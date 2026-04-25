@@ -1,26 +1,78 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+const dump = {
+  "clients": [
+    {
+      "id": 1,
+      "companyName": "Çiçek Speti",
+      "website": "https://www.ciceksepeti.com/?utm_source=google&utm_medium=cpc&utm_campaign=318550718&utm_content=42740430888&gad_source=1&gad_campaignid=318550718&gbraid=0AAAAADc_BHAIDj9NDwJBAEfGRYTs9Qe55&gc",
+      "contactName": "Hakan Çiçekçi",
+      "phone": "05334762658",
+      "services": "[\"SEO\",\"Sosyal Medya\"]",
+      "createdAt": "2026-04-17T06:49:00.473Z",
+      "updatedAt": "2026-04-17T13:23:17.887Z",
+      "socialAccounts": "{\"Instagram\":\"https://www.instagram.com/ciceksepeti/\",\"YouTube\":\"\",\"Facebook\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\",\"LinkedIn\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\",\"X\":\"\",\"TikTok\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\"}",
+      "weeklyBlogTarget": 4,
+      "socialSchedule": "{\"Instagram\":[\"Monday\",\"Wednesday\",\"Friday\"],\"LinkedIn\":[\"Monday\",\"Wednesday\",\"Friday\"],\"Facebook\":[\"Monday\",\"Wednesday\",\"Friday\"],\"TikTok\":[\"Monday\",\"Wednesday\",\"Friday\",\"Sunday\"]}",
+      "specialInstructions": "merhaba"
+    }
+  ],
+  "tasks": [
+    { "id": 1, "clientId": 1, "date": "2026-04-17T08:00:18.867Z", "type": "BLOG", "platform": null, "status": true, "createdAt": "2026-04-17T08:00:18.980Z", "updatedAt": "2026-04-17T08:32:39.313Z", "link": null, "note": null },
+    { "id": 5, "clientId": 1, "date": "2026-04-01T06:00:00.000Z", "type": "SOCIAL", "platform": "Instagram", "status": true, "createdAt": "2026-04-17T08:23:23.227Z", "updatedAt": "2026-04-17T08:27:43.638Z", "link": "https://www.instagram.com/reel/DXEzx41An7R/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==", "note": null },
+    { "id": 6, "clientId": 1, "date": "2026-04-03T06:00:00.000Z", "type": "SOCIAL", "platform": "Instagram", "status": true, "createdAt": "2026-04-17T08:31:43.962Z", "updatedAt": "2026-04-17T08:31:50.285Z", "link": "https://www.instagram.com/p/DWAADOFAvcB/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==", "note": null },
+    { "id": 7, "clientId": 1, "date": "2026-04-01T06:00:00.000Z", "type": "SOCIAL", "platform": "LinkedIn", "status": true, "createdAt": "2026-04-17T08:40:52.403Z", "updatedAt": "2026-04-17T09:14:41.421Z", "link": null, "note": null },
+    { "id": 9, "clientId": 1, "date": "2026-04-08T06:00:00.000Z", "type": "SOCIAL", "platform": "Instagram", "status": true, "createdAt": "2026-04-17T08:53:41.227Z", "updatedAt": "2026-04-17T09:26:29.189Z", "link": null, "note": null },
+    { "id": 10, "clientId": 1, "date": "2026-04-03T06:00:00.000Z", "type": "SOCIAL", "platform": "LinkedIn", "status": true, "createdAt": "2026-04-17T09:14:44.869Z", "updatedAt": "2026-04-17T09:14:46.215Z", "link": null, "note": null },
+    { "id": 11, "clientId": 1, "date": "2026-04-02T06:00:00.000Z", "type": "SOCIAL", "platform": "Özel", "status": true, "createdAt": "2026-04-17T09:22:14.406Z", "updatedAt": "2026-04-17T10:54:27.131Z", "link": null, "note": "resmi tatil" },
+    { "id": 12, "clientId": 1, "date": "2026-04-08T06:00:00.000Z", "type": "SOCIAL", "platform": "LinkedIn", "status": false, "createdAt": "2026-04-17T09:26:30.417Z", "updatedAt": "2026-04-17T09:26:30.417Z", "link": null, "note": null },
+    { "id": 13, "clientId": 1, "date": "2026-04-10T06:00:00.000Z", "type": "SOCIAL", "platform": "Instagram", "status": true, "createdAt": "2026-04-17T09:26:32.859Z", "updatedAt": "2026-04-17T09:26:34.545Z", "link": null, "note": null },
+    { "id": 14, "clientId": 1, "date": "2026-04-10T06:00:00.000Z", "type": "SOCIAL", "platform": "LinkedIn", "status": true, "createdAt": "2026-04-17T09:26:33.655Z", "updatedAt": "2026-04-17T09:26:35.631Z", "link": null, "note": null },
+    { "id": 15, "clientId": 1, "date": "2026-01-03T06:00:00.000Z", "type": "BLOG", "platform": null, "status": false, "createdAt": "2026-04-17T09:31:13.532Z", "updatedAt": "2026-04-17T09:31:13.532Z", "link": null, "note": null },
+    { "id": 16, "clientId": 1, "date": "2026-01-08T06:00:00.000Z", "type": "BLOG", "platform": null, "status": false, "createdAt": "2026-04-17T09:33:21.644Z", "updatedAt": "2026-04-17T09:33:21.644Z", "link": null, "note": null },
+    { "id": 21, "clientId": 1, "date": "2026-01-28T06:00:00.000Z", "type": "BLOG", "platform": null, "status": false, "createdAt": "2026-04-17T09:33:35.344Z", "updatedAt": "2026-04-17T09:33:35.344Z", "link": null, "note": null },
+    { "id": 22, "clientId": 1, "date": "2026-04-15T06:00:00.000Z", "type": "BLOG", "platform": null, "status": false, "createdAt": "2026-04-17T09:38:55.861Z", "updatedAt": "2026-04-17T09:39:02.841Z", "link": "", "note": "" },
+    { "id": 23, "clientId": 1, "date": "2026-04-08T06:00:00.000Z", "type": "BLOG", "platform": null, "status": true, "createdAt": "2026-04-17T09:44:08.396Z", "updatedAt": "2026-04-17T10:58:52.380Z", "link": null, "note": null },
+    { "id": 25, "clientId": 1, "date": "2026-04-09T06:00:00.000Z", "type": "BLOG", "platform": null, "status": false, "createdAt": "2026-04-17T10:49:00.836Z", "updatedAt": "2026-04-17T10:49:00.836Z", "link": null, "note": null },
+    { "id": 26, "clientId": 1, "date": "2026-04-08T06:00:00.000Z", "type": "SOCIAL", "platform": "Facebook", "status": false, "createdAt": "2026-04-17T10:57:18.083Z", "updatedAt": "2026-04-17T10:57:20.697Z", "link": "https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr", "note": "" },
+    { "id": 27, "clientId": 1, "date": "2026-04-20T06:00:00.000Z", "type": "BLOG", "platform": null, "status": false, "createdAt": "2026-04-17T13:22:30.114Z", "updatedAt": "2026-04-17T13:22:30.114Z", "link": null, "note": null }
+  ],
+  "users": [
+    { "id": 2, "username": "ahmet123", "password": "$2b$10$422hdL.ZS5jKZ8cEs420tuGy/vps7JjpM97BIu3OwKnIXsYZR1wMK", "role": "DESIGNER", "createdAt": "2026-04-17T06:45:22.977Z", "updatedAt": "2026-04-17T06:47:10.154Z" },
+    { "id": 3, "username": "25obit007", "password": "$2b$10$UjG5r0ElOd.HXv55orgPheEuzh9yqeGFU26qOa/.hDKncMe/8MRnS", "role": "ADVERTISER", "createdAt": "2026-04-17T13:23:48.763Z", "updatedAt": "2026-04-17T13:24:38.257Z" }
+  ]
+};
+
 export async function GET() {
   try {
-    const existingAdmin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-    
-    if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-      await prisma.user.create({
-        data: {
-          username: 'admin',
-          password: hashedPassword,
-          role: 'ADMIN',
-        },
+    for (const client of dump.clients) {
+      await prisma.client.upsert({
+        where: { id: client.id },
+        update: {},
+        create: { ...client, id: client.id }
       });
-      return NextResponse.json({ success: true, message: 'Admin user created successfully! You can now log in.' });
-    } else {
-      return NextResponse.json({ success: true, message: 'Admin user already exists.' });
     }
+
+    for (const task of dump.tasks) {
+      await prisma.task.upsert({
+        where: { id: task.id },
+        update: {},
+        create: { ...task, id: task.id, status: Boolean(task.status) }
+      });
+    }
+
+    for (const user of dump.users) {
+      await prisma.user.upsert({
+        where: { username: user.username },
+        update: {},
+        create: { ...user, id: user.id }
+      });
+    }
+
+    return NextResponse.json({ success: true, message: 'Tüm eski veriler başarıyla Vercel veritabanına aktarıldı!' });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message });
   }
