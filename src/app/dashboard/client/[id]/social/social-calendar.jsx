@@ -3,12 +3,17 @@
 import { useState, useTransition } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Instagram, Linkedin, Youtube, Facebook, Twitter, Play, Link as LinkIcon } from 'lucide-react';
+import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Instagram, Linkedin, Youtube, Facebook, Twitter, Play, Link as LinkIcon, Calendar as CalendarIcon } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
 
 const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const PLATFORMS = ['Instagram', 'YouTube', 'Facebook', 'LinkedIn', 'X', 'TikTok'];
+
+const MONTHS = [
+  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+];
 
 const PLATFORM_ICONS = {
   Instagram: (
@@ -53,7 +58,9 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,16 +71,35 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const [linkInput, setLinkInput] = useState('');
   const [deleteTaskId, setDeleteTaskId] = useState(null);
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const year = selectedYear;
+  const month = selectedMonth;
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
-  const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1));
-  const handleNextMonth = () => setCurrentDate(new Date(year, month + 1));
-  const handleToday = () => setCurrentDate(new Date());
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+  
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+  
+  const handleToday = () => {
+    setSelectedMonth(now.getMonth());
+    setSelectedYear(now.getFullYear());
+  };
 
   async function handleToggle(taskId, currentStatus) {
     startTransition(async () => {
@@ -314,34 +340,74 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
 
   return (
-    <div className="calendar-container">
-      <div className="calendar-header">
-        <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>
-          {currentDate.toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}
-        </h3>
-        <div className="calendar-controls">
-          <button className="btn" onClick={handlePrevMonth} style={{ padding: '0.25rem' }}><ChevronLeft size={16} /></button>
-          <button className="btn" onClick={handleToday} style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Bugün</button>
-          <button className="btn" onClick={handleNextMonth} style={{ padding: '0.25rem' }}><ChevronRight size={16} /></button>
+    <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
+      {/* Month Sidebar */}
+      <div style={{ 
+        width: '160px', 
+        background: 'var(--bg-secondary)', 
+        borderRadius: '12px', 
+        border: '1px solid var(--border-color)',
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'fit-content',
+        position: 'sticky',
+        top: '20px'
+      }}>
+        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+          <CalendarIcon size={14} /> AYLAR
+        </div>
+        <div style={{ padding: '0.5rem' }}>
+          {MONTHS.map((m, index) => (
+            <div 
+              key={m}
+              onClick={() => setSelectedMonth(index)}
+              style={{
+                padding: '0.6rem 0.75rem',
+                borderRadius: '8px',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                marginBottom: '2px',
+                transition: 'all 0.2s',
+                backgroundColor: selectedMonth === index ? 'var(--accent-primary)' : 'transparent',
+                color: selectedMonth === index ? 'white' : 'var(--text-secondary)',
+                fontWeight: selectedMonth === index ? 600 : 400
+              }}
+            >
+              {m}
+            </div>
+          ))}
         </div>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(7, 1fr)', 
-        gap: '1px', 
-        background: 'var(--border-color)', 
-        border: '1px solid var(--border-color)', 
-        borderRadius: '10px', 
-        overflow: 'hidden',
-        boxShadow: 'var(--shadow-lg)'
-      }}>
-        {DAYS_OF_WEEK.map(day => (
-          <div key={day} style={{ padding: '0.75rem', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.05)', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-            {day}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div className="calendar-header">
+          <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>
+            {MONTHS[selectedMonth]} {selectedYear}
+          </h3>
+          <div className="calendar-controls">
+            <button className="btn" onClick={handlePrevMonth} style={{ padding: '0.25rem' }}><ChevronLeft size={16} /></button>
+            <button className="btn" onClick={handleToday} style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Bugün</button>
+            <button className="btn" onClick={handleNextMonth} style={{ padding: '0.25rem' }}><ChevronRight size={16} /></button>
           </div>
-        ))}
-        {calendarDays.map(day => renderDay(day))}
+        </div>
+
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(7, 1fr)', 
+          gap: '1px', 
+          background: 'var(--border-color)', 
+          border: '1px solid var(--border-color)', 
+          borderRadius: '10px', 
+          overflow: 'hidden',
+          boxShadow: 'var(--shadow-lg)'
+        }}>
+          {DAYS_OF_WEEK.map(day => (
+            <div key={day} style={{ padding: '0.75rem', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.05)', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+              {day}
+            </div>
+          ))}
+          {calendarDays.map(day => renderDay(day))}
+        </div>
       </div>
 
       <CustomDialog 
