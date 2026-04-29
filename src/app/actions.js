@@ -64,7 +64,7 @@ export async function setPasswordAction(userId, formData) {
 
 export async function logoutAction() {
   await destroySession();
-  redirect('/login');
+  return { success: true };
 }
 
 export async function createUserAction(formData) {
