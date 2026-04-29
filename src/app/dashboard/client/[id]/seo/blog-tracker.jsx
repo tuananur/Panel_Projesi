@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon } from 'lucide-react';
+import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon, ExternalLink } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
 
@@ -178,11 +178,25 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
                 >
                   <LinkIcon size={10} /> BLOG
                 </div>
-                <div 
-                  onClick={() => handleToggle(task.id, task.status)}
-                  style={{ cursor: 'pointer', color: task.status ? '#10b981' : 'var(--text-secondary)' }}
-                >
-                  {task.status ? <CheckCircle2 size={12} /> : <Circle size={12} />}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {task.link && (
+                    <a 
+                      href={task.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ color: 'var(--accent-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                      title="Blog'a Git"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={11} />
+                    </a>
+                  )}
+                  <div 
+                    onClick={() => handleToggle(task.id, task.status)}
+                    style={{ cursor: 'pointer', color: task.status ? '#10b981' : 'var(--text-secondary)' }}
+                  >
+                    {task.status ? <CheckCircle2 size={12} /> : <Circle size={12} />}
+                  </div>
                 </div>
               </div>
               
