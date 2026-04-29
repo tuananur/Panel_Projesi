@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon } from 'lucide-react';
@@ -16,6 +16,7 @@ const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', '
 
 export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
   const now = new Date();
   
@@ -33,36 +34,36 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   async function handleToggle(taskId, currentStatus) {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('taskId', taskId);
-    formData.append('status', (!currentStatus).toString());
-    await toggleTaskAction(formData);
-    router.refresh();
-    setLoading(false);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('taskId', taskId);
+      formData.append('status', (!currentStatus).toString());
+      await toggleTaskAction(formData);
+      router.refresh();
+    });
   }
 
   async function handleAddBlog(day) {
-    setLoading(true);
-    const date = new Date(selectedYear, selectedMonth, day, 12);
-    const formData = new FormData();
-    formData.append('clientId', clientId);
-    formData.append('type', 'BLOG');
-    formData.append('date', date.toISOString());
-    await addTaskAction(formData);
-    router.refresh();
-    setLoading(false);
+    startTransition(async () => {
+      const date = new Date(selectedYear, selectedMonth, day, 12);
+      const formData = new FormData();
+      formData.append('clientId', clientId);
+      formData.append('type', 'BLOG');
+      formData.append('date', date.toISOString());
+      await addTaskAction(formData);
+      router.refresh();
+    });
   }
 
   async function handleDelete() {
     if (!deleteTaskId) return;
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('taskId', deleteTaskId);
-    await deleteTaskAction(formData);
-    setDeleteTaskId(null);
-    router.refresh();
-    setLoading(false);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('taskId', deleteTaskId);
+      await deleteTaskAction(formData);
+      setDeleteTaskId(null);
+      router.refresh();
+    });
   }
 
   const openDetailModal = (task) => {
@@ -72,16 +73,15 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
   };
 
   async function confirmUpdate() {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('taskId', activeTask.id);
-    formData.append('link', linkInput);
-    // Note is not edited in Blog modal anymore, we keep the existing one if any
-    formData.append('note', activeTask.note || '');
-    await updateTaskDetailAction(formData);
-    setIsDetailModalOpen(false);
-    router.refresh();
-    setLoading(false);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('taskId', activeTask.id);
+      formData.append('link', linkInput);
+      formData.append('note', activeTask.note || '');
+      await updateTaskDetailAction(formData);
+      setIsDetailModalOpen(false);
+      router.refresh();
+    });
   }
 
   const renderDay = (day) => {
@@ -282,7 +282,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
         title="Blog Detayları" 
         onClose={() => setIsDetailModalOpen(false)} 
         onConfirm={confirmUpdate} 
-        loading={loading}
+        loading={isPending}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="input-group">
@@ -305,7 +305,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
         onClose={() => setDeleteTaskId(null)}
         onConfirm={handleDelete}
         confirmText="Sil"
-        loading={loading}
+        loading={isPending}
       >
         <div style={{ color: 'var(--text-secondary)' }}>
           Bu blog kaydını silmek istediğinize emin misiniz?

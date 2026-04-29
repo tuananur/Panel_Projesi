@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Instagram, Linkedin, Youtube, Facebook, Twitter, Play, Link as LinkIcon } from 'lucide-react';
@@ -51,6 +51,7 @@ const PLATFORM_ICONS = {
 
 export default function SocialCalendar({ clientId, initialTasks, platforms, schedule, socialAccounts, isAdmin }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   
@@ -75,24 +76,24 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const handleToday = () => setCurrentDate(new Date());
 
   async function handleToggle(taskId, currentStatus) {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('taskId', taskId);
-    formData.append('status', (!currentStatus).toString());
-    await toggleTaskAction(formData);
-    router.refresh();
-    setLoading(false);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('taskId', taskId);
+      formData.append('status', (!currentStatus).toString());
+      await toggleTaskAction(formData);
+      router.refresh();
+    });
   }
 
   async function handleDelete() {
     if (!deleteTaskId) return;
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('taskId', deleteTaskId);
-    await deleteTaskAction(formData);
-    setDeleteTaskId(null);
-    router.refresh();
-    setLoading(false);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('taskId', deleteTaskId);
+      await deleteTaskAction(formData);
+      setDeleteTaskId(null);
+      router.refresh();
+    });
   }
 
   const openModal = (day, platform = null, task = null) => {
@@ -105,30 +106,30 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   };
 
   async function handleSave() {
-    setLoading(true);
-    const platformToSave = selectedPlatform || '';
-    
-    if (activeTask) {
-      const formData = new FormData();
-      formData.append('taskId', activeTask.id);
-      formData.append('note', noteInput);
-      formData.append('link', linkInput);
-      formData.append('platform', platformToSave);
-      await updateTaskDetailAction(formData);
-    } else {
-      const date = new Date(year, month, activeDay, 12);
-      const formData = new FormData();
-      formData.append('clientId', clientId);
-      formData.append('type', 'SOCIAL');
-      formData.append('date', date.toISOString());
-      formData.append('platform', platformToSave);
-      formData.append('note', noteInput);
-      formData.append('link', linkInput);
-      await addTaskAction(formData);
-    }
-    setIsModalOpen(false);
-    router.refresh();
-    setLoading(false);
+    startTransition(async () => {
+      const platformToSave = selectedPlatform || '';
+      
+      if (activeTask) {
+        const formData = new FormData();
+        formData.append('taskId', activeTask.id);
+        formData.append('note', noteInput);
+        formData.append('link', linkInput);
+        formData.append('platform', platformToSave);
+        await updateTaskDetailAction(formData);
+      } else {
+        const date = new Date(year, month, activeDay, 12);
+        const formData = new FormData();
+        formData.append('clientId', clientId);
+        formData.append('type', 'SOCIAL');
+        formData.append('date', date.toISOString());
+        formData.append('platform', platformToSave);
+        formData.append('note', noteInput);
+        formData.append('link', linkInput);
+        await addTaskAction(formData);
+      }
+      setIsModalOpen(false);
+      router.refresh();
+    });
   }
 
   const renderDay = (day) => {
@@ -348,7 +349,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
         title={activeTask ? 'Görev Düzenle' : 'Yeni Görev / Not Ekle'} 
         onClose={() => setIsModalOpen(false)} 
         onConfirm={handleSave}
-        loading={loading}
+        loading={isPending}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="input-group">
@@ -413,7 +414,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
         onClose={() => setDeleteTaskId(null)}
         onConfirm={handleDelete}
         confirmText="Sil"
-        loading={loading}
+        loading={isPending}
       >
         <div style={{ color: 'var(--text-secondary)' }}>
           Bu görevi silmek istediğinize emin misiniz?
