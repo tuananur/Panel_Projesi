@@ -146,12 +146,14 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       return isScheduled && !hasTask;
     });
 
+    const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+
     return (
       <div 
         key={day} 
         style={{ 
           padding: '0.4rem', 
-          border: '1px solid var(--border-color)', 
+          border: isToday ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)', 
           minHeight: '90px',
           display: 'flex',
           flexDirection: 'column',
@@ -161,7 +163,20 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>{day}</span>
+          <span style={{ 
+            fontSize: '0.75rem', 
+            fontWeight: 700, 
+            color: isToday ? '#fff' : 'var(--text-secondary)',
+            backgroundColor: isToday ? 'var(--accent-primary)' : 'transparent',
+            width: '20px',
+            height: '20px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%'
+          }}>
+            {day}
+          </span>
           {isAdmin && (
             <button 
               onClick={() => openModal(day)}
