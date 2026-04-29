@@ -5,6 +5,7 @@ import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailActi
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Instagram, Linkedin, Youtube, Facebook, Twitter, Play, Link as LinkIcon } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
+import { SPECIAL_DAYS } from '@/lib/holidays';
 
 const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const PLATFORMS = ['Instagram', 'YouTube', 'Facebook', 'LinkedIn', 'X', 'TikTok'];
@@ -148,6 +149,11 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
 
     const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
 
+    const monthStr = String(month + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateKey = `${monthStr}-${dayStr}`;
+    const specialDayName = SPECIAL_DAYS[dateKey];
+
     return (
       <div 
         key={day} 
@@ -186,6 +192,23 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
             </button>
           )}
         </div>
+
+        {specialDayName && (
+          <div style={{ 
+            fontSize: '0.5rem', 
+            fontWeight: 600, 
+            color: '#ef4444', 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            padding: '2px 4px', 
+            borderRadius: '4px',
+            marginTop: '2px',
+            marginBottom: '2px',
+            display: 'inline-block',
+            width: 'fit-content'
+          }} title={specialDayName}>
+            {specialDayName}
+          </div>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
           {dayTasks.map(task => (

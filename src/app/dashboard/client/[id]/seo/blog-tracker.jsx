@@ -5,6 +5,7 @@ import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailActi
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
+import { SPECIAL_DAYS } from '@/lib/holidays';
 
 const MONTHS = [
   'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
@@ -93,6 +94,11 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
 
     const isToday = day === now.getDate() && selectedMonth === now.getMonth() && selectedYear === now.getFullYear();
 
+    const monthStr = String(selectedMonth + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateKey = `${monthStr}-${dayStr}`;
+    const specialDayName = SPECIAL_DAYS[dateKey];
+
     return (
       <div 
         key={day} 
@@ -131,6 +137,23 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
             </button>
           )}
         </div>
+        
+        {specialDayName && (
+          <div style={{ 
+            fontSize: '0.5rem', 
+            fontWeight: 600, 
+            color: '#ef4444', 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            padding: '2px 4px', 
+            borderRadius: '4px',
+            marginTop: '2px',
+            marginBottom: '2px',
+            display: 'inline-block',
+            width: 'fit-content'
+          }} title={specialDayName}>
+            {specialDayName}
+          </div>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           {dayTasks.map(task => (
