@@ -1,9 +1,18 @@
 'use client';
 
-export default function CustomDialog({ isOpen, title, children, onClose, onConfirm, confirmText = 'Tamam', cancelText = 'İptal', loading = false, showCancel = true }) {
-  if (!isOpen) return null;
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
-  return (
+export default function CustomDialog({ isOpen, title, children, onClose, onConfirm, confirmText = 'Tamam', cancelText = 'İptal', loading = false, showCancel = true }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-container" onClick={e => e.stopPropagation()}>
         <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', color: 'var(--text-primary)' }}>{title}</h3>
@@ -32,6 +41,7 @@ export default function CustomDialog({ isOpen, title, children, onClose, onConfi
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
