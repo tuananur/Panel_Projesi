@@ -60,6 +60,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   const [noteInput, setNoteInput] = useState('');
   const [linkInput, setLinkInput] = useState('');
+  const [deleteTaskId, setDeleteTaskId] = useState(null);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -82,12 +83,13 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
     setLoading(false);
   }
 
-  async function handleDelete(taskId) {
-    if (!confirm('Bu görevi silmek istediğinize emin misiniz?')) return;
+  async function handleDelete() {
+    if (!deleteTaskId) return;
     setLoading(true);
     const formData = new FormData();
-    formData.append('taskId', taskId);
+    formData.append('taskId', deleteTaskId);
     await deleteTaskAction(formData);
+    setDeleteTaskId(null);
     router.refresh();
     setLoading(false);
   }
@@ -235,7 +237,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                     {task.note || 'Link Kayıtlı'}
                   </span>
                   {isAdmin && (
-                    <Trash2 size={8} style={{ cursor: 'pointer', color: '#ef4444' }} onClick={() => handleDelete(task.id)} />
+                    <Trash2 size={8} style={{ cursor: 'pointer', color: '#ef4444' }} onClick={() => setDeleteTaskId(task.id)} />
                   )}
                 </div>
               )}
@@ -363,6 +365,19 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
               ))}
             </div>
           </div>
+        </div>
+      </CustomDialog>
+
+      <CustomDialog
+        isOpen={!!deleteTaskId}
+        title="Silme Onayı"
+        onClose={() => setDeleteTaskId(null)}
+        onConfirm={handleDelete}
+        confirmText="Sil"
+        loading={loading}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          Bu görevi silmek istediğinize emin misiniz?
         </div>
       </CustomDialog>
     </div>

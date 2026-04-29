@@ -24,6 +24,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [activeTask, setActiveTask] = useState(null);
   const [linkInput, setLinkInput] = useState('');
+  const [deleteTaskId, setDeleteTaskId] = useState(null);
 
   // Calendar Logic
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
@@ -52,12 +53,13 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
     setLoading(false);
   }
 
-  async function handleDelete(taskId) {
-    if (!confirm('Bu blog kaydını silmek istediğinize emin misiniz?')) return;
+  async function handleDelete() {
+    if (!deleteTaskId) return;
     setLoading(true);
     const formData = new FormData();
-    formData.append('taskId', taskId);
+    formData.append('taskId', deleteTaskId);
     await deleteTaskAction(formData);
+    setDeleteTaskId(null);
     router.refresh();
     setLoading(false);
   }
@@ -150,7 +152,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
                   {task.link ? 'Link Kayıtlı' : 'Link Ekle...'}
                 </span>
                 {isAdmin && (
-                  <Trash2 size={10} style={{ cursor: 'pointer', color: '#ef4444' }} onClick={() => handleDelete(task.id)} />
+                  <Trash2 size={10} style={{ cursor: 'pointer', color: '#ef4444' }} onClick={() => setDeleteTaskId(task.id)} />
                 )}
               </div>
             </div>
@@ -255,6 +257,19 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
               autoFocus
             />
           </div>
+        </div>
+      </CustomDialog>
+
+      <CustomDialog
+        isOpen={!!deleteTaskId}
+        title="Silme Onayı"
+        onClose={() => setDeleteTaskId(null)}
+        onConfirm={handleDelete}
+        confirmText="Sil"
+        loading={loading}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          Bu blog kaydını silmek istediğinize emin misiniz?
         </div>
       </CustomDialog>
     </div>
