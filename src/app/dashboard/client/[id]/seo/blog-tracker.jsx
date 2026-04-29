@@ -140,16 +140,17 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
         
         {specialDayName && (
           <div style={{ 
-            fontSize: '0.5rem', 
-            fontWeight: 600, 
+            fontSize: '0.75rem', 
+            fontWeight: 700, 
             color: '#ef4444', 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            padding: '2px 4px', 
-            borderRadius: '4px',
-            marginTop: '2px',
-            marginBottom: '2px',
+            background: 'rgba(239, 68, 68, 0.15)', 
+            padding: '4px 8px', 
+            borderRadius: '6px',
+            marginTop: '4px',
+            marginBottom: '4px',
             display: 'inline-block',
-            width: 'fit-content'
+            width: 'fit-content',
+            letterSpacing: '0.5px'
           }} title={specialDayName}>
             {specialDayName}
           </div>
