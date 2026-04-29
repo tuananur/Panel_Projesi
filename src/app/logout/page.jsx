@@ -18,7 +18,7 @@ export default function LogoutPage() {
     async function performLogout() {
       try {
         await logoutAction();
-        setStatus('Başarıyla çıkış yapıldı. Ana sayfaya yönlendiriliyorsunuz...');
+        setStatus('Başarıyla çıkış yapıldı. Giriş sayfasına yönlendiriliyorsunuz...');
         
         setTimeout(() => {
           router.push('/login');
