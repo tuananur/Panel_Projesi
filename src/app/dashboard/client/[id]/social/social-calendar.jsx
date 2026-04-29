@@ -195,17 +195,17 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
 
         {specialDayName && (
           <div style={{ 
-            fontSize: '0.75rem', 
-            fontWeight: 700, 
+            fontSize: '0.6rem', 
+            fontWeight: 600, 
             color: '#ef4444', 
             background: 'rgba(239, 68, 68, 0.15)', 
-            padding: '4px 8px', 
-            borderRadius: '6px',
-            marginTop: '4px',
-            marginBottom: '4px',
+            padding: '3px 5px', 
+            borderRadius: '4px',
+            marginTop: '3px',
+            marginBottom: '3px',
             display: 'inline-block',
             width: 'fit-content',
-            letterSpacing: '0.5px'
+            lineHeight: '1.2'
           }} title={specialDayName}>
             {specialDayName}
           </div>
