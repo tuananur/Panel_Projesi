@@ -27,6 +27,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
   const [activeTask, setActiveTask] = useState(null);
   const [linkInput, setLinkInput] = useState('');
   const [deleteTaskId, setDeleteTaskId] = useState(null);
+  const [addConfirmDay, setAddConfirmDay] = useState(null);
 
   // Calendar Logic
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
@@ -43,14 +44,16 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
     });
   }
 
-  async function handleAddBlog(day) {
+  async function handleAddBlog() {
+    if (!addConfirmDay) return;
     startTransition(async () => {
-      const date = new Date(selectedYear, selectedMonth, day, 12);
+      const date = new Date(selectedYear, selectedMonth, addConfirmDay, 12);
       const formData = new FormData();
       formData.append('clientId', clientId);
       formData.append('type', 'BLOG');
       formData.append('date', date.toISOString());
       await addTaskAction(formData);
+      setAddConfirmDay(null);
       router.refresh();
     });
   }
@@ -130,7 +133,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
           </span>
           {isAdmin && (
             <button 
-              onClick={() => handleAddBlog(day)}
+              onClick={() => setAddConfirmDay(day)}
               style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', padding: '2px' }}
             >
               <Plus size={10} />
@@ -309,6 +312,19 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
       >
         <div style={{ color: 'var(--text-secondary)' }}>
           Bu blog kaydını silmek istediğinize emin misiniz?
+        </div>
+      </CustomDialog>
+
+      <CustomDialog
+        isOpen={!!addConfirmDay}
+        title="Yeni Blog Ekle"
+        onClose={() => setAddConfirmDay(null)}
+        onConfirm={handleAddBlog}
+        confirmText="Ekle"
+        loading={isPending}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          {addConfirmDay} {MONTHS[selectedMonth]} tarihine yeni bir blog kaydı eklemek istediğinize emin misiniz?
         </div>
       </CustomDialog>
     </div>
