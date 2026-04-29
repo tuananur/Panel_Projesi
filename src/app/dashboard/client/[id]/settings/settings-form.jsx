@@ -19,6 +19,7 @@ export default function SettingsForm({ client }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   
   const currentSocial = JSON.parse(client.socialAccounts || '{}');
   const currentSchedule = JSON.parse(client.socialSchedule || '{}');
@@ -51,6 +52,7 @@ export default function SettingsForm({ client }) {
   async function handleSubmit(formData) {
     setLoading(true);
     setError('');
+    setSuccess('');
     
     formData.append('socialAccounts', JSON.stringify(social));
     formData.append('socialSchedule', JSON.stringify(schedule));
@@ -61,7 +63,8 @@ export default function SettingsForm({ client }) {
       setError(result.error);
     } else {
       router.refresh();
-      alert('Ayarlar başarıyla kaydedildi.');
+      setSuccess('Ayarlar başarıyla kaydedildi.');
+      setTimeout(() => setSuccess(''), 3000);
     }
     setLoading(false);
   }
@@ -71,6 +74,11 @@ export default function SettingsForm({ client }) {
       {error && (
         <div style={{ color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1.5rem' }}>
           {error}
+        </div>
+      )}
+      {success && (
+        <div style={{ color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1.5rem' }}>
+          {success}
         </div>
       )}
 
