@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+
 import { loginAction } from '@/app/actions';
+import CustomDialog from '@/app/components/custom-dialog';
 
 export default function LoginForm() {
   const [error, setError] = useState('');
@@ -20,11 +22,6 @@ export default function LoginForm() {
 
   return (
     <form action={handleSubmit}>
-      {error && (
-        <div style={{ color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-          {error}
-        </div>
-      )}
       
       <div className="input-group">
         <label htmlFor="username" className="input-label">Kullanıcı Adı</label>
@@ -57,6 +54,19 @@ export default function LoginForm() {
       >
         {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
       </button>
+
+      <CustomDialog
+        isOpen={!!error}
+        title="Hata"
+        onClose={() => setError('')}
+        onConfirm={() => setError('')}
+        confirmText="Tamam"
+        showCancel={false}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          {error}
+        </div>
+      </CustomDialog>
     </form>
   );
 }

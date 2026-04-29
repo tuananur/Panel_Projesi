@@ -70,11 +70,6 @@ export default function SettingsForm({ client }) {
 
   return (
     <form action={handleSubmit}>
-      {error && (
-        <div style={{ color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1.5rem' }}>
-          {error}
-        </div>
-      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {/* Top Section: Targets & Instructions */}
@@ -172,6 +167,19 @@ export default function SettingsForm({ client }) {
       >
         <div style={{ color: 'var(--text-secondary)' }}>
           Ayarlar başarıyla kaydedildi.
+        </div>
+      </CustomDialog>
+
+      <CustomDialog
+        isOpen={!!error}
+        title="Hata"
+        onClose={() => setError('')}
+        onConfirm={() => setError('')}
+        confirmText="Tamam"
+        showCancel={false}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          {error}
         </div>
       </CustomDialog>
     </form>

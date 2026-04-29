@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import CustomDialog from '@/app/components/custom-dialog';
 import { setPasswordAction } from '@/app/actions';
 
 export default function SetPasswordForm({ userId }) {
@@ -23,11 +25,6 @@ export default function SetPasswordForm({ userId }) {
 
   return (
     <form action={handleSubmit}>
-      {error && (
-        <div style={{ color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-          {error}
-        </div>
-      )}
       
       <div className="input-group">
         <label htmlFor="password" className="input-label">Yeni Şifre</label>
@@ -60,8 +57,21 @@ export default function SetPasswordForm({ userId }) {
         style={{ width: '100%', marginTop: '1rem' }}
         disabled={loading}
       >
-        {loading ? 'Kaydediliyor...' : 'Şifreyi Kaydet ve Devam Et'}
+        {loading ? 'Şifre Belirleniyor...' : 'Şifremi Belirle ve Giriş Yap'}
       </button>
+
+      <CustomDialog
+        isOpen={!!error}
+        title="Hata"
+        onClose={() => setError('')}
+        onConfirm={() => setError('')}
+        confirmText="Tamam"
+        showCancel={false}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          {error}
+        </div>
+      </CustomDialog>
     </form>
   );
 }

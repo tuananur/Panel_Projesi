@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { updateUserAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { Edit } from 'lucide-react';
+import CustomDialog from '@/app/components/custom-dialog';
 
 export default function EditUserModal({ user }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,12 +43,6 @@ export default function EditUserModal({ user }) {
             
             <form action={handleSubmit}>
               <input type="hidden" name="id" value={user.id} />
-              
-              {error && (
-                <div style={{ color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem' }}>
-                  {error}
-                </div>
-              )}
 
               <div className="input-group">
                 <label className="input-label">Kullanıcı Adı</label>
@@ -91,6 +86,19 @@ export default function EditUserModal({ user }) {
           </div>
         </div>
       )}
+
+      <CustomDialog
+        isOpen={!!error}
+        title="Hata"
+        onClose={() => setError('')}
+        onConfirm={() => setError('')}
+        confirmText="Tamam"
+        showCancel={false}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          {error}
+        </div>
+      </CustomDialog>
     </>
   );
 }

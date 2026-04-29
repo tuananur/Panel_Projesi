@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createUserAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
+import CustomDialog from '@/app/components/custom-dialog';
 
 export default function CreateUserForm() {
   const [error, setError] = useState('');
@@ -27,11 +28,6 @@ export default function CreateUserForm() {
 
   return (
     <form id="create-user-form" action={handleSubmit}>
-      {error && (
-        <div style={{ color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-          {error}
-        </div>
-      )}
       
       <div className="input-group">
         <label htmlFor="username" className="input-label">Kullanıcı Adı</label>
@@ -68,6 +64,19 @@ export default function CreateUserForm() {
       >
         {loading ? 'Oluşturuluyor...' : 'Kullanıcı Oluştur'}
       </button>
+
+      <CustomDialog
+        isOpen={!!error}
+        title="Hata"
+        onClose={() => setError('')}
+        onConfirm={() => setError('')}
+        confirmText="Tamam"
+        showCancel={false}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          {error}
+        </div>
+      </CustomDialog>
     </form>
   );
 }

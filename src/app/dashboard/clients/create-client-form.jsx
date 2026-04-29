@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClientAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
+import CustomDialog from '@/app/components/custom-dialog';
 
 export default function CreateClientForm() {
   const [error, setError] = useState('');
@@ -26,11 +27,6 @@ export default function CreateClientForm() {
 
   return (
     <form id="create-client-form" action={handleSubmit}>
-      {error && (
-        <div style={{ color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-          {error}
-        </div>
-      )}
       
       <div className="input-group">
         <label htmlFor="companyName" className="input-label">Firma Adı</label>
@@ -98,6 +94,19 @@ export default function CreateClientForm() {
       >
         {loading ? 'Oluşturuluyor...' : 'Müşteri Oluştur'}
       </button>
+
+      <CustomDialog
+        isOpen={!!error}
+        title="Hata"
+        onClose={() => setError('')}
+        onConfirm={() => setError('')}
+        confirmText="Tamam"
+        showCancel={false}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          {error}
+        </div>
+      </CustomDialog>
     </form>
   );
 }
