@@ -1,6 +1,6 @@
 'use client';
 
-export default function CustomDialog({ isOpen, title, children, onClose, onConfirm, confirmText = 'Tamam', cancelText = 'İptal', loading = false }) {
+export default function CustomDialog({ isOpen, title, children, onClose, onConfirm, confirmText = 'Tamam', cancelText = 'İptal', loading = false, showCancel = true }) {
   if (!isOpen) return null;
 
   return (
@@ -13,14 +13,16 @@ export default function CustomDialog({ isOpen, title, children, onClose, onConfi
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-          <button 
-            onClick={onClose}
-            className="btn"
-            style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}
-            disabled={loading}
-          >
-            {cancelText}
-          </button>
+          {showCancel && (
+            <button 
+              onClick={onClose}
+              className="btn"
+              style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}
+              disabled={loading}
+            >
+              {cancelText}
+            </button>
+          )}
           <button 
             onClick={onConfirm}
             className="btn btn-primary"

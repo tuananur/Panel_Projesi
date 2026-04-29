@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { updateClientSettingsAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
+import CustomDialog from '@/app/components/custom-dialog';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAY_LABELS = {
@@ -19,7 +20,7 @@ export default function SettingsForm({ client }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   
   const currentSocial = JSON.parse(client.socialAccounts || '{}');
   const currentSchedule = JSON.parse(client.socialSchedule || '{}');
@@ -52,7 +53,6 @@ export default function SettingsForm({ client }) {
   async function handleSubmit(formData) {
     setLoading(true);
     setError('');
-    setSuccess('');
     
     formData.append('socialAccounts', JSON.stringify(social));
     formData.append('socialSchedule', JSON.stringify(schedule));
@@ -63,8 +63,7 @@ export default function SettingsForm({ client }) {
       setError(result.error);
     } else {
       router.refresh();
-      setSuccess('Ayarlar başarıyla kaydedildi.');
-      setTimeout(() => setSuccess(''), 3000);
+      setIsSuccessDialogOpen(true);
     }
     setLoading(false);
   }
@@ -74,11 +73,6 @@ export default function SettingsForm({ client }) {
       {error && (
         <div style={{ color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1.5rem' }}>
           {error}
-        </div>
-      )}
-      {success && (
-        <div style={{ color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1.5rem' }}>
-          {success}
         </div>
       )}
 
@@ -167,6 +161,19 @@ export default function SettingsForm({ client }) {
       >
         {loading ? 'Kaydediliyor...' : 'Tüm Ayarları Kaydet'}
       </button>
+
+      <CustomDialog
+        isOpen={isSuccessDialogOpen}
+        title="Başarılı"
+        onClose={() => setIsSuccessDialogOpen(false)}
+        onConfirm={() => setIsSuccessDialogOpen(false)}
+        confirmText="Tamam"
+        showCancel={false}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          Ayarlar başarıyla kaydedildi.
+        </div>
+      </CustomDialog>
     </form>
   );
 }
