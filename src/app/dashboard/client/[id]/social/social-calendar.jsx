@@ -50,6 +50,11 @@ const PLATFORM_ICONS = {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
     </svg>
+  ),
+  Özel: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+    </svg>
   )
 };
 
@@ -293,7 +298,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                     flex: 1
                   }}
                 >
-                  {task.platform ? PLATFORM_ICONS[task.platform] : <Plus size={12} />}
+                  {task.platform ? PLATFORM_ICONS[task.platform] : PLATFORM_ICONS['Özel']}
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {task.platform || (task.note ? (task.note.length > 15 ? task.note.substring(0, 15) + '...' : task.note) : 'Not')}
                   </span>
