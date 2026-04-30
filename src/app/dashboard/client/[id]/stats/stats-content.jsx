@@ -1,0 +1,348 @@
+'use client';
+
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { BarChart3, TrendingUp, CheckCircle2, Clock, Instagram, Youtube, Facebook, Linkedin, Twitter, Play, Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle } from 'lucide-react';
+import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
+import CustomDialog from '@/app/components/custom-dialog';
+
+const PLATFORM_ICONS = {
+  Instagram: <Instagram size={14} />,
+  YouTube: <Youtube size={14} />,
+  Facebook: <Facebook size={14} />,
+  LinkedIn: <Linkedin size={14} />,
+  X: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932L18.901 1.153zM17.61 20.644h2.039L6.486 3.24H4.298L17.61 20.644z" />
+    </svg>
+  ),
+  TikTok: <Play size={14} />
+};
+
+export default function StatsContent({ client }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [activeTask, setActiveTask] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [noteInput, setNoteInput] = useState('');
+  const [linkInput, setLinkInput] = useState('');
+  const [selectedPlatform, setSelectedPlatform] = useState(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const totalTasks = client.tasks.length;
+  const completedTasks = client.tasks.filter(t => t.status);
+  const pendingTasks = client.tasks.filter(t => !t.status);
+  const successRate = totalTasks > 0 ? Math.round((completedTasks.length / totalTasks) * 100) : 0;
+
+  const now = new Date();
+  const currentMonthTasks = client.tasks.filter(t => {
+    const d = new Date(t.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const completedThisMonth = currentMonthTasks.filter(t => t.status).length;
+
+  const platforms = {};
+  client.tasks.filter(t => t.type === 'SOCIAL').forEach(t => {
+    platforms[t.platform] = (platforms[t.platform] || 0) + (t.status ? 1 : 0);
+  });
+
+  const openEditModal = (task) => {
+    setActiveTask(task);
+    setNoteInput(task.note || '');
+    setLinkInput(task.link || '');
+    setSelectedPlatform(task.platform);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('taskId', activeTask.id);
+      formData.append('note', noteInput);
+      formData.append('link', linkInput);
+      formData.append('platform', selectedPlatform || '');
+      
+      await updateTaskDetailAction(formData);
+      setIsModalOpen(false);
+      router.refresh();
+    });
+  };
+
+  const handleToggleStatus = async (task) => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('taskId', task.id);
+      formData.append('status', (!task.status).toString());
+      await toggleTaskAction(formData);
+      router.refresh();
+    });
+  };
+
+  const handleDeleteTask = async () => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('taskId', activeTask.id);
+      await deleteTaskAction(formData);
+      setIsDeleteDialogOpen(false);
+      setIsModalOpen(false);
+      router.refresh();
+    });
+  };
+
+  const TaskList = ({ tasks, title, icon: Icon, color }) => (
+    <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h3 className="text-muted" style={{ fontSize: '0.85rem', fontWeight: 500, marginBottom: '0.5rem' }}>{title}</h3>
+          <p style={{ fontSize: '2rem', fontWeight: 700 }}>{tasks.length}</p>
+        </div>
+        <Icon size={32} color={color} />
+      </div>
+      
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '0.5rem', 
+        maxHeight: '200px', 
+        overflowY: 'auto',
+        paddingRight: '0.5rem',
+        marginTop: '0.5rem'
+      }}>
+        {tasks.length > 0 ? tasks.sort((a, b) => new Date(b.date) - new Date(a.date)).map(task => (
+          <div 
+            key={task.id} 
+            onClick={() => openEditModal(task)}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.75rem', 
+              padding: '0.6rem 0.75rem', 
+              background: 'rgba(255,255,255,0.03)', 
+              borderRadius: '8px',
+              border: '1px solid var(--border-color)',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            className="task-item-hover"
+          >
+            <div style={{ color: task.status ? '#10b981' : 'var(--text-secondary)' }}>
+              {task.status ? <CheckCircle size={16} /> : <Circle size={16} />}
+            </div>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                {task.type === 'SOCIAL' && PLATFORM_ICONS[task.platform]}
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {task.type === 'BLOG' ? 'Blog İçeriği' : task.platform}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                {new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                {task.note && ` • ${task.note.substring(0, 20)}...`}
+              </div>
+            </div>
+          </div>
+        )) : (
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', padding: '1rem' }}>Görev bulunamadı.</p>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="animate-fade-in">
+      <h2 className="heading-2" style={{ fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <BarChart3 size={24} className="text-muted" /> Performans Verileri
+      </h2>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+        <div className="card" style={{ background: 'var(--accent-gradient)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem', fontWeight: 500, marginBottom: '0.5rem' }}>Genel Başarı Oranı</h3>
+          <p style={{ color: 'white', fontSize: '3rem', fontWeight: 700 }}>%{successRate}</p>
+          <div style={{ height: '6px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '3px', marginTop: '1rem', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${successRate}%`, backgroundColor: 'white' }}></div>
+          </div>
+          <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', marginTop: '1rem' }}>Toplam {totalTasks} görevden {completedTasks.length} tanesi tamamlandı.</p>
+        </div>
+
+        <TaskList 
+          tasks={completedTasks} 
+          title="Tamamlanan Görevler" 
+          icon={CheckCircle2} 
+          color="#10b981" 
+        />
+
+        <TaskList 
+          tasks={pendingTasks} 
+          title="Bekleyen İşler" 
+          icon={Clock} 
+          color="#f59e0b" 
+        />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+        <div className="card">
+          <h3 className="heading-2" style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <TrendingUp size={18} /> Platform Bazlı Paylaşım Dağılımı
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {Object.keys(platforms).length > 0 ? Object.keys(platforms).map(platform => (
+              <div key={platform}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                  <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {PLATFORM_ICONS[platform]} {platform}
+                  </span>
+                  <span className="text-muted">{platforms[platform]} Paylaşım</span>
+                </div>
+                <div style={{ height: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: `${Math.min(100, (platforms[platform] / (completedTasks.length || 1)) * 100)}%`, 
+                    backgroundColor: 'var(--accent-primary)',
+                    borderRadius: '4px'
+                  }}></div>
+                </div>
+              </div>
+            )) : (
+                <p className="text-muted" style={{ textAlign: 'center', padding: '1rem' }}>Henüz paylaşım verisi yok.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Bu Ay Üretilen İçerik</h3>
+          <div style={{ position: 'relative', width: '150px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             <svg width="150" height="150" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-primary)" strokeWidth="8" 
+                  strokeDasharray={`${(completedThisMonth / (currentMonthTasks.length || 1)) * 283} 283`}
+                  transform="rotate(-90 50 50)"
+                  style={{ transition: 'stroke-dasharray 0.5s ease' }}
+                />
+             </svg>
+             <div style={{ position: 'absolute', fontSize: '1.5rem', fontWeight: 700 }}>{completedThisMonth}</div>
+          </div>
+          <p style={{ marginTop: '1rem', fontSize: '0.85rem', fontWeight: 500 }}>{now.toLocaleString('tr-TR', { month: 'long' })} Ayı Verimliliği</p>
+        </div>
+      </div>
+
+      {/* Görev Düzenleme Modalı */}
+      <CustomDialog 
+        isOpen={isModalOpen} 
+        title="Görev Düzenle" 
+        onClose={() => setIsModalOpen(false)} 
+        onConfirm={handleSave}
+        loading={isPending}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="input-group">
+            <label className="input-label">Özel İçerik / Notlar</label>
+            <textarea 
+              className="input-field" 
+              placeholder="İçerik detaylarını buraya yazın..." 
+              value={noteInput}
+              onChange={(e) => setNoteInput(e.target.value)}
+              rows={4}
+              style={{ resize: 'vertical' }}
+            />
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">URL Bağlantısı</label>
+            <input 
+              type="url" 
+              className="input-field" 
+              placeholder="https://..." 
+              value={linkInput}
+              onChange={(e) => setLinkInput(e.target.value)}
+            />
+          </div>
+
+          {activeTask?.type === 'SOCIAL' && (
+            <div className="input-group">
+              <label className="input-label">Platform</label>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {Object.keys(PLATFORM_ICONS).map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setSelectedPlatform(p)}
+                    style={{
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid',
+                      borderColor: selectedPlatform === p ? 'var(--accent-primary)' : 'var(--border-color)',
+                      backgroundColor: selectedPlatform === p ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
+                      color: selectedPlatform === p ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {PLATFORM_ICONS[p]}
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Durum:</span>
+                <button 
+                  type="button"
+                  onClick={() => handleToggleStatus(activeTask)}
+                  style={{ 
+                    background: activeTask?.status ? '#10b981' : 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {activeTask?.status ? 'Tamamlandı' : 'Bekliyor'}
+                </button>
+            </div>
+            
+            <button 
+              type="button"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '0.4rem', borderRadius: '6px', cursor: 'pointer' }}
+              title="Görevi Sil"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </div>
+      </CustomDialog>
+
+      {/* Silme Onayı */}
+      <CustomDialog
+        isOpen={isDeleteDialogOpen}
+        title="Görevi Sil"
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDeleteTask}
+        confirmText="Evet, Sil"
+        cancelText="İptal"
+        loading={isPending}
+      >
+        <p style={{ color: 'var(--text-secondary)' }}>Bu görevi kalıcı olarak silmek istediğinize emin misiniz?</p>
+      </CustomDialog>
+
+      <style jsx>{`
+        .task-item-hover:hover {
+          background: rgba(255,255,255,0.08) !important;
+          border-color: var(--accent-primary) !important;
+          transform: translateX(4px);
+        }
+      `}</style>
+    </div>
+  );
+}
