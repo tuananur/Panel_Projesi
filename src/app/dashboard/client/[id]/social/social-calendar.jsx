@@ -195,9 +195,10 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
 
     const date = new Date(year, month, day);
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+    const targetDateStr = new Date(year, month, day).toLocaleDateString('en-CA'); // YYYY-MM-DD
     const dayTasks = initialTasks.filter(t => {
       const tDate = new Date(t.date);
-      return tDate.getDate() === day && tDate.getMonth() === month && tDate.getFullYear() === year;
+      return tDate.toLocaleDateString('en-CA') === targetDateStr;
     });
 
     const scheduledOnly = PLATFORMS.filter(p => {

@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import SocialCalendar from './social-calendar';
 
+export const revalidate = 0; // Disable cache to see new tasks immediately
+
 export default async function SocialPage({ params }) {
   const { id } = await params;
   const session = await getSession();
