@@ -56,10 +56,13 @@ export default function StatsContent({ client }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [noteInput, setNoteInput] = useState('');
   const [linkInput, setLinkInput] = useState('');
-  const [selectedPlatform, setSelectedPlatform] = useState(null);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [taskStatus, setTaskStatus] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showCompletedModal, setShowCompletedModal] = useState(false);
   const [showPendingModal, setShowPendingModal] = useState(false);
+
+  const PLATFORMS_LIST = ['Instagram', 'YouTube', 'Facebook', 'LinkedIn', 'X', 'TikTok'];
 
   const totalTasks = client.tasks.length;
   const completedTasks = client.tasks.filter(t => t.status);
@@ -88,7 +91,8 @@ export default function StatsContent({ client }) {
     setActiveTask(task);
     setNoteInput(task.note || '');
     setLinkInput(task.link || '');
-    setSelectedPlatform(task.platform);
+    setSelectedPlatforms(task.platform ? [task.platform] : []);
+    setTaskStatus(task.status);
     setIsModalOpen(true);
   };
 
@@ -98,7 +102,8 @@ export default function StatsContent({ client }) {
       formData.append('taskId', activeTask.id);
       formData.append('note', noteInput);
       formData.append('link', linkInput);
-      formData.append('platform', selectedPlatform || '');
+      formData.append('status', taskStatus.toString());
+      formData.append('platform', selectedPlatforms[0] || '');
       
       await updateTaskDetailAction(formData);
       setIsModalOpen(false);
@@ -366,20 +371,48 @@ export default function StatsContent({ client }) {
 
           {activeTask?.type === 'SOCIAL' && (
             <div className="input-group">
-              <label className="input-label">Platform Seçin (Opsiyonel)</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label className="input-label" style={{ marginBottom: 0 }}>Platform Seçin (Opsiyonel)</label>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (selectedPlatforms.length === PLATFORMS_LIST.length) {
+                      setSelectedPlatforms([]);
+                    } else {
+                      setSelectedPlatforms([...PLATFORMS_LIST]);
+                    }
+                  }}
+                  style={{ 
+                    fontSize: '0.7rem', 
+                    color: 'var(--accent-primary)', 
+                    background: 'none', 
+                    border: 'none', 
+                    cursor: 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  {selectedPlatforms.length === PLATFORMS_LIST.length ? 'Seçimi Kaldır' : 'Tümünü Seç'}
+                </button>
+              </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {Object.keys(PLATFORM_ICONS).map(p => (
+                {PLATFORMS_LIST.map(p => (
                   <button
                     key={p}
                     type="button"
-                    onClick={() => setSelectedPlatform(p)}
+                    onClick={() => {
+                      if (selectedPlatforms.includes(p)) {
+                        setSelectedPlatforms(selectedPlatforms.filter(item => item !== p));
+                      } else {
+                        setSelectedPlatforms([...selectedPlatforms, p]);
+                      }
+                    }}
                     style={{
                       padding: '0.5rem 0.75rem',
                       borderRadius: '8px',
                       border: '1px solid',
-                      borderColor: selectedPlatform === p ? 'var(--accent-primary)' : 'var(--border-color)',
-                      backgroundColor: selectedPlatform === p ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
-                      color: selectedPlatform === p ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                      borderColor: selectedPlatforms.includes(p) ? 'var(--accent-primary)' : 'var(--border-color)',
+                      backgroundColor: selectedPlatforms.includes(p) ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
+                      color: selectedPlatforms.includes(p) ? 'var(--accent-primary)' : 'var(--text-secondary)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -393,40 +426,104 @@ export default function StatsContent({ client }) {
                     {p}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedPlatforms.includes('')) {
+                      setSelectedPlatforms(selectedPlatforms.filter(item => item !== ''));
+                    } else {
+                      setSelectedPlatforms([...selectedPlatforms, '']);
+                    }
+                  }}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: selectedPlatforms.includes('') ? 'var(--accent-primary)' : 'var(--border-color)',
+                    backgroundColor: selectedPlatforms.includes('') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
+                    color: selectedPlatforms.includes('') ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {PLATFORM_ICONS['Özel']}
+                  Özel
+                </button>
               </div>
             </div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Durum:</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
+              <label className="input-label" style={{ marginBottom: 0 }}>Durum Seçin</label>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <button 
                   type="button"
-                  onClick={() => handleToggleStatus(activeTask)}
+                  onClick={() => setTaskStatus(false)}
                   style={{ 
-                    background: activeTask?.status ? '#10b981' : 'rgba(255,255,255,0.1)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: '6px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
+                    flex: 1,
+                    background: !taskStatus ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255,255,255,0.02)',
+                    color: !taskStatus ? '#f59e0b' : 'var(--text-secondary)',
+                    border: '1px solid',
+                    borderColor: !taskStatus ? '#f59e0b' : 'var(--border-color)',
+                    padding: '0.6rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem'
                   }}
                 >
-                  {activeTask?.status ? 'Tamamlandı' : 'Bekliyor'}
+                  <Circle size={14} /> Bekliyor
                 </button>
+                <button 
+                  type="button"
+                  onClick={() => setTaskStatus(true)}
+                  style={{ 
+                    flex: 1,
+                    background: taskStatus ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.02)',
+                    color: taskStatus ? '#10b981' : 'var(--text-secondary)',
+                    border: '1px solid',
+                    borderColor: taskStatus ? '#10b981' : 'var(--border-color)',
+                    padding: '0.6rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem'
+                  }}
+                >
+                  <CheckCircle2 size={14} /> Tamamlandı
+                </button>
+              </div>
             </div>
-            
-            <button 
-              type="button"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '0.4rem', borderRadius: '6px', cursor: 'pointer' }}
-              title="Görevi Sil"
-            >
-              <Trash2 size={18} />
-            </button>
           </div>
+          
+          {activeTask && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              <button 
+                type="button"
+                onClick={() => setIsDeleteDialogOpen(true)}
+                style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 600 }}
+                title="Görevi Sil"
+              >
+                <Trash2 size={16} /> Görevi Sil
+              </button>
+            </div>
+          )}
         </div>
       </CustomDialog>
 
