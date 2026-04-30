@@ -73,10 +73,15 @@ export default function StatsContent({ client }) {
   });
   const completedThisMonth = currentMonthTasks.filter(t => t.status).length;
 
-  const platforms = {};
+  const platformStats = {};
+  const specialTasksStats = [];
+  
   client.tasks.filter(t => t.type === 'SOCIAL').forEach(t => {
-    const platformName = t.platform || 'Özel';
-    platforms[platformName] = (platforms[platformName] || 0) + (t.status ? 1 : 0);
+    if (t.platform) {
+      platformStats[t.platform] = (platformStats[t.platform] || 0) + (t.status ? 1 : 0);
+    } else {
+      specialTasksStats.push(t);
+    }
   });
 
   const openEditModal = (task) => {
@@ -255,24 +260,56 @@ export default function StatsContent({ client }) {
             <TrendingUp size={18} /> Platform Bazlı Paylaşım Dağılımı
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {Object.keys(platforms).length > 0 ? Object.keys(platforms).map(platform => (
+            {/* Regular Platforms */}
+            {Object.keys(platformStats).map(platform => (
               <div key={platform}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
                   <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     {PLATFORM_ICONS[platform]} {platform}
                   </span>
-                  <span className="text-muted">{platforms[platform]} Paylaşım</span>
+                  <span className="text-muted">{platformStats[platform]} Paylaşım</span>
                 </div>
                 <div style={{ height: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
                   <div style={{ 
                     height: '100%', 
-                    width: `${Math.min(100, (platforms[platform] / (completedTasks.length || 1)) * 100)}%`, 
+                    width: `${Math.min(100, (platformStats[platform] / (completedTasks.length || 1)) * 100)}%`, 
                     backgroundColor: 'var(--accent-primary)',
                     borderRadius: '4px'
                   }}></div>
                 </div>
               </div>
-            )) : (
+            ))}
+
+            {/* Individual Special Tasks */}
+            {specialTasksStats.map(task => (
+              <div key={task.id}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                  <span style={{ 
+                    fontWeight: 600, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.4rem',
+                    color: task.status ? '#10b981' : 'var(--text-primary)'
+                  }}>
+                    {PLATFORM_ICONS['Özel']} 
+                    {new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })} {task.note || 'Özel Görev'}
+                    {task.status && <CheckCircle size={14} />}
+                  </span>
+                  <span className="text-muted">{task.status ? 'Paylaşıldı' : 'Bekliyor'}</span>
+                </div>
+                <div style={{ height: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: task.status ? '100%' : '15%', 
+                    backgroundColor: task.status ? '#10b981' : 'var(--border-color)',
+                    borderRadius: '4px',
+                    opacity: task.status ? 1 : 0.3
+                  }}></div>
+                </div>
+              </div>
+            ))}
+
+            {Object.keys(platformStats).length === 0 && specialTasksStats.length === 0 && (
                 <p className="text-muted" style={{ textAlign: 'center', padding: '1rem' }}>Henüz paylaşım verisi yok.</p>
             )}
           </div>
