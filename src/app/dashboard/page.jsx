@@ -9,7 +9,10 @@ export const metadata = {
 export default async function DashboardPage() {
   const session = await getSession();
   const clients = await prisma.client.findMany({
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    include: {
+      tasks: true
+    }
   });
 
   return (
@@ -37,13 +40,27 @@ export default async function DashboardPage() {
         {clients.length > 0 ? (
           clients.map(client => {
             const services = JSON.parse(client.services || '[]');
+            const pendingTasks = client.tasks.filter(t => !t.status);
             
-            // Rol kontrolü: Tasarımcı sadece Sosyal Medya olanları görsün gibi filtreler eklenebilir.
-            // Fakat reklamcı (SEO+Sosyal Medya) vs. görebilsin. Şimdilik hepsini listeleyelim.
-
             return (
               <Link key={client.id} href={`/dashboard/client/${client.id}/stats`} style={{ textDecoration: 'none' }}>
-                <div className="card card-interactive" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <div className="card card-interactive" style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                  {pendingTasks.length > 0 && (
+                    <div style={{ 
+                      position: 'absolute', 
+                      top: '1rem', 
+                      right: '1rem', 
+                      backgroundColor: '#f59e0b', 
+                      color: 'white', 
+                      fontSize: '0.65rem', 
+                      fontWeight: 800, 
+                      padding: '2px 8px', 
+                      borderRadius: '100px',
+                      boxShadow: '0 2px 10px rgba(245, 158, 11, 0.3)'
+                    }}>
+                      {pendingTasks.length} BEKLEYEN
+                    </div>
+                  )}
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{client.companyName}</h3>
                   <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem', flex: 1 }}>{client.contactName}</p>
                   
