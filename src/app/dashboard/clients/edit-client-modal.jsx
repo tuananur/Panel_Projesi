@@ -78,6 +78,8 @@ export default function EditClientModal({ client }) {
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                     <input type="checkbox" name="services" value="SEO" defaultChecked={currentServices.includes('SEO')} /> SEO
                   </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input type="checkbox" name="services" value="Sosyal Medya" defaultChecked={currentServices.includes('Sosyal Medya')} /> Sosyal Medya
                   </label>
                 </div>
               </div>
