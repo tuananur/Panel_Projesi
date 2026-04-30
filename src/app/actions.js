@@ -2,8 +2,27 @@
 
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { createSession, destroySession } from '@/lib/auth';
+import { createSession, destroySession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+
+async function logActivity(action, entityType, details, clientId = null) {
+  try {
+    const session = await getSession();
+    if (!session) return;
+    
+    await prisma.activityLog.create({
+      data: {
+        userId: session.userId,
+        clientId: clientId ? parseInt(clientId) : null,
+        action,
+        entityType,
+        details
+      }
+    });
+  } catch (error) {
+    console.error('Logging error:', error);
+  }
+}
 
 export async function loginAction(formData) {
   const username = formData.get('username');
@@ -83,6 +102,7 @@ export async function createUserAction(formData) {
         // password is left null intentionally
       },
     });
+    await logActivity('CREATE', 'USER', `${username} isimli kullanıcı oluşturuldu.`);
     return { success: true };
   } catch (error) {
     return { error: 'Kullanıcı oluşturulurken hata oluştu. Kullanıcı adı zaten kullanımda olabilir.' };
@@ -115,6 +135,8 @@ export async function createClientAction(formData) {
         services,
       },
     });
+    const newClient = await prisma.client.findFirst({ where: { companyName }, orderBy: { createdAt: 'desc' } });
+    await logActivity('CREATE', 'CLIENT', `${companyName} isimli müşteri sisteme eklendi.`, newClient?.id);
     return { success: true };
   } catch (error) {
     return { error: 'Müşteri eklenirken hata oluştu.' };
@@ -126,7 +148,9 @@ export async function deleteUserAction(formData) {
   if (!id) return { error: 'Geçersiz ID' };
   
   try {
+    const user = await prisma.user.findUnique({ where: { id } });
     await prisma.user.delete({ where: { id } });
+    await logActivity('DELETE', 'USER', `${user?.username || id} isimli kullanıcı silindi.`);
     return { success: true };
   } catch (error) {
     return { error: 'Kullanıcı silinemedi.' };
@@ -138,7 +162,9 @@ export async function deleteClientAction(formData) {
   if (!id) return { error: 'Geçersiz ID' };
   
   try {
+    const client = await prisma.client.findUnique({ where: { id } });
     await prisma.client.delete({ where: { id } });
+    await logActivity('DELETE', 'CLIENT', `${client?.companyName || id} isimli müşteri ve tüm verileri silindi.`, id);
     return { success: true };
   } catch (error) {
     return { error: 'Müşteri silinemedi.' };
@@ -157,6 +183,7 @@ export async function updateUserAction(formData) {
       where: { id },
       data: { username, role }
     });
+    await logActivity('UPDATE', 'USER', `${username} isimli kullanıcının bilgileri güncellendi.`);
     return { success: true };
   } catch (error) {
     return { error: 'Kullanıcı güncellenemedi.' };
@@ -180,6 +207,7 @@ export async function updateClientAction(formData) {
       where: { id },
       data: { companyName, website, contactName, email, phone, services }
     });
+    await logActivity('UPDATE', 'CLIENT', `${companyName} isimli müşterinin bilgileri güncellendi.`, id);
     return { success: true };
   } catch (error) {
     return { error: 'Müşteri güncellenemedi.' };
@@ -195,6 +223,8 @@ export async function toggleTaskAction(formData) {
       where: { id: taskId },
       data: { status }
     });
+    const task = await prisma.task.findUnique({ where: { id: taskId }, include: { client: true } });
+    await logActivity('TOGGLE', 'TASK', `${task?.client.companyName} için ${task?.platform || 'Özel'} görevi ${status ? 'Tamamlandı' : 'Bekliyor'} olarak işaretlendi.`, task?.clientId);
     return { success: true };
   } catch (error) {
     return { error: 'Görev güncellenemedi.' };
@@ -212,6 +242,8 @@ export async function updateTaskDetailAction(formData) {
       where: { id: taskId },
       data: { link, note, platform }
     });
+    const task = await prisma.task.findUnique({ where: { id: taskId }, include: { client: true } });
+    await logActivity('UPDATE', 'TASK', `${task?.client.companyName} için ${task?.platform || 'Özel'} görevinin detayları güncellendi.`, task?.clientId);
     return { success: true };
   } catch (error) {
     return { error: 'Görev detayları güncellenemedi.' };
@@ -223,7 +255,9 @@ export async function deleteTaskAction(formData) {
   if (!taskId) return { error: 'Geçersiz ID' };
 
   try {
+    const task = await prisma.task.findUnique({ where: { id: taskId }, include: { client: true } });
     await prisma.task.delete({ where: { id: taskId } });
+    await logActivity('DELETE', 'TASK', `${task?.client.companyName} için ${task?.platform || 'Özel'} görevi silindi.`, task?.clientId);
     return { success: true };
   } catch (error) {
     return { error: 'Görev silinemedi.' };
@@ -250,6 +284,8 @@ export async function addTaskAction(formData) {
         status: false
       }
     });
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    await logActivity('CREATE', 'TASK', `${client?.companyName} için yeni bir ${type === 'BLOG' ? 'Blog' : 'Sosyal Medya'} görevi (${platform || 'Özel'}) eklendi.`, clientId);
     return { success: true };
   } catch (error) {
     return { error: 'Görev eklenemedi.' };
@@ -274,6 +310,7 @@ export async function updateClientSettingsAction(clientId, formData) {
         specialInstructions
       }
     });
+    await logActivity('UPDATE', 'SETTINGS', `Müşteri ayarları güncellendi.`, clientId);
     return { success: true };
   } catch (error) {
     return { error: 'Ayarlar güncellenemedi.' };

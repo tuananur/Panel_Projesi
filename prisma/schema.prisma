@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -12,6 +12,7 @@ model User {
   username  String   @unique
   password  String?  // Nullable, if null requires setting password
   role      String   @default("DESIGNER") // "ADMIN", "DESIGNER", "ADVERTISER"
+  logs      ActivityLog[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -32,6 +33,7 @@ model Client {
   specialInstructions String? @db.Text
   
   tasks            Task[]
+  logs             ActivityLog[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -49,4 +51,16 @@ model Task {
   status    Boolean  @default(false) // false = pending, true = completed
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  clientId    Int?
+  client      Client?  @relation(fields: [clientId], references: [id])
+  action      String   // "CREATE", "UPDATE", "DELETE", "TOGGLE"
+  entityType  String   // "TASK", "CLIENT", "USER"
+  details     String   @db.Text
+  createdAt   DateTime @default(now())
 }

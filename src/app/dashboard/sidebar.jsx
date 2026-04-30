@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Sidebar({ role }) {
@@ -28,6 +28,7 @@ export default function Sidebar({ role }) {
     ...(isAdmin ? [
       { href: '/dashboard/clients', label: 'Müşteriler', icon: <Users size={20} /> },
       { href: '/dashboard/users', label: 'Kullanıcılar', icon: <UserCircle size={20} /> },
+      { href: '/dashboard/logs', label: 'Sistem Logları', icon: <ClipboardList size={20} /> },
     ] : []),
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
