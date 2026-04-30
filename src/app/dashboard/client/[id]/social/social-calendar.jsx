@@ -295,7 +295,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                 >
                   {task.platform ? PLATFORM_ICONS[task.platform] : <Plus size={12} />}
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {task.platform || 'Not'}
+                    {task.platform || (task.note ? (task.note.length > 15 ? task.note.substring(0, 15) + '...' : task.note) : 'Not')}
                   </span>
                 </div>
                 

@@ -174,7 +174,7 @@ export default function StatsContent({ client }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.15rem' }}>
                 {task.type === 'SOCIAL' && PLATFORM_ICONS[task.platform || 'Özel']}
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {task.type === 'BLOG' ? 'Blog İçeriği' : (task.platform || 'Özel Görev')}
+                  {task.type === 'BLOG' ? 'Blog İçeriği' : (task.platform || (task.note || 'Özel Görev'))}
                 </span>
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
