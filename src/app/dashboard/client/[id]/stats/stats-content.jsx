@@ -41,7 +41,12 @@ const PLATFORM_ICONS = {
       <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932L18.901 1.153zM17.61 20.644h2.039L6.486 3.24H4.298L17.61 20.644z" />
     </svg>
   ),
-  TikTok: <Play size={14} />
+  TikTok: <Play size={14} />,
+  Özel: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+    </svg>
+  )
 };
 
 export default function StatsContent({ client }) {
@@ -70,7 +75,8 @@ export default function StatsContent({ client }) {
 
   const platforms = {};
   client.tasks.filter(t => t.type === 'SOCIAL').forEach(t => {
-    platforms[t.platform] = (platforms[t.platform] || 0) + (t.status ? 1 : 0);
+    const platformName = t.platform || 'Özel';
+    platforms[platformName] = (platforms[platformName] || 0) + (t.status ? 1 : 0);
   });
 
   const openEditModal = (task) => {
@@ -166,9 +172,9 @@ export default function StatsContent({ client }) {
           >
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.15rem' }}>
-                {task.type === 'SOCIAL' && PLATFORM_ICONS[task.platform]}
+                {task.type === 'SOCIAL' && PLATFORM_ICONS[task.platform || 'Özel']}
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {task.type === 'BLOG' ? 'Blog İçeriği' : (task.platform || 'Genel Görev')}
+                  {task.type === 'BLOG' ? 'Blog İçeriği' : (task.platform || 'Özel Görev')}
                 </span>
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
