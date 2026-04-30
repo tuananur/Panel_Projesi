@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon, ExternalLink, RefreshCw } from 'lucide-react';
+import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon, ExternalLink, RefreshCw, Settings2 } from 'lucide-react';
 import { syncBlogsAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
@@ -183,55 +183,65 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           {dayTasks.map(task => (
-            <div key={task.id} style={{ display: 'flex', flexDirection: 'column', padding: '4px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div 
-                  onClick={() => openDetailModal(task)}
-                  style={{ 
+            <div key={task.id} style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              padding: '6px 8px', 
+              borderRadius: '6px', 
+              background: 'rgba(255,255,255,0.03)', 
+              border: '1px solid rgba(255,255,255,0.08)',
+              transition: 'all 0.2s'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '4px' }}>
+                {task.link ? (
+                  <a 
+                    href={task.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ 
+                      fontSize: '0.65rem', 
+                      fontWeight: 600, 
+                      color: 'var(--accent-primary)',
+                      textDecoration: 'none',
+                      flex: 1,
+                      lineHeight: '1.3',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}
+                    title={task.note || 'Blog Başlığı'}
+                  >
+                    {task.note || 'Başlıksız Blog'}
+                  </a>
+                ) : (
+                  <span style={{ 
                     fontSize: '0.65rem', 
-                    fontWeight: 700, 
-                    cursor: 'pointer',
-                    color: task.link ? 'var(--accent-primary)' : 'inherit',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    flex: 1
-                  }}
-                >
-                  <LinkIcon size={10} /> BLOG
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  {task.link && (
-                    <a 
-                      href={task.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      style={{ color: 'var(--accent-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                      title="Blog'a Git"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <ExternalLink size={11} />
-                    </a>
-                  )}
+                    fontWeight: 600, 
+                    color: 'var(--text-secondary)',
+                    flex: 1,
+                    lineHeight: '1.3'
+                  }}>
+                    {task.note || 'Planlanan Blog'}
+                  </span>
+                )}
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div 
                     onClick={() => handleToggle(task.id, task.status)}
-                    style={{ cursor: 'pointer', color: task.status ? '#10b981' : 'var(--text-secondary)' }}
+                    style={{ cursor: 'pointer', color: task.status ? '#10b981' : 'rgba(255,255,255,0.2)' }}
                   >
-                    {task.status ? <CheckCircle2 size={12} /> : <Circle size={12} />}
+                    {task.status ? <CheckCircle2 size={13} /> : <Circle size={13} />}
                   </div>
+                  {isAdmin && (
+                    <div 
+                      onClick={() => openDetailModal(task)}
+                      style={{ cursor: 'pointer', color: 'var(--text-secondary)', hover: { color: 'var(--accent-primary)' } }}
+                    >
+                      <Settings2 size={13} />
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                <span 
-                  onClick={() => openDetailModal(task)}
-                  style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80%' }}
-                >
-                  {task.link ? 'Link Kayıtlı' : 'Link Ekle...'}
-                </span>
-                {isAdmin && (
-                  <Trash2 size={10} style={{ cursor: 'pointer', color: '#ef4444' }} onClick={() => setDeleteTaskId(task.id)} />
-                )}
               </div>
             </div>
           ))}
@@ -344,9 +354,18 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
         onConfirm={confirmUpdate} 
         loading={isPending}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="input-group">
-            <label className="input-label">URL Bağlantısını Giriniz</label>
+            <label className="input-label">Blog Başlığı</label>
+            <input 
+              type="text" 
+              className="input-field" 
+              value={activeTask?.note || ''} 
+              onChange={(e) => setActiveTask({ ...activeTask, note: e.target.value })} 
+            />
+          </div>
+          <div className="input-group">
+            <label className="input-label">URL Bağlantısı</label>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <input 
                 type="url" 
@@ -354,7 +373,6 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
                 placeholder="https://..." 
                 value={linkInput} 
                 onChange={(e) => setLinkInput(e.target.value)} 
-                autoFocus
                 style={{ flex: 1 }}
               />
               {linkInput && (
@@ -362,14 +380,29 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
                   href={linkInput} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="btn btn-primary"
-                  style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center' }}
                 >
-                  <ExternalLink size={14} /> Blog'a Git
+                  <ExternalLink size={14} />
                 </a>
               )}
             </div>
           </div>
+          {isAdmin && (
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <button 
+                className="btn" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsDetailModalOpen(false);
+                  setDeleteTaskId(activeTask.id);
+                }}
+                style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Trash2 size={14} /> Kaydı Sil
+              </button>
+            </div>
+          )}
         </div>
       </CustomDialog>
 
