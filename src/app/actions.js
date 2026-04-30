@@ -352,11 +352,14 @@ export async function syncBlogsAction(clientId) {
     const blogList = Array.isArray(blogs) ? blogs : (blogs.data || blogs.blogs || []);
 
     for (const blog of blogList) {
-      // Logic based on user requirement: published_date must not be empty
-      const publishDate = blog.published_date || blog.publish_date || blog.createdAt;
+      // Mapping for tacambalaj.com API: published_at, title, slug
+      const publishDate = blog.published_at || blog.published_date || blog.publish_date || blog.createdAt;
       if (!publishDate) continue;
 
-      const link = blog.link || blog.url || '';
+      // Construct link: base URL + slug
+      const link = blog.slug 
+        ? `https://tacambalaj.com/blog/${blog.slug}` 
+        : (blog.link || blog.url || '');
       
       // Check if already exists in DB for this client
       const exists = client.tasks.some(t => t.link === link);
@@ -369,7 +372,7 @@ export async function syncBlogsAction(clientId) {
           date: new Date(publishDate),
           link: link,
           note: blog.title || 'Otomatik Çekilen Blog',
-          status: true // If published on site, it's completed for us
+          status: true
         }
       });
       addedCount++;
