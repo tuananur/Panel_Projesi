@@ -380,17 +380,36 @@ export async function syncBlogsAction(clientId) {
         ? `${origin}/tr/${slug}` 
         : (blog.link || blog.url || `${origin}/${slug}`);
       
-      // Check if already exists in DB for this client
-      const exists = client.tasks.some(t => t.link === link);
-      if (exists) continue;
+      const targetDate = new Date(publishDate);
+      const title = blog.title || 'Otomatik Çekilen Blog';
+
+      // Smart Update: Check if task with same title and date exists
+      const existingTask = client.tasks.find(t => {
+        const taskDate = new Date(t.date);
+        return t.note === title && 
+               taskDate.getFullYear() === targetDate.getFullYear() &&
+               taskDate.getMonth() === targetDate.getMonth() &&
+               taskDate.getDate() === targetDate.getDate();
+      });
+
+      if (existingTask) {
+        // If link is different (e.g. fixed the /blog/ prefix), update it
+        if (existingTask.link !== link) {
+          await prisma.task.update({
+            where: { id: existingTask.id },
+            data: { link: link }
+          });
+        }
+        continue;
+      }
 
       await prisma.task.create({
         data: {
           clientId: client.id,
           type: 'BLOG',
-          date: new Date(publishDate),
+          date: targetDate,
           link: link,
-          note: blog.title || 'Otomatik Çekilen Blog',
+          note: title,
           status: true
         }
       });
