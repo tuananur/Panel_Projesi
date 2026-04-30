@@ -17,35 +17,19 @@ export function ThemeProvider({ children }) {
     setAccent(savedAccent);
     
     document.documentElement.setAttribute('data-theme', savedTheme);
-    if (savedAccent !== 'blue') {
-      document.documentElement.setAttribute('data-theme', savedAccent);
-    }
+    document.documentElement.setAttribute('data-accent', savedAccent);
   }, []);
 
   const changeTheme = (newTheme) => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
-    
-    // If we switch to light/dark, we should re-apply the accent if it's not default
-    if (accent !== 'blue') {
-      // Small delay to ensure light/dark is applied first
-      setTimeout(() => {
-        document.documentElement.setAttribute('data-theme', accent);
-      }, 10);
-    }
   };
 
   const changeAccent = (newAccent) => {
     setAccent(newAccent);
     localStorage.setItem('accent', newAccent);
-    
-    if (newAccent === 'blue') {
-      // Re-apply base theme
-      document.documentElement.setAttribute('data-theme', theme);
-    } else {
-      document.documentElement.setAttribute('data-theme', newAccent);
-    }
+    document.documentElement.setAttribute('data-accent', newAccent);
   };
 
   return (

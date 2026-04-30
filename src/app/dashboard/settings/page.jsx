@@ -15,6 +15,11 @@ export default function SettingsPage() {
     { id: 'blue', label: 'Okyanus Mavisi', color: '#3b82f6' },
     { id: 'purple', label: 'Mistisizm Moru', color: '#a855f7' },
     { id: 'green', label: 'Doğa Yeşili', color: '#10b981' },
+    { id: 'orange', label: 'Gün Batımı', color: '#f59e0b' },
+    { id: 'red', label: 'Enerji Kırmızısı', color: '#ef4444' },
+    { id: 'cyan', label: 'Siber Turkuaz', color: '#06b6d4' },
+    { id: 'pink', label: 'Gül Pembesi', color: '#ec4899' },
+    { id: 'gold', label: 'Lüks Altın', color: '#eab308' },
   ];
 
   return (
