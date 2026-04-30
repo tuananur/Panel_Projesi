@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Sidebar({ username }) {
@@ -31,9 +31,51 @@ export default function Sidebar({ username }) {
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`} style={{ overflow: 'visible' }}>
       <div className="sidebar-header" style={{ position: 'relative', height: '80px', display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', padding: isCollapsed ? '0' : '0 1.5rem', overflow: 'visible' }}>
         {!isCollapsed && (
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-             AGENCY
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ 
+              width: '32px', 
+              height: '32px', 
+              background: 'var(--accent-gradient)', 
+              borderRadius: '8px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: 'white',
+              boxShadow: 'var(--shadow-glow)'
+            }}>
+              <Brain size={20} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ 
+                fontSize: '1rem', 
+                fontWeight: 800, 
+                letterSpacing: '-0.02em',
+                background: 'var(--accent-gradient)', 
+                WebkitBackgroundClip: 'text', 
+                WebkitTextFillColor: 'transparent',
+                lineHeight: 1.1
+              }}>
+                BEYİN ATÖLYESİ
+              </span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.05em' }}>YÖNETİM PANELİ</span>
+            </div>
+          </div>
+        )}
+        
+        {isCollapsed && (
+          <div style={{ 
+            width: '40px', 
+            height: '40px', 
+            background: 'var(--accent-gradient)', 
+            borderRadius: '10px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            color: 'white',
+            boxShadow: 'var(--shadow-glow)'
+          }}>
+            <Brain size={24} />
+          </div>
         )}
         
         <button 

@@ -39,46 +39,52 @@ export default function LogoutPage() {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
-      background: 'var(--bg-primary)' 
+      background: 'radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-primary) 100%)' 
     }}>
       <div className="glass-panel" style={{ 
-        padding: '3rem', 
+        padding: '3.5rem 2rem', 
         display: 'flex', 
         flexDirection: 'column', 
         alignItems: 'center', 
         gap: '1.5rem', 
-        maxWidth: '450px', 
+        maxWidth: '400px', 
         width: '90%',
-        textAlign: 'center' 
+        textAlign: 'center',
+        boxShadow: 'var(--shadow-glow)'
       }}>
         <div style={{ 
-          width: '70px', 
-          height: '70px', 
+          width: '80px', 
+          height: '80px', 
           borderRadius: '50%', 
           background: 'rgba(16, 185, 129, 0.1)', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
           color: '#10b981',
-          marginBottom: '0.5rem'
+          marginBottom: '0.5rem',
+          border: '2px solid rgba(16, 185, 129, 0.2)'
         }}>
-          <LogOut size={32} />
+          <div style={{ animation: 'pulse 2s infinite' }}>
+            <LogOut size={36} />
+          </div>
         </div>
         
-        <h1 className="heading-2" style={{ fontSize: '1.5rem', margin: 0 }}>Oturum Kapatılıyor</h1>
+        <h1 className="heading-2" style={{ fontSize: '1.75rem', margin: 0, background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          Oturum Kapatıldı
+        </h1>
         
-        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '1rem' }}>
           {status}
         </p>
         
         <div style={{ 
-          marginTop: '1rem', 
-          width: '24px', 
-          height: '24px', 
-          border: '3px solid rgba(255,255,255,0.1)', 
+          marginTop: '0.5rem', 
+          width: '30px', 
+          height: '30px', 
+          border: '3px solid rgba(255,255,255,0.05)', 
           borderTopColor: 'var(--accent-primary)', 
           borderRadius: '50%', 
-          animation: 'spin 1s linear infinite' 
+          animation: 'spin 0.8s linear infinite' 
         }} />
       </div>
 
@@ -86,6 +92,11 @@ export default function LogoutPage() {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.1); opacity: 0.8; }
+          100% { transform: scale(1); opacity: 1; }
         }
       `}</style>
     </div>

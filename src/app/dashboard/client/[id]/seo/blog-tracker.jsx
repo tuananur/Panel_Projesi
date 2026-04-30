@@ -46,16 +46,19 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
 
   async function handleAddBlog() {
     if (!addConfirmDay) return;
-    startTransition(async () => {
-      const date = new Date(selectedYear, selectedMonth, addConfirmDay, 12);
-      const formData = new FormData();
-      formData.append('clientId', clientId);
-      formData.append('type', 'BLOG');
-      formData.append('date', date.toISOString());
-      await addTaskAction(formData);
+    const date = new Date(selectedYear, selectedMonth, addConfirmDay, 12);
+    const formData = new FormData();
+    formData.append('clientId', clientId);
+    formData.append('type', 'BLOG');
+    formData.append('date', date.toISOString());
+    
+    setLoading(true);
+    const result = await addTaskAction(formData);
+    if (result.success) {
       setAddConfirmDay(null);
       router.refresh();
-    });
+    }
+    setLoading(false);
   }
 
   async function handleDelete() {
@@ -270,7 +273,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
           </h3>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button className="btn" onClick={() => setSelectedYear(selectedYear - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear - 1}</button>
-            <button className="btn" style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'var(--accent-primary)', color: 'white' }}>{selectedYear}</button>
+            <button className="btn" style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'var(--accent-gradient)', color: 'white' }}>{selectedYear}</button>
             <button className="btn" onClick={() => setSelectedYear(selectedYear + 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear + 1}</button>
           </div>
         </div>
@@ -304,14 +307,28 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="input-group">
             <label className="input-label">URL Bağlantısını Giriniz</label>
-            <input 
-              type="url" 
-              className="input-field" 
-              placeholder="https://..." 
-              value={linkInput} 
-              onChange={(e) => setLinkInput(e.target.value)} 
-              autoFocus
-            />
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input 
+                type="url" 
+                className="input-field" 
+                placeholder="https://..." 
+                value={linkInput} 
+                onChange={(e) => setLinkInput(e.target.value)} 
+                autoFocus
+                style={{ flex: 1 }}
+              />
+              {linkInput && (
+                <a 
+                  href={linkInput} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                  style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <ExternalLink size={14} /> Blog'a Git
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </CustomDialog>

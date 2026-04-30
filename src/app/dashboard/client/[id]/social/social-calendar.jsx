@@ -42,9 +42,8 @@ const PLATFORM_ICONS = {
     </svg>
   ),
   X: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4l11.733 16h4.267l-11.733 -16z"></path>
-      <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932L18.901 1.153zM17.61 20.644h2.039L6.486 3.24H4.298L17.61 20.644z" />
     </svg>
   ),
   TikTok: (
@@ -382,12 +381,12 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div className="calendar-header">
           <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>
-            {MONTHS[selectedMonth]} {selectedYear}
+            {MONTHS[month]} {year}
           </h3>
-          <div className="calendar-controls">
-            <button className="btn" onClick={handlePrevMonth} style={{ padding: '0.25rem' }}><ChevronLeft size={16} /></button>
-            <button className="btn" onClick={handleToday} style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Bugün</button>
-            <button className="btn" onClick={handleNextMonth} style={{ padding: '0.25rem' }}><ChevronRight size={16} /></button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="btn" onClick={() => setYear(year - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{year - 1}</button>
+            <button className="btn" style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'var(--accent-primary)', color: 'white' }}>{year}</button>
+            <button className="btn" onClick={() => setYear(year + 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{year + 1}</button>
           </div>
         </div>
 
