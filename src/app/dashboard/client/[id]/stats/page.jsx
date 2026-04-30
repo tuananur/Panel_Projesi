@@ -2,6 +2,8 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import StatsContent from './stats-content';
 
+export const dynamic = 'force-dynamic';
+
 export default async function StatsPage({ params }) {
   const { id } = await params;
   const session = await getSession();
