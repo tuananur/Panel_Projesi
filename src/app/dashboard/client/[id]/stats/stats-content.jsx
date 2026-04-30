@@ -90,23 +90,25 @@ export default function StatsContent({ client }) {
   };
 
   const TaskList = ({ tasks, title, icon: Icon, color }) => (
-    <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: '300px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
         <div>
-          <h3 className="text-muted" style={{ fontSize: '0.85rem', fontWeight: 500, marginBottom: '0.5rem' }}>{title}</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 700 }}>{tasks.length}</p>
+          <h3 className="text-muted" style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>{title}</h3>
+          <p style={{ fontSize: '1.75rem', fontWeight: 800 }}>{tasks.length}</p>
         </div>
-        <Icon size={32} color={color} />
+        <div style={{ background: `${color}15`, padding: '0.75rem', borderRadius: '12px' }}>
+          <Icon size={24} color={color} />
+        </div>
       </div>
       
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
-        gap: '0.5rem', 
-        maxHeight: '200px', 
+        gap: '0.6rem', 
+        maxHeight: '250px', 
         overflowY: 'auto',
         paddingRight: '0.5rem',
-        marginTop: '0.5rem'
+        margin: '0 -0.5rem'
       }}>
         {tasks.length > 0 ? tasks.sort((a, b) => new Date(b.date) - new Date(a.date)).map(task => (
           <div 
@@ -116,33 +118,39 @@ export default function StatsContent({ client }) {
               display: 'flex', 
               alignItems: 'center', 
               gap: '0.75rem', 
-              padding: '0.6rem 0.75rem', 
-              background: 'rgba(255,255,255,0.03)', 
-              borderRadius: '8px',
+              padding: '0.75rem', 
+              background: 'rgba(255,255,255,0.02)', 
+              borderRadius: '10px',
               border: '1px solid var(--border-color)',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s ease',
+              borderLeft: `3px solid ${color}`
             }}
-            className="task-item-hover"
+            className="task-item-card"
           >
-            <div style={{ color: task.status ? '#10b981' : 'var(--text-secondary)' }}>
-              {task.status ? <CheckCircle size={16} /> : <Circle size={16} />}
-            </div>
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.15rem' }}>
                 {task.type === 'SOCIAL' && PLATFORM_ICONS[task.platform]}
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {task.type === 'BLOG' ? 'Blog İçeriği' : task.platform}
+                  {task.type === 'BLOG' ? 'Blog İçeriği' : (task.platform || 'Genel Görev')}
                 </span>
               </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
-                {new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
-                {task.note && ` • ${task.note.substring(0, 20)}...`}
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span>{new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</span>
+                {task.note && (
+                   <>
+                     <span style={{ opacity: 0.3 }}>|</span>
+                     <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{task.note}</span>
+                   </>
+                )}
               </div>
             </div>
+            <Edit3 size={14} className="text-muted" />
           </div>
         )) : (
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', padding: '1rem' }}>Görev bulunamadı.</p>
+          <div style={{ textAlign: 'center', padding: '2rem 1rem', opacity: 0.5 }}>
+            <p style={{ fontSize: '0.8rem' }}>Görev bulunamadı.</p>
+          </div>
         )}
       </div>
     </div>
