@@ -78,10 +78,73 @@ export default function SettingsForm({ client, role }) {
 
   return (
     <form action={handleSubmit}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2.5rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '0.8fr 1.2fr', gap: '2.5rem', alignItems: 'start' }}>
         
-        {/* SOL TARAF: Sosyal Medya Ayarları Bölümü */}
+        {/* SOL TARAF: SEO Ayarları Bölümü */}
         <section className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            SEO Ayarları
+          </h3>
+          {!canEditSEO && (
+            <div style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.75rem', borderRadius: '8px' }}>
+              Bu bölümü düzenleme yetkiniz bulunmamaktadır.
+            </div>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="input-group">
+              <label className="input-label">Haftalık Blog Hedefi (SEO)</label>
+              <input 
+                type="number" 
+                name="weeklyBlogTarget" 
+                className="input-field" 
+                defaultValue={client.weeklyBlogTarget || 0}
+                min="0"
+                disabled={!canEditSEO}
+                style={{ opacity: canEditSEO ? 1 : 0.6 }}
+              />
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">Müşteri E-posta Adresi</label>
+              <input 
+                type="email" 
+                name="email" 
+                className="input-field" 
+                defaultValue={client.email || ''}
+                placeholder="ornek@mail.com"
+                disabled={!isAdmin}
+                style={{ opacity: isAdmin ? 1 : 0.6 }}
+              />
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">Özel Talimatlar / Notlar</label>
+              <textarea 
+                name="specialInstructions" 
+                className="input-field" 
+                rows={6}
+                defaultValue={client.specialInstructions || ''}
+                placeholder="Müşteriye özel stratejiler..."
+                style={{ resize: 'vertical', opacity: isAdmin ? 1 : 0.6 }}
+                disabled={!isAdmin}
+              />
+            </div>
+
+            {(isAdmin || canEditSEO) && (
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                style={{ width: '100%', marginTop: '1rem', padding: '0.8rem', fontSize: '1rem' }}
+                disabled={loading}
+              >
+                {loading ? 'Kaydediliyor...' : 'Tüm Ayarları Kaydet'}
+              </button>
+            )}
+          </div>
+        </section>
+
+        {/* SAĞ TARAF: Sosyal Medya Ayarları Bölümü */}
+        <section className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingLeft: '1.5rem', borderLeft: '1px solid var(--border-color)' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             Sosyal Medya ve Planlama
           </h3>
@@ -90,7 +153,7 @@ export default function SettingsForm({ client, role }) {
               Bu bölümü düzenleme yetkiniz bulunmamaktadır.
             </div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
             {Object.keys(social).map(platform => (
               <div key={platform} className="card" style={{ padding: '1rem', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)', opacity: canEditSocial ? 1 : 0.7 }}>
                 <div className="input-group" style={{ marginBottom: '0.75rem' }}>
@@ -137,53 +200,8 @@ export default function SettingsForm({ client, role }) {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* SAĞ TARAF: SEO Ayarları Bölümü */}
-        <section className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingLeft: '1.5rem', borderLeft: '1px solid var(--border-color)' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            SEO Ayarları
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="input-group">
-              <label className="input-label">Haftalık Blog Hedefi (SEO)</label>
-              <input 
-                type="number" 
-                name="weeklyBlogTarget" 
-                className="input-field" 
-                defaultValue={client.weeklyBlogTarget || 0}
-                min="0"
-                disabled={!canEditSEO}
-                style={{ opacity: canEditSEO ? 1 : 0.6 }}
-              />
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Müşteri E-posta Adresi</label>
-              <input 
-                type="email" 
-                name="email" 
-                className="input-field" 
-                defaultValue={client.email || ''}
-                placeholder="ornek@mail.com"
-                disabled={!isAdmin}
-                style={{ opacity: isAdmin ? 1 : 0.6 }}
-              />
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Özel Talimatlar / Notlar</label>
-              <textarea 
-                name="specialInstructions" 
-                className="input-field" 
-                rows={4}
-                defaultValue={client.specialInstructions || ''}
-                placeholder="Müşteriye özel stratejiler..."
-                style={{ resize: 'vertical', opacity: isAdmin ? 1 : 0.6 }}
-                disabled={!isAdmin}
-              />
-            </div>
-
+          
+          {(canEditSocial && !isAdmin) && (
             <button 
               type="submit" 
               className="btn btn-primary" 
@@ -192,7 +210,7 @@ export default function SettingsForm({ client, role }) {
             >
               {loading ? 'Kaydediliyor...' : 'Tüm Ayarları Kaydet'}
             </button>
-          </div>
+          )}
         </section>
       </div>
 
