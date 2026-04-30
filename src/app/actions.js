@@ -364,15 +364,21 @@ export async function syncBlogsAction(clientId) {
     // Standard list structure or nested under 'data'/'blogs'
     const blogList = Array.isArray(blogs) ? blogs : (blogs.data || blogs.blogs || []);
 
+    const urlObj = new URL(client.blogApiUrl);
+    const origin = urlObj.origin;
+
     for (const blog of blogList) {
       // Mapping for tacambalaj.com API: published_at, title, slug
       const publishDate = blog.published_at || blog.published_date || blog.publish_date || blog.createdAt;
       if (!publishDate) continue;
 
-      // Construct link: base URL + slug
-      const link = blog.slug 
-        ? `https://tacambalaj.com/blog/${blog.slug}` 
-        : (blog.link || blog.url || '');
+      // Construct link: base URL + language prefix + normalized slug
+      let slug = blog.slug || blog.url || blog.link || '';
+      if (slug.startsWith('/')) slug = slug.substring(1);
+      
+      const link = client.websiteType === 'BEYIN_ATOLYESI' 
+        ? `${origin}/tr/${slug}` 
+        : (blog.link || blog.url || `${origin}/${slug}`);
       
       // Check if already exists in DB for this client
       const exists = client.tasks.some(t => t.link === link);
