@@ -82,7 +82,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeDay, setActiveDay] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
-  const [selectedPlatform, setSelectedPlatform] = useState(null);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [noteInput, setNoteInput] = useState('');
   const [linkInput, setLinkInput] = useState('');
   const [deleteTaskId, setDeleteTaskId] = useState(null);
@@ -156,7 +156,13 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
 
   const openModal = (day, platform = null, task = null) => {
     setActiveDay(day);
-    setSelectedPlatform(platform || task?.platform || null);
+    if (task) {
+      setSelectedPlatforms([task.platform || '']);
+    } else if (platform) {
+      setSelectedPlatforms([platform]);
+    } else {
+      setSelectedPlatforms([]);
+    }
     setActiveTask(task);
     setNoteInput(task?.note || '');
     setLinkInput(task?.link || '');
@@ -165,25 +171,28 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
 
   async function handleSave() {
     startTransition(async () => {
-      const platformToSave = selectedPlatform || '';
-      
       if (activeTask) {
         const formData = new FormData();
         formData.append('taskId', activeTask.id);
         formData.append('note', noteInput);
         formData.append('link', linkInput);
-        formData.append('platform', platformToSave);
+        formData.append('platform', selectedPlatforms[0] || '');
         await updateTaskDetailAction(formData);
       } else {
         const date = new Date(year, month, activeDay, 12);
-        const formData = new FormData();
-        formData.append('clientId', clientId);
-        formData.append('type', 'SOCIAL');
-        formData.append('date', date.toISOString());
-        formData.append('platform', platformToSave);
-        formData.append('note', noteInput);
-        formData.append('link', linkInput);
-        await addTaskAction(formData);
+        const platformsToCreate = selectedPlatforms.length > 0 ? selectedPlatforms : [''];
+        
+        // Create a task for each selected platform
+        for (const p of platformsToCreate) {
+          const formData = new FormData();
+          formData.append('clientId', clientId);
+          formData.append('type', 'SOCIAL');
+          formData.append('date', date.toISOString());
+          formData.append('platform', p);
+          formData.append('note', noteInput);
+          formData.append('link', linkInput);
+          await addTaskAction(formData);
+        }
       }
       setIsModalOpen(false);
       router.refresh();
@@ -484,20 +493,54 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
           </div>
 
           <div className="input-group">
-            <label className="input-label">Platform Seçin (Opsiyonel)</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <label className="input-label" style={{ marginBottom: 0 }}>Platform Seçin (Opsiyonel)</label>
+              {!activeTask && (
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (selectedPlatforms.length === PLATFORMS.length) {
+                      setSelectedPlatforms([]);
+                    } else {
+                      setSelectedPlatforms([...PLATFORMS]);
+                    }
+                  }}
+                  style={{ 
+                    fontSize: '0.7rem', 
+                    color: 'var(--accent-primary)', 
+                    background: 'none', 
+                    border: 'none', 
+                    cursor: 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  {selectedPlatforms.length === PLATFORMS.length ? 'Seçimi Kaldır' : 'Tümünü Seç'}
+                </button>
+              )}
+            </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {PLATFORMS.map(p => (
                 <button
                   key={p}
                   type="button"
-                  onClick={() => setSelectedPlatform(selectedPlatform === p ? null : p)}
+                  onClick={() => {
+                    if (activeTask) {
+                      setSelectedPlatforms([p]);
+                    } else {
+                      if (selectedPlatforms.includes(p)) {
+                        setSelectedPlatforms(selectedPlatforms.filter(item => item !== p));
+                      } else {
+                        setSelectedPlatforms([...selectedPlatforms, p]);
+                      }
+                    }
+                  }}
                   style={{
                     padding: '0.5rem',
                     borderRadius: '8px',
                     border: '1px solid',
-                    borderColor: selectedPlatform === p ? 'var(--accent-primary)' : 'var(--border-color)',
-                    backgroundColor: selectedPlatform === p ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
-                    color: selectedPlatform === p ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    borderColor: selectedPlatforms.includes(p) ? 'var(--accent-primary)' : 'var(--border-color)',
+                    backgroundColor: selectedPlatforms.includes(p) ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
+                    color: selectedPlatforms.includes(p) ? 'var(--accent-primary)' : 'var(--text-secondary)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -511,6 +554,36 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                   {p}
                 </button>
               ))}
+              {!activeTask && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedPlatforms.includes('')) {
+                      setSelectedPlatforms(selectedPlatforms.filter(item => item !== ''));
+                    } else {
+                      setSelectedPlatforms([...selectedPlatforms, '']);
+                    }
+                  }}
+                  style={{
+                    padding: '0.5rem',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: selectedPlatforms.includes('') ? 'var(--accent-primary)' : 'var(--border-color)',
+                    backgroundColor: selectedPlatforms.includes('') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
+                    color: selectedPlatforms.includes('') ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {PLATFORM_ICONS['Özel']}
+                  Özel
+                </button>
+              )}
             </div>
           </div>
         </div>
