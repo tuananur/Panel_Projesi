@@ -65,11 +65,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   };
 
   const openEditModal = (task) => {
-    setActiveTask(task);
-    setNoteInput(task.note || '');
-    setLinkInput(task.link || '');
-    setSelectedPlatform(task.platform);
-    setShowModal(true);
+    router.push(`/dashboard/client/${clientId}/social?taskId=${task.id}`);
   };
 
   const openAddModal = () => {

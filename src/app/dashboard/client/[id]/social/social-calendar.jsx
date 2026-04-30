@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Play, Link as LinkIcon, Calendar as CalendarIcon } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
@@ -55,11 +55,14 @@ const PLATFORM_ICONS = {
 
 export default function SocialCalendar({ clientId, initialTasks, platforms, schedule, socialAccounts, isAdmin }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const taskIdParam = searchParams.get('taskId');
 
   const getTaskStatusMessage = (task) => {
     if (task.status) return 'Tamamlandı';
@@ -78,6 +81,22 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const [noteInput, setNoteInput] = useState('');
   const [linkInput, setLinkInput] = useState('');
   const [deleteTaskId, setDeleteTaskId] = useState(null);
+
+  useEffect(() => {
+    if (taskIdParam && initialTasks.length > 0) {
+      const task = initialTasks.find(t => t.id.toString() === taskIdParam);
+      if (task) {
+        const tDate = new Date(task.date);
+        setSelectedMonth(tDate.getMonth());
+        setSelectedYear(tDate.getFullYear());
+        
+        // Use timeout to ensure state updates (month/year) are processed if needed
+        setTimeout(() => {
+          openModal(tDate.getDate(), task.platform, task);
+        }, 100);
+      }
+    }
+  }, [taskIdParam, initialTasks]);
 
   const year = selectedYear;
   const month = selectedMonth;

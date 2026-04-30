@@ -68,11 +68,7 @@ export default function StatsContent({ client }) {
   });
 
   const openEditModal = (task) => {
-    setActiveTask(task);
-    setNoteInput(task.note || '');
-    setLinkInput(task.link || '');
-    setSelectedPlatform(task.platform);
-    setIsModalOpen(true);
+    router.push(`/dashboard/client/${clientId}/social?taskId=${task.id}`);
   };
 
   const handleSave = async () => {
