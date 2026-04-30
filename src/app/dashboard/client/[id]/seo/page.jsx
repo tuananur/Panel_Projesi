@@ -52,11 +52,15 @@ export default async function SEOPage({ params }) {
           </div>
         </div>
 
-        {/* 4. Toplam Arşiv */}
+        {/* 4. Bu Ay Girilen */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '1.25rem', background: 'var(--bg-secondary)' }}>
-          <h3 className="text-muted" style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Toplam Blog Arşivi</h3>
-          <p style={{ fontSize: '2.25rem', fontWeight: 800, margin: 0, opacity: 0.9 }}>{totalArchive}</p>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Yayındaki tüm içerikler</p>
+          <h3 className="text-muted" style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+            {now.toLocaleString('tr-TR', { month: 'long' })} Ayı Toplamı
+          </h3>
+          <p style={{ fontSize: '2.25rem', fontWeight: 800, margin: 0, opacity: 0.9 }}>
+            {client.tasks.filter(t => t.status && new Date(t.date).getMonth() === now.getMonth() && new Date(t.date).getFullYear() === now.getFullYear()).length}
+          </p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Bu ayki performansınız</p>
         </div>
       </div>
 
