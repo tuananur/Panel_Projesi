@@ -44,6 +44,8 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
     });
   }
 
+  const [newBlogLink, setNewBlogLink] = useState('');
+
   async function handleAddBlog() {
     if (!addConfirmDay) return;
     const date = new Date(selectedYear, selectedMonth, addConfirmDay, 12);
@@ -51,11 +53,16 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
     formData.append('clientId', clientId);
     formData.append('type', 'BLOG');
     formData.append('date', date.toISOString());
+    formData.append('link', newBlogLink);
+    if (newBlogLink) {
+      formData.append('status', 'true');
+    }
     
     setLoading(true);
     const result = await addTaskAction(formData);
     if (result.success) {
       setAddConfirmDay(null);
+      setNewBlogLink('');
       router.refresh();
     }
     setLoading(false);
@@ -349,13 +356,32 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
       <CustomDialog
         isOpen={!!addConfirmDay}
         title="Yeni Blog Ekle"
-        onClose={() => setAddConfirmDay(null)}
+        onClose={() => {
+          setAddConfirmDay(null);
+          setNewBlogLink('');
+        }}
         onConfirm={handleAddBlog}
         confirmText="Ekle"
-        loading={isPending}
+        loading={loading}
       >
-        <div style={{ color: 'var(--text-secondary)' }}>
-          {addConfirmDay} {MONTHS[selectedMonth]} tarihine yeni bir blog kaydı eklemek istediğinize emin misiniz?
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            {addConfirmDay} {MONTHS[selectedMonth]} tarihine blog kaydı ekleniyor.
+          </div>
+          <div className="input-group">
+            <label className="input-label">Blog URL Bağlantısı (Opsiyonel)</label>
+            <input 
+              type="url" 
+              className="input-field" 
+              placeholder="https://..." 
+              value={newBlogLink} 
+              onChange={(e) => setNewBlogLink(e.target.value)}
+              autoFocus
+            />
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+              * Link girerseniz blog otomatik olarak "Tamamlandı" işaretlenir.
+            </p>
+          </div>
         </div>
       </CustomDialog>
     </div>
