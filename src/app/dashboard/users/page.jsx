@@ -4,12 +4,19 @@ import DeleteUserButton from './delete-user-button';
 import EditUserModal from './edit-user-modal';
 import { getSession } from '@/lib/auth';
 
+import { redirect } from 'next/navigation';
+
 export const metadata = {
   title: 'Kullanıcılar | Dashboard',
 };
 
 export default async function UsersPage() {
   const session = await getSession();
+  
+  if (!session || session.role !== 'ADMIN') {
+    redirect('/dashboard');
+  }
+
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' }
   });

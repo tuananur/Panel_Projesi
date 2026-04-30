@@ -4,6 +4,7 @@ import DeleteClientButton from './delete-client-button';
 import EditClientModal from './edit-client-modal';
 import { getSession } from '@/lib/auth';
 import { Phone, Mail, MessageCircle } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 export const metadata = {
   title: 'Müşteriler | Dashboard',
@@ -11,6 +12,11 @@ export const metadata = {
 
 export default async function ClientsPage() {
   const session = await getSession();
+
+  if (!session || session.role !== 'ADMIN') {
+    redirect('/dashboard');
+  }
+
   const clients = await prisma.client.findMany({
     orderBy: { createdAt: 'desc' }
   });

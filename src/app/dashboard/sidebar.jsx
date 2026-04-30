@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-export default function Sidebar({ username }) {
+export default function Sidebar({ role }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -21,10 +21,14 @@ export default function Sidebar({ username }) {
     localStorage.setItem('sidebar-collapsed', newState.toString());
   };
 
+  const isAdmin = role === 'ADMIN';
+
   const navItems = [
     { href: '/dashboard', label: 'Gösterge Paneli', icon: <LayoutDashboard size={20} /> },
-    { href: '/dashboard/clients', label: 'Müşteriler', icon: <Users size={20} /> },
-    { href: '/dashboard/users', label: 'Kullanıcılar', icon: <UserCircle size={20} /> },
+    ...(isAdmin ? [
+      { href: '/dashboard/clients', label: 'Müşteriler', icon: <Users size={20} /> },
+      { href: '/dashboard/users', label: 'Kullanıcılar', icon: <UserCircle size={20} /> },
+    ] : []),
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
 
