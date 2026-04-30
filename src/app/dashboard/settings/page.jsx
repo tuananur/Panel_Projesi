@@ -12,14 +12,14 @@ export default function SettingsPage() {
   ];
 
   const accents = [
-    { id: 'blue', label: 'Okyanus Mavisi', color: '#3b82f6' },
-    { id: 'purple', label: 'Mistisizm Moru', color: '#a855f7' },
-    { id: 'green', label: 'Doğa Yeşili', color: '#10b981' },
-    { id: 'orange', label: 'Gün Batımı', color: '#f59e0b' },
-    { id: 'red', label: 'Enerji Kırmızısı', color: '#ef4444' },
-    { id: 'cyan', label: 'Siber Turkuaz', color: '#06b6d4' },
-    { id: 'pink', label: 'Gül Pembesi', color: '#ec4899' },
-    { id: 'gold', label: 'Lüks Altın', color: '#eab308' },
+    { id: 'blue', label: 'Okyanus Mavisi', color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' },
+    { id: 'purple', label: 'Mistisizm Moru', color: '#a855f7', gradient: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)' },
+    { id: 'green', label: 'Doğa Yeşili', color: '#10b981', gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
+    { id: 'orange', label: 'Gün Batımı', color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' },
+    { id: 'red', label: 'Enerji Kırmızısı', color: '#ef4444', gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' },
+    { id: 'cyan', label: 'Siber Turkuaz', color: '#06b6d4', gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' },
+    { id: 'pink', label: 'Gül Pembesi', color: '#ec4899', gradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' },
+    { id: 'gold', label: 'Lüks Altın', color: '#eab308', gradient: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)' },
   ];
 
   return (
@@ -102,9 +102,7 @@ export default function SettingsPage() {
                   width: '48px', 
                   height: '48px', 
                   borderRadius: '50%', 
-                  background: a.id === 'blue' ? 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)' : 
-                             a.id === 'purple' ? 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)' :
-                             'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+                  background: a.gradient,
                   boxShadow: accent === a.id ? `0 0 15px ${a.color}60` : 'none',
                   display: 'flex',
                   alignItems: 'center',
