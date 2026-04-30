@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import ClientNav from './client-nav';
 import WeeklyStats from './social/weekly-stats';
+import ClientSwitcher from '@/app/components/client-switcher';
 import { Globe, Layout, Play, Share2, Info, User, Phone, Mail } from 'lucide-react';
 
 const BRAND_ICONS = {
@@ -57,6 +58,11 @@ export default async function ClientDetailLayout({ children, params }) {
 
   if (!client) return null;
 
+  const allClients = await prisma.client.findMany({
+    select: { id: true, companyName: true },
+    orderBy: { companyName: 'asc' }
+  });
+
   const services = JSON.parse(client.services || '[]');
   const socialAccounts = JSON.parse(client.socialAccounts || '{}');
   const socialSchedule = JSON.parse(client.socialSchedule || '{}');
@@ -70,7 +76,7 @@ export default async function ClientDetailLayout({ children, params }) {
     <div className="animate-fade-in">
       <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>{client.companyName}</h1>
+          <ClientSwitcher currentClient={client} allClients={allClients} />
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
