@@ -134,6 +134,7 @@ export default async function ClientDetailLayout({ children, params }) {
         {/* Weekly Stats moved back to Header with full data */}
         <div style={{ marginTop: '0.5rem' }}>
           <WeeklyStats 
+            clientId={id}
             tasks={client.tasks} 
             schedule={socialSchedule} 
             platforms={activePlatforms} 

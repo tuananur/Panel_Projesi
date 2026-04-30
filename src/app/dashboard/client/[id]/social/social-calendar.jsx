@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Instagram, Linkedin, Youtube, Facebook, Twitter, Play, Link as LinkIcon, Calendar as CalendarIcon } from 'lucide-react';
+import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Play, Link as LinkIcon, Calendar as CalendarIcon } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
 
@@ -384,9 +384,9 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
             {MONTHS[month]} {year}
           </h3>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn" onClick={() => setYear(year - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{year - 1}</button>
+            <button className="btn" onClick={() => setSelectedYear(year - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{year - 1}</button>
             <button className="btn" style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'var(--accent-primary)', color: 'white' }}>{year}</button>
-            <button className="btn" onClick={() => setYear(year + 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{year + 1}</button>
+            <button className="btn" onClick={() => setSelectedYear(year + 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{year + 1}</button>
           </div>
         </div>
 
