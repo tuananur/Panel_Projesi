@@ -2,7 +2,11 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { BarChart3, TrendingUp, CheckCircle2, Clock, Play, Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle } from 'lucide-react';
+import { 
+  BarChart3, TrendingUp, CheckCircle2, Clock, Play, 
+  Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
+  ChevronRight 
+} from 'lucide-react';
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 
@@ -49,6 +53,8 @@ export default function StatsContent({ client }) {
   const [linkInput, setLinkInput] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showCompletedModal, setShowCompletedModal] = useState(false);
+  const [showPendingModal, setShowPendingModal] = useState(false);
 
   const totalTasks = client.tasks.length;
   const completedTasks = client.tasks.filter(t => t.status);
@@ -202,19 +208,35 @@ export default function StatsContent({ client }) {
           <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', marginTop: '1rem' }}>Toplam {totalTasks} görevden {completedTasks.length} tanesi tamamlandı.</p>
         </div>
 
-        <TaskList 
-          tasks={completedTasks} 
-          title="Tamamlanan Görevler" 
-          icon={CheckCircle2} 
-          color="#10b981" 
-        />
+        <div 
+          className="card card-interactive" 
+          onClick={() => setShowCompletedModal(true)}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', cursor: 'pointer' }}
+        >
+          <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
+            <CheckCircle2 size={24} />
+          </div>
+          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Tamamlanan Görevler</h3>
+          <p style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--text-primary)' }}>{completedTasks.length}</p>
+          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
+             Listeyi Görüntüle <ChevronRight size={14} />
+          </div>
+        </div>
 
-        <TaskList 
-          tasks={pendingTasks} 
-          title="Bekleyen İşler" 
-          icon={Clock} 
-          color="#f59e0b" 
-        />
+        <div 
+          className="card card-interactive" 
+          onClick={() => setShowPendingModal(true)}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', cursor: 'pointer' }}
+        >
+          <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
+            <Clock size={24} />
+          </div>
+          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Bekleyen İşler</h3>
+          <p style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--text-primary)' }}>{pendingTasks.length}</p>
+          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f59e0b', fontSize: '0.8rem', fontWeight: 600 }}>
+             Listeyi Görüntüle <ChevronRight size={14} />
+          </div>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
@@ -247,7 +269,7 @@ export default function StatsContent({ client }) {
         </div>
 
         <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Bu Ay Üretilen İçerik</h3>
+          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Aylık Verimlilik</h3>
           <div style={{ position: 'relative', width: '150px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
              <svg width="150" height="150" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
@@ -358,6 +380,34 @@ export default function StatsContent({ client }) {
               <Trash2 size={18} />
             </button>
           </div>
+        </div>
+      </CustomDialog>
+
+      {/* Tamamlananlar Listesi Modalı */}
+      <CustomDialog
+        isOpen={showCompletedModal}
+        title="Tamamlanan Görevler"
+        onClose={() => setShowCompletedModal(false)}
+        showCancel={false}
+        confirmText="Kapat"
+        onConfirm={() => setShowCompletedModal(false)}
+      >
+        <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
+          <TaskList tasks={completedTasks} title="Tamamlananlar" icon={CheckCircle2} color="#10b981" />
+        </div>
+      </CustomDialog>
+
+      {/* Bekleyenler Listesi Modalı */}
+      <CustomDialog
+        isOpen={showPendingModal}
+        title="Bekleyen Görevler"
+        onClose={() => setShowPendingModal(false)}
+        showCancel={false}
+        confirmText="Kapat"
+        onConfirm={() => setShowPendingModal(false)}
+      >
+        <div style={{ maxHeight: '60vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
+          <TaskList tasks={pendingTasks} title="Bekleyen Görevler" icon={Clock} color="#f59e0b" />
         </div>
       </CustomDialog>
 
