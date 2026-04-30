@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import ClientNav from './client-nav';
 import WeeklyStats from './social/weekly-stats';
-import { Globe, Layout, Play, Share2, Info, User, Phone } from 'lucide-react';
+import { Globe, Layout, Play, Share2, Info, User, Phone, Mail } from 'lucide-react';
 
 const BRAND_ICONS = {
   Instagram: (
@@ -73,9 +73,28 @@ export default async function ClientDetailLayout({ children, params }) {
           <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>{client.companyName}</h1>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><User size={14} /> {client.contactName}</span>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Phone size={14} /> {client.phone}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+               <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }} title="İletişim Kişisi">
+                 <User size={14} /> {client.contactName}
+               </span>
+               <a 
+                 href={`https://wa.me/${client.phone.replace(/\D/g, '')}`} 
+                 target="_blank" 
+                 rel="noopener noreferrer" 
+                 style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'inherit', textDecoration: 'none' }}
+                 title="WhatsApp ile Mesaj Gönder"
+               >
+                 <Phone size={14} /> {client.phone}
+               </a>
+               {client.email && (
+                 <a 
+                   href={`mailto:${client.email}`} 
+                   style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'inherit', textDecoration: 'none' }}
+                   title="E-posta Gönder"
+                 >
+                   <Mail size={14} /> {client.email}
+                 </a>
+               )}
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.25rem' }}>

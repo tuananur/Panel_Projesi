@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -21,6 +21,7 @@ model Client {
   companyName String
   website     String?
   contactName String
+  email       String?
   phone       String
   services    String   // JSON or comma separated e.g. "SEO,SOCIAL_MEDIA"
   

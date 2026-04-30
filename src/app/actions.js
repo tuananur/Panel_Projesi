@@ -93,6 +93,7 @@ export async function createClientAction(formData) {
   const companyName = formData.get('companyName');
   const website = formData.get('website');
   const contactName = formData.get('contactName');
+  const email = formData.get('email');
   const phone = formData.get('phone');
   
   // services handles multi-select
@@ -109,6 +110,7 @@ export async function createClientAction(formData) {
         companyName,
         website,
         contactName,
+        email,
         phone,
         services,
       },
@@ -166,6 +168,7 @@ export async function updateClientAction(formData) {
   const companyName = formData.get('companyName');
   const website = formData.get('website');
   const contactName = formData.get('contactName');
+  const email = formData.get('email');
   const phone = formData.get('phone');
   const servicesList = formData.getAll('services');
   const services = JSON.stringify(servicesList);
@@ -175,7 +178,7 @@ export async function updateClientAction(formData) {
   try {
     await prisma.client.update({
       where: { id },
-      data: { companyName, website, contactName, phone, services }
+      data: { companyName, website, contactName, email, phone, services }
     });
     return { success: true };
   } catch (error) {
@@ -255,6 +258,7 @@ export async function addTaskAction(formData) {
 
 export async function updateClientSettingsAction(clientId, formData) {
   const weeklyBlogTarget = parseInt(formData.get('weeklyBlogTarget') || '0');
+  const email = formData.get('email');
   const socialAccounts = formData.get('socialAccounts'); // Already JSON string from client
   const socialSchedule = formData.get('socialSchedule'); // Already JSON string from client
   const specialInstructions = formData.get('specialInstructions');
@@ -264,6 +268,7 @@ export async function updateClientSettingsAction(clientId, formData) {
       where: { id: clientId },
       data: {
         weeklyBlogTarget,
+        email,
         socialAccounts,
         socialSchedule,
         specialInstructions
