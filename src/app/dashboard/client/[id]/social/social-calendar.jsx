@@ -60,6 +60,15 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const getTaskStatusMessage = (task) => {
+    if (task.status) return 'Tamamlandı';
+    const missing = [];
+    if (!task.note) missing.push('İçerik');
+    if (!task.link) missing.push('Link');
+    if (missing.length === 0) return 'Onay Bekliyor';
+    return `${missing.join(' & ')} Eksik`;
+  };
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -293,16 +302,25 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                 </div>
               </div>
               
-              {(task.note || task.link) && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
-                  <span 
-                    onClick={() => openModal(day, task.platform, task)}
-                    style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80%' }}
-                  >
-                    {task.note || 'Link Kayıtlı'}
-                  </span>
+              {(task.note || task.link || !task.status) && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px', gap: '4px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flex: 1, overflow: 'hidden' }}>
+                    {!task.status && (
+                      <span style={{ fontSize: '0.45rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase' }}>
+                        {getTaskStatusMessage(task)}
+                      </span>
+                    )}
+                    {task.note && (
+                      <span 
+                        onClick={() => openModal(day, task.platform, task)}
+                        style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}
+                      >
+                        {task.note}
+                      </span>
+                    )}
+                  </div>
                   {isAdmin && (
-                    <Trash2 size={8} style={{ cursor: 'pointer', color: '#ef4444' }} onClick={() => setDeleteTaskId(task.id)} />
+                    <Trash2 size={8} style={{ cursor: 'pointer', color: '#ef4444', flexShrink: 0 }} onClick={() => setDeleteTaskId(task.id)} />
                   )}
                 </div>
               )}
