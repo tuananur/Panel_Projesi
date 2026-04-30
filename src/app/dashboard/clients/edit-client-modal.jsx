@@ -10,6 +10,7 @@ export default function EditClientModal({ client }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [websiteType, setWebsiteType] = useState(client.websiteType || 'OTHER');
   const router = useRouter();
 
   const currentServices = JSON.parse(client.services || '[]');
@@ -77,11 +78,42 @@ export default function EditClientModal({ client }) {
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                     <input type="checkbox" name="services" value="SEO" defaultChecked={currentServices.includes('SEO')} /> SEO
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                    <input type="checkbox" name="services" value="Sosyal Medya" defaultChecked={currentServices.includes('Sosyal Medya')} /> Sosyal Medya
                   </label>
                 </div>
               </div>
+
+              <div className="input-group">
+                <label htmlFor="websiteType" className="input-label">Websitesi Altyapısı</label>
+                <select 
+                  id="websiteType" 
+                  name="websiteType" 
+                  className="input-field"
+                  value={websiteType}
+                  onChange={(e) => setWebsiteType(e.target.value)}
+                >
+                  <option value="OTHER">Diğer</option>
+                  <option value="BEYIN_ATOLYESI">Beyin Atölyesi</option>
+                  <option value="IDEASOFT">Ideasoft</option>
+                </select>
+              </div>
+
+              {websiteType === 'BEYIN_ATOLYESI' && (
+                <div className="input-group animate-fade-in">
+                  <label htmlFor="blogApiUrl" className="input-label">Blog API URL</label>
+                  <input 
+                    type="url" 
+                    id="blogApiUrl" 
+                    name="blogApiUrl" 
+                    className="input-field" 
+                    defaultValue={client.blogApiUrl || ''}
+                    placeholder="https://..."
+                    required={websiteType === 'BEYIN_ATOLYESI'}
+                  />
+                  <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>
+                    * Bu adresten bloglar otomatik olarak çekilecektir.
+                  </p>
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                 <button 

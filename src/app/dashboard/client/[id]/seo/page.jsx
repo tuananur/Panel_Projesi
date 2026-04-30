@@ -66,7 +66,13 @@ export default async function SEOPage({ params }) {
 
       <div className="card">
         <h2 className="heading-2" style={{ fontSize: '1.25rem' }}>Blog Listesi (SEO)</h2>
-        <BlogTracker clientId={client.id} initialTasks={client.tasks} isAdmin={session.role === 'ADMIN' || session.role === 'ADVERTISER'} />
+        <BlogTracker 
+          clientId={client.id} 
+          initialTasks={client.tasks} 
+          isAdmin={session.role === 'ADMIN' || session.role === 'ADVERTISER'} 
+          websiteType={client.websiteType}
+          blogApiUrl={client.blogApiUrl}
+        />
       </div>
     </div>
   );

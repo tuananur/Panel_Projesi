@@ -32,6 +32,10 @@ model Client {
   socialSchedule     String? @db.Text
   specialInstructions String? @db.Text
   
+  // Website Integration
+  websiteType        String? @default("OTHER") // "BEYIN_ATOLYESI", "IDEASOFT", "OTHER"
+  blogApiUrl         String? @db.Text
+  
   tasks            Task[]
   logs             ActivityLog[]
 

@@ -8,6 +8,7 @@ import CustomDialog from '@/app/components/custom-dialog';
 export default function CreateClientForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [websiteType, setWebsiteType] = useState('OTHER');
   const router = useRouter();
 
   async function handleSubmit(formData) {
@@ -96,6 +97,38 @@ export default function CreateClientForm() {
           </label>
         </div>
       </div>
+
+      <div className="input-group">
+        <label htmlFor="websiteType" className="input-label">Websitesi Altyapısı</label>
+        <select 
+          id="websiteType" 
+          name="websiteType" 
+          className="input-field"
+          value={websiteType}
+          onChange={(e) => setWebsiteType(e.target.value)}
+        >
+          <option value="OTHER">Diğer</option>
+          <option value="BEYIN_ATOLYESI">Beyin Atölyesi</option>
+          <option value="IDEASOFT">Ideasoft</option>
+        </select>
+      </div>
+
+      {websiteType === 'BEYIN_ATOLYESI' && (
+        <div className="input-group animate-fade-in">
+          <label htmlFor="blogApiUrl" className="input-label">Blog API URL</label>
+          <input 
+            type="url" 
+            id="blogApiUrl" 
+            name="blogApiUrl" 
+            className="input-field" 
+            placeholder="https://..."
+            required={websiteType === 'BEYIN_ATOLYESI'}
+          />
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>
+            * Bu adresten bloglar otomatik olarak çekilecektir.
+          </p>
+        </div>
+      )}
 
       <button 
         type="submit" 

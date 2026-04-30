@@ -119,6 +119,8 @@ export async function createClientAction(formData) {
   // services handles multi-select
   const servicesList = formData.getAll('services');
   const services = JSON.stringify(servicesList);
+  const websiteType = formData.get('websiteType');
+  const blogApiUrl = formData.get('blogApiUrl') || null;
 
   if (!companyName || !contactName || !phone) {
     return { error: 'Gerekli alanları doldurun.' };
@@ -133,6 +135,8 @@ export async function createClientAction(formData) {
         email,
         phone,
         services,
+        websiteType,
+        blogApiUrl
       },
     });
     const newClient = await prisma.client.findFirst({ where: { companyName }, orderBy: { createdAt: 'desc' } });
@@ -199,13 +203,15 @@ export async function updateClientAction(formData) {
   const phone = formData.get('phone');
   const servicesList = formData.getAll('services');
   const services = JSON.stringify(servicesList);
+  const websiteType = formData.get('websiteType');
+  const blogApiUrl = formData.get('blogApiUrl') || null;
 
   if (!id || !companyName || !contactName || !phone) return { error: 'Gerekli alanlar eksik.' };
 
   try {
     await prisma.client.update({
       where: { id },
-      data: { companyName, website, contactName, email, phone, services }
+      data: { companyName, website, contactName, email, phone, services, websiteType, blogApiUrl }
     });
     await logActivity('UPDATE', 'CLIENT', `${companyName} isimli müşterinin bilgileri güncellendi.`, id);
     return { success: true };
@@ -323,4 +329,56 @@ export async function getLatestLogIdAction() {
     select: { id: true }
   });
   return log?.id || 0;
+}
+
+export async function syncBlogsAction(clientId) {
+  try {
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) },
+      include: { tasks: { where: { type: 'BLOG' } } }
+    });
+
+    if (!client || !client.blogApiUrl) {
+      return { error: 'Müşteri veya API URL bulunamadı.' };
+    }
+
+    const response = await fetch(client.blogApiUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error('API isteği başarısız oldu.');
+    
+    const blogs = await response.json();
+    let addedCount = 0;
+
+    // Standard list structure or nested under 'data'/'blogs'
+    const blogList = Array.isArray(blogs) ? blogs : (blogs.data || blogs.blogs || []);
+
+    for (const blog of blogList) {
+      // Logic based on user requirement: published_date must not be empty
+      const publishDate = blog.published_date || blog.publish_date || blog.createdAt;
+      if (!publishDate) continue;
+
+      const link = blog.link || blog.url || '';
+      
+      // Check if already exists in DB for this client
+      const exists = client.tasks.some(t => t.link === link);
+      if (exists) continue;
+
+      await prisma.task.create({
+        data: {
+          clientId: client.id,
+          type: 'BLOG',
+          date: new Date(publishDate),
+          link: link,
+          note: blog.title || 'Otomatik Çekilen Blog',
+          status: true // If published on site, it's completed for us
+        }
+      });
+      addedCount++;
+    }
+
+    await logActivity('UPDATE', 'CLIENT', `${client.companyName} için ${addedCount} yeni blog otomatik olarak senkronize edildi.`, client.id);
+    return { success: true, addedCount };
+  } catch (error) {
+    console.error('Sync error:', error);
+    return { error: 'Bloglar senkronize edilirken bir hata oluştu.' };
+  }
 }

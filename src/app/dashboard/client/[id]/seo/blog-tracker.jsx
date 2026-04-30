@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon, ExternalLink } from 'lucide-react';
+import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon, ExternalLink, RefreshCw } from 'lucide-react';
+import { syncBlogsAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
 
@@ -14,7 +15,7 @@ const MONTHS = [
 
 const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 
-export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
+export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteType, blogApiUrl }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
@@ -95,6 +96,17 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
       setIsDetailModalOpen(false);
       router.refresh();
     });
+  }
+
+  async function handleSync() {
+    setLoading(true);
+    const result = await syncBlogsAction(clientId);
+    if (result.success) {
+      router.refresh();
+    } else {
+      alert(result.error);
+    }
+    setLoading(false);
   }
 
   const renderDay = (day) => {
@@ -279,6 +291,27 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin }) {
             {MONTHS[selectedMonth]} {selectedYear}
           </h3>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {isAdmin && websiteType === 'BEYIN_ATOLYESI' && blogApiUrl && (
+              <button 
+                className="btn btn-secondary" 
+                onClick={handleSync} 
+                disabled={loading}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem', 
+                  fontSize: '0.75rem', 
+                  padding: '0.4rem 0.8rem',
+                  marginRight: '0.5rem',
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  color: 'var(--accent-primary)',
+                  borderColor: 'rgba(59, 130, 246, 0.2)'
+                }}
+              >
+                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                Blogları Güncelle
+              </button>
+            )}
             <button className="btn" onClick={() => setSelectedYear(selectedYear - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear - 1}</button>
             <button className="btn" style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'var(--accent-gradient)', color: 'white' }}>{selectedYear}</button>
             <button className="btn" onClick={() => setSelectedYear(selectedYear + 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear + 1}</button>
