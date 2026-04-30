@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { getLatestLogIdAction } from '@/app/actions';
 
 export default function Sidebar({ role }) {
   const pathname = usePathname();
@@ -22,6 +23,30 @@ export default function Sidebar({ role }) {
   };
 
   const isAdmin = role === 'ADMIN';
+  const [hasNewLogs, setHasNewLogs] = useState(false);
+
+  useEffect(() => {
+    if (isAdmin) {
+      const checkLogs = async () => {
+        const latestId = await getLatestLogIdAction();
+        const lastSeenId = parseInt(localStorage.getItem('last_seen_log_id') || '0');
+        if (latestId > lastSeenId) {
+          setHasNewLogs(true);
+        }
+      };
+      checkLogs();
+      
+      const handleStorage = () => checkLogs();
+      window.addEventListener('storage', handleStorage);
+
+      // Check every 30 seconds
+      const interval = setInterval(checkLogs, 30000);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('storage', handleStorage);
+      };
+    }
+  }, [isAdmin, pathname]);
 
   const navItems = [
     { href: '/dashboard', label: 'Gösterge Paneli', icon: <LayoutDashboard size={20} /> },
@@ -119,9 +144,24 @@ export default function Sidebar({ role }) {
               href={item.href} 
               className={`nav-item ${isActive ? 'active' : ''}`}
               title={isCollapsed ? item.label : ''}
-              style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '0.75rem 0' : '0.75rem 1rem' }}
+              style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '0.75rem 0' : '0.75rem 1rem', position: 'relative' }}
             >
-              {item.icon}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {item.icon}
+                {item.label === 'Sistem Logları' && hasNewLogs && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#ef4444',
+                    borderRadius: '50%',
+                    border: '2px solid var(--bg-secondary)',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)'
+                  }}></span>
+                )}
+              </div>
               {!isCollapsed && <span>{item.label}</span>}
             </Link>
           );

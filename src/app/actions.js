@@ -316,3 +316,11 @@ export async function updateClientSettingsAction(clientId, formData) {
     return { error: 'Ayarlar güncellenemedi.' };
   }
 }
+
+export async function getLatestLogIdAction() {
+  const log = await prisma.activityLog.findFirst({
+    orderBy: { id: 'desc' },
+    select: { id: true }
+  });
+  return log?.id || 0;
+}

@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { Clock, User as UserIcon, Building2, Activity } from 'lucide-react';
+import LogClient from './log-client';
 
 export const metadata = {
   title: 'Sistem Logları | Dashboard',
@@ -35,6 +36,7 @@ export default async function LogsPage() {
 
   return (
     <div className="animate-fade-in">
+      <LogClient latestId={logs[0]?.id} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Sistem Logları</h1>
