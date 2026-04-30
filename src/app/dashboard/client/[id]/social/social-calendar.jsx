@@ -83,6 +83,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const [activeDay, setActiveDay] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [taskStatus, setTaskStatus] = useState(false);
   const [noteInput, setNoteInput] = useState('');
   const [linkInput, setLinkInput] = useState('');
   const [deleteTaskId, setDeleteTaskId] = useState(null);
@@ -158,10 +159,13 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
     setActiveDay(day);
     if (task) {
       setSelectedPlatforms([task.platform || '']);
+      setTaskStatus(task.status);
     } else if (platform) {
       setSelectedPlatforms([platform]);
+      setTaskStatus(false);
     } else {
       setSelectedPlatforms([]);
+      setTaskStatus(false);
     }
     setActiveTask(task);
     setNoteInput(task?.note || '');
@@ -176,6 +180,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
         formData.append('taskId', activeTask.id);
         formData.append('note', noteInput);
         formData.append('link', linkInput);
+        formData.append('status', taskStatus.toString());
         formData.append('platform', selectedPlatforms[0] || '');
         await updateTaskDetailAction(formData);
       } else {
@@ -191,6 +196,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
           formData.append('platform', p);
           formData.append('note', noteInput);
           formData.append('link', linkInput);
+          formData.append('status', taskStatus.toString());
           await addTaskAction(formData);
         }
       }
@@ -586,6 +592,73 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
               )}
             </div>
           </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
+              <label className="input-label" style={{ marginBottom: 0 }}>Durum Seçin</label>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button 
+                  type="button"
+                  onClick={() => setTaskStatus(false)}
+                  style={{ 
+                    flex: 1,
+                    background: !taskStatus ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255,255,255,0.02)',
+                    color: !taskStatus ? '#f59e0b' : 'var(--text-secondary)',
+                    border: '1px solid',
+                    borderColor: !taskStatus ? '#f59e0b' : 'var(--border-color)',
+                    padding: '0.6rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem'
+                  }}
+                >
+                  <Circle size={14} /> Bekliyor
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setTaskStatus(true)}
+                  style={{ 
+                    flex: 1,
+                    background: taskStatus ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.02)',
+                    color: taskStatus ? '#10b981' : 'var(--text-secondary)',
+                    border: '1px solid',
+                    borderColor: taskStatus ? '#10b981' : 'var(--border-color)',
+                    padding: '0.6rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem'
+                  }}
+                >
+                  <CheckCircle2 size={14} /> Tamamlandı
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {activeTask && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              <button 
+                type="button"
+                onClick={() => setDeleteTaskId(activeTask.id)}
+                style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 600 }}
+                title="Görevi Sil"
+              >
+                <Trash2 size={16} /> Görevi Sil
+              </button>
+            </div>
+          )}
         </div>
       </CustomDialog>
 
