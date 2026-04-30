@@ -110,6 +110,15 @@ export default function StatsContent({ client }) {
     });
   };
 
+  const getTaskStatusMessage = (task) => {
+    if (task.status) return 'Tamamlandı';
+    const missing = [];
+    if (!task.note) missing.push('İçerik');
+    if (!task.link) missing.push('Link');
+    if (missing.length === 0) return 'Onay Bekliyor';
+    return `${missing.join(' & ')} Bekleniyor`;
+  };
+
   const TaskList = ({ tasks, title, icon: Icon, color }) => (
     <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: '300px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
@@ -156,12 +165,16 @@ export default function StatsContent({ client }) {
                   {task.type === 'BLOG' ? 'Blog İçeriği' : (task.platform || 'Genel Görev')}
                 </span>
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 600, color: task.status ? '#10b981' : (getTaskStatusMessage(task).includes('Bekleniyor') ? '#f59e0b' : 'var(--text-secondary)') }}>
+                  {getTaskStatusMessage(task)}
+                </span>
+                <span style={{ opacity: 0.3 }}>•</span>
                 <span>{new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</span>
                 {task.note && (
                    <>
                      <span style={{ opacity: 0.3 }}>|</span>
-                     <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{task.note}</span>
+                     <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px' }}>{task.note}</span>
                    </>
                 )}
               </div>
@@ -264,7 +277,7 @@ export default function StatsContent({ client }) {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="input-group">
-            <label className="input-label">Özel İçerik / Notlar</label>
+            <label className="input-label">Özel İçerik</label>
             <textarea 
               className="input-field" 
               placeholder="İçerik detaylarını buraya yazın..." 
@@ -276,7 +289,7 @@ export default function StatsContent({ client }) {
           </div>
 
           <div className="input-group">
-            <label className="input-label">URL Bağlantısı</label>
+            <label className="input-label">URL Bağlantısını Giriniz</label>
             <input 
               type="url" 
               className="input-field" 
@@ -288,7 +301,7 @@ export default function StatsContent({ client }) {
 
           {activeTask?.type === 'SOCIAL' && (
             <div className="input-group">
-              <label className="input-label">Platform</label>
+              <label className="input-label">Platform Seçin (Opsiyonel)</label>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {Object.keys(PLATFORM_ICONS).map(p => (
                   <button

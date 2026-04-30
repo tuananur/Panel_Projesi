@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Clock, X, Plus } from 'lucide-react';
-import { addTaskAction } from '@/app/actions';
+import { addTaskAction, updateTaskDetailAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 
 const PLATFORM_ICONS = {
@@ -53,6 +53,32 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   const [noteInput, setNoteInput] = useState('');
   const [linkInput, setLinkInput] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState(null);
+  const [activeTask, setActiveTask] = useState(null);
+
+  const getTaskStatusMessage = (task) => {
+    if (task.status) return 'Tamamlandı';
+    const missing = [];
+    if (!task.note) missing.push('İçerik');
+    if (!task.link) missing.push('Link');
+    if (missing.length === 0) return 'Onay Bekliyor';
+    return `${missing.join(' & ')} Bekleniyor`;
+  };
+
+  const openEditModal = (task) => {
+    setActiveTask(task);
+    setNoteInput(task.note || '');
+    setLinkInput(task.link || '');
+    setSelectedPlatform(task.platform);
+    setShowModal(true);
+  };
+
+  const openAddModal = () => {
+    setActiveTask(null);
+    setNoteInput('');
+    setLinkInput('');
+    setSelectedPlatform(null);
+    setShowModal(true);
+  };
 
   const now = new Date();
 
@@ -85,18 +111,27 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   const handleSave = async () => {
     startTransition(async () => {
       const formData = new FormData();
-      formData.append('clientId', clientId);
-      formData.append('type', 'SOCIAL');
-      formData.append('date', new Date().toISOString());
-      formData.append('platform', selectedPlatform || '');
-      formData.append('note', noteInput);
-      formData.append('link', linkInput);
-
-      await addTaskAction(formData);
+      
+      if (activeTask) {
+        formData.append('taskId', activeTask.id);
+        formData.append('note', noteInput);
+        formData.append('link', linkInput);
+        formData.append('platform', selectedPlatform || '');
+        await updateTaskDetailAction(formData);
+      } else {
+        formData.append('clientId', clientId);
+        formData.append('type', 'SOCIAL');
+        formData.append('date', new Date().toISOString());
+        formData.append('platform', selectedPlatform || '');
+        formData.append('note', noteInput);
+        formData.append('link', linkInput);
+        await addTaskAction(formData);
+      }
       
       setNoteInput('');
       setLinkInput('');
       setSelectedPlatform(null);
+      setActiveTask(null);
       setShowModal(false);
       router.refresh();
     });
@@ -111,7 +146,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
     <>
       <div
         className="card"
-        onClick={() => setShowModal(true)}
+        onClick={openAddModal}
         style={{
           padding: '0.6rem 0.8rem',
           minWidth: '220px',
@@ -158,7 +193,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
 
       <CustomDialog
         isOpen={showModal}
-        title="Yeni Görev / Not Ekle"
+        title={activeTask ? "Görev Düzenle" : "Yeni Görev / Not Ekle"}
         onClose={() => setShowModal(false)}
         onConfirm={handleSave}
         loading={isPending}
@@ -174,13 +209,33 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
               <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f59e0b', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Clock size={12} /> ŞU AN BEKLEYENLER
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '100px', overflowY: 'auto' }}>
-                {allPending.slice(0, 3).map(t => (
-                  <div key={t.id} style={{ fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      {t.platform && PLATFORM_ICONS[t.platform]} {t.platform || 'Not'}: {t.note || 'Link'}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '150px', overflowY: 'auto' }}>
+                {allPending.slice(0, 5).map(t => (
+                  <div 
+                    key={t.id} 
+                    onClick={(e) => { e.stopPropagation(); openEditModal(t); }}
+                    style={{ 
+                      fontSize: '0.75rem', 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      color: 'var(--text-secondary)',
+                      padding: '4px 6px',
+                      borderRadius: '6px',
+                      background: 'rgba(255,255,255,0.02)',
+                      cursor: 'pointer',
+                      border: '1px solid transparent',
+                      transition: 'all 0.2s'
+                    }}
+                    className="pending-item-hover"
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                      {t.platform && PLATFORM_ICONS[t.platform]} 
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{t.platform || 'Not'}</span>
+                      <span style={{ opacity: 0.5 }}>|</span>
+                      <span style={{ color: '#f59e0b', fontWeight: 600 }}>{getTaskStatusMessage(t)}</span>
                     </span>
-                    <span style={{ fontSize: '0.65rem' }}>{formatDate(t.date)}</span>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>{formatDate(t.date)}</span>
                   </div>
                 ))}
                 {allPending.length > 3 && (
@@ -247,6 +302,13 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
           </div>
         </div>
       </CustomDialog>
+      <style jsx>{`
+        .pending-item-hover:hover {
+          background: rgba(255,255,255,0.08) !important;
+          border-color: var(--accent-primary) !important;
+          transform: translateX(4px);
+        }
+      `}</style>
     </>
   );
 }
