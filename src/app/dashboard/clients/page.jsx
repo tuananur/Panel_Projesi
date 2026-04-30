@@ -3,6 +3,7 @@ import CreateClientForm from './create-client-form';
 import DeleteClientButton from './delete-client-button';
 import EditClientModal from './edit-client-modal';
 import { getSession } from '@/lib/auth';
+import { Phone, Mail, MessageCircle } from 'lucide-react';
 
 export const metadata = {
   title: 'Müşteriler | Dashboard',
@@ -45,9 +46,25 @@ export default async function ClientsPage() {
                         {client.website && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>{client.website}</div>}
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ fontWeight: 600 }}>{client.contactName}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{client.phone}</div>
-                        {client.email && <div style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', opacity: 0.8 }}>{client.email}</div>}
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem' }}>{client.contactName}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                          <a 
+                            href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#10b981', textDecoration: 'none', fontWeight: 500 }}
+                          >
+                            <MessageCircle size={14} /> {client.phone}
+                          </a>
+                          {client.email && (
+                            <a 
+                              href={`mailto:${client.email}`}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}
+                            >
+                              <Mail size={14} /> {client.email}
+                            </a>
+                          )}
+                        </div>
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>

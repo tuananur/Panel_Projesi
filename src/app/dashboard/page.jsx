@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import Link from 'next/link';
+import { Phone, Mail, MessageCircle, ChevronRight } from 'lucide-react';
 
 export const metadata = {
   title: 'Gösterge Paneli | Agency Dashboard',
@@ -43,8 +44,7 @@ export default async function DashboardPage() {
             const pendingTasks = client.tasks.filter(t => !t.status);
             
             return (
-              <Link key={client.id} href={`/dashboard/client/${client.id}/stats`} style={{ textDecoration: 'none' }}>
-                <div className="card card-interactive" style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                <div key={client.id} className="card card-interactive" style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', padding: '1.25rem' }}>
                   {pendingTasks.length > 0 && (
                     <div style={{ 
                       position: 'absolute', 
@@ -61,14 +61,17 @@ export default async function DashboardPage() {
                       {pendingTasks.length} BEKLEYEN
                     </div>
                   )}
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{client.companyName}</h3>
-                  <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem', flex: 1 }}>{client.contactName}</p>
                   
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Link href={`/dashboard/client/${client.id}/stats`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{client.companyName}</h3>
+                    <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>{client.contactName}</p>
+                  </Link>
+
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
                     {services.map(s => (
                       <span key={s} style={{ 
-                        fontSize: '0.7rem', 
-                        padding: '0.2rem 0.6rem', 
+                        fontSize: '0.65rem', 
+                        padding: '0.15rem 0.5rem', 
                         borderRadius: '100px', 
                         backgroundColor: s === 'SEO' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(168, 85, 247, 0.1)',
                         color: s === 'SEO' ? '#60a5fa' : '#c084fc',
@@ -79,8 +82,35 @@ export default async function DashboardPage() {
                       </span>
                     ))}
                   </div>
+
+                  <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <a 
+                        href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="contact-icon-btn"
+                        title="WhatsApp"
+                        style={{ color: '#10b981' }}
+                      >
+                        <MessageCircle size={18} />
+                      </a>
+                      {client.email && (
+                        <a 
+                          href={`mailto:${client.email}`}
+                          className="contact-icon-btn"
+                          title="E-posta"
+                          style={{ color: 'var(--accent-primary)' }}
+                        >
+                          <Mail size={18} />
+                        </a>
+                      )}
+                    </div>
+                    <Link href={`/dashboard/client/${client.id}/stats`} style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+                      <ChevronRight size={18} />
+                    </Link>
+                  </div>
                 </div>
-              </Link>
             );
           })
         ) : (
