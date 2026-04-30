@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import SocialCalendar from './social-calendar';
@@ -30,14 +31,16 @@ export default async function SocialPage({ params }) {
       </div>
 
       <div className="card" style={{ padding: '0.75rem' }}>
-        <SocialCalendar 
-          clientId={client.id} 
-          initialTasks={client.tasks} 
-          platforms={activePlatforms}
-          schedule={socialSchedule}
-          socialAccounts={socialAccounts}
-          isAdmin={session.role === 'ADMIN' || session.role === 'ADVERTISER' || session.role === 'DESIGNER'} 
-        />
+        <Suspense fallback={<div>Yükleniyor...</div>}>
+          <SocialCalendar 
+            clientId={client.id} 
+            initialTasks={client.tasks} 
+            platforms={activePlatforms}
+            schedule={socialSchedule}
+            socialAccounts={socialAccounts}
+            isAdmin={session.role === 'ADMIN' || session.role === 'ADVERTISER' || session.role === 'DESIGNER'} 
+          />
+        </Suspense>
       </div>
     </div>
   );
