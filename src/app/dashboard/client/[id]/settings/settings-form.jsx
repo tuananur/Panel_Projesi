@@ -78,18 +78,20 @@ export default function SettingsForm({ client, role }) {
 
   return (
     <form action={handleSubmit}>
-      <div style={{ display: 'grid', gridTemplateColumns: '0.8fr 1.2fr', gap: '2.5rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', alignItems: 'start' }}>
         
-        {/* SOL TARAF: SEO Ayarları Bölümü */}
-        <section className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {/* SOL PANEL: SEO Ayarları */}
+        <div className="card animate-fade-in" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
             SEO Ayarları
           </h3>
+          
           {!canEditSEO && (
-            <div style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)' }}>
               Bu bölümü düzenleme yetkiniz bulunmamaktadır.
             </div>
           )}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="input-group">
               <label className="input-label">Haftalık Blog Hedefi (SEO)</label>
@@ -122,7 +124,7 @@ export default function SettingsForm({ client, role }) {
               <textarea 
                 name="specialInstructions" 
                 className="input-field" 
-                rows={6}
+                rows={8}
                 defaultValue={client.specialInstructions || ''}
                 placeholder="Müşteriye özel stratejiler..."
                 style={{ resize: 'vertical', opacity: isAdmin ? 1 : 0.6 }}
@@ -134,28 +136,30 @@ export default function SettingsForm({ client, role }) {
               <button 
                 type="submit" 
                 className="btn btn-primary" 
-                style={{ width: '100%', marginTop: '1rem', padding: '0.8rem', fontSize: '1rem' }}
+                style={{ width: '100%', marginTop: 'auto', padding: '0.8rem', fontSize: '1rem' }}
                 disabled={loading}
               >
-                {loading ? 'Kaydediliyor...' : 'Tüm Ayarları Kaydet'}
+                {loading ? 'Kaydediliyor...' : 'SEO Ayarlarını Kaydet'}
               </button>
             )}
           </div>
-        </section>
+        </div>
 
-        {/* SAĞ TARAF: Sosyal Medya Ayarları Bölümü */}
-        <section className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingLeft: '1.5rem', borderLeft: '1px solid var(--border-color)' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {/* SAĞ PANEL: Sosyal Medya Ayarları */}
+        <div className="card animate-fade-in" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
             Sosyal Medya ve Planlama
           </h3>
+
           {!canEditSocial && (
-            <div style={{ fontSize: '0.75rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.75rem', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(245,158,11,0.2)' }}>
               Bu bölümü düzenleme yetkiniz bulunmamaktadır.
             </div>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
             {Object.keys(social).map(platform => (
-              <div key={platform} className="card" style={{ padding: '1rem', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)', opacity: canEditSocial ? 1 : 0.7 }}>
+              <div key={platform} style={{ padding: '1rem', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', background: 'rgba(255,255,255,0.01)', opacity: canEditSocial ? 1 : 0.7 }}>
                 <div className="input-group" style={{ marginBottom: '0.75rem' }}>
                   <label className="input-label" style={{ fontSize: '0.75rem' }}>{platform} Linki</label>
                   <input 
@@ -201,17 +205,17 @@ export default function SettingsForm({ client, role }) {
             ))}
           </div>
           
-          {(canEditSocial && !isAdmin) && (
+          {(canEditSocial || isAdmin) && (
             <button 
               type="submit" 
               className="btn btn-primary" 
-              style={{ width: '100%', marginTop: '1rem', padding: '0.8rem', fontSize: '1rem' }}
+              style={{ width: '100%', marginTop: 'auto', padding: '0.8rem', fontSize: '1rem', background: 'var(--accent-gradient)' }}
               disabled={loading}
             >
-              {loading ? 'Kaydediliyor...' : 'Tüm Ayarları Kaydet'}
+              {loading ? 'Kaydediliyor...' : 'Sosyal Medya Ayarlarını Kaydet'}
             </button>
           )}
-        </section>
+        </div>
       </div>
 
       <CustomDialog
