@@ -64,7 +64,7 @@ export default async function ClientDetailLayout({ children, params }) {
   
   const canSeeSEO = services.includes('SEO') && (session.role === 'ADMIN' || session.role === 'ADVERTISER');
   const canSeeSocial = services.includes('Sosyal Medya') && (session.role === 'ADMIN' || session.role === 'DESIGNER' || session.role === 'ADVERTISER');
-  const canSeeSettings = session.role === 'ADMIN';
+  const canSeeSettings = session.role === 'ADMIN' || session.role === 'DESIGNER' || session.role === 'ADVERTISER';
 
   return (
     <div className="animate-fade-in">
