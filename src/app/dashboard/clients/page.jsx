@@ -45,8 +45,9 @@ export default async function ClientsPage() {
                         {client.website && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>{client.website}</div>}
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
-                        <div>{client.contactName}</div>
+                        <div style={{ fontWeight: 600 }}>{client.contactName}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{client.phone}</div>
+                        {client.email && <div style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', opacity: 0.8 }}>{client.email}</div>}
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>

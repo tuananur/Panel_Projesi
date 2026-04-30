@@ -62,6 +62,11 @@ export default function EditClientModal({ client }) {
               </div>
 
               <div className="input-group">
+                <label className="input-label">E-posta Adresi</label>
+                <input type="email" name="email" className="input-field" defaultValue={client.email || ''} placeholder="ornek@mail.com" />
+              </div>
+
+              <div className="input-group">
                 <label className="input-label">Telefon Numarası</label>
                 <input type="tel" name="phone" className="input-field" defaultValue={client.phone} required />
               </div>

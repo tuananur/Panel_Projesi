@@ -62,6 +62,17 @@ export default function CreateClientForm() {
       </div>
 
       <div className="input-group">
+        <label htmlFor="email" className="input-label">E-posta Adresi</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          className="input-field" 
+          placeholder="ornek@mail.com"
+        />
+      </div>
+
+      <div className="input-group">
         <label htmlFor="phone" className="input-label">Telefon Numarası</label>
         <input 
           type="tel" 
