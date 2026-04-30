@@ -332,20 +332,33 @@ export async function getLatestLogIdAction() {
 }
 
 export async function syncBlogsAction(clientId) {
+  console.log('Starting sync for client:', clientId);
   try {
     const client = await prisma.client.findUnique({
       where: { id: parseInt(clientId) },
       include: { tasks: { where: { type: 'BLOG' } } }
     });
 
-    if (!client || !client.blogApiUrl) {
-      return { error: 'Müşteri veya API URL bulunamadı.' };
+    if (!client) {
+      console.error('Client not found:', clientId);
+      return { error: 'Müşteri bulunamadı.' };
     }
 
+    if (!client.blogApiUrl) {
+      console.error('API URL not set for client:', client.companyName);
+      return { error: 'API URL tanımlanmamış.' };
+    }
+
+    console.log('Fetching from:', client.blogApiUrl);
     const response = await fetch(client.blogApiUrl, { cache: 'no-store' });
-    if (!response.ok) throw new Error('API isteği başarısız oldu.');
+    if (!response.ok) {
+      console.error('API request failed with status:', response.status);
+      throw new Error('API isteği başarısız oldu.');
+    }
     
     const blogs = await response.json();
+    console.log('Total items fetched from API:', Array.isArray(blogs) ? blogs.length : 'not an array');
+    
     let addedCount = 0;
 
     // Standard list structure or nested under 'data'/'blogs'
