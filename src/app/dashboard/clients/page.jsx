@@ -47,40 +47,43 @@ export default async function ClientsPage() {
                   
                   return (
                     <tr key={client.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>{client.companyName}</div>
-                        {client.website && (
-                          <a 
-                            href={client.website.startsWith('http') ? client.website : `https://${client.website}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ 
-                              fontSize: '0.75rem', 
-                              color: 'var(--accent-primary)', 
-                              textDecoration: 'none',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.3rem',
-                              background: 'rgba(59, 130, 246, 0.1)',
-                              padding: '2px 8px',
-                              borderRadius: '4px',
-                              fontWeight: 600
-                            }}
-                          >
-                            <Globe size={12} /> Web Sitesi
-                          </a>
-                        )}
+                      <td style={{ padding: '0.6rem 0.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.8rem' }}>{client.companyName}</div>
+                          {client.website && (
+                            <a 
+                              href={client.website.startsWith('http') ? client.website : `https://${client.website}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ 
+                                fontSize: '0.6rem', 
+                                color: 'var(--accent-primary)', 
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.2rem',
+                                background: 'rgba(59, 130, 246, 0.1)',
+                                padding: '1px 5px',
+                                borderRadius: '4px',
+                                fontWeight: 600,
+                                width: 'fit-content'
+                              }}
+                            >
+                              <Globe size={10} /> Web Sitesi
+                            </a>
+                          )}
+                        </div>
                       </td>
-                      <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.3rem', color: 'var(--text-primary)' }}>{client.contactName}</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <td style={{ padding: '0.6rem 0.5rem' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.8rem', marginBottom: '0.1rem', color: 'var(--text-primary)' }}>{client.contactName}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
                           <a 
                             href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', color: '#10b981', textDecoration: 'none', fontWeight: 500 }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: '#10b981', textDecoration: 'none', fontWeight: 500 }}
                           >
-                            <MessageCircle size={12} /> {client.phone}
+                            <MessageCircle size={10} /> {client.phone}
                           </a>
                           {client.email && (
                             <a 
@@ -88,36 +91,36 @@ export default async function ClientsPage() {
                               style={{ 
                                 display: 'flex', 
                                 alignItems: 'center', 
-                                gap: '0.4rem', 
-                                fontSize: '0.7rem', 
+                                gap: '0.3rem', 
+                                fontSize: '0.65rem', 
                                 color: 'var(--text-secondary)', 
                                 textDecoration: 'none', 
                                 fontWeight: 500,
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
-                                maxWidth: '150px'
+                                maxWidth: '110px'
                               }}
                               title={client.email}
                             >
-                              <Mail size={12} /> {client.email}
+                              <Mail size={10} /> {client.email}
                             </a>
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <td style={{ padding: '0.6rem 0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
                           {services.length > 0 ? services.map(s => (
-                            <span key={s} style={{ padding: '0.2rem 0.5rem', background: 'rgba(59, 130, 246, 0.2)', color: 'var(--accent-primary)', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600 }}>
-                              {s}
+                            <span key={s} style={{ padding: '1px 4px', background: 'rgba(59, 130, 246, 0.2)', color: 'var(--accent-primary)', borderRadius: '3px', fontSize: '0.55rem', fontWeight: 700 }}>
+                              {s === 'Sosyal Medya' ? 'SM' : s}
                             </span>
                           )) : (
-                            <span className="text-muted" style={{ fontSize: '0.75rem' }}>Hizmet yok</span>
+                            <span className="text-muted" style={{ fontSize: '0.6rem' }}>-</span>
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <td style={{ padding: '0.6rem 0.5rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                           <EditClientModal client={client} />
                           <DeleteClientButton clientId={client.id} />
                         </div>
