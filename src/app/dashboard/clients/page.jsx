@@ -48,8 +48,24 @@ export default async function ClientsPage() {
                   return (
                     <tr key={client.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                       <td style={{ padding: '1rem 0.75rem', maxWidth: '300px' }}>
-                        <div style={{ fontWeight: 500 }}>{client.companyName}</div>
-                        {client.website && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>{client.website}</div>}
+                        <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{client.companyName}</div>
+                        {client.website && (
+                          <a 
+                            href={client.website.startsWith('http') ? client.website : `https://${client.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ 
+                              fontSize: '0.75rem', 
+                              color: 'var(--accent-primary)', 
+                              textDecoration: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.25rem'
+                            }}
+                          >
+                            Web Sitesi
+                          </a>
+                        )}
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
                         <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem' }}>{client.contactName}</div>
