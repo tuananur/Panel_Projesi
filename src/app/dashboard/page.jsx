@@ -23,7 +23,7 @@ export default async function DashboardPage() {
         <p className="text-muted">Ajansınızın genel durumunu ve müşterilerinizi buradan takip edebilirsiniz.</p>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
           <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Toplam Müşteri</h3>
           <p style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--accent-primary)' }}>{clients.length}</p>
@@ -37,7 +37,7 @@ export default async function DashboardPage() {
       </div>
 
       <h2 className="heading-2" style={{ marginBottom: '1.5rem' }}>Müşteri Portföyü</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
         {clients.length > 0 ? (
           clients.map(client => {
             const services = JSON.parse(client.services || '[]');

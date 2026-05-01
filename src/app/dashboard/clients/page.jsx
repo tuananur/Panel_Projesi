@@ -27,8 +27,8 @@ export default async function ClientsPage() {
         <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: 0 }}>Müşteri Yönetimi</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', alignItems: 'start' }}>
-        <div className="card">
+      <div className="responsive-flex" style={{ gap: '2rem', alignItems: 'start' }}>
+        <div className="card" style={{ flex: 1, minWidth: 0 }}>
           <h2 className="heading-2" style={{ fontSize: '1.25rem' }}>Mevcut Müşteriler</h2>
           
           <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
@@ -102,7 +102,7 @@ export default async function ClientsPage() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" style={{ width: '100%', maxWidth: '350px', flexShrink: 0 }}>
           <h2 className="heading-2" style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Yeni Müşteri Ekle</h2>
           <CreateClientForm />
         </div>
