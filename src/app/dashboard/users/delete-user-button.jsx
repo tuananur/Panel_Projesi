@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { deleteUserAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
 
 export default function DeleteUserButton({ userId }) {
@@ -29,11 +30,14 @@ export default function DeleteUserButton({ userId }) {
           border: 'none',
           color: '#ef4444',
           cursor: 'pointer',
-          fontSize: '0.85rem',
-          textDecoration: 'underline'
+          fontSize: '0.8rem',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.25rem'
         }}
+        title="Sil"
       >
-        Sil
+        <Trash2 size={14} /> <span className="hide-mobile">Sil</span>
       </button>
 
       <CustomDialog

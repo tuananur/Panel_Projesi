@@ -45,22 +45,22 @@ export default async function UsersPage() {
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '1rem 0.75rem' }}>{user.id}</td>
-                    <td style={{ padding: '1rem 0.75rem', fontWeight: 500 }}>{user.username}</td>
-                    <td style={{ padding: '1rem 0.75rem' }}>
-                      <span className="role-badge" style={{ fontSize: '0.7rem' }}>
+                    <td style={{ padding: '0.4rem 0.3rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{user.id}</td>
+                    <td style={{ padding: '0.4rem 0.3rem', fontWeight: 600, fontSize: '0.8rem' }}>{user.username}</td>
+                    <td style={{ padding: '0.4rem 0.3rem' }}>
+                      <span className="role-badge" style={{ fontSize: '0.6rem', padding: '1px 4px' }}>
                         {user.role}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem 0.75rem' }}>
+                    <td style={{ padding: '0.4rem 0.3rem' }}>
                       {user.password ? (
-                        <span style={{ color: '#10b981', fontSize: '0.85rem' }}>Aktif</span>
+                        <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 500 }}>Aktif</span>
                       ) : (
-                        <span style={{ color: '#f59e0b', fontSize: '0.85rem' }}>Şifre Bekliyor</span>
+                        <span style={{ color: '#f59e0b', fontSize: '0.75rem', fontWeight: 500 }}>Bekliyor</span>
                       )}
                     </td>
-                    <td style={{ padding: '1rem 0.75rem' }}>
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <td style={{ padding: '0.4rem 0.3rem' }}>
+                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                         {user.role !== 'ADMIN' && (
                           <>
                             <EditUserModal user={user} />
