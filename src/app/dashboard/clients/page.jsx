@@ -3,7 +3,7 @@ import CreateClientForm from './create-client-form';
 import DeleteClientButton from './delete-client-button';
 import EditClientModal from './edit-client-modal';
 import { getSession } from '@/lib/auth';
-import { Phone, Mail, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MessageCircle, Globe } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
@@ -47,8 +47,8 @@ export default async function ClientsPage() {
                   
                   return (
                     <tr key={client.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '1rem 0.75rem', maxWidth: '300px' }}>
-                        <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{client.companyName}</div>
+                      <td style={{ padding: '1rem 0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>{client.companyName}</div>
                         {client.website && (
                           <a 
                             href={client.website.startsWith('http') ? client.website : `https://${client.website}`}
@@ -58,32 +58,49 @@ export default async function ClientsPage() {
                               fontSize: '0.75rem', 
                               color: 'var(--accent-primary)', 
                               textDecoration: 'none',
-                              display: 'flex',
+                              display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '0.25rem'
+                              gap: '0.3rem',
+                              background: 'rgba(59, 130, 246, 0.1)',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontWeight: 600
                             }}
                           >
-                            Web Sitesi
+                            <Globe size={12} /> Web Sitesi
                           </a>
                         )}
                       </td>
                       <td style={{ padding: '1rem 0.75rem' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem' }}>{client.contactName}</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.3rem', color: 'var(--text-primary)' }}>{client.contactName}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                           <a 
                             href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#10b981', textDecoration: 'none', fontWeight: 500 }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', color: '#10b981', textDecoration: 'none', fontWeight: 500 }}
                           >
-                            <MessageCircle size={14} /> {client.phone}
+                            <MessageCircle size={12} /> {client.phone}
                           </a>
                           {client.email && (
                             <a 
                               href={`mailto:${client.email}`}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 500 }}
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '0.4rem', 
+                                fontSize: '0.7rem', 
+                                color: 'var(--text-secondary)', 
+                                textDecoration: 'none', 
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                maxWidth: '150px'
+                              }}
+                              title={client.email}
                             >
-                              <Mail size={14} /> {client.email}
+                              <Mail size={12} /> {client.email}
                             </a>
                           )}
                         </div>
