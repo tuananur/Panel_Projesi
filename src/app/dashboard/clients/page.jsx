@@ -47,8 +47,8 @@ export default async function ClientsPage() {
                   
                   return (
                     <tr key={client.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '0.6rem 0.5rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                      <td style={{ padding: '0.4rem 0.3rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                           <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.8rem' }}>{client.companyName}</div>
                           {client.website && (
                             <a 
@@ -56,71 +56,71 @@ export default async function ClientsPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{ 
-                                fontSize: '0.6rem', 
+                                fontSize: '0.55rem', 
                                 color: 'var(--accent-primary)', 
                                 textDecoration: 'none',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '0.2rem',
+                                gap: '0.1rem',
                                 background: 'rgba(59, 130, 246, 0.1)',
-                                padding: '1px 5px',
-                                borderRadius: '4px',
-                                fontWeight: 600,
-                                width: 'fit-content'
+                                padding: '1px 4px',
+                                borderRadius: '3px',
+                                fontWeight: 700
                               }}
                             >
-                              <Globe size={10} /> Web Sitesi
+                              <Globe size={9} /> Link
                             </a>
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '0.6rem 0.5rem' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.8rem', marginBottom: '0.1rem', color: 'var(--text-primary)' }}>{client.contactName}</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-                          <a 
-                            href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: '#10b981', textDecoration: 'none', fontWeight: 500 }}
-                          >
-                            <MessageCircle size={10} /> {client.phone}
-                          </a>
-                          {client.email && (
+                      <td style={{ padding: '0.4rem 0.3rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.05rem' }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-primary)' }}>{client.contactName}</div>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <a 
-                              href={`mailto:${client.email}`}
-                              style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '0.3rem', 
-                                fontSize: '0.65rem', 
-                                color: 'var(--text-secondary)', 
-                                textDecoration: 'none', 
-                                fontWeight: 500,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                maxWidth: '110px'
-                              }}
-                              title={client.email}
+                              href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.6rem', color: '#10b981', textDecoration: 'none' }}
                             >
-                              <Mail size={10} /> {client.email}
+                              <MessageCircle size={9} /> {client.phone.slice(-4)}
                             </a>
-                          )}
+                            {client.email && (
+                              <a 
+                                href={`mailto:${client.email}`}
+                                style={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  gap: '0.2rem', 
+                                  fontSize: '0.6rem', 
+                                  color: 'var(--text-secondary)', 
+                                  textDecoration: 'none',
+                                  maxWidth: '80px',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}
+                                title={client.email}
+                              >
+                                <Mail size={9} /> {client.email.split('@')[0]}
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </td>
-                      <td style={{ padding: '0.6rem 0.5rem' }}>
-                        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                      <td style={{ padding: '0.4rem 0.3rem' }}>
+                        <div style={{ display: 'flex', gap: '0.2rem' }}>
                           {services.length > 0 ? services.map(s => (
-                            <span key={s} style={{ padding: '1px 4px', background: 'rgba(59, 130, 246, 0.2)', color: 'var(--accent-primary)', borderRadius: '3px', fontSize: '0.55rem', fontWeight: 700 }}>
+                            <span key={s} style={{ padding: '1px 3px', background: 'rgba(59, 130, 246, 0.2)', color: 'var(--accent-primary)', borderRadius: '2px', fontSize: '0.55rem', fontWeight: 800 }}>
                               {s === 'Sosyal Medya' ? 'SM' : s}
                             </span>
                           )) : (
-                            <span className="text-muted" style={{ fontSize: '0.6rem' }}>-</span>
+                            <span style={{ fontSize: '0.55rem' }}>-</span>
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '0.6rem 0.5rem' }}>
-                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                      <td style={{ padding: '0.4rem 0.3rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                           <EditClientModal client={client} />
                           <DeleteClientButton clientId={client.id} />
                         </div>
