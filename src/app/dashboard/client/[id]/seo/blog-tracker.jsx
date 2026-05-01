@@ -255,9 +255,9 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
   for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
 
   return (
-    <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
+    <div className="responsive-flex" style={{ marginTop: '0.5rem', alignItems: 'stretch' }}>
       {/* Month Sidebar */}
-      <div style={{ 
+      <div className="month-sidebar" style={{ 
         width: '160px', 
         background: 'var(--bg-secondary)', 
         borderRadius: '12px', 
@@ -266,7 +266,8 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
         flexDirection: 'column',
         height: 'fit-content',
         position: 'sticky',
-        top: '20px'
+        top: '20px',
+        flexShrink: 0
       }}>
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
           <CalendarIcon size={14} /> AYLAR
