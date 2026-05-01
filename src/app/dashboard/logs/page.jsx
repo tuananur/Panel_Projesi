@@ -49,9 +49,8 @@ export default async function LogsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
-                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Kullanıcı / İşlem</th>
+                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase', width: '35%' }}>Kullanıcı / İşlem</th>
                 <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Müşteri / Detay</th>
-                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Saat</th>
               </tr>
             </thead>
             <tbody>
@@ -83,18 +82,13 @@ export default async function LogsPage() {
                     <td style={{ padding: '0.4rem 0.75rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
                         {log.client && (
-                          <div style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>
                             {log.client.companyName}
                           </div>
                         )}
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', maxWidth: '140px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', wordBreak: 'break-word' }}>
                           {log.details}
                         </div>
-                      </div>
-                    </td>
-                    <td style={{ padding: '0.4rem 0.75rem' }}>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                        {new Date(log.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </td>
                   </tr>
