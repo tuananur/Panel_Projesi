@@ -543,6 +543,9 @@ input, button, select, textarea {
 @media (max-width: 991px) {
   .dashboard-layout {
     flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    min-height: 100dvh !important;
   }
 
   .sidebar {
