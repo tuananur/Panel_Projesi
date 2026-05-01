@@ -609,6 +609,10 @@ input, button, select, textarea {
     font-size: 1.25rem !important;
   }
 
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+
   /* Overlay for mobile sidebar */
   .sidebar-overlay {
     position: fixed !important;
