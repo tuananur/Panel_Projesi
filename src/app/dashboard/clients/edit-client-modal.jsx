@@ -34,9 +34,10 @@ export default function EditClientModal({ client }) {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' }}
+        style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem' }}
+        title="Düzenle"
       >
-        <Edit size={14} /> Düzenle
+        <Edit size={14} /> <span className="hide-mobile">Düzenle</span>
       </button>
 
       {isOpen && (
