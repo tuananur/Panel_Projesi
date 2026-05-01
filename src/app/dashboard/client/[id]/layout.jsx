@@ -74,7 +74,7 @@ export default async function ClientDetailLayout({ children, params }) {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="responsive-flex" style={{ marginBottom: '1.5rem' }}>
         <div>
           <ClientSwitcher currentClient={client} allClients={allClients} />
           

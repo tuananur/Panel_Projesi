@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getLatestLogIdAction } from '@/app/actions';
 
-export default function Sidebar({ role }) {
+export default function Sidebar({ role, isMobileOpen, onClose }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -59,9 +59,9 @@ export default function Sidebar({ role }) {
   ];
 
   return (
-    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`} style={{ overflow: 'visible' }}>
+    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`} style={{ overflow: 'visible' }}>
       <div className="sidebar-header" style={{ position: 'relative', height: '80px', display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', padding: isCollapsed ? '0' : '0 1.5rem', overflow: 'visible' }}>
-        {!isCollapsed && (
+        {(!isCollapsed || isMobileOpen) && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ 
               width: '32px', 
@@ -93,7 +93,7 @@ export default function Sidebar({ role }) {
           </div>
         )}
         
-        {isCollapsed && (
+        {isCollapsed && !isMobileOpen && (
           <div style={{ 
             width: '40px', 
             height: '40px', 
@@ -109,30 +109,48 @@ export default function Sidebar({ role }) {
           </div>
         )}
         
-        <button 
-          onClick={toggleSidebar}
-          style={{
-            position: 'absolute',
-            right: '-12px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-secondary)',
-            borderRadius: '50%',
-            width: '24px',
-            height: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            zIndex: 100,
-            transition: 'all 0.3s',
-            boxShadow: 'var(--shadow-md)'
-          }}
-        >
-          {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
+        {!isMobileOpen ? (
+          <button 
+            onClick={toggleSidebar}
+            className="sidebar-toggle-btn"
+            style={{
+              position: 'absolute',
+              right: '-12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              borderRadius: '50%',
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              zIndex: 100,
+              transition: 'all 0.3s',
+              boxShadow: 'var(--shadow-md)'
+            }}
+          >
+            {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          </button>
+        ) : (
+          <button 
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <X size={24} />
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav" style={{ marginTop: '1rem' }}>
@@ -143,8 +161,8 @@ export default function Sidebar({ role }) {
               key={item.href} 
               href={item.href} 
               className={`nav-item ${isActive ? 'active' : ''}`}
-              title={isCollapsed ? item.label : ''}
-              style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '0.75rem 0' : '0.75rem 1rem', position: 'relative' }}
+              title={isCollapsed && !isMobileOpen ? item.label : ''}
+              style={{ justifyContent: (isCollapsed && !isMobileOpen) ? 'center' : 'flex-start', padding: (isCollapsed && !isMobileOpen) ? '0.75rem 0' : '0.75rem 1rem', position: 'relative' }}
             >
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {item.icon}
@@ -162,7 +180,7 @@ export default function Sidebar({ role }) {
                   }}></span>
                 )}
               </div>
-              {!isCollapsed && <span>{item.label}</span>}
+              {(!isCollapsed || isMobileOpen) && <span>{item.label}</span>}
             </Link>
           );
         })}
@@ -172,13 +190,14 @@ export default function Sidebar({ role }) {
         <Link 
           href="/logout" 
           className="nav-item" 
-          style={{ color: '#ef4444', justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '0.75rem 0' : '0.75rem 1rem' }}
-          title={isCollapsed ? 'Çıkış Yap' : ''}
+          style={{ color: '#ef4444', justifyContent: (isCollapsed && !isMobileOpen) ? 'center' : 'flex-start', padding: (isCollapsed && !isMobileOpen) ? '0.75rem 0' : '0.75rem 1rem' }}
+          title={isCollapsed && !isMobileOpen ? 'Çıkış Yap' : ''}
         >
           <LogOut size={20} />
-          {!isCollapsed && <span>Çıkış Yap</span>}
+          {(!isCollapsed || isMobileOpen) && <span>Çıkış Yap</span>}
         </Link>
       </div>
+
     </aside>
   );
 }

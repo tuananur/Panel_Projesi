@@ -14,7 +14,16 @@ export default function ClientNav({ clientId, canSeeSEO, canSeeSocial, canSeeSet
   ].filter(tab => tab.show);
 
   return (
-    <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+    <div style={{ 
+      display: 'flex', 
+      gap: '0.5rem', 
+      borderBottom: '1px solid var(--border-color)', 
+      paddingBottom: '0.5rem',
+      overflowX: 'auto',
+      whiteSpace: 'nowrap',
+      msOverflowStyle: 'none',
+      scrollbarWidth: 'none'
+    }}>
       {tabs.map(tab => {
         const isActive = pathname.startsWith(tab.href) || (tab.href.endsWith('/stats') && pathname === `/dashboard/client/${clientId}`);
         return (
