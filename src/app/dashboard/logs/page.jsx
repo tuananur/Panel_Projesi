@@ -49,7 +49,7 @@ export default async function LogsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
-                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase', width: '35%' }}>Kullanıcı / İşlem</th>
+                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase', width: '40%' }}>Kullanıcı / İşlem / Tarih</th>
                 <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Müşteri / Detay</th>
               </tr>
             </thead>
@@ -66,17 +66,21 @@ export default async function LogsPage() {
                           </div>
                           <div style={{ fontWeight: 600, fontSize: '0.75rem' }}>{log.user.username}</div>
                         </div>
-                        <span style={{ 
-                          padding: '1px 4px', 
-                          borderRadius: '3px', 
-                          fontSize: '0.55rem', 
-                          fontWeight: 800, 
-                          background: badge.bg, 
-                          color: badge.color,
-                          width: 'fit-content'
-                        }}>
-                          {log.action}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span style={{ 
+                            padding: '1px 4px', 
+                            borderRadius: '3px', 
+                            fontSize: '0.55rem', 
+                            fontWeight: 800, 
+                            background: badge.bg, 
+                            color: badge.color
+                          }}>
+                            {log.action}
+                          </span>
+                          <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                            {new Date(log.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td style={{ padding: '0.4rem 0.75rem' }}>
