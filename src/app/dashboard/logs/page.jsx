@@ -52,7 +52,7 @@ export default async function LogsPage() {
                 <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Kullanıcı</th>
                 <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>İşlem</th>
                 <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Müşteri</th>
-                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Detay</th>
+                <th className="hide-mobile" style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Detay</th>
                 <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Tarih</th>
               </tr>
             </thead>
@@ -84,14 +84,14 @@ export default async function LogsPage() {
                     </td>
                     <td style={{ padding: '0.4rem 0.75rem' }}>
                       {log.client ? (
-                        <div style={{ fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px' }}>
+                        <div style={{ fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80px' }}>
                           {log.client.companyName}
                         </div>
                       ) : (
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>-</span>
                       )}
                     </td>
-                    <td style={{ padding: '0.4rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-secondary)', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <td className="hide-mobile" style={{ padding: '0.4rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-secondary)', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {log.details}
                     </td>
                     <td style={{ padding: '0.4rem 0.75rem' }}>
