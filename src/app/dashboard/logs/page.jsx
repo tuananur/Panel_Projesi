@@ -49,11 +49,11 @@ export default async function LogsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
-                <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase' }}>Kullanıcı</th>
-                <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase' }}>İşlem</th>
-                <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase' }}>Müşteri</th>
-                <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase' }}>Detay</th>
-                <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase' }}>Tarih</th>
+                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Kullanıcı</th>
+                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>İşlem</th>
+                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Müşteri</th>
+                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Detay</th>
+                <th style={{ padding: '0.5rem 0.75rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase' }}>Tarih</th>
               </tr>
             </thead>
             <tbody>
@@ -61,23 +61,20 @@ export default async function LogsPage() {
                 const badge = getActionBadgeColor(log.action);
                 return (
                   <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
-                    <td style={{ padding: '1rem 1.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' }}>
-                          <UserIcon size={14} style={{ opacity: 0.7 }} />
+                    <td style={{ padding: '0.4rem 0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' }}>
+                          <UserIcon size={10} style={{ opacity: 0.7 }} />
                         </div>
-                        <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{log.user.username}</div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{log.user.role}</div>
-                        </div>
+                        <div style={{ fontWeight: 600, fontSize: '0.75rem' }}>{log.user.username}</div>
                       </div>
                     </td>
-                    <td style={{ padding: '1rem 1.5rem' }}>
+                    <td style={{ padding: '0.4rem 0.75rem' }}>
                       <span style={{ 
-                        padding: '0.25rem 0.6rem', 
-                        borderRadius: '6px', 
-                        fontSize: '0.7rem', 
-                        fontWeight: 700, 
+                        padding: '1px 4px', 
+                        borderRadius: '4px', 
+                        fontSize: '0.6rem', 
+                        fontWeight: 800, 
                         background: badge.bg, 
                         color: badge.color,
                         border: `1px solid ${badge.color}20`
@@ -85,23 +82,21 @@ export default async function LogsPage() {
                         {log.action}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem 1.5rem' }}>
+                    <td style={{ padding: '0.4rem 0.75rem' }}>
                       {log.client ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                          <Building2 size={14} style={{ color: 'var(--text-secondary)' }} />
+                        <div style={{ fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px' }}>
                           {log.client.companyName}
                         </div>
                       ) : (
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>-</span>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>-</span>
                       )}
                     </td>
-                    <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '300px' }}>
+                    <td style={{ padding: '0.4rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-secondary)', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {log.details}
                     </td>
-                    <td style={{ padding: '1rem 1.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                        <Clock size={12} />
-                        {new Date(log.createdAt).toLocaleString('tr-TR')}
+                    <td style={{ padding: '0.4rem 0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+                        {new Date(log.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </td>
                   </tr>
