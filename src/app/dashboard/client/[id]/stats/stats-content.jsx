@@ -151,12 +151,7 @@ export default function StatsContent({ client }) {
   });
 
   const accounts = JSON.parse(client?.socialAccounts || '{}');
-  const schedule = JSON.parse(client?.socialSchedule || '{}');
-  const activeSettingsPlatforms = Object.keys(accounts).filter(p => {
-    const hasAccount = accounts[p] && accounts[p].trim() !== '';
-    const hasSchedule = schedule[p] && schedule[p].length > 0;
-    return hasAccount || hasSchedule;
-  });
+  const activeSettingsPlatforms = Object.keys(accounts).filter(p => accounts[p] && accounts[p].trim() !== '');
 
   // Initialize with 0 so they always show up in the chart if in settings
   activeSettingsPlatforms.forEach(p => {
