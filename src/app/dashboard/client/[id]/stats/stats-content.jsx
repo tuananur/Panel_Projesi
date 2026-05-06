@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { 
   BarChart3, TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
-  ChevronRight, BookOpen, X, Calendar, ExternalLink
+  ChevronRight, BookOpen, X, Calendar, ExternalLink, BarChart
 } from 'lucide-react';
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
