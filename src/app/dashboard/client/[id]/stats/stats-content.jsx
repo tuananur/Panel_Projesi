@@ -107,6 +107,26 @@ export default function StatsContent({ client }) {
   const platformStats = {};
   const specialTasksStats = [];
   
+  const socialGrid = {}; 
+  const turkishDaysShort = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+  const platforms = ['X', 'Instagram', 'TikTok', 'YouTube'];
+
+  (client?.tasks || []).filter(t => {
+    if (t.type !== 'SOCIAL') return false;
+    const d = new Date(t.date);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).forEach(t => {
+    const d = new Date(t.date);
+    const week = getWeekOfMonth(d);
+    const dayName = turkishDaysShort[d.getDay()];
+    
+    if (!socialGrid[week]) socialGrid[week] = {};
+    if (!socialGrid[week][dayName]) socialGrid[week][dayName] = {};
+    
+    socialGrid[week][dayName][t.platform] = t.status;
+  });
+
   (client?.tasks || []).filter(t => t.type === 'SOCIAL').forEach(t => {
     if (t.platform) {
       platformStats[t.platform] = (platformStats[t.platform] || 0) + (t.status ? 1 : 0);
@@ -319,8 +339,54 @@ export default function StatsContent({ client }) {
           <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.5rem', opacity: 0.6 }}>Tüm Zamanlar</p>
         </div>
 
-        {/* BÖLÜM 3-6: BOŞ KUTULAR */}
-        {[3, 4, 5, 6].map(i => (
+        {/* BÖLÜM 3: SOSYAL MEDYA TAKİP TABLOSU */}
+        <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px', padding: '0.75rem' }}>
+          <h3 style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.75rem', textAlign: 'center' }}>Sosyal Medya Akışı</h3>
+          
+          <div style={{ flex: 1, overflowY: 'auto', fontSize: '0.6rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', opacity: 0.7 }}>
+                  <th style={{ padding: '0.3rem 0.1rem', textAlign: 'left' }}>H</th>
+                  <th style={{ padding: '0.3rem 0.1rem', textAlign: 'left' }}>G</th>
+                  <th style={{ padding: '0.3rem 0.1rem' }}>X</th>
+                  <th style={{ padding: '0.3rem 0.1rem' }}>I</th>
+                  <th style={{ padding: '0.3rem 0.1rem' }}>T</th>
+                  <th style={{ padding: '0.3rem 0.1rem' }}>Y</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[1, 2, 3, 4].map(week => (
+                  Object.keys(socialGrid[week] || {}).length > 0 ? (
+                    Object.keys(socialGrid[week]).map((day, idx) => (
+                      <tr key={`${week}-${day}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <td style={{ padding: '0.3rem 0.1rem', fontWeight: 700, color: 'var(--accent-primary)' }}>{idx === 0 ? week : ''}</td>
+                        <td style={{ padding: '0.3rem 0.1rem', opacity: 0.8 }}>{day}</td>
+                        {['X', 'Instagram', 'TikTok', 'YouTube'].map(p => (
+                          <td key={p} style={{ padding: '0.3rem 0.1rem', textAlign: 'center' }}>
+                            {socialGrid[week][day][p] !== undefined ? (
+                              socialGrid[week][day][p] ? 
+                                <CheckCircle2 size={10} style={{ color: '#10b981' }} /> : 
+                                <X size={10} style={{ color: '#ef4444' }} />
+                            ) : '-'}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : null
+                ))}
+                {Object.keys(socialGrid).length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem 0', opacity: 0.3 }}>Veri yok</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* BÖLÜM 4-6: BOŞ KUTULAR */}
+        {[4, 5, 6].map(i => (
           <div key={i} className="card" style={{ 
             background: 'var(--bg-secondary)', 
             border: '1px solid var(--border-color)', 
