@@ -23,7 +23,11 @@ export default async function SocialPage({ params }) {
 
   const socialAccounts = JSON.parse(client.socialAccounts || '{}');
   const socialSchedule = JSON.parse(client.socialSchedule || '{}');
-  const activePlatforms = Object.keys(socialAccounts).filter(p => socialAccounts[p]);
+  const activePlatforms = Object.keys(socialAccounts).filter(p => {
+    const hasAccount = socialAccounts[p] && socialAccounts[p].trim() !== '';
+    const hasSchedule = socialSchedule[p] && socialSchedule[p].length > 0;
+    return hasAccount || hasSchedule;
+  });
 
   return (
     <div className="animate-fade-in">
