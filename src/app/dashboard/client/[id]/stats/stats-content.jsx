@@ -307,8 +307,20 @@ export default function StatsContent({ client }) {
           </div>
         </div>
 
-        {/* BÖLÜM 2-6: BOŞ KUTULAR */}
-        {[2, 3, 4, 5, 6].map(i => (
+        {/* BÖLÜM 2: TOPLAM BLOG SAYISI */}
+        <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '400px' }}>
+          <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '50%', marginBottom: '1rem', color: 'var(--accent-primary)' }}>
+            <BarChart size={32} />
+          </div>
+          <h3 style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Toplam Blog</h3>
+          <p style={{ fontSize: '3.5rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+            {client.tasks.filter(t => t.type === 'BLOG').length}
+          </p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.5rem', opacity: 0.6 }}>Tüm Zamanlar</p>
+        </div>
+
+        {/* BÖLÜM 3-6: BOŞ KUTULAR */}
+        {[3, 4, 5, 6].map(i => (
           <div key={i} className="card" style={{ 
             background: 'var(--bg-secondary)', 
             border: '1px solid var(--border-color)', 
