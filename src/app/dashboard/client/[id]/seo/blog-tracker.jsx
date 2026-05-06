@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as LinkIcon, ExternalLink, RefreshCw, Settings2 } from 'lucide-react';
 import { syncBlogsAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -17,12 +17,33 @@ const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', '
 
 export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteType, blogApiUrl }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
   const now = new Date();
   
-  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
-  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const monthParam = searchParams.get('month');
+  const yearParam = searchParams.get('year');
+
+  const [selectedMonth, setSelectedMonth] = useState(monthParam !== null ? parseInt(monthParam) : now.getMonth());
+  const [selectedYear, setSelectedYear] = useState(yearParam !== null ? parseInt(yearParam) : now.getFullYear());
+
+  const updateUrl = (month, year) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('month', month);
+    params.set('year', year);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const handleMonthChange = (index) => {
+    setSelectedMonth(index);
+    updateUrl(index, selectedYear);
+  };
+
+  const handleYearChange = (year) => {
+    setSelectedYear(year);
+    updateUrl(selectedMonth, year);
+  };
   
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [activeTask, setActiveTask] = useState(null);
@@ -276,7 +297,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
           {MONTHS.map((month, index) => (
             <div 
               key={month}
-              onClick={() => setSelectedMonth(index)}
+              onClick={() => handleMonthChange(index)}
               style={{
                 padding: '0.6rem 0.75rem',
                 borderRadius: '8px',
@@ -323,9 +344,9 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
                 Blogları Güncelle
               </button>
             )}
-            <button className="btn" onClick={() => setSelectedYear(selectedYear - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear - 1}</button>
+            <button className="btn" onClick={() => handleYearChange(selectedYear - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear - 1}</button>
             <button className="btn" style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'var(--accent-gradient)', color: 'white' }}>{selectedYear}</button>
-            <button className="btn" onClick={() => setSelectedYear(selectedYear + 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear + 1}</button>
+            <button className="btn" onClick={() => handleYearChange(selectedYear + 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear + 1}</button>
           </div>
         </div>
 

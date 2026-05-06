@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, Clock, X, Plus, Layout } from 'lucide-react';
 import { addTaskAction, updateTaskDetailAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -46,8 +46,21 @@ const PLATFORM_ICONS = {
 
 export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [showModal, setShowModal] = useState(false);
+  
+  const monthParam = searchParams.get('month');
+  const yearParam = searchParams.get('year');
+  const now = new Date();
+  
+  const displayMonth = monthParam !== null ? parseInt(monthParam) : now.getMonth();
+  const displayYear = yearParam !== null ? parseInt(yearParam) : now.getFullYear();
+
+  const MONTH_NAMES = [
+    'OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN', 
+    'TEMMUZ', 'AĞUSTOS', 'EYLÜL', 'EKİM', 'KASIM', 'ARALIK'
+  ];
   
   // Form States
   const [noteInput, setNoteInput] = useState('');
@@ -111,7 +124,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   const totalBlogs = (tasks || []).filter(t => {
     if (t.type !== 'BLOG') return false;
     const d = new Date(t.date);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
   }).length;
 
   const handleSave = async () => {
@@ -214,7 +227,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>{totalBlogs}</span>
-            <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TOPLAM BLOG</span>
+            <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{MONTH_NAMES[displayMonth]} AYI BLOG</span>
           </div>
         </div>
       </div>
