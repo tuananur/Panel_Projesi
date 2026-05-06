@@ -613,104 +613,166 @@ export default function StatsContent({ client }) {
           </div>
         </div>
 
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '400px', padding: '1.5rem' }}>
-          <h3 className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '1.5rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>
-            {currentMonthName} Ayı Performans Özeti
-          </h3>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '450px', padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+          {/* Decorative Background Element */}
+          <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'var(--accent-primary)', opacity: 0.03, borderRadius: '50%', zLines: 0 }}></div>
           
-          <div style={{ display: 'flex', width: '100%', gap: '2rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: '2rem' }}>
+            <h3 className="text-muted" style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+              {currentMonthName} Ayı Performans Özeti
+            </h3>
+            {(() => {
+              const rate = Math.round((completedThisMonth / (currentMonthTasks.length || 1)) * 100);
+              let badge = { text: 'Geliştirilmeli', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' };
+              if (rate >= 90) badge = { text: 'Mükemmel', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' };
+              else if (rate >= 70) badge = { text: 'Çok İyi', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' };
+              else if (rate >= 50) badge = { text: 'İyi', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' };
+              
+              return (
+                <div style={{ padding: '0.3rem 0.75rem', background: badge.bg, color: badge.color, borderRadius: '20px', fontSize: '0.65rem', fontWeight: 800, border: `1px solid ${badge.color}33` }}>
+                  {badge.text}
+                </div>
+              );
+            })()}
+          </div>
+          
+          <div style={{ display: 'flex', width: '100%', gap: '2.5rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
             {/* Left side: Circular Chart */}
-            <div style={{ position: 'relative', width: '140px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-               <svg width="140" height="140" viewBox="0 0 100 100">
+            <div style={{ position: 'relative', width: '150px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+               <svg width="150" height="150" viewBox="0 0 100 100">
+                  <defs>
+                    <linearGradient id="successGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="var(--accent-primary)" />
+                      <stop offset="100%" stopColor="#8b5cf6" />
+                    </linearGradient>
+                  </defs>
                   <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="8" />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent-primary)" strokeWidth="8" 
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="url(#successGradient)" strokeWidth="8" 
                     strokeDasharray={`${(completedThisMonth / (currentMonthTasks.length || 1)) * 264} 264`}
                     strokeLinecap="round"
                     transform="rotate(-90 50 50)"
-                    style={{ transition: 'stroke-dasharray 0.8s ease-out' }}
+                    style={{ transition: 'stroke-dasharray 1s cubic-bezier(0.4, 0, 0.2, 1)' }}
                   />
                </svg>
                <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+                  <span style={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-1px' }}>
                     %{Math.round((completedThisMonth / (currentMonthTasks.length || 1)) * 100)}
                   </span>
-                  <span style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', fontWeight: 800, opacity: 0.6 }}>VERİMLİLİK</span>
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', fontWeight: 800, opacity: 0.6 }}>GENEL BAŞARI</span>
                </div>
             </div>
 
             {/* Right side: Detailed Stats */}
-            <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#10b981' }}>{completedThisMonth}</div>
-                  <div style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', fontWeight: 800 }}>BİTEN GÖREV</div>
+            <div style={{ flex: 1, minWidth: '240px', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.03)', borderRadius: '14px', border: '1px solid rgba(16, 185, 129, 0.08)', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#10b981' }}>{completedThisMonth}</div>
+                  <div style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', fontWeight: 800, marginTop: '2px' }}>TAMAMLANAN</div>
                 </div>
-                <div style={{ padding: '0.75rem', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#f59e0b' }}>{currentMonthTasks.length - completedThisMonth}</div>
-                  <div style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', fontWeight: 800 }}>KALAN GÖREV</div>
+                <div style={{ padding: '1rem', background: 'rgba(245, 158, 11, 0.03)', borderRadius: '14px', border: '1px solid rgba(245, 158, 11, 0.08)', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#f59e0b' }}>{currentMonthTasks.length - completedThisMonth}</div>
+                  <div style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', fontWeight: 800, marginTop: '2px' }}>BEKLEYEN</div>
                 </div>
               </div>
 
               {/* Progress Distribution */}
-              <div style={{ marginTop: '0.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.65rem', fontWeight: 700 }}>
-                  <span className="text-muted">KATEGORİ DAĞILIMI</span>
-                  <span style={{ color: 'var(--accent-primary)' }}>{currentMonthTasks.length} Görev</span>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <span className="text-muted">PLATFORM DAĞILIMI</span>
+                  <span style={{ color: 'var(--accent-primary)' }}>{currentMonthTasks.length} Toplam İş</span>
                 </div>
                 {(() => {
-                  const blogCount = currentMonthTasks.filter(t => t.type === 'BLOG').length;
-                  const socialCount = currentMonthTasks.filter(t => t.type === 'SOCIAL').length;
-                  const blogPct = (blogCount / (currentMonthTasks.length || 1)) * 100;
+                  const blogTasks = currentMonthTasks.filter(t => t.type === 'BLOG');
+                  const socialTasks = currentMonthTasks.filter(t => t.type === 'SOCIAL');
                   
+                  const platformsData = {};
+                  socialTasks.forEach(t => {
+                    const p = t.platform || 'Diğer';
+                    platformsData[p] = (platformsData[p] || 0) + 1;
+                  });
+
+                  const total = currentMonthTasks.length || 1;
+                  const blogPct = (blogTasks.length / total) * 100;
+                  
+                  const PLATFORM_COLORS = {
+                    Instagram: '#e1306c',
+                    YouTube: '#ff0000',
+                    Facebook: '#1877f2',
+                    LinkedIn: '#0a66c2',
+                    X: '#000000',
+                    TikTok: '#00f2ea',
+                    'Diğer': '#8b5cf6'
+                  };
+
                   return (
-                    <div style={{ height: '8px', width: '100%', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', overflow: 'hidden', display: 'flex' }}>
-                      <div style={{ width: `${blogPct}%`, background: 'var(--accent-primary)', height: '100%' }} title="Blog"></div>
-                      <div style={{ flex: 1, background: '#8b5cf6', height: '100%' }} title="Sosyal Medya"></div>
-                    </div>
+                    <>
+                      <div style={{ height: '10px', width: '100%', background: 'rgba(255,255,255,0.03)', borderRadius: '5px', overflow: 'hidden', display: 'flex' }}>
+                        <div style={{ width: `${blogPct}%`, background: 'var(--accent-primary)', height: '100%', transition: 'width 1s' }} title="Blog"></div>
+                        {Object.entries(platformsData).map(([p, count]) => (
+                          <div 
+                            key={p} 
+                            style={{ width: `${(count / total) * 100}%`, background: PLATFORM_COLORS[p] || '#8b5cf6', height: '100%', transition: 'width 1s' }} 
+                            title={p}
+                          ></div>
+                        ))}
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-primary)' }}></div>
+                           <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700 }}>BLOG</span>
+                         </div>
+                         {Object.keys(platformsData).map(p => (
+                           <div key={p} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: PLATFORM_COLORS[p] || '#8b5cf6' }}></div>
+                             <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>{p}</span>
+                           </div>
+                         ))}
+                      </div>
+                    </>
                   );
                 })()}
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-primary)' }}></div>
-                     <span style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', fontWeight: 700 }}>BLOG</span>
-                   </div>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#8b5cf6' }}></div>
-                     <span style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', fontWeight: 700 }}>SOSYAL MEDYA</span>
-                   </div>
-                </div>
               </div>
             </div>
           </div>
 
-          <div style={{ width: '100%', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-             <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 800, marginBottom: '0.25rem' }}>BLOG BAŞARISI</div>
-                {(() => {
-                   const blogs = currentMonthTasks.filter(t => t.type === 'BLOG');
-                   const completed = blogs.filter(t => t.status).length;
-                   const pct = blogs.length > 0 ? Math.round((completed / blogs.length) * 100) : 0;
-                   return (
-                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 900 }}>%{pct}</span>
-                        <span style={{ fontSize: '0.6rem', color: '#10b981', fontWeight: 700 }}>{completed}/{blogs.length}</span>
-                     </div>
-                   );
-                })()}
+          <div style={{ width: '100%', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ padding: '0.5rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '10px' }}>
+                  <TrendingUp size={18} color="var(--accent-primary)" />
+                </div>
+                <div>
+                   <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>BLOG BAŞARISI</div>
+                   {(() => {
+                      const blogs = currentMonthTasks.filter(t => t.type === 'BLOG');
+                      const completed = blogs.filter(t => t.status).length;
+                      const pct = blogs.length > 0 ? Math.round((completed / blogs.length) * 100) : 0;
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                           <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-primary)' }}>%{pct}</span>
+                           <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700, padding: '1px 4px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '4px' }}>{completed}/{blogs.length}</span>
+                        </div>
+                      );
+                   })()}
+                </div>
              </div>
-             <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 800, marginBottom: '0.25rem' }}>SOSYAL MEDYA BAŞARISI</div>
-                {(() => {
-                   const socials = currentMonthTasks.filter(t => t.type === 'SOCIAL');
-                   const completed = socials.filter(t => t.status).length;
-                   const pct = socials.length > 0 ? Math.round((completed / socials.length) * 100) : 0;
-                   return (
-                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 900 }}>%{pct}</span>
-                        <span style={{ fontSize: '0.6rem', color: '#8b5cf6', fontWeight: 700 }}>{completed}/{socials.length}</span>
-                     </div>
-                   );
-                })()}
+             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ padding: '0.5rem', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '10px' }}>
+                  <TrendingUp size={18} color="#8b5cf6" />
+                </div>
+                <div>
+                   <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>SOSYAL MEDYA BAŞARISI</div>
+                   {(() => {
+                      const socials = currentMonthTasks.filter(t => t.type === 'SOCIAL');
+                      const completed = socials.filter(t => t.status).length;
+                      const pct = socials.length > 0 ? Math.round((completed / socials.length) * 100) : 0;
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                           <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-primary)' }}>%{pct}</span>
+                           <span style={{ fontSize: '0.65rem', color: '#8b5cf6', fontWeight: 700, padding: '1px 4px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '4px' }}>{completed}/{socials.length}</span>
+                        </div>
+                      );
+                   })()}
+                </div>
              </div>
           </div>
         </div>
