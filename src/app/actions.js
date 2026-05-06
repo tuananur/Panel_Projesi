@@ -32,7 +32,14 @@ export async function loginAction(formData) {
     return { error: 'Kullanıcı adı gerekli.' };
   }
 
-  const user = await prisma.user.findUnique({ where: { username } });
+  const user = await prisma.user.findFirst({
+    where: {
+      username: {
+        equals: username,
+        mode: 'insensitive'
+      }
+    }
+  });
 
   if (!user) {
     return { error: 'Geçersiz kullanıcı adı veya şifre.' };
@@ -95,6 +102,19 @@ export async function createUserAction(formData) {
   }
 
   try {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: username,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (existingUser) {
+      return { error: 'Bu kullanıcı adı zaten kullanımda.' };
+    }
+
     await prisma.user.create({
       data: {
         username,
@@ -183,6 +203,20 @@ export async function updateUserAction(formData) {
   if (!id || !username || !role) return { error: 'Gerekli alanlar eksik.' };
 
   try {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: username,
+          mode: 'insensitive'
+        },
+        NOT: { id }
+      }
+    });
+
+    if (existingUser) {
+      return { error: 'Bu kullanıcı adı başka bir kullanıcı tarafından kullanılıyor.' };
+    }
+
     await prisma.user.update({
       where: { id },
       data: { username, role }
