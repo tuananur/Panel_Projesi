@@ -735,7 +735,7 @@ export default function StatsContent({ client }) {
       {/* Blog Detail Modal */}
       {selectedBlog && (
         <div className="modal-backdrop" onClick={() => setSelectedBlog(null)}>
-          <div className="modal-content blog-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '800px', width: '90%' }}>
+          <div className="modal-content blog-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%', padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', color: 'var(--accent-primary)' }}>
@@ -756,7 +756,7 @@ export default function StatsContent({ client }) {
             <div style={{ 
               maxHeight: '60vh', 
               overflowY: 'auto', 
-              padding: '1.5rem', 
+              padding: '1rem', 
               background: 'var(--bg-primary)', 
               borderRadius: '12px',
               border: '1px solid var(--border-color)',
