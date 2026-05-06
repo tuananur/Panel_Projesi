@@ -50,9 +50,7 @@ export default async function ClientDetailLayout({ children, params }) {
   const client = await prisma.client.findUnique({
     where: { id: parseInt(id) },
     include: {
-      tasks: {
-        where: { type: 'SOCIAL' }
-      }
+      tasks: true
     }
   });
 

@@ -93,7 +93,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
 
   const weeklyCompleted = tasks.filter(t => {
     const d = new Date(t.date);
-    return d >= startOfWeek && d <= endOfWeek && t.status === true;
+    return t.type === 'SOCIAL' && d >= startOfWeek && d <= endOfWeek && t.status === true;
   }).length;
 
   let totalTarget = 0;
@@ -106,7 +106,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   const percentage = displayTotal > 0 ? Math.round((weeklyCompleted / displayTotal) * 100) : 0;
 
   // --- Bekleyen görevler ---
-  const allPending = tasks.filter(t => !t.status).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const allPending = tasks.filter(t => t.type === 'SOCIAL' && !t.status).sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const totalBlogs = (tasks || []).filter(t => t.type === 'BLOG').length;
 
