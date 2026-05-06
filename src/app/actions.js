@@ -532,3 +532,32 @@ export async function bulkDeleteDayAction(formData) {
     return { error: 'Toplu silme başarısız.' };
   }
 }
+
+export async function searchTasksAction(query) {
+  const session = await getSession();
+  if (!session) return { error: 'Yetkisiz erişim.' };
+  if (!query || query.length < 2) return { tasks: [] };
+
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        OR: [
+          { note: { contains: query, mode: 'insensitive' } },
+          { content: { contains: query, mode: 'insensitive' } }
+        ]
+      },
+      include: {
+        client: {
+          select: { id: true, companyName: true }
+        }
+      },
+      orderBy: { date: 'desc' },
+      take: 20
+    });
+
+    return { tasks };
+  } catch (error) {
+    console.error('Global search error:', error);
+    return { error: 'Arama sırasında bir hata oluştu.' };
+  }
+}

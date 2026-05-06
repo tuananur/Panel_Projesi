@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import Link from 'next/link';
 import { Phone, Mail, MessageCircle, ChevronRight } from 'lucide-react';
+import GlobalSearch from '@/app/components/global-search';
 
 export const metadata = {
   title: 'Gösterge Paneli | Agency Dashboard',
@@ -18,10 +19,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="animate-fade-in">
-      <header style={{ marginBottom: '2.5rem' }}>
+      <header style={{ marginBottom: '2rem' }}>
         <h1 className="heading-1">Hoş Geldiniz, {session.username}</h1>
         <p className="text-muted">Ajansınızın genel durumunu ve müşterilerinizi buradan takip edebilirsiniz.</p>
       </header>
+
+      <GlobalSearch />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
