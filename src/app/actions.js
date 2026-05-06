@@ -275,6 +275,7 @@ export async function updateTaskDetailAction(formData) {
   const taskId = parseInt(formData.get('taskId'));
   const link = formData.get('link');
   const note = formData.get('note');
+  const platform = formData.get('platform') || null;
   const content = formData.get('content') || null;
 
   try {
@@ -310,7 +311,9 @@ export async function addTaskAction(formData) {
   const date = new Date(formData.get('date'));
   const platform = formData.get('platform') || null;
   const link = formData.get('link') || null;
+  const note = formData.get('note') || (type === 'BLOG' ? 'Manuel Blog' : 'Yeni Görev');
   const content = formData.get('content') || null;
+  const status = formData.get('status') === 'true';
 
   try {
     await prisma.task.create({
@@ -322,7 +325,7 @@ export async function addTaskAction(formData) {
         link,
         note,
         content,
-        status: false
+        status
       }
     });
     const client = await prisma.client.findUnique({ where: { id: clientId } });
