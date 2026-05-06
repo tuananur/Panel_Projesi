@@ -487,3 +487,48 @@ export async function removeScheduleDayAction(formData) {
     return { error: 'Takvim güncellenemedi.' };
   }
 }
+
+export async function bulkDeleteDayAction(formData) {
+  const clientId = parseInt(formData.get('clientId'));
+  const dateStr = formData.get('date');
+  const platformsToHide = JSON.parse(formData.get('platformsToHide') || '[]');
+
+  try {
+    const targetDate = new Date(dateStr);
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // 1. Delete all existing tasks for this day
+    await prisma.task.deleteMany({
+      where: {
+        clientId,
+        type: 'SOCIAL',
+        date: {
+          gte: startOfDay,
+          lte: endOfDay
+        }
+      }
+    });
+
+    // 2. Create __DELETED__ tasks for ghost platforms
+    for (const p of platformsToHide) {
+      await prisma.task.create({
+        data: {
+          clientId,
+          type: 'SOCIAL',
+          date: targetDate,
+          platform: p,
+          note: '__DELETED__',
+          status: false
+        }
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Bulk delete error:', error);
+    return { error: 'Toplu silme başarısız.' };
+  }
+}

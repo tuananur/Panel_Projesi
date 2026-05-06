@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction, removeScheduleDayAction } from '@/app/actions';
+import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction, removeScheduleDayAction, bulkDeleteDayAction } from '@/app/actions';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Play, Link as LinkIcon, Calendar as CalendarIcon } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -285,14 +285,34 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
           }}>
             {day}
           </span>
-          {isAdmin && (
-            <button 
-              onClick={() => openModal(day)}
-              style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', padding: '2px' }}
-            >
-              <Plus size={10} />
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {isAdmin && (dayTasks.length > 0 || scheduledOnly.length > 0) && (
+              <Trash2 
+                size={14} 
+                style={{ cursor: 'pointer', color: 'rgba(239, 68, 68, 0.4)' }} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm(`${day} ${new Date(year, month, day).toLocaleDateString('tr-TR', { month: 'long' })} tarihindeki TÜM görevleri temizlemek istediğinize emin misiniz?`)) {
+                    startTransition(async () => {
+                      const formData = new FormData();
+                      formData.append('clientId', clientId);
+                      formData.append('date', new Date(year, month, day, 12).toISOString());
+                      formData.append('platformsToHide', JSON.stringify(scheduledOnly));
+                      await bulkDeleteDayAction(formData);
+                      router.refresh();
+                    });
+                  }
+                }}
+                className="hover-danger"
+                title="Günü Temizle"
+              />
+            )}
+            <Plus 
+              size={14} 
+              style={{ cursor: 'pointer', color: 'var(--accent-primary)' }} 
+              onClick={() => openModal(day)} 
+            />
+          </div>
         </div>
 
         {specialDayName && (
