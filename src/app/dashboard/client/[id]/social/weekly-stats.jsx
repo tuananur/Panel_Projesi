@@ -100,10 +100,35 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
     return t.type === 'SOCIAL' && d.getMonth() === displayMonth && d.getFullYear() === displayYear;
   });
 
-  const socialCompleted = socialTasksInMonth.filter(t => t.status === true).length;
-  const socialPending = socialTasksInMonth.filter(t => t.status === false).length;
+  // Calculate total scheduled slots in this month
+  let totalScheduled = 0;
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   
-  const displayTotal = socialCompleted + socialPending;
+  platforms.forEach(platform => {
+    const platformSchedule = schedule[platform] || [];
+    platformSchedule.forEach(dayName => {
+      const targetDayIndex = daysOfWeek.indexOf(dayName);
+      if (targetDayIndex === -1) return;
+      
+      // Count occurrences of targetDayIndex in displayMonth/displayYear
+      let count = 0;
+      const d = new Date(displayYear, displayMonth, 1);
+      while (d.getMonth() === displayMonth) {
+        if (d.getDay() === targetDayIndex) count++;
+        d.setDate(d.getDate() + 1);
+      }
+      totalScheduled += count;
+    });
+  });
+
+  const deletedTasks = socialTasksInMonth.filter(t => t.note === '__DELETED__').length;
+  const actualTarget = Math.max(0, totalScheduled - deletedTasks);
+  
+  const socialCompleted = socialTasksInMonth.filter(t => t.status === true).length;
+  const socialTasksCount = socialTasksInMonth.filter(t => t.note !== '__DELETED__').length;
+  
+  const displayTotal = Math.max(actualTarget, socialTasksCount);
+  const socialPending = Math.max(0, displayTotal - socialCompleted);
   const percentage = displayTotal > 0 ? Math.round((socialCompleted / displayTotal) * 100) : 0;
 
   // --- Bekleyen görevler ---
