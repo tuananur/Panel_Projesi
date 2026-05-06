@@ -539,12 +539,54 @@ export async function searchTasksAction(query) {
   if (!query || query.length < 2) return { tasks: [] };
 
   try {
+    const orConditions = [
+      { note: { contains: query, mode: 'insensitive' } },
+      { content: { contains: query, mode: 'insensitive' } }
+    ];
+
+    // Akıllı Tarih Algılama
+    const datePattern = /(\d{1,2})[.\/-](\d{1,2})[.\/-]?(\d{2,4})?/;
+    const monthNames = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
+    const lowerQuery = query.toLowerCase();
+    
+    let searchDate = null;
+    
+    // Format 1: 19.05 or 19.05.2024
+    const dateMatch = query.match(datePattern);
+    if (dateMatch) {
+      const day = parseInt(dateMatch[1]);
+      const month = parseInt(dateMatch[2]) - 1;
+      const year = dateMatch[3] ? (dateMatch[3].length === 2 ? 2000 + parseInt(dateMatch[3]) : parseInt(dateMatch[3])) : new Date().getFullYear();
+      searchDate = new Date(year, month, day);
+    } 
+    // Format 2: 19 Mayıs
+    else {
+      const monthIndex = monthNames.findIndex(m => lowerQuery.includes(m));
+      if (monthIndex !== -1) {
+        const dayMatch = lowerQuery.match(/(\d{1,2})/);
+        const day = dayMatch ? parseInt(dayMatch[1]) : 1;
+        const year = new Date().getFullYear();
+        searchDate = new Date(year, monthIndex, day);
+      }
+    }
+
+    if (searchDate && !isNaN(searchDate.getTime())) {
+      const startOfDay = new Date(searchDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(searchDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      orConditions.push({
+        date: {
+          gte: startOfDay,
+          lte: endOfDay
+        }
+      });
+    }
+
     const tasks = await prisma.task.findMany({
       where: {
-        OR: [
-          { note: { contains: query, mode: 'insensitive' } },
-          { content: { contains: query, mode: 'insensitive' } }
-        ]
+        OR: orConditions
       },
       include: {
         client: {
