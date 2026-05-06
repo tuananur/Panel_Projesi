@@ -557,17 +557,27 @@ export default function StatsContent({ client }) {
               return specialTasksStats.map(task => (
                 <div key={task.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                    <span style={{ 
-                      fontWeight: 600, 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '0.4rem',
-                      color: task.status ? '#10b981' : 'var(--text-primary)'
-                    }}>
-                      {PLATFORM_ICONS['Özel']} 
-                      {new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })} {task.note || 'Özel Görev'}
-                      {task.status && <CheckCircle size={14} />}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <span style={{ 
+                        fontWeight: 600, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.4rem',
+                        color: task.status ? '#10b981' : 'var(--text-primary)'
+                      }}>
+                        {PLATFORM_ICONS['Özel']} 
+                        {new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })} {task.note || 'Özel Görev'}
+                        {task.status && <CheckCircle size={14} />}
+                      </span>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setDeleteTaskId(task.id); setIsDeleteDialogOpen(true); }}
+                        style={{ background: 'none', border: 'none', color: 'rgba(239, 68, 68, 0.4)', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
+                        title="Görevi Sil"
+                        className="hover-danger"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                     <span className="text-muted">{task.status ? 'Paylaşıldı' : 'Bekliyor'}</span>
                   </div>
                   <div style={{ height: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
