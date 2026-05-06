@@ -92,9 +92,9 @@ export default function StatsContent({ client }) {
 
   const PLATFORMS_LIST = ['Instagram', 'YouTube', 'Facebook', 'LinkedIn', 'X', 'TikTok'];
 
-  const totalTasks = client.tasks.length;
-  const completedTasks = client.tasks.filter(t => t.status);
-  const pendingTasks = client.tasks.filter(t => !t.status);
+  const totalTasks = (client?.tasks || []).length;
+  const completedTasks = (client?.tasks || []).filter(t => t.status);
+  const pendingTasks = (client?.tasks || []).filter(t => !t.status);
   const successRate = totalTasks > 0 ? Math.round((completedTasks.length / totalTasks) * 100) : 0;
 
   const now = new Date();
@@ -107,7 +107,7 @@ export default function StatsContent({ client }) {
   const platformStats = {};
   const specialTasksStats = [];
   
-  client.tasks.filter(t => t.type === 'SOCIAL').forEach(t => {
+  (client?.tasks || []).filter(t => t.type === 'SOCIAL').forEach(t => {
     if (t.platform) {
       platformStats[t.platform] = (platformStats[t.platform] || 0) + (t.status ? 1 : 0);
     } else {
@@ -314,7 +314,7 @@ export default function StatsContent({ client }) {
           </div>
           <h3 style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Toplam Blog</h3>
           <p style={{ fontSize: '3.5rem', fontWeight: 900, color: 'var(--text-primary)' }}>
-            {client.tasks.filter(t => t.type === 'BLOG').length}
+            {(client?.tasks || []).filter(t => t.type === 'BLOG').length}
           </p>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.5rem', opacity: 0.6 }}>Tüm Zamanlar</p>
         </div>
