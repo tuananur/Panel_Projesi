@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
-import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction } from '@/app/actions';
+import { toggleTaskAction, addTaskAction, deleteTaskAction, updateTaskDetailAction, removeScheduleDayAction } from '@/app/actions';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Play, Link as LinkIcon, Calendar as CalendarIcon } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -366,7 +366,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                     )}
                   </div>
                   {isAdmin && (
-                    <Trash2 size={8} style={{ cursor: 'pointer', color: '#ef4444', flexShrink: 0 }} onClick={() => setDeleteTaskId(task.id)} />
+                    <Trash2 size={12} style={{ cursor: 'pointer', color: '#ef4444', flexShrink: 0, opacity: 0.6 }} onClick={() => setDeleteTaskId(task.id)} className="hover-opacity-100" />
                   )}
                 </div>
               )}
@@ -376,21 +376,46 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
           {scheduledOnly.map(p => (
             <div 
               key={p} 
-              onClick={() => openModal(day, p)}
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '4px', 
+                justifyContent: 'space-between',
                 padding: '4px 6px', 
                 borderRadius: '4px', 
                 background: 'rgba(255,255,255,0.02)', 
                 border: '1px solid rgba(255,255,255,0.05)',
-                cursor: 'pointer',
                 opacity: 0.5
               }}
+              className="ghost-task-hover"
             >
-              <Circle size={10} color="var(--text-secondary)" />
-              <span style={{ fontSize: '0.55rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{p}</span>
+              <div 
+                onClick={() => openModal(day, p)}
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', flex: 1 }}
+              >
+                <Circle size={10} color="var(--text-secondary)" />
+                <span style={{ fontSize: '0.55rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{p}</span>
+              </div>
+              {isAdmin && (
+                <Trash2 
+                  size={10} 
+                  style={{ cursor: 'pointer', color: 'rgba(239, 68, 68, 0.4)' }} 
+                  onClick={() => {
+                    const date = new Date(year, month, day);
+                    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                    if (confirm(`${p} platformunu tüm ${date.toLocaleDateString('tr-TR', { weekday: 'long' })} günlerinden kaldırmak istediğinize emin misiniz?`)) {
+                      startTransition(async () => {
+                        const formData = new FormData();
+                        formData.append('clientId', clientId);
+                        formData.append('platform', p);
+                        formData.append('dayName', dayName);
+                        await removeScheduleDayAction(formData);
+                        router.refresh();
+                      });
+                    }
+                  }}
+                  title="Plandan Kaldır"
+                />
+              )}
             </div>
           ))}
         </div>

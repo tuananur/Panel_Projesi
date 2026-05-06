@@ -464,3 +464,26 @@ export async function syncBlogsAction(clientId) {
     return { error: 'Bloglar senkronize edilirken bir hata oluştu.' };
   }
 }
+
+export async function removeScheduleDayAction(formData) {
+  const clientId = parseInt(formData.get('clientId'));
+  const platform = formData.get('platform');
+  const dayName = formData.get('dayName');
+
+  try {
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    const schedule = JSON.parse(client.socialSchedule || '{}');
+    
+    if (schedule[platform]) {
+      schedule[platform] = schedule[platform].filter(d => d !== dayName);
+      await prisma.client.update({
+        where: { id: clientId },
+        data: { socialSchedule: JSON.stringify(schedule) }
+      });
+      await logActivity('UPDATE', 'CLIENT', `${client.companyName} için ${platform} takviminden ${dayName} günü kaldırıldı.`, clientId);
+    }
+    return { success: true };
+  } catch (error) {
+    return { error: 'Takvim güncellenemedi.' };
+  }
+}
