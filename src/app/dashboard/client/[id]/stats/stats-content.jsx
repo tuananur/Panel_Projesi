@@ -564,20 +564,44 @@ export default function StatsContent({ client }) {
           </div>
         </div>
 
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Aylık Verimlilik</h3>
-          <div style={{ position: 'relative', width: '150px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-             <svg width="150" height="150" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-                <circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent-primary)" strokeWidth="8" 
-                  strokeDasharray={`${(completedThisMonth / (currentMonthTasks.length || 1)) * 283} 283`}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: '350px' }}>
+          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1.5rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
+            {currentMonthName} Ayı Verimliliği
+          </h3>
+          <div style={{ position: 'relative', width: '160px', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             <svg width="160" height="160" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="8" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent-primary)" strokeWidth="8" 
+                  strokeDasharray={`${(completedThisMonth / (currentMonthTasks.length || 1)) * 264} 264`}
+                  strokeLinecap="round"
                   transform="rotate(-90 50 50)"
-                  style={{ transition: 'stroke-dasharray 0.5s ease' }}
+                  style={{ transition: 'stroke-dasharray 0.8s ease-out' }}
                 />
              </svg>
-             <div style={{ position: 'absolute', fontSize: '1.5rem', fontWeight: 700 }}>{completedThisMonth}</div>
+             <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span style={{ fontSize: '2.25rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+                  %{Math.round((completedThisMonth / (currentMonthTasks.length || 1)) * 100)}
+                </span>
+                <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700, opacity: 0.6 }}>BAŞARI</span>
+             </div>
           </div>
-          <p style={{ marginTop: '1rem', fontSize: '0.85rem', fontWeight: 500 }}>{now.toLocaleString('tr-TR', { month: 'long' })} Ayı Verimliliği</p>
+          
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '2rem', padding: '1rem 1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
+             <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{currentMonthTasks.length}</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '2px' }}>TOPLAM</div>
+             </div>
+             <div style={{ width: '1px', backgroundColor: 'var(--border-color)', margin: '4px 0' }}></div>
+             <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10b981' }}>{completedThisMonth}</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '2px' }}>BİTEN</div>
+             </div>
+             <div style={{ width: '1px', backgroundColor: 'var(--border-color)', margin: '4px 0' }}></div>
+             <div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f59e0b' }}>{currentMonthTasks.length - completedThisMonth}</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '2px' }}>KALAN</div>
+             </div>
+          </div>
         </div>
       </div>
 
