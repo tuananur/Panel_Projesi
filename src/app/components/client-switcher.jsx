@@ -90,12 +90,14 @@ export default function ClientSwitcher({ currentClient, allClients }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 autoFocus
+                className="client-search-input"
                 style={{ 
                   width: '100%', 
                   padding: '0.5rem 0.75rem 0.5rem 2.25rem', 
                   borderRadius: '8px', 
                   border: '1px solid var(--border-color)', 
                   background: 'var(--bg-primary)', 
+                  color: 'var(--text-primary)',
                   fontSize: '0.85rem' 
                 }}
               />
@@ -156,6 +158,16 @@ export default function ClientSwitcher({ currentClient, allClients }) {
         }
         .client-option-hover:hover {
           background: ${isOpen ? '' : 'rgba(255,255,255,0.05)'};
+        }
+        .client-search-input:focus {
+          outline: none;
+          border-color: var(--accent-primary) !important;
+          animation: searchPulse 1.5s infinite ease-in-out;
+        }
+        @keyframes searchPulse {
+          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+          50% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.1); }
+          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
         }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(10px); }
