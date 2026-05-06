@@ -246,7 +246,7 @@ export default function StatsContent({ client }) {
         <BarChart3 size={24} className="text-muted" /> Performans Verileri
       </h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1rem', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '1rem' }} className="main-stats-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(160px, 1fr))', gap: '1rem', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '1rem' }} className="main-stats-grid">
         {/* BÖLÜM 1: AYLIK BLOG PLANI */}
         <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -273,21 +273,24 @@ export default function StatsContent({ client }) {
                   <span>{weekNum}.H</span>
                   {blogsByWeek[weekNum].length > 0 && <span style={{ color: 'var(--accent-primary)' }}>{blogsByWeek[weekNum].length}</span>}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1, overflow: 'hidden' }}>
-                  {blogsByWeek[weekNum].length > 0 ? blogsByWeek[weekNum].slice(0, 2).map(blog => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1, overflow: 'hidden', maxWeight: '100%' }}>
+                  {blogsByWeek[weekNum].length > 0 ? blogsByWeek[weekNum].slice(0, 4).map(blog => (
                     <div 
                       key={blog.id}
                       onClick={() => setSelectedBlog(blog)}
+                      title={blog.note}
                       style={{ 
-                        padding: '0.25rem 0.4rem', 
+                        padding: '0.2rem 0.4rem', 
                         background: 'var(--bg-secondary)', 
                         borderRadius: '4px', 
-                        fontSize: '0.6rem', 
+                        fontSize: '0.55rem', 
                         cursor: 'pointer',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        border: '1px solid transparent'
+                        border: '1px solid transparent',
+                        width: '100%',
+                        maxWidth: '85px'
                       }}
                       className="blog-item-compact"
                     >
