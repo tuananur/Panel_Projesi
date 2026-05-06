@@ -153,7 +153,12 @@ export default function StatsContent({ client }) {
   const accounts = JSON.parse(client?.socialAccounts || '{}');
   const activeSettingsPlatforms = Object.keys(accounts).filter(p => accounts[p] && accounts[p].trim() !== '');
 
-  (client?.tasks || []).filter(t => t.type === 'SOCIAL').forEach(t => {
+  (client?.tasks || []).filter(t => {
+    if (t.type !== 'SOCIAL') return false;
+    const d = new Date(t.date);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).forEach(t => {
     if (t.platform && activeSettingsPlatforms.includes(t.platform)) {
       platformStats[t.platform] = (platformStats[t.platform] || 0) + (t.status ? 1 : 0);
     } else {
