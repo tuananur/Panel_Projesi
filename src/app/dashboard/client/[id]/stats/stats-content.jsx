@@ -109,7 +109,18 @@ export default function StatsContent({ client }) {
   
   const socialGrid = {}; 
   const turkishDaysShort = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
-  const platforms = ['X', 'Instagram', 'TikTok', 'YouTube'];
+  
+  let activePlatforms = [];
+  try {
+    const accounts = JSON.parse(client?.socialAccounts || '{}');
+    activePlatforms = Object.keys(accounts).filter(p => accounts[p] && accounts[p].trim() !== '');
+  } catch (e) {
+    activePlatforms = ['X', 'Instagram', 'TikTok', 'YouTube']; // Fallback
+  }
+  
+  if (activePlatforms.length === 0) {
+    activePlatforms = ['X', 'Instagram', 'TikTok', 'YouTube'];
+  }
 
   (client?.tasks || []).filter(t => {
     if (t.type !== 'SOCIAL') return false;
@@ -349,10 +360,13 @@ export default function StatsContent({ client }) {
                 <tr style={{ borderBottom: '1px solid var(--border-color)', opacity: 0.7 }}>
                   <th style={{ padding: '0.3rem 0.1rem', textAlign: 'left' }}>H</th>
                   <th style={{ padding: '0.3rem 0.1rem', textAlign: 'left' }}>G</th>
-                  <th style={{ padding: '0.3rem 0.1rem' }}>X</th>
-                  <th style={{ padding: '0.3rem 0.1rem' }}>I</th>
-                  <th style={{ padding: '0.3rem 0.1rem' }}>T</th>
-                  <th style={{ padding: '0.3rem 0.1rem' }}>Y</th>
+                  {activePlatforms.map(p => (
+                    <th key={p} style={{ padding: '0.3rem 0.1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        {PLATFORM_ICONS[p] || p[0]}
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -362,7 +376,7 @@ export default function StatsContent({ client }) {
                       <tr key={`${week}-${day}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                         <td style={{ padding: '0.3rem 0.1rem', fontWeight: 700, color: 'var(--accent-primary)' }}>{idx === 0 ? week : ''}</td>
                         <td style={{ padding: '0.3rem 0.1rem', opacity: 0.8 }}>{day}</td>
-                        {['X', 'Instagram', 'TikTok', 'YouTube'].map(p => (
+                        {activePlatforms.map(p => (
                           <td key={p} style={{ padding: '0.3rem 0.1rem', textAlign: 'center' }}>
                             {socialGrid[week][day][p] !== undefined ? (
                               socialGrid[week][day][p] ? 
@@ -377,7 +391,7 @@ export default function StatsContent({ client }) {
                 ))}
                 {Object.keys(socialGrid).length === 0 && (
                   <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem 0', opacity: 0.3 }}>Veri yok</td>
+                    <td colSpan={activePlatforms.length + 2} style={{ textAlign: 'center', padding: '2rem 0', opacity: 0.3 }}>Veri yok</td>
                   </tr>
                 )}
               </tbody>
