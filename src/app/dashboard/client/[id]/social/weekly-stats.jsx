@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Clock, X, Plus } from 'lucide-react';
+import { CheckCircle2, Clock, X, Plus, BookOpen } from 'lucide-react';
 import { addTaskAction, updateTaskDetailAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 
