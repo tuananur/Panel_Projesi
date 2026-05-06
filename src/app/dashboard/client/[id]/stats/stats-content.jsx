@@ -2,12 +2,11 @@
 
 import { useState, useTransition, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import { 
   TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
-  ChevronRight, Layout, X, Calendar as CalendarIcon, ExternalLink
+  ChevronRight, Layout, X, Calendar as CalendarIcon, ExternalLink,
+  BookOpen
 } from 'lucide-react';
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -74,11 +73,19 @@ export default function StatsContent({ client }) {
     setIsGeneratingPDF(true);
     
     try {
+      // Dynamic imports to avoid SSR issues
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
       const canvas = await html2canvas(statsRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#0f172a', // Match dashboard bg
-        logging: false
+        backgroundColor: '#0f172a',
+        logging: false,
+        onclone: (clonedDoc) => {
+           // Ensure colors are correct in the clone
+           clonedDoc.body.style.background = '#0f172a';
+        }
       });
       
       const imgData = canvas.toDataURL('image/png');
