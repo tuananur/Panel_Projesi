@@ -184,8 +184,9 @@ export default function GlobalSearch() {
                   </div>
                   <ChevronRight size={16} style={{ color: 'var(--text-secondary)', opacity: 0.5 }} />
                 </Link>
-              ))}
-            </div>
+              );
+            })}
+          </div>
           ) : !isSearching && (
             <div style={{ padding: '3rem 2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
               <div style={{ marginBottom: '1rem', opacity: 0.2 }}>
