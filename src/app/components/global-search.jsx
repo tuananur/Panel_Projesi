@@ -124,24 +124,31 @@ export default function GlobalSearch() {
               <div style={{ padding: '0.75rem 1rem', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
                 Bulunan Sonuçlar ({results.length})
               </div>
-              {results.map((task) => (
-                <Link 
-                  key={task.id} 
-                  href={`/dashboard/client/${task.client.id}/stats`}
-                  onClick={() => setIsOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    padding: '1rem',
-                    borderRadius: '12px',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    transition: 'all 0.2s',
-                    border: '1px solid transparent'
-                  }}
-                  className="search-result-item"
-                >
+              {results.map((task) => {
+                const taskDate = new Date(task.date);
+                const month = taskDate.getMonth() + 1;
+                const year = taskDate.getFullYear();
+                const targetPage = task.type === 'BLOG' ? 'seo' : 'social';
+                const href = `/dashboard/client/${task.client.id}/${targetPage}?month=${month}&year=${year}`;
+
+                return (
+                  <Link 
+                    key={task.id} 
+                    href={href}
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      padding: '1rem',
+                      borderRadius: '12px',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      transition: 'all 0.2s',
+                      border: '1px solid transparent'
+                    }}
+                    className="search-result-item"
+                  >
                   <div style={{
                     width: '40px',
                     height: '40px',
