@@ -277,11 +277,12 @@ export async function updateTaskDetailAction(formData) {
   const note = formData.get('note');
   const platform = formData.get('platform') || null;
   const content = formData.get('content') || null;
+  const status = formData.get('status') === 'true';
 
   try {
     await prisma.task.update({
       where: { id: taskId },
-      data: { link, note, platform, content }
+      data: { link, note, platform, content, status }
     });
     const task = await prisma.task.findUnique({ where: { id: taskId }, include: { client: true } });
     await logActivity('UPDATE', 'TASK', `${task?.client.companyName} için ${task?.platform || 'Özel'} görevinin detayları güncellendi.`, task?.clientId);
