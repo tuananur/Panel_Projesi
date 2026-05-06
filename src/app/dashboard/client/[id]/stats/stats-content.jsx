@@ -246,63 +246,81 @@ export default function StatsContent({ client }) {
         <BarChart3 size={24} className="text-muted" /> Performans Verileri
       </h2>
 
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '3.5rem', fontWeight: 800, color: 'var(--text-primary)', opacity: 0.1, position: 'absolute', left: '50%', transform: 'translateX(-50%)', top: '100px', zIndex: -1, pointerEvents: 'none', textTransform: 'uppercase' }}>
-          {currentMonthName}
-        </h1>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', background: 'var(--bg-secondary)', padding: '0.5rem 1.5rem', borderRadius: '50px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
-          <Calendar size={18} className="text-accent" />
-          <span style={{ fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.9rem' }}>{currentMonthName} BLOG PLANI</span>
-        </div>
-      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }} className="main-stats-grid">
+        {/* BÖLÜM 1: AYLIK BLOG PLANI */}
+        <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Blog Planı</h3>
+            <BookOpen size={16} className="text-accent" />
+          </div>
+          
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)', opacity: 0.2, textTransform: 'uppercase' }}>{currentMonthName}</span>
+          </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }} className="blog-calendar-grid">
-        {[1, 2, 3, 4, 5, 6].map(weekNum => (
-          <div key={weekNum} className="card" style={{ 
-            minHeight: '180px', 
-            background: 'var(--bg-secondary)', 
-            border: '1px solid var(--border-color)',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '1.25rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{weekNum}. HAFTA</span>
-              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700 }}>
-                {blogsByWeek[weekNum].length}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '0.75rem', flex: 1 }}>
+            {[1, 2, 3, 4].map(weekNum => (
+              <div key={weekNum} style={{ 
+                background: 'var(--bg-primary)', 
+                borderRadius: '12px', 
+                padding: '0.75rem', 
+                border: '1px solid var(--border-color)',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{weekNum}. HAFTA</span>
+                  {blogsByWeek[weekNum].length > 0 && <span style={{ color: 'var(--accent-primary)' }}>{blogsByWeek[weekNum].length}</span>}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1, overflow: 'hidden' }}>
+                  {blogsByWeek[weekNum].length > 0 ? blogsByWeek[weekNum].slice(0, 3).map(blog => (
+                    <div 
+                      key={blog.id}
+                      onClick={() => setSelectedBlog(blog)}
+                      style={{ 
+                        padding: '0.4rem 0.6rem', 
+                        background: 'var(--bg-secondary)', 
+                        borderRadius: '6px', 
+                        fontSize: '0.7rem', 
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        border: '1px solid transparent',
+                        transition: 'all 0.2s'
+                      }}
+                      className="blog-item-compact"
+                    >
+                      {blog.note}
+                    </div>
+                  )) : (
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2, fontSize: '0.6rem', border: '1px dashed var(--border-color)', borderRadius: '6px' }}>
+                      -
+                    </div>
+                  )}
+                  {blogsByWeek[weekNum].length > 3 && (
+                    <div style={{ fontSize: '0.6rem', textAlign: 'center', opacity: 0.5 }}>+{blogsByWeek[weekNum].length - 3} daha</div>
+                  )}
+                </div>
               </div>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-              {blogsByWeek[weekNum].length > 0 ? blogsByWeek[weekNum].map(blog => (
-                <div 
-                  key={blog.id}
-                  onClick={() => setSelectedBlog(blog)}
-                  className="blog-item-mini"
-                  style={{ 
-                    padding: '0.75rem', 
-                    background: 'var(--bg-primary)', 
-                    borderRadius: '8px', 
-                    fontSize: '0.8rem', 
-                    cursor: 'pointer',
-                    border: '1px solid transparent',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <BookOpen size={12} className="text-accent" />
-                  <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>
-                    {blog.note}
-                  </span>
-                </div>
-              )) : (
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3, border: '1px dashed var(--border-color)', borderRadius: '8px', fontSize: '0.75rem' }}>
-                  Plan yok
-                </div>
-              )}
-            </div>
+            ))}
+          </div>
+        </div>
+
+        {/* BÖLÜM 2-6: BOŞ KUTULAR */}
+        {[2, 3, 4, 5, 6].map(i => (
+          <div key={i} className="card" style={{ 
+            background: 'var(--bg-secondary)', 
+            border: '1px solid var(--border-color)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            height: '100%',
+            minHeight: '400px',
+            opacity: 0.3,
+            borderStyle: 'dashed'
+          }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>BÖLÜM {i}</span>
           </div>
         ))}
       </div>
@@ -687,10 +705,11 @@ export default function StatsContent({ client }) {
       )}
 
       <style jsx>{`
-        .blog-item-mini:hover {
+        .blog-item-compact:hover {
+          background: var(--bg-primary) !important;
           border-color: var(--accent-primary) !important;
-          background: rgba(59, 130, 246, 0.05) !important;
-          transform: translateX(4px);
+          color: var(--accent-primary) !important;
+          transform: translateY(-1px);
         }
         .blog-content-area :global(h1), .blog-content-area :global(h2), .blog-content-area :global(h3) {
           margin-top: 1.5rem;
@@ -707,13 +726,13 @@ export default function StatsContent({ client }) {
           margin: 1rem 0;
         }
         @media (max-width: 1024px) {
-          .blog-calendar-grid {
-            gridTemplateColumns: 1fr 1fr !important;
+          .main-stats-grid {
+            grid-template-columns: 1fr 1fr !important;
           }
         }
         @media (max-width: 640px) {
-          .blog-calendar-grid {
-            gridTemplateColumns: 1fr !important;
+          .main-stats-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
