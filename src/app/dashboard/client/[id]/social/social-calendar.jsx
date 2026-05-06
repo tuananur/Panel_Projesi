@@ -313,6 +313,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
     return (
       <div 
         key={day} 
+        className={isActuallyHighlighted ? 'search-highlight' : ''}
         style={{ 
           padding: '0.4rem', 
           border: isActuallyHighlighted ? '2px solid var(--accent-primary)' : (isToday ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)'), 
@@ -322,18 +323,8 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
           gap: '0.25rem',
           backgroundColor: isActuallyHighlighted ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
           position: 'relative',
-          animation: isActuallyHighlighted ? 'pulse-highlight 2s infinite' : 'none',
-          boxShadow: isActuallyHighlighted ? '0 0 15px rgba(99, 102, 241, 0.3)' : 'none',
-          zIndex: isActuallyHighlighted ? 10 : 1
         }}
       >
-        <style jsx>{`
-          @keyframes pulse-highlight {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
-          }
-        `}</style>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ 
             fontSize: '0.75rem', 
