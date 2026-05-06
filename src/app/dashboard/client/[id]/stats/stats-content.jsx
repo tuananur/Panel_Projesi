@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  BarChart3, TrendingUp, CheckCircle2, Clock, Play, 
+  TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
-  ChevronRight, BookOpen, X, Calendar as CalendarIcon, ExternalLink
+  ChevronRight, Layout, X, Calendar as CalendarIcon, ExternalLink
 } from 'lucide-react';
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -310,7 +310,7 @@ export default function StatsContent({ client }) {
   return (
     <div className="animate-fade-in">
       <h2 className="heading-2" style={{ fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <BarChart3 size={24} className="text-muted" /> Performans Verileri
+        <TrendingUp size={24} className="text-muted" /> Performans Verileri
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }} className="main-stats-grid">
@@ -318,7 +318,7 @@ export default function StatsContent({ client }) {
         <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Blog Planı</h3>
-            <BookOpen size={16} className="text-accent" />
+            <Layout size={16} className="text-accent" />
           </div>
           
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>

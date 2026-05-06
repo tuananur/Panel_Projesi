@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Clock, X, Plus, BookOpen } from 'lucide-react';
+import { CheckCircle2, Clock, X, Plus, Layout } from 'lucide-react';
 import { addTaskAction, updateTaskDetailAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 
@@ -191,7 +191,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '45px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '0.8rem' }}>
-          <BookOpen size={16} color="var(--accent-primary)" />
+          <Layout size={16} color="var(--accent-primary)" />
           <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>{totalBlogs}</span>
           <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>BLOG</span>
         </div>
