@@ -317,20 +317,6 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
             {day}
           </span>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {isAdmin && (dayTasks.length > 0 || scheduledOnly.length > 0) && (
-              <Trash2 
-                size={14} 
-                style={{ cursor: 'pointer', color: 'rgba(239, 68, 68, 0.4)' }} 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const date = new Date(year, month, day, 12);
-                  const dateStr = `${day} ${date.toLocaleDateString('tr-TR', { month: 'long' })}`;
-                  setBulkDeleteData({ date, dateStr, platformsToHide: scheduledOnly });
-                }}
-                className="hover-danger"
-                title="Günü Temizle"
-              />
-            )}
             <Plus 
               size={14} 
               style={{ cursor: 'pointer', color: 'var(--accent-primary)' }} 
