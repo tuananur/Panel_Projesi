@@ -69,40 +69,43 @@ export default function StatsContent({ client }) {
   const [selectedBlog, setSelectedBlog] = useState(null);
 
   const handleDownloadPDF = async () => {
-    if (!statsRef.current) return;
+    const reportElement = document.getElementById('report-template');
+    if (!reportElement) return;
+    
     setIsGeneratingPDF(true);
     
     try {
-      // Dynamic imports to avoid SSR issues
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
-      const canvas = await html2canvas(statsRef.current, {
+      // Temporarily show the report template or ensure it's rendered
+      reportElement.style.display = 'block';
+      
+      const canvas = await html2canvas(reportElement, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#0f172a',
+        backgroundColor: '#ffffff',
         logging: false,
-        onclone: (clonedDoc) => {
-           // Ensure colors are correct in the clone
-           clonedDoc.body.style.background = '#0f172a';
-        }
+        windowWidth: 794, // A4 width at 96 DPI
       });
       
+      reportElement.style.display = 'none';
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
-        orientation: 'landscape',
+        orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
       
-      const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${client.companyName}_${currentMonthName}_Performans_Raporu.pdf`);
     } catch (error) {
       console.error('PDF Error:', error);
+      alert('Rapor oluşturulurken bir hata oluştu.');
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -1268,6 +1271,126 @@ export default function StatsContent({ client }) {
           }
         }
       `}</style>
+      {/* GİZLİ RAPOR TASLAĞI (PDF İÇİN) */}
+      <div id="report-template" style={{ 
+        display: 'none', 
+        width: '794px', // A4 Width
+        minHeight: '1123px', // A4 Height
+        background: '#ffffff', 
+        color: '#1a1a1a', 
+        padding: '50px',
+        fontFamily: 'Inter, system-ui, sans-serif'
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #f0f0f0', paddingBottom: '30px', marginBottom: '40px' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#2563eb', marginBottom: '8px', letterSpacing: '-1px' }}>PERFORMANS RAPORU</h1>
+            <p style={{ fontSize: '14px', color: '#64748b', fontWeight: 600 }}>{client.companyName.toUpperCase()}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b' }}>{currentMonthName} {displayYear}</p>
+            <p style={{ fontSize: '12px', color: '#94a3b8' }}>Rapor Tarihi: {new Date().toLocaleDateString('tr-TR')}</p>
+          </div>
+        </div>
+
+        {/* Executive Summary Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '40px' }}>
+          <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <p style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Toplam Başarı</p>
+            <p style={{ fontSize: '24px', fontWeight: 900, color: '#1e293b' }}>%{Math.round((completedThisMonth / (currentMonthTasks.length || 1)) * 100)}</p>
+          </div>
+          <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <p style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Tamamlanan</p>
+            <p style={{ fontSize: '24px', fontWeight: 900, color: '#10b981' }}>{completedThisMonth}</p>
+          </div>
+          <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <p style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Kalan Görev</p>
+            <p style={{ fontSize: '24px', fontWeight: 900, color: '#f59e0b' }}>{currentMonthTasks.length - completedThisMonth}</p>
+          </div>
+        </div>
+
+        {/* Blog Planı Bölümü */}
+        <div style={{ marginBottom: '40px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+             <div style={{ width: '4px', height: '20px', background: '#2563eb', borderRadius: '2px' }}></div>
+             BLOG İÇERİK PLANI
+          </h2>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: '#f1f5f9' }}>
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#475569', borderBottom: '1px solid #e2e8f0' }}>TARİH</th>
+                <th style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#475569', borderBottom: '1px solid #e2e8f0' }}>KONU / BAŞLIK</th>
+                <th style={{ padding: '12px', textAlign: 'center', fontSize: '11px', fontWeight: 800, color: '#475569', borderBottom: '1px solid #e2e8f0' }}>DURUM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentMonthTasks.filter(t => t.type === 'BLOG').length > 0 ? (
+                currentMonthTasks.filter(t => t.type === 'BLOG').sort((a,b) => new Date(a.date) - new Date(b.date)).map(blog => (
+                  <tr key={blog.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '12px', fontSize: '12px', color: '#475569' }}>{new Date(blog.date).toLocaleDateString('tr-TR')}</td>
+                    <td style={{ padding: '12px', fontSize: '12px', color: '#1e293b', fontWeight: 600 }}>{blog.note || 'İçerik Girilmemiş'}</td>
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 800, padding: '4px 8px', borderRadius: '4px', background: blog.status ? '#dcfce7' : '#fef3c7', color: blog.status ? '#166534' : '#92400e' }}>
+                        {blog.status ? 'TAMAMLANDI' : 'BEKLİYOR'}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '12px' }}>Bu ay için blog kaydı bulunmamaktadır.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Sosyal Medya Bölümü */}
+        <div style={{ marginBottom: '40px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+             <div style={{ width: '4px', height: '20px', background: '#8b5cf6', borderRadius: '2px' }}></div>
+             SOSYAL MEDYA ANALİZİ
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+            <div>
+               <p style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '15px' }}>PLATFORM DAĞILIMI</p>
+               {(() => {
+                  const socials = currentMonthTasks.filter(t => t.type === 'SOCIAL');
+                  const platforms = {};
+                  socials.forEach(s => platforms[s.platform || 'Diğer'] = (platforms[s.platform || 'Diğer'] || 0) + 1);
+                  return Object.entries(platforms).map(([p, count]) => (
+                    <div key={p} style={{ marginBottom: '12px' }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '5px', fontWeight: 700 }}>
+                         <span>{p.toUpperCase()}</span>
+                         <span>{count} Paylaşım</span>
+                       </div>
+                       <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
+                         <div style={{ height: '100%', width: `${(count / (socials.length || 1)) * 100}%`, background: '#8b5cf6' }}></div>
+                       </div>
+                    </div>
+                  ));
+               })()}
+            </div>
+            <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+               <p style={{ fontSize: '12px', fontWeight: 800, color: '#64748b', marginBottom: '10px' }}>SOSYAL MEDYA BAŞARI ORANI</p>
+               {(() => {
+                 const socials = currentMonthTasks.filter(t => t.type === 'SOCIAL');
+                 const comp = socials.filter(s => s.status).length;
+                 const pct = socials.length > 0 ? Math.round((comp / socials.length) * 100) : 0;
+                 return (
+                   <>
+                     <p style={{ fontSize: '36px', fontWeight: 900, color: '#8b5cf6' }}>%{pct}</p>
+                     <p style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>{comp} / {socials.length} Tamamlanan</p>
+                   </>
+                 );
+               })()}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ marginTop: 'auto', borderTop: '1px solid #f0f0f0', paddingTop: '20px', textAlign: 'center' }}>
+           <p style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '1px' }}>BU RAPOR BEYİN ATÖLYESİ YÖNETİM PANELİ TARAFINDAN OTOMATİK OLARAK OLUŞTURULMUŞTUR.</p>
+        </div>
+      </div>
     </div>
   );
 }
