@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { 
   TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
@@ -54,6 +56,8 @@ export default function StatsContent({ client }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const statsRef = useRef(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [activeTask, setActiveTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [noteInput, setNoteInput] = useState('');
@@ -64,6 +68,38 @@ export default function StatsContent({ client }) {
   const [showCompletedModal, setShowCompletedModal] = useState(false);
   const [showPendingModal, setShowPendingModal] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState(null);
+
+  const handleDownloadPDF = async () => {
+    if (!statsRef.current) return;
+    setIsGeneratingPDF(true);
+    
+    try {
+      const canvas = await html2canvas(statsRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#0f172a', // Match dashboard bg
+        logging: false
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${client.companyName}_${currentMonthName}_Performans_Raporu.pdf`);
+    } catch (error) {
+      console.error('PDF Error:', error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   const monthParam = searchParams.get('month');
   const yearParam = searchParams.get('year');
@@ -311,7 +347,7 @@ export default function StatsContent({ client }) {
   );
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" ref={statsRef} style={{ background: 'var(--bg-primary)', padding: '1rem', borderRadius: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem' }}>
         <h2 className="heading-2" style={{ fontSize: '1.5rem', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <TrendingUp size={24} className="text-muted" /> Performans Verileri
@@ -829,6 +865,35 @@ export default function StatsContent({ client }) {
                 </div>
              </div>
           </div>
+
+          {/* PDF Download Button */}
+          <button 
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+            data-html2canvas-ignore="true"
+            style={{ 
+              marginTop: '2rem', 
+              width: '100%', 
+              padding: '0.85rem', 
+              background: 'rgba(255,255,255,0.03)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: '12px', 
+              color: 'var(--text-primary)', 
+              fontSize: '0.75rem', 
+              fontWeight: 800, 
+              cursor: isGeneratingPDF ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.6rem',
+              transition: 'all 0.2s',
+              opacity: isGeneratingPDF ? 0.7 : 1
+            }}
+            className="hover-glow"
+          >
+             {isGeneratingPDF ? <Clock size={16} className="animate-spin" /> : <BookOpen size={16} />}
+             {isGeneratingPDF ? 'Rapor Hazırlanıyor...' : 'PDF Performans Raporu Oluştur'}
+          </button>
         </div>
       </div>
 
