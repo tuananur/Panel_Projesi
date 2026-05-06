@@ -312,58 +312,61 @@ export default function StatsContent({ client }) {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem' }}>
         <h2 className="heading-2" style={{ fontSize: '1.5rem', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <TrendingUp size={24} className="text-muted" /> Performans Verileri
         </h2>
 
         {/* Ay Seçici */}
-        <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-secondary)', padding: '0.4rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-          <select 
-            value={displayMonth}
-            onChange={(e) => {
-              const params = new URLSearchParams(searchParams.toString());
-              params.set('month', e.target.value);
-              router.push(`?${params.toString()}`);
-            }}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: 'var(--text-primary)', 
-              fontSize: '0.85rem', 
-              fontWeight: 700, 
-              padding: '0.25rem 0.5rem',
-              outline: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            {turkishMonths.map((m, idx) => (
-              <option key={m} value={idx} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{m}</option>
-            ))}
-          </select>
-          <div style={{ width: '1px', background: 'var(--border-color)', margin: '4px 0' }}></div>
-          <select 
-            value={displayYear}
-            onChange={(e) => {
-              const params = new URLSearchParams(searchParams.toString());
-              params.set('year', e.target.value);
-              router.push(`?${params.toString()}`);
-            }}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: 'var(--text-primary)', 
-              fontSize: '0.85rem', 
-              fontWeight: 700, 
-              padding: '0.25rem 0.5rem',
-              outline: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            {[2024, 2025, 2026, 2027].map(y => (
-              <option key={y} value={y} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{y}</option>
-            ))}
-          </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Dönem Seçin:</span>
+          <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--accent-primary)15', padding: '0.5rem', borderRadius: '12px', border: '1px solid var(--accent-primary)33' }}>
+            <select 
+              value={displayMonth}
+              onChange={(e) => {
+                const params = new URLSearchParams(searchParams.toString());
+                params.set('month', e.target.value);
+                router.push(`?${params.toString()}`);
+              }}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: 'var(--accent-primary)', 
+                fontSize: '0.85rem', 
+                fontWeight: 800, 
+                padding: '0.25rem 0.5rem',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              {turkishMonths.map((m, idx) => (
+                <option key={m} value={idx} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{m}</option>
+              ))}
+            </select>
+            <div style={{ width: '1px', background: 'var(--accent-primary)33', margin: '4px 0' }}></div>
+            <select 
+              value={displayYear}
+              onChange={(e) => {
+                const params = new URLSearchParams(searchParams.toString());
+                params.set('year', e.target.value);
+                router.push(`?${params.toString()}`);
+              }}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: 'var(--accent-primary)', 
+                fontSize: '0.85rem', 
+                fontWeight: 800, 
+                padding: '0.25rem 0.5rem',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              {[2024, 2025, 2026, 2027].map(y => (
+                <option key={y} value={y} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{y}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
