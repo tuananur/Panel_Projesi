@@ -87,6 +87,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const [noteInput, setNoteInput] = useState('');
   const [linkInput, setLinkInput] = useState('');
   const [deleteTaskId, setDeleteTaskId] = useState(null);
+  const [scheduleDeleteData, setScheduleDeleteData] = useState(null);
 
   useEffect(() => {
     if (taskIdParam && initialTasks.length > 0) {
@@ -151,6 +152,19 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       formData.append('taskId', deleteTaskId);
       await deleteTaskAction(formData);
       setDeleteTaskId(null);
+      router.refresh();
+    });
+  }
+
+  async function handleRemoveFromSchedule() {
+    if (!scheduleDeleteData) return;
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('clientId', clientId);
+      formData.append('platform', scheduleDeleteData.platform);
+      formData.append('dayName', scheduleDeleteData.dayName);
+      await removeScheduleDayAction(formData);
+      setScheduleDeleteData(null);
       router.refresh();
     });
   }
@@ -405,16 +419,8 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                 onClick={() => {
                   const date = new Date(year, month, day);
                   const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-                  if (confirm(`${p} platformunu tüm ${date.toLocaleDateString('tr-TR', { weekday: 'long' })} günlerinden kaldırmak istediğinize emin misiniz?`)) {
-                    startTransition(async () => {
-                      const formData = new FormData();
-                      formData.append('clientId', clientId);
-                      formData.append('platform', p);
-                      formData.append('dayName', dayName);
-                      await removeScheduleDayAction(formData);
-                      router.refresh();
-                    });
-                  }
+                  const displayDayName = date.toLocaleDateString('tr-TR', { weekday: 'long' });
+                  setScheduleDeleteData({ platform: p, dayName, displayDayName });
                 }}
                 title="Plandan Kaldır"
               />
@@ -706,6 +712,18 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       >
         <div style={{ color: 'var(--text-secondary)' }}>
           Bu görevi silmek istediğinize emin misiniz?
+        </div>
+      </CustomDialog>
+      <CustomDialog
+        isOpen={!!scheduleDeleteData}
+        title="Plandan Kaldırma Onayı"
+        onClose={() => setScheduleDeleteData(null)}
+        onConfirm={handleRemoveFromSchedule}
+        confirmText="Plandan Kaldır"
+        loading={isPending}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          <strong>{scheduleDeleteData?.platform}</strong> platformunu tüm <strong>{scheduleDeleteData?.displayDayName}</strong> günlerinden kaldırmak istediğinize emin misiniz?
         </div>
       </CustomDialog>
     </div>
