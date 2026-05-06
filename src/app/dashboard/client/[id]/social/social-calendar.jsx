@@ -88,6 +88,8 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   const [linkInput, setLinkInput] = useState('');
   const [deleteTaskId, setDeleteTaskId] = useState(null);
   const [scheduleDeleteData, setScheduleDeleteData] = useState(null);
+  const [bulkDeleteData, setBulkDeleteData] = useState(null);
+  const [singleGhostDeleteData, setSingleGhostDeleteData] = useState(null);
 
   useEffect(() => {
     if (taskIdParam && initialTasks.length > 0) {
@@ -165,6 +167,35 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       formData.append('dayName', scheduleDeleteData.dayName);
       await removeScheduleDayAction(formData);
       setScheduleDeleteData(null);
+      router.refresh();
+    });
+  }
+
+  async function handleBulkDelete() {
+    if (!bulkDeleteData) return;
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('clientId', clientId);
+      formData.append('date', bulkDeleteData.date.toISOString());
+      formData.append('platformsToHide', JSON.stringify(bulkDeleteData.platformsToHide));
+      await bulkDeleteDayAction(formData);
+      setBulkDeleteData(null);
+      router.refresh();
+    });
+  }
+
+  async function handleSingleGhostDelete() {
+    if (!singleGhostDeleteData) return;
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('clientId', clientId);
+      formData.append('type', 'SOCIAL');
+      formData.append('date', singleGhostDeleteData.date.toISOString());
+      formData.append('platform', singleGhostDeleteData.platform);
+      formData.append('note', '__DELETED__');
+      formData.append('status', 'false');
+      await addTaskAction(formData);
+      setSingleGhostDeleteData(null);
       router.refresh();
     });
   }
@@ -292,16 +323,9 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                 style={{ cursor: 'pointer', color: 'rgba(239, 68, 68, 0.4)' }} 
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm(`${day} ${new Date(year, month, day).toLocaleDateString('tr-TR', { month: 'long' })} tarihindeki TÜM görevleri temizlemek istediğinize emin misiniz?`)) {
-                    startTransition(async () => {
-                      const formData = new FormData();
-                      formData.append('clientId', clientId);
-                      formData.append('date', new Date(year, month, day, 12).toISOString());
-                      formData.append('platformsToHide', JSON.stringify(scheduledOnly));
-                      await bulkDeleteDayAction(formData);
-                      router.refresh();
-                    });
-                  }
+                  const date = new Date(year, month, day, 12);
+                  const dateStr = `${day} ${date.toLocaleDateString('tr-TR', { month: 'long' })}`;
+                  setBulkDeleteData({ date, dateStr, platformsToHide: scheduledOnly });
                 }}
                 className="hover-danger"
                 title="Günü Temizle"
@@ -446,19 +470,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                 onClick={(e) => {
                   e.stopPropagation();
                   const date = new Date(year, month, day, 12);
-                  if (confirm(`${p} platformunu sadece bu gün için kaldırmak istediğinize emin misiniz?`)) {
-                    startTransition(async () => {
-                      const formData = new FormData();
-                      formData.append('clientId', clientId);
-                      formData.append('type', 'SOCIAL');
-                      formData.append('date', date.toISOString());
-                      formData.append('platform', p);
-                      formData.append('note', '__DELETED__');
-                      formData.append('status', 'false');
-                      await addTaskAction(formData);
-                      router.refresh();
-                    });
-                  }
+                  setSingleGhostDeleteData({ platform: p, date });
                 }}
                 title="Sadece Bugün İçin Kaldır"
               />
@@ -762,6 +774,31 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       >
         <div style={{ color: 'var(--text-secondary)' }}>
           <strong>{scheduleDeleteData?.platform}</strong> platformunu tüm <strong>{scheduleDeleteData?.displayDayName}</strong> günlerinden kaldırmak istediğinize emin misiniz?
+        </div>
+      </CustomDialog>
+      <CustomDialog
+        isOpen={!!bulkDeleteData}
+        title="Toplu Silme Onayı"
+        onClose={() => setBulkDeleteData(null)}
+        onConfirm={handleBulkDelete}
+        confirmText="Günü Temizle"
+        loading={isPending}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          <strong>{bulkDeleteData?.dateStr}</strong> tarihindeki TÜM görevleri temizlemek istediğinize emin misiniz?
+        </div>
+      </CustomDialog>
+
+      <CustomDialog
+        isOpen={!!singleGhostDeleteData}
+        title="Görevi Kaldırma Onayı"
+        onClose={() => setSingleGhostDeleteData(null)}
+        onConfirm={handleSingleGhostDelete}
+        confirmText="Sadece Bugün İçin Kaldır"
+        loading={isPending}
+      >
+        <div style={{ color: 'var(--text-secondary)' }}>
+          <strong>{singleGhostDeleteData?.platform}</strong> platformunu sadece bu gün için kaldırmak istediğinize emin misiniz?
         </div>
       </CustomDialog>
     </div>
