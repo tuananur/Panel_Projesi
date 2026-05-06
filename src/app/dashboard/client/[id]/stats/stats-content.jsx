@@ -150,8 +150,11 @@ export default function StatsContent({ client }) {
     socialGrid[week][dayName][t.platform] = t.status;
   });
 
+  const accounts = JSON.parse(client?.socialAccounts || '{}');
+  const activeSettingsPlatforms = Object.keys(accounts).filter(p => accounts[p] && accounts[p].trim() !== '');
+
   (client?.tasks || []).filter(t => t.type === 'SOCIAL').forEach(t => {
-    if (t.platform) {
+    if (t.platform && activeSettingsPlatforms.includes(t.platform)) {
       platformStats[t.platform] = (platformStats[t.platform] || 0) + (t.status ? 1 : 0);
     } else {
       specialTasksStats.push(t);
