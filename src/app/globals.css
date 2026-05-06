@@ -386,10 +386,12 @@ input, button, select, textarea {
   background-color: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(8px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 3rem;
   justify-content: center;
   z-index: 2000;
   animation: modalFadeIn 0.2s ease-out;
+  overflow-y: auto;
 }
 
 .modal-container {
@@ -399,8 +401,10 @@ input, button, select, textarea {
   padding: 2rem;
   width: 100%;
   max-width: 450px;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: modalSlideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes modalFadeIn {
@@ -408,8 +412,8 @@ input, button, select, textarea {
   to { opacity: 1; }
 }
 
-@keyframes modalSlideUp {
-  from { transform: translateY(20px); opacity: 0; }
+@keyframes modalSlideDown {
+  from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
