@@ -825,7 +825,8 @@ export default function StatsContent({ client }) {
           background: rgba(0, 0, 0, 0.8);
           backdrop-filter: blur(8px);
           display: flex;
-          align-items: center;
+          align-items: flex-start;
+          padding-top: 5rem;
           justify-content: center;
           z-index: 9999;
           animation: modalFadeIn 0.2s ease-out;
@@ -836,14 +837,14 @@ export default function StatsContent({ client }) {
           border-radius: 16px;
           border: 1px solid var(--border-color);
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-          animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          animation: modalSlideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         @keyframes modalFadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        @keyframes modalSlideUp {
-          from { transform: translateY(20px); opacity: 0; }
+        @keyframes modalSlideDown {
+          from { transform: translateY(-20px); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
         @media (max-width: 1024px) {
