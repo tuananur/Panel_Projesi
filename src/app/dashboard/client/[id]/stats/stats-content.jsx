@@ -113,9 +113,20 @@ export default function StatsContent({ client }) {
   let activePlatforms = [];
   try {
     const accounts = JSON.parse(client?.socialAccounts || '{}');
-    activePlatforms = Object.keys(accounts).filter(p => accounts[p] && accounts[p].trim() !== '');
+    const settingsPlatforms = Object.keys(accounts).filter(p => accounts[p] && accounts[p].trim() !== '');
+    
+    // Get platforms that have tasks in the current month
+    const taskPlatforms = (client?.tasks || []).filter(t => {
+      if (t.type !== 'SOCIAL') return false;
+      const d = new Date(t.date);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).map(t => t.platform);
+    
+    // Combine and unique
+    activePlatforms = [...new Set([...settingsPlatforms, ...taskPlatforms])].filter(Boolean);
   } catch (e) {
-    activePlatforms = ['X', 'Instagram', 'TikTok', 'YouTube']; // Fallback
+    activePlatforms = ['X', 'Instagram', 'TikTok', 'YouTube']; 
   }
   
   if (activePlatforms.length === 0) {
