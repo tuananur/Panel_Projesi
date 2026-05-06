@@ -365,9 +365,13 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                       </span>
                     )}
                   </div>
-                  {isAdmin && (
-                    <Trash2 size={12} style={{ cursor: 'pointer', color: '#ef4444', flexShrink: 0, opacity: 0.6 }} onClick={() => setDeleteTaskId(task.id)} className="hover-opacity-100" />
-                  )}
+                  <Trash2 
+                    size={12} 
+                    style={{ cursor: 'pointer', color: '#ef4444', flexShrink: 0, opacity: 0.9 }} 
+                    onClick={() => setDeleteTaskId(task.id)} 
+                    className="hover-opacity-100" 
+                    title="Görevi Sil"
+                  />
                 </div>
               )}
             </div>
@@ -384,7 +388,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                 borderRadius: '4px', 
                 background: 'rgba(255,255,255,0.02)', 
                 border: '1px solid rgba(255,255,255,0.05)',
-                opacity: 0.5
+                opacity: 0.8
               }}
               className="ghost-task-hover"
             >
@@ -395,27 +399,25 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                 <Circle size={10} color="var(--text-secondary)" />
                 <span style={{ fontSize: '0.55rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{p}</span>
               </div>
-              {isAdmin && (
-                <Trash2 
-                  size={10} 
-                  style={{ cursor: 'pointer', color: 'rgba(239, 68, 68, 0.4)' }} 
-                  onClick={() => {
-                    const date = new Date(year, month, day);
-                    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-                    if (confirm(`${p} platformunu tüm ${date.toLocaleDateString('tr-TR', { weekday: 'long' })} günlerinden kaldırmak istediğinize emin misiniz?`)) {
-                      startTransition(async () => {
-                        const formData = new FormData();
-                        formData.append('clientId', clientId);
-                        formData.append('platform', p);
-                        formData.append('dayName', dayName);
-                        await removeScheduleDayAction(formData);
-                        router.refresh();
-                      });
-                    }
-                  }}
-                  title="Plandan Kaldır"
-                />
-              )}
+              <Trash2 
+                size={11} 
+                style={{ cursor: 'pointer', color: '#ef4444' }} 
+                onClick={() => {
+                  const date = new Date(year, month, day);
+                  const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                  if (confirm(`${p} platformunu tüm ${date.toLocaleDateString('tr-TR', { weekday: 'long' })} günlerinden kaldırmak istediğinize emin misiniz?`)) {
+                    startTransition(async () => {
+                      const formData = new FormData();
+                      formData.append('clientId', clientId);
+                      formData.append('platform', p);
+                      formData.append('dayName', dayName);
+                      await removeScheduleDayAction(formData);
+                      router.refresh();
+                    });
+                  }
+                }}
+                title="Plandan Kaldır"
+              />
             </div>
           ))}
         </div>
