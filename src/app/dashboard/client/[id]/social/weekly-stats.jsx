@@ -108,7 +108,11 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   // --- Bekleyen görevler ---
   const allPending = tasks.filter(t => t.type === 'SOCIAL' && !t.status).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const totalBlogs = (tasks || []).filter(t => t.type === 'BLOG').length;
+  const totalBlogs = (tasks || []).filter(t => {
+    if (t.type !== 'BLOG') return false;
+    const d = new Date(t.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
 
   const handleSave = async () => {
     startTransition(async () => {
