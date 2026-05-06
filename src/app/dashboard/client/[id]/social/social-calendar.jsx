@@ -430,13 +430,6 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                       </span>
                     )}
                   </div>
-                  <Trash2 
-                    size={12} 
-                    style={{ cursor: 'pointer', color: '#ef4444', flexShrink: 0, opacity: 0.9 }} 
-                    onClick={() => setDeleteTaskId(task.id)} 
-                    className="hover-opacity-100" 
-                    title="Görevi Sil"
-                  />
                 </div>
               )}
             </div>
