@@ -4,7 +4,6 @@ import { getSession } from '@/lib/auth';
 import ClientNav from './client-nav';
 import WeeklyStats from './social/weekly-stats';
 import ClientSwitcher from '@/app/components/client-switcher';
-import InternalChat from '@/app/components/internal-chat';
 import { Globe, Layout, Play, Share2, Info, User, Phone, Mail } from 'lucide-react';
 
 const BRAND_ICONS = {
@@ -166,9 +165,6 @@ export default async function ClientDetailLayout({ children, params }) {
       <div className="content-area-client">
         {children}
       </div>
-
-      {/* Ajans İçi Sohbet / Notlar */}
-      <InternalChat clientId={id} currentUsername={session.username} />
     </div>
   );
 }
