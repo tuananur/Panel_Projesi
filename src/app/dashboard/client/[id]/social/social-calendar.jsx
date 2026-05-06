@@ -301,6 +301,8 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       return isScheduled && !hasAnyTask;
     });
 
+    const highlightDay = searchParams.get('highlight');
+    const isActuallyHighlighted = highlightDay && parseInt(highlightDay) === day;
     const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
 
     const monthStr = String(month + 1).padStart(2, '0');
@@ -313,15 +315,25 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
         key={day} 
         style={{ 
           padding: '0.4rem', 
-          border: isToday ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)', 
+          border: isActuallyHighlighted ? '2px solid var(--accent-primary)' : (isToday ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)'), 
           minHeight: '90px',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.25rem',
-          backgroundColor: 'transparent',
-          position: 'relative'
+          backgroundColor: isActuallyHighlighted ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+          position: 'relative',
+          animation: isActuallyHighlighted ? 'pulse-highlight 2s infinite' : 'none',
+          boxShadow: isActuallyHighlighted ? '0 0 15px rgba(99, 102, 241, 0.3)' : 'none',
+          zIndex: isActuallyHighlighted ? 10 : 1
         }}
       >
+        <style jsx>{`
+          @keyframes pulse-highlight {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+          }
+        `}</style>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ 
             fontSize: '0.75rem', 
