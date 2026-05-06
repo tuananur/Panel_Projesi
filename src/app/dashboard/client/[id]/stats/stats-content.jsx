@@ -313,7 +313,7 @@ export default function StatsContent({ client }) {
         <BarChart3 size={24} className="text-muted" /> Performans Verileri
       </h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }} className="main-stats-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }} className="main-stats-grid">
         {/* BÖLÜM 1: AYLIK BLOG PLANI */}
         <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -373,19 +373,7 @@ export default function StatsContent({ client }) {
           </div>
         </div>
 
-        {/* BÖLÜM 2: TOPLAM BLOG SAYISI */}
-        <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '400px' }}>
-          <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '50%', marginBottom: '1rem', color: 'var(--accent-primary)' }}>
-            <BarChart size={32} />
-          </div>
-          <h3 style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Toplam Blog</h3>
-          <p style={{ fontSize: '3.5rem', fontWeight: 900, color: 'var(--text-primary)' }}>
-            {(client?.tasks || []).filter(t => t.type === 'BLOG').length}
-          </p>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.5rem', opacity: 0.6 }}>Tüm Zamanlar</p>
-        </div>
-
-        {/* BÖLÜM 3: SOSYAL MEDYA TAKİP TABLOSU */}
+        {/* BÖLÜM 2: SOSYAL MEDYA TAKİP TABLOSU */}
         <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px', padding: '0.75rem' }}>
           <h3 style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.75rem', textAlign: 'center' }}>Sosyal Medya Akışı</h3>
           
