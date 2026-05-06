@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { 
   BarChart3, TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
-  ChevronRight 
+  ChevronRight, BookOpen, X, Calendar, ExternalLink
 } from 'lucide-react';
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -61,6 +61,34 @@ export default function StatsContent({ client }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showCompletedModal, setShowCompletedModal] = useState(false);
   const [showPendingModal, setShowPendingModal] = useState(false);
+  const [selectedBlog, setSelectedBlog] = useState(null);
+
+  const turkishMonths = [
+    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+  ];
+  const currentMonthName = turkishMonths[new Date().getMonth()];
+
+  const getWeekOfMonth = (date) => {
+    const d = new Date(date);
+    const firstDayOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    const day = firstDayOfMonth.getDay();
+    const adjDay = day === 0 ? 6 : day - 1; // Monday = 0
+    return Math.ceil((d.getDate() + adjDay) / 7);
+  };
+
+  const currentMonthBlogs = (client.tasks || []).filter(t => {
+    if (t.type !== 'BLOG') return false;
+    const d = new Date(t.date);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  const blogsByWeek = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+  currentMonthBlogs.forEach(blog => {
+    const week = getWeekOfMonth(new Date(blog.date));
+    if (blogsByWeek[week]) blogsByWeek[week].push(blog);
+  });
 
   const PLATFORMS_LIST = ['Instagram', 'YouTube', 'Facebook', 'LinkedIn', 'X', 'TikTok'];
 
@@ -218,45 +246,65 @@ export default function StatsContent({ client }) {
         <BarChart3 size={24} className="text-muted" /> Performans Verileri
       </h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        <div className="card" style={{ background: 'var(--accent-gradient)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem', fontWeight: 500, marginBottom: '0.5rem' }}>Genel Başarı Oranı</h3>
-          <p style={{ color: 'white', fontSize: '3rem', fontWeight: 700 }}>%{successRate}</p>
-          <div style={{ height: '6px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '3px', marginTop: '1rem', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${successRate}%`, backgroundColor: 'white' }}></div>
-          </div>
-          <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', marginTop: '1rem' }}>Toplam {totalTasks} görevden {completedTasks.length} tanesi tamamlandı.</p>
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '3.5rem', fontWeight: 800, color: 'var(--text-primary)', opacity: 0.1, position: 'absolute', left: '50%', transform: 'translateX(-50%)', top: '100px', zIndex: -1, pointerEvents: 'none', textTransform: 'uppercase' }}>
+          {currentMonthName}
+        </h1>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', background: 'var(--bg-secondary)', padding: '0.5rem 1.5rem', borderRadius: '50px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+          <Calendar size={18} className="text-accent" />
+          <span style={{ fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.9rem' }}>{currentMonthName} BLOG PLANI</span>
         </div>
+      </div>
 
-        <div 
-          className="card card-interactive" 
-          onClick={() => setShowCompletedModal(true)}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', cursor: 'pointer' }}
-        >
-          <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
-            <CheckCircle2 size={24} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }} className="blog-calendar-grid">
+        {[1, 2, 3, 4, 5, 6].map(weekNum => (
+          <div key={weekNum} className="card" style={{ 
+            minHeight: '180px', 
+            background: 'var(--bg-secondary)', 
+            border: '1px solid var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '1.25rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{weekNum}. HAFTA</span>
+              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700 }}>
+                {blogsByWeek[weekNum].length}
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+              {blogsByWeek[weekNum].length > 0 ? blogsByWeek[weekNum].map(blog => (
+                <div 
+                  key={blog.id}
+                  onClick={() => setSelectedBlog(blog)}
+                  className="blog-item-mini"
+                  style={{ 
+                    padding: '0.75rem', 
+                    background: 'var(--bg-primary)', 
+                    borderRadius: '8px', 
+                    fontSize: '0.8rem', 
+                    cursor: 'pointer',
+                    border: '1px solid transparent',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <BookOpen size={12} className="text-accent" />
+                  <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>
+                    {blog.note}
+                  </span>
+                </div>
+              )) : (
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3, border: '1px dashed var(--border-color)', borderRadius: '8px', fontSize: '0.75rem' }}>
+                  Plan yok
+                </div>
+              )}
+            </div>
           </div>
-          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Tamamlanan Görevler</h3>
-          <p style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--text-primary)' }}>{completedTasks.length}</p>
-          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
-             Listeyi Görüntüle <ChevronRight size={14} />
-          </div>
-        </div>
-
-        <div 
-          className="card card-interactive" 
-          onClick={() => setShowPendingModal(true)}
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', cursor: 'pointer' }}
-        >
-          <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
-            <Clock size={24} />
-          </div>
-          <h3 className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Bekleyen İşler</h3>
-          <p style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--text-primary)' }}>{pendingTasks.length}</p>
-          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f59e0b', fontSize: '0.8rem', fontWeight: 600 }}>
-             Listeyi Görüntüle <ChevronRight size={14} />
-          </div>
-        </div>
+        ))}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
@@ -573,6 +621,100 @@ export default function StatsContent({ client }) {
           background: rgba(255,255,255,0.08) !important;
           border-color: var(--accent-primary) !important;
           transform: translateX(4px);
+        }
+      `}</style>
+      {/* Blog Detail Modal */}
+      {selectedBlog && (
+        <div className="modal-backdrop" onClick={() => setSelectedBlog(null)}>
+          <div className="modal-content blog-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '800px', width: '90%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', color: 'var(--accent-primary)' }}>
+                  <BookOpen size={24} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>{selectedBlog.note}</h3>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                    {new Date(selectedBlog.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setSelectedBlog(null)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ 
+              maxHeight: '60vh', 
+              overflowY: 'auto', 
+              padding: '1.5rem', 
+              background: 'var(--bg-primary)', 
+              borderRadius: '12px',
+              border: '1px solid var(--border-color)',
+              lineHeight: '1.6',
+              color: 'var(--text-primary)'
+            }}>
+              {selectedBlog.content ? (
+                <div dangerouslySetInnerHTML={{ __html: selectedBlog.content }} className="blog-content-area" />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '3rem 1rem', opacity: 0.5 }}>
+                  <p>Bu blog için henüz içerik girilmemiş.</p>
+                  {selectedBlog.link && (
+                    <a href={selectedBlog.link} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', color: 'var(--accent-primary)', fontWeight: 600, textDecoration: 'none' }}>
+                      Yazıyı Kaynakta Gör <ExternalLink size={14} />
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', gap: '1rem' }}>
+              {selectedBlog.link && (
+                <a 
+                  href={selectedBlog.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn-secondary"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <ExternalLink size={16} /> Linke Git
+                </a>
+              )}
+              <button className="btn-primary" onClick={() => setSelectedBlog(null)}>Kapat</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        .blog-item-mini:hover {
+          border-color: var(--accent-primary) !important;
+          background: rgba(59, 130, 246, 0.05) !important;
+          transform: translateX(4px);
+        }
+        .blog-content-area :global(h1), .blog-content-area :global(h2), .blog-content-area :global(h3) {
+          margin-top: 1.5rem;
+          margin-bottom: 1rem;
+          color: var(--text-primary);
+        }
+        .blog-content-area :global(p) {
+          margin-bottom: 1rem;
+        }
+        .blog-content-area :global(img) {
+          max-width: 100%;
+          height: auto;
+          border-radius: 8px;
+          margin: 1rem 0;
+        }
+        @media (max-width: 1024px) {
+          .blog-calendar-grid {
+            gridTemplateColumns: 1fr 1fr !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .blog-calendar-grid {
+            gridTemplateColumns: 1fr !important;
+          }
         }
       `}</style>
     </div>

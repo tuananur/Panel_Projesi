@@ -51,6 +51,7 @@ model Task {
   type      String   // "BLOG" or "SOCIAL"
   platform  String?  // Only for social e.g., "Instagram", "YouTube"
   note      String?  @db.Text // Descriptive note for the task
+  content   String?  @db.Text // Blog content or body
   link      String?  @db.Text // Link to the specific post
   status    Boolean  @default(false) // false = pending, true = completed
   createdAt DateTime @default(now())

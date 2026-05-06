@@ -275,12 +275,12 @@ export async function updateTaskDetailAction(formData) {
   const taskId = parseInt(formData.get('taskId'));
   const link = formData.get('link');
   const note = formData.get('note');
-  const platform = formData.get('platform') || null;
+  const content = formData.get('content') || null;
 
   try {
     await prisma.task.update({
       where: { id: taskId },
-      data: { link, note, platform }
+      data: { link, note, platform, content }
     });
     const task = await prisma.task.findUnique({ where: { id: taskId }, include: { client: true } });
     await logActivity('UPDATE', 'TASK', `${task?.client.companyName} için ${task?.platform || 'Özel'} görevinin detayları güncellendi.`, task?.clientId);
@@ -310,7 +310,7 @@ export async function addTaskAction(formData) {
   const date = new Date(formData.get('date'));
   const platform = formData.get('platform') || null;
   const link = formData.get('link') || null;
-  const note = formData.get('note') || null;
+  const content = formData.get('content') || null;
 
   try {
     await prisma.task.create({
@@ -321,6 +321,7 @@ export async function addTaskAction(formData) {
         platform,
         link,
         note,
+        content,
         status: false
       }
     });
@@ -416,6 +417,7 @@ export async function syncBlogsAction(clientId) {
       
       const targetDate = new Date(publishDate);
       const title = blog.title || 'Otomatik Çekilen Blog';
+      const content = blog.data?.content || blog.content || null;
 
       // Smart Update: Check if task with same title and date exists
       const existingTask = client.tasks.find(t => {
@@ -427,11 +429,11 @@ export async function syncBlogsAction(clientId) {
       });
 
       if (existingTask) {
-        // If link is different (e.g. fixed the /blog/ prefix), update it
-        if (existingTask.link !== link) {
+        // If link or content is different, update it
+        if (existingTask.link !== link || existingTask.content !== content) {
           await prisma.task.update({
             where: { id: existingTask.id },
-            data: { link: link }
+            data: { link, content }
           });
         }
         continue;
@@ -444,6 +446,7 @@ export async function syncBlogsAction(clientId) {
           date: targetDate,
           link: link,
           note: title,
+          content: content,
           status: true
         }
       });
