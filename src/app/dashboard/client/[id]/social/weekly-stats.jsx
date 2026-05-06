@@ -94,28 +94,17 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   };
 
 
-  // --- Haftalık hesap ---
-  const startOfWeek = new Date(now);
-  const diff = now.getDay() === 0 ? -6 : 1 - now.getDay();
-  startOfWeek.setDate(now.getDate() + diff);
-  startOfWeek.setHours(0, 0, 0, 0);
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6);
-  endOfWeek.setHours(23, 59, 59, 999);
-
-  const weeklyCompleted = tasks.filter(t => {
+  // --- Aylık hesap ---
+  const socialTasksInMonth = tasks.filter(t => {
     const d = new Date(t.date);
-    return t.type === 'SOCIAL' && d >= startOfWeek && d <= endOfWeek && t.status === true;
-  }).length;
-
-  let totalTarget = 0;
-  platforms.forEach(p => {
-    const platformSchedule = schedule[p] || [];
-    totalTarget += platformSchedule.length;
+    return t.type === 'SOCIAL' && d.getMonth() === displayMonth && d.getFullYear() === displayYear;
   });
-  const displayTotal = Math.max(totalTarget, weeklyCompleted);
-  const weeklyPending = displayTotal - weeklyCompleted;
-  const percentage = displayTotal > 0 ? Math.round((weeklyCompleted / displayTotal) * 100) : 0;
+
+  const socialCompleted = socialTasksInMonth.filter(t => t.status === true).length;
+  const socialPending = socialTasksInMonth.filter(t => t.status === false).length;
+  
+  const displayTotal = socialCompleted + socialPending;
+  const percentage = displayTotal > 0 ? Math.round((socialCompleted / displayTotal) * 100) : 0;
 
   // --- Bekleyen görevler ---
   const allPending = tasks.filter(t => t.type === 'SOCIAL' && !t.status).sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -190,7 +179,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
         >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '45px' }}>
             <CheckCircle2 size={16} color="#10b981" />
-            <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#10b981' }}>{weeklyCompleted}</span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#10b981' }}>{socialCompleted}</span>
             <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>BİTEN</span>
           </div>
 
@@ -206,7 +195,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '45px' }}>
             <Clock size={16} color="#f59e0b" />
-            <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f59e0b' }}>{weeklyPending}</span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f59e0b' }}>{socialPending}</span>
             <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>KALAN</span>
           </div>
         </div>
