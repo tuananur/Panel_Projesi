@@ -735,14 +735,14 @@ export default function StatsContent({ client }) {
       {/* Blog Detail Modal */}
       {selectedBlog && (
         <div className="modal-backdrop" onClick={() => setSelectedBlog(null)}>
-          <div className="modal-content blog-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%', padding: '1.5rem' }}>
+          <div className="modal-content blog-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px', width: '90%', padding: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px', color: 'var(--accent-primary)' }}>
-                  <BookOpen size={24} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ padding: '0.5rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '10px', color: 'var(--accent-primary)' }}>
+                  <BookOpen size={18} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>{selectedBlog.note}</h3>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: '1.2' }}>{selectedBlog.note}</h3>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
                     {new Date(selectedBlog.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
