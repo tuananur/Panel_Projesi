@@ -176,7 +176,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700 }}>HAFTALIK DURUM</span>
+             <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700 }}>SOSYAL MEDYA BEKLEYEN İÇERİKLER</span>
              <span style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: 800 }}>%{percentage}</span>
           </div>
           <div style={{ height: '6px', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '10px', overflow: 'hidden' }}>
