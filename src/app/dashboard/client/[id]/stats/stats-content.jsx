@@ -308,6 +308,7 @@ export default function StatsContent({ client }) {
                     <div 
                       key={blog.id}
                       onClick={() => setSelectedBlog(blog)}
+                      title={blog.note}
                       style={{ 
                         padding: '0.4rem 0.6rem', 
                         background: 'var(--bg-secondary)', 
@@ -318,11 +319,12 @@ export default function StatsContent({ client }) {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         border: '1px solid transparent',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        maxWidth: '100%'
                       }}
                       className="blog-item-compact"
                     >
-                      {blog.note}
+                      {blog.note.length > 25 ? blog.note.substring(0, 25) + '...' : blog.note}
                     </div>
                   )) : (
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2, fontSize: '0.6rem', border: '1px dashed var(--border-color)', borderRadius: '6px' }}>
