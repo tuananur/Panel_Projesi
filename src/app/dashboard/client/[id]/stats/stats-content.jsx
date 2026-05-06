@@ -105,7 +105,6 @@ export default function StatsContent({ client }) {
   const pendingTasks = (client?.tasks || []).filter(t => !t.status);
   const successRate = totalTasks > 0 ? Math.round((completedTasks.length / totalTasks) * 100) : 0;
 
-  const now = new Date();
   const currentMonthTasks = client.tasks.filter(t => {
     const d = new Date(t.date);
     return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
