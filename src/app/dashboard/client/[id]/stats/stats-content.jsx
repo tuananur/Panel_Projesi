@@ -153,15 +153,24 @@ export default function StatsContent({ client }) {
   const accounts = JSON.parse(client?.socialAccounts || '{}');
   const activeSettingsPlatforms = Object.keys(accounts).filter(p => accounts[p] && accounts[p].trim() !== '');
 
+  // Initialize with 0 so they always show up in the chart if in settings
+  activeSettingsPlatforms.forEach(p => {
+    platformStats[p] = 0;
+  });
+
   (client?.tasks || []).filter(t => {
     if (t.type !== 'SOCIAL') return false;
     const d = new Date(t.date);
     const now = new Date();
+    // Use UTC comparison to avoid timezone issues or just local is fine for dashboard
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   }).forEach(t => {
     if (t.platform && activeSettingsPlatforms.includes(t.platform)) {
-      platformStats[t.platform] = (platformStats[t.platform] || 0) + (t.status ? 1 : 0);
+      if (t.status) {
+        platformStats[t.platform] = (platformStats[t.platform] || 0) + 1;
+      }
     } else {
+      // Any platform not in settings OR special tasks
       specialTasksStats.push(t);
     }
   });
@@ -518,53 +527,61 @@ export default function StatsContent({ client }) {
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {/* Regular Platforms */}
-            {Object.keys(platformStats).map(platform => (
-              <div key={platform}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                  <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    {PLATFORM_ICONS[platform]} {platform}
-                  </span>
-                  <span className="text-muted">{platformStats[platform]} Paylaşım</span>
+            {(() => {
+              const totalMonthlySocialShares = Object.values(platformStats).reduce((a, b) => a + b, 0) + specialTasksStats.filter(t => t.status).length;
+              
+              return Object.keys(platformStats).map(platform => (
+                <div key={platform}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                    <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      {PLATFORM_ICONS[platform]} {platform}
+                    </span>
+                    <span className="text-muted">{platformStats[platform]} Paylaşım</span>
+                  </div>
+                  <div style={{ height: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ 
+                      height: '100%', 
+                      width: `${Math.min(100, (platformStats[platform] / (totalMonthlySocialShares || 1)) * 100)}%`, 
+                      backgroundColor: 'var(--accent-primary)',
+                      borderRadius: '4px'
+                    }}></div>
+                  </div>
                 </div>
-                <div style={{ height: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ 
-                    height: '100%', 
-                    width: `${Math.min(100, (platformStats[platform] / (completedTasks.length || 1)) * 100)}%`, 
-                    backgroundColor: 'var(--accent-primary)',
-                    borderRadius: '4px'
-                  }}></div>
-                </div>
-              </div>
-            ))}
+              ));
+            })()}
 
             {/* Individual Special Tasks */}
-            {specialTasksStats.map(task => (
-              <div key={task.id}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                  <span style={{ 
-                    fontWeight: 600, 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.4rem',
-                    color: task.status ? '#10b981' : 'var(--text-primary)'
-                  }}>
-                    {PLATFORM_ICONS['Özel']} 
-                    {new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })} {task.note || 'Özel Görev'}
-                    {task.status && <CheckCircle size={14} />}
-                  </span>
-                  <span className="text-muted">{task.status ? 'Paylaşıldı' : 'Bekliyor'}</span>
+            {(() => {
+              const totalMonthlySocialShares = Object.values(platformStats).reduce((a, b) => a + b, 0) + specialTasksStats.filter(t => t.status).length;
+              
+              return specialTasksStats.map(task => (
+                <div key={task.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                    <span style={{ 
+                      fontWeight: 600, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.4rem',
+                      color: task.status ? '#10b981' : 'var(--text-primary)'
+                    }}>
+                      {PLATFORM_ICONS['Özel']} 
+                      {new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })} {task.note || 'Özel Görev'}
+                      {task.status && <CheckCircle size={14} />}
+                    </span>
+                    <span className="text-muted">{task.status ? 'Paylaşıldı' : 'Bekliyor'}</span>
+                  </div>
+                  <div style={{ height: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ 
+                      height: '100%', 
+                      width: task.status ? `${Math.min(100, (1 / (totalMonthlySocialShares || 1)) * 100)}%` : '15%', 
+                      backgroundColor: task.status ? '#10b981' : 'var(--border-color)',
+                      borderRadius: '4px',
+                      opacity: task.status ? 1 : 0.3
+                    }}></div>
+                  </div>
                 </div>
-                <div style={{ height: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ 
-                    height: '100%', 
-                    width: task.status ? '100%' : '15%', 
-                    backgroundColor: task.status ? '#10b981' : 'var(--border-color)',
-                    borderRadius: '4px',
-                    opacity: task.status ? 1 : 0.3
-                  }}></div>
-                </div>
-              </div>
-            ))}
+              ));
+            })()}
 
             {Object.keys(platformStats).length === 0 && specialTasksStats.length === 0 && (
                 <p className="text-muted" style={{ textAlign: 'center', padding: '1rem' }}>Henüz paylaşım verisi yok.</p>
