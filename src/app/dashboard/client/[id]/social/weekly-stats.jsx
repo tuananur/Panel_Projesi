@@ -146,56 +146,72 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
 
   return (
     <>
-      <div
-        className="card"
-        onClick={openAddModal}
-        style={{
-          padding: '0.6rem 0.8rem',
-          minWidth: '220px',
-          border: '1px solid var(--border-color)',
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'stretch', flexWrap: 'wrap' }}>
+        <div
+          className="card"
+          onClick={openAddModal}
+          style={{
+            padding: '0.6rem 0.8rem',
+            flex: 1,
+            minWidth: '350px',
+            border: '1px solid var(--border-color)',
+            background: 'var(--bg-secondary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.8rem',
+            cursor: 'pointer',
+            borderRadius: '12px',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.borderColor = 'var(--accent-primary)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.borderColor = 'var(--border-color)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '45px' }}>
+            <CheckCircle2 size={16} color="#10b981" />
+            <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#10b981' }}>{weeklyCompleted}</span>
+            <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>BİTEN</span>
+          </div>
+
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700 }}>SOSYAL MEDYA BEKLEYEN İÇERİKLER</span>
+               <span style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: 800 }}>%{percentage}</span>
+            </div>
+            <div style={{ height: '6px', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '10px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${percentage}%`, backgroundColor: 'var(--accent-primary)', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '45px' }}>
+            <Clock size={16} color="#f59e0b" />
+            <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f59e0b' }}>{weeklyPending}</span>
+            <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>KALAN</span>
+          </div>
+        </div>
+
+        <div className="card" style={{ 
+          padding: '0.6rem 1rem', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '1rem', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border-color)', 
           background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.8rem',
-          cursor: 'pointer',
-          borderRadius: '12px',
-          transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.borderColor = 'var(--accent-primary)';
-          e.currentTarget.style.transform = 'translateY(-1px)';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.borderColor = 'var(--border-color)';
-          e.currentTarget.style.transform = 'translateY(0)';
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '45px' }}>
-          <CheckCircle2 size={16} color="#10b981" />
-          <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#10b981' }}>{weeklyCompleted}</span>
-          <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>BİTEN</span>
-        </div>
-
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700 }}>SOSYAL MEDYA BEKLEYEN İÇERİKLER</span>
-             <span style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: 800 }}>%{percentage}</span>
+          minWidth: '140px'
+        }}>
+          <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.6rem', borderRadius: '10px' }}>
+            <Layout size={20} color="var(--accent-primary)" />
           </div>
-          <div style={{ height: '6px', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '10px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${percentage}%`, backgroundColor: 'var(--accent-primary)', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>{totalBlogs}</span>
+            <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TOPLAM BLOG</span>
           </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '45px' }}>
-          <Clock size={16} color="#f59e0b" />
-          <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f59e0b' }}>{weeklyPending}</span>
-          <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>KALAN</span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '45px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '0.8rem' }}>
-          <Layout size={16} color="var(--accent-primary)" />
-          <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>{totalBlogs}</span>
-          <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>BLOG</span>
         </div>
       </div>
 
