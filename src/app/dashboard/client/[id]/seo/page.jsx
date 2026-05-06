@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import BlogTracker from './blog-tracker';
@@ -66,13 +67,15 @@ export default async function SEOPage({ params }) {
 
       <div className="card">
         <h2 className="heading-2" style={{ fontSize: '1.25rem' }}>Blog Listesi (SEO)</h2>
-        <BlogTracker 
-          clientId={client.id} 
-          initialTasks={client.tasks} 
-          isAdmin={session.role === 'ADMIN' || session.role === 'ADVERTISER'} 
-          websiteType={client.websiteType}
-          blogApiUrl={client.blogApiUrl}
-        />
+        <Suspense fallback={<div>Yükleniyor...</div>}>
+          <BlogTracker 
+            clientId={client.id} 
+            initialTasks={client.tasks} 
+            isAdmin={session.role === 'ADMIN' || session.role === 'ADVERTISER'} 
+            websiteType={client.websiteType}
+            blogApiUrl={client.blogApiUrl}
+          />
+        </Suspense>
       </div>
     </div>
   );

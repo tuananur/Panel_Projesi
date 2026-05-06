@@ -529,7 +529,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div className="calendar-header">
           <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>
-            {MONTHS[month]} {year}
+            {MONTHS[selectedMonth]} {selectedYear}
           </h3>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button className="btn" onClick={() => handleYearChange(selectedYear - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear - 1}</button>

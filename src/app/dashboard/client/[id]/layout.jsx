@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import ClientNav from './client-nav';
@@ -141,12 +142,14 @@ export default async function ClientDetailLayout({ children, params }) {
 
         {/* Weekly Stats moved back to Header with full data */}
         <div style={{ marginTop: '0.5rem' }}>
-          <WeeklyStats 
-            clientId={id}
-            tasks={client.tasks} 
-            schedule={socialSchedule} 
-            platforms={activePlatforms} 
-          />
+          <Suspense fallback={<div style={{ height: '60px', background: 'var(--bg-secondary)', borderRadius: '12px', opacity: 0.5 }}></div>}>
+            <WeeklyStats 
+              clientId={id}
+              tasks={client.tasks} 
+              schedule={socialSchedule} 
+              platforms={activePlatforms} 
+            />
+          </Suspense>
         </div>
       </div>
 
