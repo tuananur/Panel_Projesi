@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
@@ -52,6 +52,7 @@ const PLATFORM_ICONS = {
 
 export default function StatsContent({ client }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [activeTask, setActiveTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,11 +65,18 @@ export default function StatsContent({ client }) {
   const [showPendingModal, setShowPendingModal] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState(null);
 
+  const monthParam = searchParams.get('month');
+  const yearParam = searchParams.get('year');
+  const now = new Date();
+  
+  const displayMonth = monthParam !== null ? parseInt(monthParam) : now.getMonth();
+  const displayYear = yearParam !== null ? parseInt(yearParam) : now.getFullYear();
+
   const turkishMonths = [
     'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
   ];
-  const currentMonthName = turkishMonths[new Date().getMonth()];
+  const currentMonthName = turkishMonths[displayMonth];
 
   const getWeekOfMonth = (date) => {
     const d = new Date(date);
@@ -81,8 +89,7 @@ export default function StatsContent({ client }) {
   const currentMonthBlogs = (client.tasks || []).filter(t => {
     if (t.type !== 'BLOG') return false;
     const d = new Date(t.date);
-    const now = new Date();
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
   });
 
   const blogsByWeek = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
@@ -101,7 +108,7 @@ export default function StatsContent({ client }) {
   const now = new Date();
   const currentMonthTasks = client.tasks.filter(t => {
     const d = new Date(t.date);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
   });
   const completedThisMonth = currentMonthTasks.filter(t => t.status).length;
 
@@ -120,8 +127,7 @@ export default function StatsContent({ client }) {
     const taskPlatforms = (client?.tasks || []).filter(t => {
       if (t.type !== 'SOCIAL') return false;
       const d = new Date(t.date);
-      const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
     }).map(t => t.platform);
     
     // Combine and unique
@@ -138,8 +144,7 @@ export default function StatsContent({ client }) {
     if (t.type !== 'SOCIAL') return false;
     if (t.note === '__DELETED__') return false;
     const d = new Date(t.date);
-    const now = new Date();
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
   }).forEach(t => {
     const d = new Date(t.date);
     const week = getWeekOfMonth(d);
@@ -168,9 +173,8 @@ export default function StatsContent({ client }) {
     if (t.type !== 'SOCIAL') return false;
     if (t.note === '__DELETED__') return false; // Ignore manually hidden tasks
     const d = new Date(t.date);
-    const now = new Date();
     // Use UTC comparison to avoid timezone issues or just local is fine for dashboard
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
   }).forEach(t => {
     if (t.platform && activeSettingsPlatforms.includes(t.platform)) {
       if (t.status) {
@@ -381,8 +385,8 @@ export default function StatsContent({ client }) {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-color)', opacity: 0.7 }}>
-                  <th style={{ padding: '0.3rem 0.1rem', textAlign: 'left' }}>H</th>
-                  <th style={{ padding: '0.3rem 0.1rem', textAlign: 'left' }}>G</th>
+                  <th style={{ padding: '0.5rem 0.2rem', textAlign: 'center', fontSize: '0.55rem', fontWeight: 800 }}>HAFTA</th>
+                  <th style={{ padding: '0.5rem 0.2rem', textAlign: 'left', fontSize: '0.55rem', fontWeight: 800 }}>GÜN</th>
                   {activePlatforms.map(p => (
                     <th key={p} style={{ padding: '0.3rem 0.1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -393,25 +397,41 @@ export default function StatsContent({ client }) {
                 </tr>
               </thead>
               <tbody>
-                {[1, 2, 3, 4].map(week => (
-                  Object.keys(socialGrid[week] || {}).length > 0 ? (
-                    Object.keys(socialGrid[week]).map((day, idx) => (
-                      <tr key={`${week}-${day}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <td style={{ padding: '0.3rem 0.1rem', fontWeight: 700, color: 'var(--accent-primary)' }}>{idx === 0 ? week : ''}</td>
-                        <td style={{ padding: '0.3rem 0.1rem', opacity: 0.8 }}>{day}</td>
-                        {activePlatforms.map(p => (
-                          <td key={p} style={{ padding: '0.3rem 0.1rem', textAlign: 'center' }}>
-                            {socialGrid[week][day][p] !== undefined ? (
-                              socialGrid[week][day][p] ? 
-                                <CheckCircle2 size={10} style={{ color: '#10b981' }} /> : 
-                                <X size={10} style={{ color: '#ef4444' }} />
-                            ) : '-'}
-                          </td>
-                        ))}
-                      </tr>
-                    ))
-                  ) : null
-                ))}
+                {[1, 2, 3, 4, 5, 6].map(week => {
+                  const daysInThisWeek = Object.keys(socialGrid[week] || {});
+                  if (daysInThisWeek.length === 0) return null;
+
+                  return daysInThisWeek.map((day, idx) => (
+                    <tr key={`${week}-${day}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      {idx === 0 && (
+                        <td 
+                          rowSpan={daysInThisWeek.length} 
+                          style={{ 
+                            padding: '0.3rem', 
+                            fontWeight: 800, 
+                            color: 'var(--accent-primary)', 
+                            textAlign: 'center', 
+                            verticalAlign: 'middle',
+                            borderRight: '1px solid rgba(255,255,255,0.05)',
+                            fontSize: '0.7rem'
+                          }}
+                        >
+                          {week}
+                        </td>
+                      )}
+                      <td style={{ padding: '0.4rem 0.2rem', opacity: 0.8, fontWeight: 600 }}>{day}</td>
+                      {activePlatforms.map(p => (
+                        <td key={p} style={{ padding: '0.4rem 0.1rem', textAlign: 'center' }}>
+                          {socialGrid[week][day][p] !== undefined ? (
+                            socialGrid[week][day][p] ? 
+                              <CheckCircle2 size={12} style={{ color: '#10b981' }} /> : 
+                              <X size={12} style={{ color: '#ef4444' }} />
+                          ) : '-'}
+                        </td>
+                      ))}
+                    </tr>
+                  ));
+                })}
                 {Object.keys(socialGrid).length === 0 && (
                   <tr>
                     <td colSpan={activePlatforms.length + 2} style={{ textAlign: 'center', padding: '2rem 0', opacity: 0.3 }}>Veri yok</td>
