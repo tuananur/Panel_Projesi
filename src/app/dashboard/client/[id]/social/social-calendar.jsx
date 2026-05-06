@@ -232,14 +232,21 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
       
       // If task has a platform, it must be in the active platforms list from settings
       if (t.platform && !platforms.includes(t.platform)) return false;
+
+      // Hide manually deleted tasks
+      if (t.note === '__DELETED__') return false;
       
       return true;
     });
 
     const scheduledOnly = PLATFORMS.filter(p => {
       const isScheduled = (schedule[p] || []).includes(dayName);
-      const hasTask = dayTasks.some(t => t.platform === p);
-      return isScheduled && !hasTask;
+      // Check if any task (including __DELETED__ ones) exists for this day and platform
+      const hasAnyTask = initialTasks.some(t => {
+        const tDate = new Date(t.date);
+        return tDate.toLocaleDateString('en-CA') === targetDateStr && t.platform === p;
+      });
+      return isScheduled && !hasAnyTask;
     });
 
     const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
@@ -416,13 +423,24 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
               <Trash2 
                 size={11} 
                 style={{ cursor: 'pointer', color: '#ef4444' }} 
-                onClick={() => {
-                  const date = new Date(year, month, day);
-                  const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-                  const displayDayName = date.toLocaleDateString('tr-TR', { weekday: 'long' });
-                  setScheduleDeleteData({ platform: p, dayName, displayDayName });
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const date = new Date(year, month, day, 12);
+                  if (confirm(`${p} platformunu sadece bu gün için kaldırmak istediğinize emin misiniz?`)) {
+                    startTransition(async () => {
+                      const formData = new FormData();
+                      formData.append('clientId', clientId);
+                      formData.append('type', 'SOCIAL');
+                      formData.append('date', date.toISOString());
+                      formData.append('platform', p);
+                      formData.append('note', '__DELETED__');
+                      formData.append('status', 'false');
+                      await addTaskAction(formData);
+                      router.refresh();
+                    });
+                  }
                 }}
-                title="Plandan Kaldır"
+                title="Sadece Bugün İçin Kaldır"
               />
             </div>
           ))}

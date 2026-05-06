@@ -136,6 +136,7 @@ export default function StatsContent({ client }) {
 
   (client?.tasks || []).filter(t => {
     if (t.type !== 'SOCIAL') return false;
+    if (t.note === '__DELETED__') return false;
     const d = new Date(t.date);
     const now = new Date();
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
@@ -165,6 +166,7 @@ export default function StatsContent({ client }) {
 
   (client?.tasks || []).filter(t => {
     if (t.type !== 'SOCIAL') return false;
+    if (t.note === '__DELETED__') return false; // Ignore manually hidden tasks
     const d = new Date(t.date);
     const now = new Date();
     // Use UTC comparison to avoid timezone issues or just local is fine for dashboard
