@@ -66,7 +66,11 @@ export default async function ClientDetailLayout({ children, params }) {
   const services = JSON.parse(client.services || '[]');
   const socialAccounts = JSON.parse(client.socialAccounts || '{}');
   const socialSchedule = JSON.parse(client.socialSchedule || '{}');
-  const activePlatforms = Object.keys(socialAccounts).filter(p => socialAccounts[p] && socialAccounts[p].trim() !== '');
+  const activePlatforms = Object.keys(socialAccounts).filter(p => {
+    const hasAccount = socialAccounts[p] && socialAccounts[p].trim() !== '';
+    const hasSchedule = socialSchedule[p] && socialSchedule[p].length > 0;
+    return hasAccount || hasSchedule;
+  });
   
   const canSeeSEO = services.includes('SEO') && (session.role === 'ADMIN' || session.role === 'ADVERTISER');
   const canSeeSocial = services.includes('Sosyal Medya') && (session.role === 'ADMIN' || session.role === 'DESIGNER' || session.role === 'ADVERTISER');
