@@ -295,9 +295,9 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                 flexDirection: 'column', 
                 padding: '4px 6px', 
                 borderRadius: '4px', 
-                background: task.status ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.05)', 
+                background: task.status ? 'rgba(16, 185, 129, 0.05)' : 'rgba(245, 158, 11, 0.05)', 
                 border: '1px solid',
-                borderColor: task.status ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.1)'
+                borderColor: task.status ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -307,7 +307,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                     fontSize: '0.6rem', 
                     fontWeight: 700, 
                     cursor: 'pointer',
-                    color: task.status ? '#10b981' : 'var(--text-primary)',
+                    color: task.status ? '#10b981' : '#f59e0b',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
@@ -335,7 +335,7 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
                   )}
                   <div 
                     onClick={() => handleToggle(task.id, task.status)}
-                    style={{ cursor: 'pointer', color: task.status ? '#10b981' : 'var(--text-secondary)' }}
+                    style={{ cursor: 'pointer', color: task.status ? '#10b981' : '#f59e0b' }}
                   >
                     {task.status ? <CheckCircle2 size={12} /> : <Circle size={12} />}
                   </div>
