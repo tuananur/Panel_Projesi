@@ -126,10 +126,11 @@ export default function GlobalSearch() {
               </div>
               {results.map((task) => {
                 const taskDate = new Date(task.date);
-                const month = taskDate.getMonth(); // Dashboard uses 0-indexed months (0-11)
+                const month = taskDate.getMonth();
                 const year = taskDate.getFullYear();
+                const day = taskDate.getDate();
                 const targetPage = task.type === 'BLOG' ? 'seo' : 'social';
-                const href = `/dashboard/client/${task.client.id}/${targetPage}?month=${month}&year=${year}`;
+                const href = `/dashboard/client/${task.client.id}/${targetPage}?month=${month}&year=${year}&highlight=${day}`;
 
                 return (
                   <Link 
