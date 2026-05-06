@@ -93,7 +93,6 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
     setShowModal(true);
   };
 
-  const now = new Date();
 
   // --- Haftalık hesap ---
   const startOfWeek = new Date(now);
