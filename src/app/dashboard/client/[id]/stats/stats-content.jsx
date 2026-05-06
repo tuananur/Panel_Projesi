@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { 
   BarChart3, TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
-  ChevronRight, BookOpen, X, Calendar, ExternalLink, BarChart
+  ChevronRight, BookOpen, X, Calendar as CalendarIcon, ExternalLink, BarChart
 } from 'lucide-react';
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
+import { SPECIAL_DAYS } from '@/lib/holidays';
 
 const PLATFORM_ICONS = {
   Instagram: (
@@ -409,8 +410,83 @@ export default function StatsContent({ client }) {
           </div>
         </div>
 
-        {/* BÖLÜM 4-6: BOŞ KUTULAR */}
-        {[4, 5, 6].map(i => (
+        {/* BÖLÜM 4: YAKLAŞAN ÖZEL GÜNLER */}
+        <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Yaklaşan Özel Günler</h3>
+            <CalendarIcon size={16} className="text-accent" />
+          </div>
+          
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Bugün</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>
+              {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' })}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
+            {(() => {
+              const today = new Date();
+              const upcoming = Object.entries(SPECIAL_DAYS).map(([dateStr, name]) => {
+                const [month, day] = dateStr.split('-').map(Number);
+                let holidayDate = new Date(today.getFullYear(), month - 1, day);
+                if (holidayDate < today && (today.getDate() !== day || today.getMonth() !== month - 1)) {
+                  holidayDate.setFullYear(today.getFullYear() + 1);
+                }
+                const diffTime = holidayDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return { name, date: holidayDate, daysLeft: diffDays };
+              })
+              .sort((a, b) => a.daysLeft - b.daysLeft)
+              .slice(0, 5);
+
+              return upcoming.map((item, idx) => {
+                const opacity = 1 - (idx * 0.15);
+                const isVeryClose = item.daysLeft <= 7;
+                
+                return (
+                  <div key={item.name} style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.75rem', 
+                    padding: '0.75rem', 
+                    background: isVeryClose ? 'rgba(59, 130, 246, 0.08)' : 'rgba(255,255,255,0.02)', 
+                    borderRadius: '10px',
+                    border: '1px solid',
+                    borderColor: isVeryClose ? 'rgba(59, 130, 246, 0.2)' : 'var(--border-color)',
+                    opacity: opacity,
+                    transition: 'transform 0.2s'
+                  }} className="upcoming-day-item">
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      background: isVeryClose ? 'var(--accent-primary)' : 'var(--bg-primary)', 
+                      borderRadius: '8px', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      color: isVeryClose ? 'white' : 'var(--text-secondary)',
+                      flexShrink: 0
+                    }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{item.date.getDate()}</span>
+                      <span style={{ fontSize: '0.5rem', fontWeight: 700, textTransform: 'uppercase' }}>{item.date.toLocaleDateString('tr-TR', { month: 'short' })}</span>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
+                      <div style={{ fontSize: '0.65rem', color: isVeryClose ? 'var(--accent-primary)' : 'var(--text-secondary)', fontWeight: 600 }}>
+                        {item.daysLeft === 0 ? 'Bugün!' : `${item.daysLeft} gün kaldı`}
+                      </div>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+
+        {/* BÖLÜM 5-6: BOŞ KUTULAR */}
+        {[5, 6].map(i => (
           <div key={i} className="card" style={{ 
             background: 'var(--bg-secondary)', 
             border: '1px solid var(--border-color)', 
