@@ -213,7 +213,13 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
     const targetDateStr = new Date(year, month, day).toLocaleDateString('en-CA'); // YYYY-MM-DD
     const dayTasks = initialTasks.filter(t => {
       const tDate = new Date(t.date);
-      return tDate.toLocaleDateString('en-CA') === targetDateStr;
+      const isCorrectDate = tDate.toLocaleDateString('en-CA') === targetDateStr;
+      if (!isCorrectDate) return false;
+      
+      // If task has a platform, it must be in the active platforms list from settings
+      if (t.platform && !platforms.includes(t.platform)) return false;
+      
+      return true;
     });
 
     const scheduledOnly = PLATFORMS.filter(p => {

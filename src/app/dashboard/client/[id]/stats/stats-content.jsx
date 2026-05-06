@@ -169,8 +169,8 @@ export default function StatsContent({ client }) {
       if (t.status) {
         platformStats[t.platform] = (platformStats[t.platform] || 0) + 1;
       }
-    } else {
-      // Any platform not in settings OR special tasks
+    } else if (!t.platform || t.platform === 'Özel') {
+      // Only include actual special tasks, exclude tasks for inactive platforms
       specialTasksStats.push(t);
     }
   });
