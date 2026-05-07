@@ -785,3 +785,38 @@ export async function getMetaAdsAction(clientId) {
     return { error: 'FETCH_FAILED' };
   }
 }
+
+export async function testMetaConnectionAction(formData) {
+  const accountId = formData.get('metaAdAccountId')?.trim();
+  const accessToken = formData.get('metaAccessToken')?.trim();
+
+  if (!accountId || !accessToken) {
+    return { error: 'Eksik Bilgi', details: 'Lütfen hem Account ID hem de Access Token alanlarını doldurun.' };
+  }
+
+  const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
+  const url = `https://graph.facebook.com/v19.0/${finalAccountId}?fields=name,account_status&access_token=${accessToken}`;
+
+  try {
+    const response = await fetch(url, { cache: 'no-store' });
+    const data = await response.json();
+
+    if (data.error) {
+      return { 
+        success: false, 
+        error: 'API Hatası', 
+        details: data.error.message,
+        code: data.error.code,
+        subcode: data.error.error_subcode
+      };
+    }
+
+    return { 
+      success: true, 
+      message: `Bağlantı Başarılı! Hesap: ${data.name}`,
+      data: data 
+    };
+  } catch (err) {
+    return { success: false, error: 'Ağ Hatası', details: err.message };
+  }
+}

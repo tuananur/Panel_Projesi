@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { updateClientSettingsAction } from '@/app/actions';
+import { updateClientSettingsAction, testMetaConnectionAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import CustomDialog from '@/app/components/custom-dialog';
 
@@ -22,6 +22,8 @@ export default function SettingsForm({ client, role }) {
   const [error, setError] = useState('');
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('seo');
+  const [testResult, setTestResult] = useState(null);
+  const [testing, setTesting] = useState(false);
 
   const isDesigner = role === 'DESIGNER';
   const isAdvertiser = role === 'ADVERTISER';
@@ -57,6 +59,22 @@ export default function SettingsForm({ client, role }) {
       return { ...prev, [platform]: newDays };
     });
   };
+
+  async function handleTestConnection() {
+    setTesting(true);
+    setTestResult(null);
+    
+    const formData = new FormData();
+    const idInput = document.querySelector('input[name="metaAdAccountId"]');
+    const tokenInput = document.querySelector('textarea[name="metaAccessToken"]');
+    
+    formData.append('metaAdAccountId', idInput?.value || '');
+    formData.append('metaAccessToken', tokenInput?.value || '');
+    
+    const result = await testMetaConnectionAction(formData);
+    setTestResult(result);
+    setTesting(false);
+  }
 
   async function handleSubmit(formData) {
     setLoading(true);
@@ -278,10 +296,46 @@ export default function SettingsForm({ client, role }) {
               </p>
             </div>
 
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+              <button 
+                type="button" 
+                onClick={handleTestConnection}
+                disabled={testing}
+                className="btn"
+                style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  color: 'var(--text-primary)', 
+                  border: '1px solid var(--border-color)',
+                  width: '100%',
+                  fontSize: '0.8rem',
+                  padding: '0.6rem'
+                }}
+              >
+                {testing ? 'Bağlantı Test Ediliyor...' : 'Bağlantıyı Test Et'}
+              </button>
+
+              {testResult && (
+                <div style={{ 
+                  padding: '0.75rem', 
+                  borderRadius: '8px', 
+                  fontSize: '0.75rem',
+                  background: testResult.success ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                  border: `1px solid ${testResult.success ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                  color: testResult.success ? '#10b981' : '#ef4444'
+                }}>
+                  <div style={{ fontWeight: 800, marginBottom: '0.25rem' }}>
+                    {testResult.success ? 'BAŞARILI' : 'BAĞLANTI HATASI'}
+                  </div>
+                  <div style={{ opacity: 0.9 }}>{testResult.message || testResult.details}</div>
+                  {testResult.code && <div style={{ fontSize: '0.65rem', marginTop: '0.25rem', opacity: 0.7 }}>Hata Kodu: {testResult.code}</div>}
+                </div>
+              )}
+            </div>
+
             <button 
               type="submit" 
               className="btn" 
-              style={{ width: '100%', marginTop: 'auto', padding: '0.8rem', fontSize: '1rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}
+              style={{ width: '100%', marginTop: '0.5rem', padding: '0.8rem', fontSize: '1rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}
               disabled={loading}
             >
               {loading ? 'Kaydediliyor...' : 'Meta Ayarlarını Kaydet'}
