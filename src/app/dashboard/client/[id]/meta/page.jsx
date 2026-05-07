@@ -4,7 +4,7 @@ import { AlertCircle, ExternalLink, TrendingUp, MousePointer2, Eye, Users as Use
 import Link from 'next/link';
 
 export default async function MetaAdsPage({ params }) {
-  const { id } = params;
+  const { id } = await params;
   const result = await getMetaAdsAction(id);
 
   return (
