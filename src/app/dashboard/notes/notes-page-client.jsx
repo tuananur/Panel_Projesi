@@ -33,8 +33,6 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
 
   const handleAdd = async (formData) => {
     setLoading(true);
-    // If on general tab, don't send clientId (it should be null)
-    // If on client tab, the form should have a client selection
     const result = await addNoteAction(formData);
     if (result?.error) {
       setError(result.error);
@@ -141,79 +139,91 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
         </button>
       </div>
 
-      {/* Notlar Listesi */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.25rem' }}>
-        {filteredNotes.map((note) => (
-          <div key={note.id} className="card animate-fade-in" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', border: note.isDone ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid var(--border-color)', opacity: note.isDone ? 0.8 : 1 }}>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                <button 
-                  onClick={() => handleToggleStatus(note.id, note.isDone)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: '2px', color: note.isDone ? '#10b981' : 'var(--text-secondary)' }}
-                  title={note.isDone ? "Tamamlanmadı olarak işaretle" : "Tamamlandı olarak işaretle"}
-                >
-                  {note.isDone ? <CheckCircle2 size={20} /> : <Circle size={20} />}
-                </button>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 700, textDecoration: note.isDone ? 'line-through' : 'none', color: note.isDone ? 'var(--text-secondary)' : 'var(--text-primary)' }}>
-                    {note.title || (activeTab === 'general' ? 'Genel Not' : note.client?.companyName)}
-                  </h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                    <Clock size={12} />
-                    {new Date(note.createdAt).toLocaleDateString('tr-TR')} {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-                    {activeTab === 'client' && note.client && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
-                         | <Building2 size={12} /> {note.client.companyName}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <div style={{ display: 'flex', gap: '0.25rem' }}>
-                <button 
-                  onClick={() => { setSelectedNote(note); setIsEditModalOpen(true); }}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
-                >
-                  <Edit2 size={16} />
-                </button>
-                <button 
-                  onClick={() => { setSelectedNote(note); setIsDeleteModalOpen(true); }}
-                  style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-
-            <p style={{ 
-              fontSize: '0.9rem', 
-              color: note.isDone ? 'var(--text-secondary)' : 'var(--text-primary)', 
-              lineHeight: '1.6', 
-              whiteSpace: 'pre-wrap',
-              textDecoration: note.isDone ? 'line-through' : 'none'
-            }}>
-              {note.content}
-            </p>
-
-            {note.isDone && (
-              <div style={{ marginTop: 'auto', alignSelf: 'flex-end' }}>
-                <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>✓ Tamamlandı</span>
-              </div>
-            )}
-          </div>
-        ))}
-        
-        {filteredNotes.length === 0 && (
-          <div style={{ gridColumn: '1 / -1', padding: '5rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '2px dashed var(--border-color)' }}>
-             <StickyNote size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-             <p style={{ color: 'var(--text-secondary)' }}>Henüz not eklenmemiş.</p>
-          </div>
-        )}
+      {/* Notlar Listesi (Log Stili Tablo) */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
+                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '60px' }}>Durum</th>
+                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '200px' }}>Tarih / Yazılış</th>
+                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase' }}>Not Detayı</th>
+                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '100px', textAlign: 'right' }}>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredNotes.map((note) => (
+                <tr key={note.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s', opacity: note.isDone ? 0.6 : 1 }}>
+                  <td style={{ padding: '1rem', textAlign: 'center' }}>
+                    <button 
+                      onClick={() => handleToggleStatus(note.id, note.isDone)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: note.isDone ? '#10b981' : 'var(--text-secondary)' }}
+                    >
+                      {note.isDone ? <CheckCircle2 size={22} /> : <Circle size={22} />}
+                    </button>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
+                        <Clock size={12} />
+                        {new Date(note.createdAt).toLocaleDateString('tr-TR')}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      {(note.title || (activeTab === 'client' && note.client)) && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {note.title && <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-primary)' }}>{note.title}</span>}
+                          {activeTab === 'client' && note.client && (
+                            <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                              {note.client.companyName}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', textDecoration: note.isDone ? 'line-through' : 'none' }}>
+                        {note.content}
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                      <button 
+                        onClick={() => { setSelectedNote(note); setIsEditModalOpen(true); }}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => { setSelectedNote(note); setIsDeleteModalOpen(true); }}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredNotes.length === 0 && (
+                <tr>
+                  <td colSpan="4" style={{ padding: '5rem', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)' }}>
+                      <StickyNote size={48} style={{ opacity: 0.1 }} />
+                      <p>Henüz not bulunamadı.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Ekleme Modalı */}
+      {/* Modallar (Aynı Kaldı) */}
       <CustomDialog
         isOpen={isAddModalOpen}
         title="Yeni Not Ekle"
@@ -259,7 +269,6 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
         </form>
       </CustomDialog>
 
-      {/* Düzenleme Modalı */}
       <CustomDialog
         isOpen={isEditModalOpen}
         title="Notu Düzenle"
@@ -304,7 +313,6 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
         </form>
       </CustomDialog>
 
-      {/* Silme Onayı */}
       <CustomDialog
         isOpen={isDeleteModalOpen}
         title="Notu Sil"
@@ -317,7 +325,6 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
         <p style={{ color: 'var(--text-secondary)' }}>Bu notu kalıcı olarak silmek istediğinizden emin misiniz?</p>
       </CustomDialog>
 
-      {/* Hata Mesajı */}
       <CustomDialog
         isOpen={!!error}
         title="Hata"
