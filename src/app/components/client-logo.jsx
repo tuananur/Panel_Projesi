@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { User } from 'lucide-react';
 
-export default function ClientLogo({ logoUrl, companyName, size = '40px', borderRadius = '8px', isCircular = false }) {
+export default function ClientLogo({ logoUrl, companyName, size = '80px', borderRadius = '8px', isCircular = false }) {
   const [imgError, setImgError] = useState(0); // 0: ok, 1: clearbit failed, 2: google failed
   
   // URL bir resim mi yoksa web sitesi mi kontrol et
@@ -95,7 +95,7 @@ export default function ClientLogo({ logoUrl, companyName, size = '40px', border
         padding: '2px',
         border: '1px solid rgba(255,255,255,0.1)', 
         flexShrink: 0,
-        backgroundColor: 'white'
+        backgroundColor: 'var(--bg-primary)'
       }} 
     />
   );
