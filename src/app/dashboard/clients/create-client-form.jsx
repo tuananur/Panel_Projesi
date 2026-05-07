@@ -52,6 +52,17 @@ export default function CreateClientForm() {
       </div>
 
       <div className="input-group">
+        <label htmlFor="logoUrl" className="input-label">Logo Linki (URL)</label>
+        <input 
+          type="url" 
+          id="logoUrl" 
+          name="logoUrl" 
+          className="input-field" 
+          placeholder="https://.../logo.png"
+        />
+      </div>
+
+      <div className="input-group">
         <label htmlFor="contactName" className="input-label">İletişim Kişisi (Ad Soyad)</label>
         <input 
           type="text" 

@@ -59,6 +59,11 @@ export default function EditClientModal({ client }) {
               </div>
 
               <div className="input-group">
+                <label className="input-label">Logo Linki (URL)</label>
+                <input type="url" name="logoUrl" className="input-field" defaultValue={client.logoUrl || ''} placeholder="https://.../logo.png" />
+              </div>
+
+              <div className="input-group">
                 <label className="input-label">İletişim Kişisi</label>
                 <input type="text" name="contactName" className="input-field" defaultValue={client.contactName} required />
               </div>
