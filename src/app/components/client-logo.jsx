@@ -10,46 +10,53 @@ export default function ClientLogo({ logoUrl, companyName, size = '40px', border
   let finalSrc = logoUrl;
   
   if (logoUrl && imgError < 2) {
-    // Başına https:// ekleyerek URL'yi normalize et (eğer yoksa)
-    let normalizedUrl = logoUrl;
-    if (!normalizedUrl.startsWith('http')) {
-      normalizedUrl = 'https://' + normalizedUrl;
-    }
-
-    const isDirectImage = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/i.test(normalizedUrl.split('?')[0]);
+    // URL bir resim mi yoksa web sitesi mi kontrol et
+    let normalizedUrl = logoUrl.trim();
     
-    if (!isDirectImage) {
-      try {
-        const urlObj = new URL(normalizedUrl);
-        const domain = urlObj.hostname.replace('www.', '');
-        
-        // Instagram Kontrolü
-        if (domain.includes('instagram.com')) {
-          const username = urlObj.pathname.split('/').filter(p => p).pop();
-          if (username) {
-            finalSrc = `https://unavatar.io/instagram/${username}`;
-          }
-        } 
-        else if (imgError === 0) {
-          finalSrc = `https://logo.clearbit.com/${domain}`;
-        } else {
-          finalSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-        }
-      } catch (e) {
-        const lowerUrl = logoUrl.toLowerCase();
-        if (lowerUrl.includes('instagram.com')) {
-          const parts = lowerUrl.split('/');
-          const username = parts[parts.length - 1] || parts[parts.length - 2];
-          finalSrc = `https://unavatar.io/instagram/${username}`;
-        } else {
-          const cleanDomain = logoUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-          finalSrc = imgError === 0 
-            ? `https://logo.clearbit.com/${cleanDomain}` 
-            : `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`;
-        }
+    // @username formatı kontrolü
+    if (normalizedUrl.startsWith('@')) {
+      const username = normalizedUrl.substring(1);
+      finalSrc = `https://unavatar.io/instagram/${username}`;
+    } 
+    else {
+      if (!normalizedUrl.startsWith('http')) {
+        normalizedUrl = 'https://' + normalizedUrl;
       }
-    } else {
-      finalSrc = normalizedUrl;
+
+      const isDirectImage = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/i.test(normalizedUrl.split('?')[0]);
+      
+      if (!isDirectImage) {
+        try {
+          const urlObj = new URL(normalizedUrl);
+          const domain = urlObj.hostname.replace('www.', '');
+          
+          if (domain.includes('instagram.com')) {
+            const username = urlObj.pathname.split('/').filter(p => p && p !== 'reels' && p !== 'p').pop();
+            if (username) {
+              finalSrc = `https://unavatar.io/instagram/${username}`;
+            }
+          } 
+          else if (imgError === 0) {
+            finalSrc = `https://logo.clearbit.com/${domain}`;
+          } else {
+            finalSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+          }
+        } catch (e) {
+          const lowerUrl = normalizedUrl.toLowerCase();
+          if (lowerUrl.includes('instagram.com')) {
+            const parts = lowerUrl.split('/');
+            const username = parts.filter(p => p && p !== 'instagram.com' && p !== 'http:' && p !== 'https:').pop();
+            finalSrc = `https://unavatar.io/instagram/${username}`;
+          } else {
+            const cleanDomain = normalizedUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+            finalSrc = imgError === 0 
+              ? `https://logo.clearbit.com/${cleanDomain}` 
+              : `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`;
+          }
+        }
+      } else {
+        finalSrc = normalizedUrl;
+      }
     }
   }
 
