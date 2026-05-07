@@ -6,6 +6,19 @@ export const revalidate = 0;
 export async function GET() {
   try {
     // 1. Görevleri Güncelle
+    // 1. Canlı veritabanında logoUrl kolonu yoksa ekle (PostgreSQL/MySQL uyumlu)
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE "Client" ADD COLUMN IF NOT EXISTS "logoUrl" TEXT`);
+    } catch (e) {
+      // Eğer "Client" (büyük harf) veya "client" (küçük harf) hatası verirse diğerini dene
+      try {
+        await prisma.$executeRawUnsafe(`ALTER TABLE Client ADD COLUMN logoUrl TEXT`);
+      } catch (e2) {
+        console.log("Kolon muhtemelen zaten var veya hata oluştu:", e2.message);
+      }
+    }
+
+    // 2. Görevleri Güncelle
     const updatedTasksCount = await prisma.task.updateMany({
       where: {
         platform: {
@@ -15,7 +28,7 @@ export async function GET() {
       data: { platform: 'Pinterest' }
     });
 
-    // 2. Müşteri Ayarlarını Güncelle
+    // 3. Müşteri Ayarlarını Güncelle
     const clients = await prisma.client.findMany();
     let clientUpdateCount = 0;
 
@@ -55,7 +68,7 @@ export async function GET() {
 
     return NextResponse.json({ 
       success: true, 
-      message: `${updatedTasksCount.count} görev ve ${clientUpdateCount} müşteri güncellendi.` 
+      message: `${updatedTasksCount.count} görev ve ${clientUpdateCount} müşteri güncellendi. Logo alanı kontrol edildi.` 
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message });
