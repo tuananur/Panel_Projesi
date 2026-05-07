@@ -21,7 +21,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [activeTab, setActiveTab] = useState('campaigns'); // campaigns, ads
+  const [activeTab, setActiveTab] = useState('campaigns'); // campaigns, adsets, ads
   const [searchQuery, setSearchQuery] = useState('');
   
   const [since, setSince] = useState(initSince || '');
@@ -52,6 +52,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
   const filteredCampaigns = result.activeCampaigns.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredAdSets = result.adSets.filter(as => 
+    as.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredAds = result.ads.filter(ad => 
@@ -204,42 +208,15 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
       {/* Tabs */}
       <div style={{ borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '2rem' }}>
-        <button 
-          onClick={() => setActiveTab('campaigns')}
-          style={{ 
-            padding: '1rem 0.5rem', 
-            fontSize: '0.9rem', 
-            fontWeight: 700, 
-            background: 'none', 
-            border: 'none', 
-            borderBottom: activeTab === 'campaigns' ? '2px solid var(--accent-primary)' : '2px solid transparent',
-            color: activeTab === 'campaigns' ? 'var(--text-primary)' : 'var(--text-secondary)',
-            cursor: 'pointer'
-          }}
-        >
-          Kampanyalar ({filteredCampaigns.length})
-        </button>
-        <button 
-          onClick={() => setActiveTab('ads')}
-          style={{ 
-            padding: '1rem 0.5rem', 
-            fontSize: '0.9rem', 
-            fontWeight: 700, 
-            background: 'none', 
-            border: 'none', 
-            borderBottom: activeTab === 'ads' ? '2px solid var(--accent-primary)' : '2px solid transparent',
-            color: activeTab === 'ads' ? 'var(--text-primary)' : 'var(--text-secondary)',
-            cursor: 'pointer'
-          }}
-        >
-          Reklamlar ({filteredAds.length})
-        </button>
+        <TabButton id="campaigns" label="Kampanyalar" count={filteredCampaigns.length} activeTab={activeTab} onClick={setActiveTab} />
+        <TabButton id="adsets" label="Reklam Setleri" count={filteredAdSets.length} activeTab={activeTab} onClick={setActiveTab} />
+        <TabButton id="ads" label="Reklamlar" count={filteredAds.length} activeTab={activeTab} onClick={setActiveTab} />
       </div>
 
       {/* Main Table Content */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
-          {activeTab === 'campaigns' ? (
+          {activeTab === 'campaigns' && (
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
@@ -268,7 +245,45 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                 {filteredCampaigns.length === 0 && <EmptyRow colSpan={5} />}
               </tbody>
             </table>
-          ) : (
+          )}
+
+          {activeTab === 'adsets' && (
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
+                  <th style={thStyle}>DURUM</th>
+                  <th style={thStyle}>REKLAM SETİ ADI</th>
+                  <th style={thStyle}>BÜTÇE</th>
+                  <th style={thStyle}>OPTİMİZASYON</th>
+                  <th style={thStyle}>HARCAMA</th>
+                  <th style={thStyle}>TIKLAMA</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAdSets.map(as => {
+                  const insights = as.insights?.data?.[0] || {};
+                  return (
+                    <tr key={as.id} style={trStyle}>
+                      <td style={tdStyle}>
+                        <StatusBadge status={as.status} />
+                      </td>
+                      <td style={{ ...tdStyle, fontWeight: 700, color: '#f59e0b' }}>{as.name}</td>
+                      <td style={tdStyle}>
+                        {as.daily_budget ? `${(as.daily_budget / 100).toFixed(2)} TL (Günlük)` : 
+                         as.lifetime_budget ? `${(as.lifetime_budget / 100).toFixed(2)} TL (Toplam)` : 'Bütçe Belirtilmedi'}
+                      </td>
+                      <td style={tdStyle}>{as.optimization_goal?.replace('_', ' ')}</td>
+                      <td style={tdStyle}>{insights.spend || 0} TL</td>
+                      <td style={tdStyle}>{Number(insights.clicks || 0).toLocaleString()}</td>
+                    </tr>
+                  );
+                })}
+                {filteredAdSets.length === 0 && <EmptyRow colSpan={6} />}
+              </tbody>
+            </table>
+          )}
+
+          {activeTab === 'ads' && (
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
@@ -314,6 +329,30 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
         </div>
       </div>
     </div>
+  );
+}
+
+function TabButton({ id, label, count, activeTab, onClick }) {
+  const isActive = activeTab === id;
+  return (
+    <button 
+      onClick={() => onClick(id)}
+      style={{ 
+        padding: '1rem 0.5rem', 
+        fontSize: '0.9rem', 
+        fontWeight: 700, 
+        background: 'none', 
+        border: 'none', 
+        borderBottom: isActive ? '2px solid var(--accent-primary)' : '2px solid transparent',
+        color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem'
+      }}
+    >
+      {label} <span style={{ fontSize: '0.7rem', background: isActive ? 'var(--accent-primary)22' : 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{count}</span>
+    </button>
   );
 }
 
