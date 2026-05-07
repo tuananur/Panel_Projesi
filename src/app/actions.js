@@ -716,7 +716,7 @@ export async function getLatestNoteIdAction() {
   }
 }
 
-export async function getMetaAdsAction(clientId) {
+export async function getMetaAdsAction(clientId, datePreset = 'last_30d') {
   try {
     const client = await prisma.client.findUnique({
       where: { id: parseInt(clientId) }
@@ -741,14 +741,14 @@ export async function getMetaAdsAction(clientId) {
     // Ensure accountId starts with act_
     const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
 
-    // Fetch account insights
-    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?fields=spend,clicks,impressions,reach,cpc,ctr&date_preset=last_30d&access_token=${accessToken}`;
+    // Fetch account insights with dynamic date preset
+    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?fields=spend,clicks,impressions,reach,cpc,ctr&date_preset=${datePreset}&access_token=${accessToken}`;
     
     // Fetch active campaigns
-    const campaignsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns?fields=name,status,objective&status=['ACTIVE']&access_token=${accessToken}`;
+    const campaignsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns?fields=name,status,objective,daily_budget,lifetime_budget,start_time&access_token=${accessToken}`;
 
-    // Fetch individual ads
-    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,creative{name,body,image_url,thumbnail_url}&limit=10&access_token=${accessToken}`;
+    // Fetch ads
+    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,creative{name,body,image_url,thumbnail_url},insights.date_preset(${datePreset}){spend,clicks,impressions,ctr}&limit=25&access_token=${accessToken}`;
 
     try {
       const [insightsRes, campaignsRes, adsRes] = await Promise.all([
