@@ -357,7 +357,10 @@ export async function updateClientSettingsAction(clientId, formData) {
         socialAccounts,
         socialSchedule,
         specialInstructions,
-        logoUrl
+        logoUrl,
+        metaEnabled: formData.get('metaEnabled') === 'on',
+        metaAdAccountId: formData.get('metaAdAccountId'),
+        metaAccessToken: formData.get('metaAccessToken')
       }
     });
     await logActivity('UPDATE', 'SETTINGS', `Müşteri ayarları güncellendi.`, clientId);
@@ -710,5 +713,48 @@ export async function getLatestNoteIdAction() {
     return latestNote?.id || 0;
   } catch (error) {
     return 0;
+  }
+}
+
+export async function getMetaAdsAction(clientId) {
+  try {
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+
+    if (!client || !client.metaEnabled || !client.metaAdAccountId || !client.metaAccessToken) {
+      return { error: 'API_MISSING' };
+    }
+
+    const accountId = client.metaAdAccountId;
+    const accessToken = client.metaAccessToken;
+
+    // Fetch account insights (spend, clicks, impressions) for the last 30 days
+    const insightsUrl = `https://graph.facebook.com/v19.0/${accountId}/insights?fields=spend,clicks,impressions,reach,cpc,ctr&date_preset=last_30d&access_token=${accessToken}`;
+    
+    // Fetch active campaigns
+    const campaignsUrl = `https://graph.facebook.com/v19.0/${accountId}/campaigns?fields=name,status,objective&status=['ACTIVE']&access_token=${accessToken}`;
+
+    const [insightsRes, campaignsRes] = await Promise.all([
+      fetch(insightsUrl, { cache: 'no-store' }),
+      fetch(campaignsUrl, { cache: 'no-store' })
+    ]);
+
+    const insightsData = await insightsRes.json();
+    const campaignsData = await campaignsRes.json();
+
+    if (insightsData.error || campaignsData.error) {
+      console.error('Meta API Error:', insightsData.error || campaignsData.error);
+      return { error: 'API_ERROR', details: insightsData.error?.message || campaignsData.error?.message };
+    }
+
+    return {
+      success: true,
+      summary: insightsData.data[0] || null,
+      activeCampaigns: campaignsData.data || []
+    };
+  } catch (error) {
+    console.error('Meta fetch failed:', error);
+    return { error: 'FETCH_FAILED' };
   }
 }

@@ -230,6 +230,69 @@ export default function SettingsForm({ client, role }) {
             </button>
           )}
         </div>
+
+        {/* YENİ PANEL: Meta Ads Ayarları */}
+        <div className="card animate-fade-in" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
+            Meta Ads API Ayarları
+          </h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
+              <div style={{ flex: 1 }}>
+                <label className="input-label">Meta Entegrasyonu</label>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Bu müşteri için reklam verilerini aktifleştir.</p>
+              </div>
+              <input 
+                type="checkbox" 
+                name="metaEnabled" 
+                defaultChecked={client.metaEnabled}
+                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+              />
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">Ad Account ID (act_xxxxxxxx)</label>
+              <input 
+                type="text" 
+                name="metaAdAccountId" 
+                className="input-field" 
+                defaultValue={client.metaAdAccountId || ''}
+                placeholder="Örn: act_123456789"
+              />
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Reklam hesabınızın benzersiz kimlik numarası.</p>
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">Meta Access Token</label>
+              <textarea 
+                name="metaAccessToken" 
+                className="input-field" 
+                rows={4}
+                defaultValue={client.metaAccessToken || ''}
+                placeholder="EAA..."
+                style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
+              />
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Meta Marketing API erişim jetonu.</p>
+            </div>
+
+            <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              <p style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>İpucu:</p>
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                Access Token almak için Meta Developers panelinden 'Ads Management' izinlerine sahip bir token oluşturmalısınız.
+              </p>
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn" 
+              style={{ width: '100%', marginTop: 'auto', padding: '0.8rem', fontSize: '1rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}
+              disabled={loading}
+            >
+              {loading ? 'Kaydediliyor...' : 'Meta Ayarlarını Kaydet'}
+            </button>
+          </div>
+        </div>
       </div>
 
       <CustomDialog

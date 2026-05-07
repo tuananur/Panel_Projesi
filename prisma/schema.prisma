@@ -42,6 +42,11 @@ model Client {
   logs             ActivityLog[]
   notes            Note[]
 
+  // Meta Ads Integration
+  metaEnabled        Boolean @default(false)
+  metaAdAccountId    String? @db.Text
+  metaAccessToken    String? @db.Text
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
