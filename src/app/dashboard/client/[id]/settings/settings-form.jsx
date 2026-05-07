@@ -241,7 +241,10 @@ export default function SettingsForm({ client, role }) {
             <input type="hidden" name="metaEnabled" value="on" />
 
             <div className="input-group">
-              <label className="input-label">Ad Account ID (act_xxxxxxxx)</label>
+              <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                Ad Account ID (act_xxxxxxxx)
+                <a href="https://adsmanager.facebook.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}>ID Bul</a>
+              </label>
               <input 
                 type="text" 
                 name="metaAdAccountId" 
@@ -253,7 +256,10 @@ export default function SettingsForm({ client, role }) {
             </div>
 
             <div className="input-group">
-              <label className="input-label">Meta Access Token</label>
+              <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                Meta Access Token
+                <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', textDecoration: 'underline' }}>Token Al</a>
+              </label>
               <textarea 
                 name="metaAccessToken" 
                 className="input-field" 
