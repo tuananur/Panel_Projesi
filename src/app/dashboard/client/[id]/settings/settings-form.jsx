@@ -238,18 +238,7 @@ export default function SettingsForm({ client, role }) {
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
-              <div style={{ flex: 1 }}>
-                <label className="input-label">Meta Entegrasyonu</label>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Bu müşteri için reklam verilerini aktifleştir.</p>
-              </div>
-              <input 
-                type="checkbox" 
-                name="metaEnabled" 
-                defaultChecked={client.metaEnabled}
-                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-              />
-            </div>
+            <input type="hidden" name="metaEnabled" value="on" />
 
             <div className="input-group">
               <label className="input-label">Ad Account ID (act_xxxxxxxx)</label>
