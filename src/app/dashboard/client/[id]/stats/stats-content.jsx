@@ -474,12 +474,9 @@ export default function StatsContent({ client }) {
                       -
                     </div>
                   )}
-                  {/* Version Tag to verify deployment */}
-                <div style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.3, fontSize: '0.7rem' }}>
-                  Sürüm 2.0 - Pinterest Güncellemesi Aktif
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
