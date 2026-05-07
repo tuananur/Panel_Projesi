@@ -59,8 +59,8 @@ export default function EditClientModal({ client }) {
               </div>
 
               <div className="input-group">
-                <label className="input-label">Logo Linki (URL)</label>
-                <input type="url" name="logoUrl" className="input-field" defaultValue={client.logoUrl || ''} placeholder="https://.../logo.png" />
+                <label className="input-label">Logo Linki (URL) – Instagram hesabı @kullanıcıadi ya da https://instagram.com/kullanıcıadi</label>
+                <input type="url" name="logoUrl" className="input-field" defaultValue={client.logoUrl || ''} placeholder="https://.../logo.png veya @kullanıcıadi" />
               </div>
 
               <div className="input-group">
