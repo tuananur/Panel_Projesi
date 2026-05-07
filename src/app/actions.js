@@ -629,8 +629,14 @@ export async function addNoteAction(formData) {
         content
       }
     });
-    const client = await prisma.client.findUnique({ where: { id: clientId } });
-    await logActivity('CREATE', 'NOTE', `${client?.companyName} için yeni bir not eklendi.`, clientId);
+    
+    let details = 'Yeni bir kişisel not eklendi.';
+    if (clientId) {
+      const client = await prisma.client.findUnique({ where: { id: clientId } });
+      if (client) details = `${client.companyName} için yeni bir not eklendi.`;
+    }
+    
+    await logActivity('CREATE', 'NOTE', details, clientId);
     return { success: true };
   } catch (error) {
     return { error: 'Not eklenemedi.' };
@@ -644,7 +650,8 @@ export async function deleteNoteAction(formData) {
   try {
     const note = await prisma.note.findUnique({ where: { id: noteId }, include: { client: true } });
     await prisma.note.delete({ where: { id: noteId } });
-    await logActivity('DELETE', 'NOTE', `${note?.client.companyName} için bir not silindi.`, note?.clientId);
+    const details = note?.client ? `${note.client.companyName} için bir not silindi.` : 'Bir kişisel not silindi.';
+    await logActivity('DELETE', 'NOTE', details, note?.clientId);
     return { success: true };
   } catch (error) {
     return { error: 'Not silinemedi.' };
@@ -664,7 +671,8 @@ export async function updateNoteAction(formData) {
       where: { id: noteId },
       data: { content, title }
     });
-    await logActivity('UPDATE', 'NOTE', `${note?.client.companyName} için bir not güncellendi.`, note?.clientId);
+    const details = note?.client ? `${note.client.companyName} için bir not güncellendi.` : 'Bir kişisel not güncellendi.';
+    await logActivity('UPDATE', 'NOTE', details, note?.clientId);
     return { success: true };
   } catch (error) {
     return { error: 'Not güncellenemedi.' };
