@@ -6,8 +6,12 @@ export const revalidate = 0;
 export async function GET() {
   try {
     // 1. Görevleri Güncelle
-    const updatedTasks = await prisma.task.updateMany({
-      where: { platform: 'TikTok' },
+    const updatedTasksCount = await prisma.task.updateMany({
+      where: {
+        platform: {
+          in: ['TikTok', 'tiktok', 'Tiktok', 'tik tok']
+        }
+      },
       data: { platform: 'Pinterest' }
     });
 
@@ -51,7 +55,7 @@ export async function GET() {
 
     return NextResponse.json({ 
       success: true, 
-      message: `${updatedTasks.count} görev ve ${clientUpdateCount} müşteri güncellendi. Artık TikTok tamamen Pinterest oldu!` 
+      message: `${updatedTasksCount.count} görev ve ${clientUpdateCount} müşteri güncellendi.` 
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message });
