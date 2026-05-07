@@ -92,44 +92,86 @@ export default async function MetaAdsPage({ params }) {
              </div>
 
              {/* Aktif Kampanyalar */}
-             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Aktif Kampanyalar</h3>
-                  <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: 'full', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontWeight: 600 }}>
-                    {result.activeCampaigns.length} Aktif
-                  </span>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                  <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Aktif Kampanyalar</h3>
+                    <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: 'full', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontWeight: 600 }}>
+                      {result.activeCampaigns.length} Aktif
+                    </span>
+                  </div>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: 'rgba(255,255,255,0.02)', textAlign: 'left' }}>
+                          <th style={{ padding: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>KAMPANYA ADI</th>
+                          <th style={{ padding: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>HEDEF</th>
+                          <th style={{ padding: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>DURUM</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.activeCampaigns.map(camp => (
+                          <tr key={camp.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                            <td style={{ padding: '1rem', fontWeight: 600, fontSize: '0.9rem' }}>{camp.name}</td>
+                            <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{camp.objective?.replace('_', ' ')}</td>
+                            <td style={{ padding: '1rem' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontSize: '0.8rem', fontWeight: 600 }}>
+                                <span style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%' }}></span>
+                                AKTİF
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        {result.activeCampaigns.length === 0 && (
+                          <tr>
+                            <td colSpan="3" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                              Şu an aktif kampanya bulunmuyor.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ background: 'rgba(255,255,255,0.02)', textAlign: 'left' }}>
-                        <th style={{ padding: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>KAMPANYA ADI</th>
-                        <th style={{ padding: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>HEDEF</th>
-                        <th style={{ padding: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>DURUM</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {result.activeCampaigns.map(camp => (
-                        <tr key={camp.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                          <td style={{ padding: '1rem', fontWeight: 600, fontSize: '0.9rem' }}>{camp.name}</td>
-                          <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{camp.objective?.replace('_', ' ')}</td>
-                          <td style={{ padding: '1rem' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontSize: '0.8rem', fontWeight: 600 }}>
-                              <span style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%' }}></span>
-                              AKTİF
+
+                {/* YENİ: Reklam Detayları */}
+                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                  <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Reklam İçerikleri (Ads)</h3>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {result.ads.map(ad => (
+                      <div key={ad.id} style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '1.5rem' }}>
+                        {ad.creative?.image_url || ad.creative?.thumbnail_url ? (
+                          <img 
+                            src={ad.creative.image_url || ad.creative.thumbnail_url} 
+                            alt={ad.name}
+                            style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', background: 'var(--bg-primary)' }}
+                          />
+                        ) : (
+                          <div style={{ width: '80px', height: '80px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TrendingUp size={24} style={{ opacity: 0.2 }} />
+                          </div>
+                        )}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <h4 style={{ fontWeight: 600, fontSize: '0.95rem' }}>{ad.name}</h4>
+                            <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: ad.status === 'ACTIVE' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.1)', color: ad.status === 'ACTIVE' ? '#10b981' : 'var(--text-secondary)', fontWeight: 700 }}>
+                              {ad.status === 'ACTIVE' ? 'AKTİF' : 'DURDURULDU'}
                             </span>
-                          </td>
-                        </tr>
-                      ))}
-                      {result.activeCampaigns.length === 0 && (
-                        <tr>
-                          <td colSpan="3" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                            Şu an aktif kampanya bulunmuyor.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                          </div>
+                          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {ad.creative?.body || 'Reklam metni bulunamadı.'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {result.ads.length === 0 && (
+                      <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                        Reklam detayı bulunamadı.
+                      </div>
+                    )}
+                  </div>
                 </div>
              </div>
           </div>

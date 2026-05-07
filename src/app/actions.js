@@ -735,23 +735,29 @@ export async function getMetaAdsAction(clientId) {
     // Fetch active campaigns
     const campaignsUrl = `https://graph.facebook.com/v19.0/${accountId}/campaigns?fields=name,status,objective&status=['ACTIVE']&access_token=${accessToken}`;
 
-    const [insightsRes, campaignsRes] = await Promise.all([
+    // Fetch individual ads with creative details
+    const adsUrl = `https://graph.facebook.com/v19.0/${accountId}/ads?fields=name,status,creative{name,body,image_url,thumbnail_url}&limit=10&access_token=${accessToken}`;
+
+    const [insightsRes, campaignsRes, adsRes] = await Promise.all([
       fetch(insightsUrl, { cache: 'no-store' }),
-      fetch(campaignsUrl, { cache: 'no-store' })
+      fetch(campaignsUrl, { cache: 'no-store' }),
+      fetch(adsUrl, { cache: 'no-store' })
     ]);
 
     const insightsData = await insightsRes.json();
     const campaignsData = await campaignsRes.json();
+    const adsData = await adsRes.json();
 
-    if (insightsData.error || campaignsData.error) {
-      console.error('Meta API Error:', insightsData.error || campaignsData.error);
-      return { error: 'API_ERROR', details: insightsData.error?.message || campaignsData.error?.message };
+    if (insightsData.error || campaignsData.error || adsData.error) {
+      console.error('Meta API Error:', insightsData.error || campaignsData.error || adsData.error);
+      return { error: 'API_ERROR', details: (insightsData.error || campaignsData.error || adsData.error)?.message };
     }
 
     return {
       success: true,
       summary: insightsData.data[0] || null,
-      activeCampaigns: campaignsData.data || []
+      activeCampaigns: campaignsData.data || [],
+      ads: adsData.data || []
     };
   } catch (error) {
     console.error('Meta fetch failed:', error);
