@@ -163,7 +163,11 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
             </thead>
             <tbody>
               {filteredNotes.map((note) => (
-                <tr key={note.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s', opacity: note.isDone ? 0.6 : 1 }}>
+                <tr key={note.id} style={{ 
+                  borderBottom: '1px solid rgba(255,255,255,0.05)', 
+                  transition: 'all 0.3s', 
+                  background: note.isDone ? 'rgba(16, 185, 129, 0.03)' : 'transparent' 
+                }}>
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
                     <button 
                       onClick={() => handleToggleStatus(note.id, note.isDone)}
@@ -174,11 +178,11 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
                   </td>
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: note.isDone ? '#10b981' : 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600 }}>
                         <Clock size={12} />
                         {new Date(note.createdAt).toLocaleDateString('tr-TR')}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      <div style={{ fontSize: '0.75rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)' }}>
                         {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </div>
@@ -187,15 +191,27 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                       {(note.title || (activeTab === 'client' && note.client)) && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          {note.title && <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-primary)' }}>{note.title}</span>}
+                          {note.title && <span style={{ fontWeight: 700, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'var(--accent-primary)' }}>{note.title}</span>}
                           {activeTab === 'client' && note.client && (
-                            <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                            <span style={{ 
+                              fontSize: '0.7rem', 
+                              padding: '1px 6px', 
+                              borderRadius: '4px', 
+                              background: note.isDone ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)', 
+                              color: note.isDone ? '#10b981' : 'var(--accent-primary)', 
+                              fontWeight: 600 
+                            }}>
                               {note.client.companyName}
                             </span>
                           )}
                         </div>
                       )}
-                      <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', textDecoration: note.isDone ? 'line-through' : 'none' }}>
+                      <div style={{ 
+                        fontSize: '0.9rem', 
+                        color: note.isDone ? '#10b981' : 'var(--text-primary)', 
+                        whiteSpace: 'pre-wrap',
+                        opacity: note.isDone ? 0.9 : 1
+                      }}>
                         {note.content}
                       </div>
                     </div>

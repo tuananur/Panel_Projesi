@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Search, Trash2, Edit2, Clock, User as UserIcon, StickyNote } from 'lucide-react';
-import { addNoteAction, deleteNoteAction, updateNoteAction } from '@/app/actions';
+import { Plus, Search, Trash2, Edit2, Clock, CheckCircle2, Circle, User as UserIcon, StickyNote } from 'lucide-react';
+import { addNoteAction, deleteNoteAction, updateNoteAction, toggleNoteStatusAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 
 export default function NotesClient({ clientId, notes, currentUserId, userRole }) {
@@ -76,6 +76,14 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
     setLoading(false);
   };
 
+  const handleToggleStatus = async (noteId, currentStatus) => {
+    const formData = new FormData();
+    formData.append('noteId', noteId);
+    formData.append('isDone', (!currentStatus).toString());
+    await toggleNoteStatusAction(formData);
+    router.refresh();
+  };
+
   const canManage = (note) => {
     return userRole === 'ADMIN' || note.userId === currentUserId;
   };
@@ -110,6 +118,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
+                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '60px', textAlign: 'center' }}>DURUM</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '25%' }}>Yazan / Tarih</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase' }}>Not İçeriği</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '120px', textAlign: 'right' }}>İşlemler</th>
@@ -117,16 +126,28 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
             </thead>
             <tbody>
               {filteredNotes.map((note) => (
-                <tr key={note.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
+                <tr key={note.id} style={{ 
+                  borderBottom: '1px solid rgba(255,255,255,0.05)', 
+                  transition: 'all 0.3s', 
+                  background: note.isDone ? 'rgba(16, 185, 129, 0.03)' : 'transparent' 
+                }}>
+                  <td style={{ padding: '1rem', textAlign: 'center' }}>
+                    <button 
+                      onClick={() => handleToggleStatus(note.id, note.isDone)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: note.isDone ? '#10b981' : 'var(--text-secondary)' }}
+                    >
+                      {note.isDone ? <CheckCircle2 size={22} /> : <Circle size={22} />}
+                    </button>
+                  </td>
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' }}>
-                          <UserIcon size={12} style={{ opacity: 0.7 }} />
+                          <UserIcon size={12} style={{ opacity: 0.7, color: note.isDone ? '#10b981' : 'inherit' }} />
                         </div>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{note.user.username}</div>
+                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'inherit' }}>{note.user.username}</div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)', fontSize: '0.75rem' }}>
                         <Clock size={12} />
                         {new Date(note.createdAt).toLocaleDateString('tr-TR')} {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
@@ -135,9 +156,15 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                       {note.title && (
-                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--accent-primary)' }}>{note.title}</div>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: note.isDone ? '#10b981' : 'var(--accent-primary)' }}>{note.title}</div>
                       )}
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                      <div style={{ 
+                        fontSize: '0.85rem', 
+                        color: note.isDone ? '#10b981' : 'var(--text-primary)', 
+                        whiteSpace: 'pre-wrap', 
+                        lineHeight: '1.6',
+                        opacity: note.isDone ? 0.9 : 1
+                      }}>
                         {note.content}
                       </div>
                     </div>
@@ -166,7 +193,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
               ))}
               {filteredNotes.length === 0 && (
                 <tr>
-                  <td colSpan="3" style={{ padding: '5rem', textAlign: 'center' }}>
+                  <td colSpan="4" style={{ padding: '5rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)' }}>
                       <StickyNote size={48} style={{ opacity: 0.1 }} />
                       <p>{search ? 'Arama sonucu bulunamadı.' : 'Henüz not eklenmemiş.'}</p>
