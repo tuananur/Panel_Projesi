@@ -14,8 +14,6 @@ export default async function MetaAdsPage({ params }) {
         <p style={{ color: 'var(--text-secondary)' }}>Bu müşterinin Meta (Instagram & Facebook) reklam performansını canlı olarak takip edin.</p>
       </div>
 
-      <ClientNav clientId={id} />
-
       {result.error === 'API_MISSING' ? (
         <div className="card animate-fade-in" style={{ 
           display: 'flex', 
