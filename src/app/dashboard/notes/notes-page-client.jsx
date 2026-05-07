@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Trash2, Edit2, Clock, CheckCircle2, Circle, StickyNote, Building2, User as UserIcon } from 'lucide-react';
 import { addNoteAction, deleteNoteAction, updateNoteAction, toggleNoteStatusAction } from '@/app/actions';
@@ -8,6 +8,20 @@ import CustomDialog from '@/app/components/custom-dialog';
 
 export default function NotesPageClient({ initialNotes, clients, currentUserId }) {
   const router = useRouter();
+  
+  // Clear notification on mount
+  useEffect(() => {
+    if (initialNotes.length > 0) {
+      const latestOtherNote = initialNotes.find(n => n.userId !== currentUserId);
+      if (latestOtherNote) {
+        const lastSeen = parseInt(localStorage.getItem('last_seen_note_id') || '0');
+        if (latestOtherNote.id > lastSeen) {
+          localStorage.setItem('last_seen_note_id', latestOtherNote.id.toString());
+          window.dispatchEvent(new Event('storage'));
+        }
+      }
+    }
+  }, [initialNotes, currentUserId]);
   const [activeTab, setActiveTab] = useState('general'); // 'general' or 'client'
   const [search, setSearch] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);

@@ -693,3 +693,22 @@ export async function toggleNoteStatusAction(formData) {
     return { error: 'Not durumu güncellenemedi.' };
   }
 }
+
+export async function getLatestNoteIdAction() {
+  try {
+    const session = await getSession();
+    if (!session) return 0;
+    
+    const latestNote = await prisma.note.findFirst({
+      where: {
+        userId: { not: session.userId }
+      },
+      orderBy: { id: 'desc' },
+      select: { id: true }
+    });
+    
+    return latestNote?.id || 0;
+  } catch (error) {
+    return 0;
+  }
+}

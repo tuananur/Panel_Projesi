@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getLatestLogIdAction } from '@/app/actions';
+import { getLatestLogIdAction, getLatestNoteIdAction } from '@/app/actions';
 
 export default function Sidebar({ role, isMobileOpen, onClose }) {
   const pathname = usePathname();
@@ -24,6 +24,7 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
 
   const isAdmin = role === 'ADMIN';
   const [hasNewLogs, setHasNewLogs] = useState(false);
+  const [hasNewNotes, setHasNewNotes] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
@@ -47,6 +48,22 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
       };
     }
   }, [isAdmin, pathname]);
+
+  useEffect(() => {
+    const checkNotes = async () => {
+      const latestId = await getLatestNoteIdAction();
+      const lastSeenId = parseInt(localStorage.getItem('last_seen_note_id') || '0');
+      if (latestId > lastSeenId) {
+        setHasNewNotes(true);
+      } else {
+        setHasNewNotes(false);
+      }
+    };
+    checkNotes();
+    
+    const interval = setInterval(checkNotes, 30000);
+    return () => clearInterval(interval);
+  }, [pathname]);
 
   const navItems = [
     { href: '/dashboard', label: 'Gösterge Paneli', icon: <LayoutDashboard size={20} /> },
@@ -177,7 +194,22 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
                     backgroundColor: '#ef4444',
                     borderRadius: '50%',
                     border: '2px solid var(--bg-secondary)',
-                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)'
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)',
+                    animation: 'pulse-red 2s infinite'
+                  }}></span>
+                )}
+                {item.label === 'Kişisel Notlar' && hasNewNotes && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#ef4444',
+                    borderRadius: '50%',
+                    border: '2px solid var(--bg-secondary)',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)',
+                    animation: 'pulse-red 2s infinite'
                   }}></span>
                 )}
               </div>
