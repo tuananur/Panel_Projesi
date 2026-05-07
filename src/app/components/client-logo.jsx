@@ -19,7 +19,12 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
     }
     else if (normalizedUrl.startsWith('@')) {
       const username = normalizedUrl.substring(1);
-      finalSrc = `https://unavatar.io/instagram/${username}`;
+      if (imgError === 0) {
+        finalSrc = `https://unavatar.io/instagram/${username}`;
+      } else {
+        // Instagram username için favicon denemeye gerek yok, doğrudan fallback'e düş
+        setImgError(2);
+      }
     } 
     else {
       if (!normalizedUrl.startsWith('http')) {
@@ -105,7 +110,7 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
           height: '100%', 
           objectFit: 'contain', 
           padding: '2px',
-          display: 'block'
+          display: imgError > 0 ? 'none' : 'block' // İlk deneme başarısızsa resmi gizle
         }} 
       />
     </div>
