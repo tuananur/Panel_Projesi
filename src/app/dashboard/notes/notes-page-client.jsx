@@ -19,10 +19,20 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
 
   // Filtering notes based on tab and search
   const filteredNotes = initialNotes.filter(note => {
+    const lowerSearch = search.toLowerCase();
+    const createdAt = new Date(note.createdAt);
+    const dateStr = createdAt.toLocaleDateString('tr-TR'); // "19.05.2024"
+    const monthNames = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
+    const monthName = monthNames[createdAt.getMonth()];
+    const day = createdAt.getDate().toString();
+    const fullDateText = `${day} ${monthName}`; // "19 mayıs"
+
     const matchesSearch = 
-      (note.title?.toLowerCase().includes(search.toLowerCase())) ||
-      (note.content.toLowerCase().includes(search.toLowerCase())) ||
-      (note.client?.companyName.toLowerCase().includes(search.toLowerCase()));
+      (note.title?.toLowerCase().includes(lowerSearch)) ||
+      (note.content.toLowerCase().includes(lowerSearch)) ||
+      (note.client?.companyName.toLowerCase().includes(lowerSearch)) ||
+      (dateStr.includes(lowerSearch)) ||
+      (fullDateText.includes(lowerSearch));
     
     if (activeTab === 'general') {
       return !note.clientId && matchesSearch;

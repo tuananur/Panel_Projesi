@@ -16,11 +16,23 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const filteredNotes = notes.filter(note => 
-    (note.title?.toLowerCase().includes(search.toLowerCase())) ||
-    (note.content.toLowerCase().includes(search.toLowerCase())) ||
-    (note.user.username.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredNotes = notes.filter(note => {
+    const lowerSearch = search.toLowerCase();
+    const createdAt = new Date(note.createdAt);
+    const dateStr = createdAt.toLocaleDateString('tr-TR'); 
+    const monthNames = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
+    const monthName = monthNames[createdAt.getMonth()];
+    const day = createdAt.getDate().toString();
+    const fullDateText = `${day} ${monthName}`;
+
+    return (
+      (note.title?.toLowerCase().includes(lowerSearch)) ||
+      (note.content.toLowerCase().includes(lowerSearch)) ||
+      (note.user.username.toLowerCase().includes(lowerSearch)) ||
+      (dateStr.includes(lowerSearch)) ||
+      (fullDateText.includes(lowerSearch))
+    );
+  });
 
   const handleAdd = async (formData) => {
     setLoading(true);
