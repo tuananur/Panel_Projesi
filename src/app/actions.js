@@ -610,11 +610,12 @@ export async function searchTasksAction(query) {
 }
 
 export async function addNoteAction(formData) {
-  const clientId = parseInt(formData.get('clientId'));
+  const clientIdRaw = formData.get('clientId');
+  const clientId = clientIdRaw ? parseInt(clientIdRaw) : null;
   const content = formData.get('content');
   const title = formData.get('title') || null;
 
-  if (!clientId || !content) {
+  if (!content) {
     return { error: 'Not içeriği boş olamaz.' };
   }
 
@@ -667,5 +668,20 @@ export async function updateNoteAction(formData) {
     return { success: true };
   } catch (error) {
     return { error: 'Not güncellenemedi.' };
+  }
+}
+
+export async function toggleNoteStatusAction(formData) {
+  const noteId = parseInt(formData.get('noteId'));
+  const isDone = formData.get('isDone') === 'true';
+
+  try {
+    await prisma.note.update({
+      where: { id: noteId },
+      data: { isDone }
+    });
+    return { success: true };
+  } catch (error) {
+    return { error: 'Not durumu güncellenemedi.' };
   }
 }

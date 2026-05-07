@@ -75,12 +75,13 @@ model ActivityLog {
 
 model Note {
   id        Int      @id @default(autoincrement())
-  clientId  Int
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  Int?     // Null = Genel Not
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
   title     String?
   content   String   @db.Text
+  isDone    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

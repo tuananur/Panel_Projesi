@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getLatestLogIdAction } from '@/app/actions';
 
@@ -55,6 +55,7 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
       { href: '/dashboard/users', label: 'Kullanıcılar', icon: <UserCircle size={20} /> },
       { href: '/dashboard/logs', label: 'Sistem Logları', icon: <ClipboardList size={20} /> },
     ] : []),
+    { href: '/dashboard/notes', label: 'Kişisel Notlar', icon: <StickyNote size={20} /> },
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
 
