@@ -7,8 +7,10 @@ export default async function MetaAdsPage({ params, searchParams }) {
   const { id } = await params;
   const sParams = await searchParams;
   const datePreset = sParams.datePreset || 'last_30d';
+  const since = sParams.since || null;
+  const until = sParams.until || null;
   
-  const result = await getMetaAdsAction(id, datePreset);
+  const result = await getMetaAdsAction(id, datePreset, since, until);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -18,7 +20,7 @@ export default async function MetaAdsPage({ params, searchParams }) {
           <p style={{ color: 'var(--text-secondary)' }}>Bu müşterinin Meta (Instagram & Facebook) reklam performansını canlı olarak takip edin.</p>
         </div>
         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-          Canlı Veri Senkronizasyonu Aktif
+          Canlı Veri Senkronizasyonu Aktif {since && until ? `(${since} - ${until})` : ''}
         </div>
       </div>
 
@@ -51,7 +53,7 @@ export default async function MetaAdsPage({ params, searchParams }) {
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>Token süresi dolmuş, izinleri eksik veya ID hatalı olabilir.</p>
         </div>
       ) : (
-        <MetaContent result={result} id={id} datePreset={datePreset} />
+        <MetaContent result={result} id={id} datePreset={datePreset} since={since} until={until} />
       )}
     </div>
   );

@@ -17,17 +17,35 @@ const DATE_PRESETS = [
   { id: 'last_month', label: 'Geçen Ay' }
 ];
 
-export default function MetaContent({ result, id, datePreset }) {
+export default function MetaContent({ result, id, datePreset, since: initSince, until: initUntil }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('campaigns'); // campaigns, ads
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const [since, setSince] = useState(initSince || '');
+  const [until, setUntil] = useState(initUntil || '');
 
   const handleDateChange = (preset) => {
+    setSince('');
+    setUntil('');
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       params.set('datePreset', preset);
+      params.delete('since');
+      params.delete('until');
+      router.push(`?${params.toString()}`);
+    });
+  };
+
+  const handleCustomDateApply = () => {
+    if (!since || !until) return;
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('datePreset');
+      params.set('since', since);
+      params.set('until', until);
       router.push(`?${params.toString()}`);
     });
   };
@@ -40,6 +58,8 @@ export default function MetaContent({ result, id, datePreset }) {
     ad.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const isCustom = !!(initSince && initUntil);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Top Filter Bar */}
@@ -49,31 +69,68 @@ export default function MetaContent({ result, id, datePreset }) {
         alignItems: 'center', 
         padding: '0.75rem 1.25rem',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '1.5rem',
         background: 'rgba(255,255,255,0.02)'
       }}>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <Calendar size={16} className="text-muted" />
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '2px' }}>
-            {DATE_PRESETS.map(preset => (
-              <button
-                key={preset.id}
-                onClick={() => handleDateChange(preset.id)}
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <Calendar size={16} className="text-muted" />
+            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '2px' }}>
+              {DATE_PRESETS.map(preset => (
+                <button
+                  key={preset.id}
+                  onClick={() => handleDateChange(preset.id)}
+                  style={{
+                    padding: '0.4rem 0.75rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: (!isCustom && datePreset === preset.id) ? 'var(--accent-primary)' : 'transparent',
+                    color: (!isCustom && datePreset === preset.id) ? 'white' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Özel:</span>
+              <input 
+                type="date" 
+                value={since}
+                onChange={(e) => setSince(e.target.value)}
+                style={dateInputStyle}
+              />
+              <span style={{ color: 'var(--text-secondary)' }}>-</span>
+              <input 
+                type="date" 
+                value={until}
+                onChange={(e) => setUntil(e.target.value)}
+                style={dateInputStyle}
+              />
+              <button 
+                onClick={handleCustomDateApply}
+                disabled={!since || !until || isPending}
                 style={{
-                  padding: '0.4rem 0.75rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
+                  padding: '0.4rem 0.8rem',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
                   borderRadius: '6px',
-                  border: 'none',
-                  background: datePreset === preset.id ? 'var(--accent-primary)' : 'transparent',
-                  color: datePreset === preset.id ? 'white' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  background: isCustom ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                  color: isCustom ? 'white' : 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
+                  cursor: 'pointer'
                 }}
               >
-                {preset.label}
+                Uygula
               </button>
-            ))}
+            </div>
           </div>
         </div>
 
@@ -267,3 +324,13 @@ function EmptyRow({ colSpan }) {
 const thStyle = { padding: '0.75rem 1rem', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' };
 const tdStyle = { padding: '1rem', fontSize: '0.85rem', borderBottom: '1px solid var(--border-color)' };
 const trStyle = { transition: 'background 0.2s' };
+const dateInputStyle = {
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid var(--border-color)',
+  borderRadius: '6px',
+  padding: '0.3rem 0.5rem',
+  fontSize: '0.75rem',
+  color: 'var(--text-primary)',
+  outline: 'none',
+  colorScheme: 'dark'
+};
