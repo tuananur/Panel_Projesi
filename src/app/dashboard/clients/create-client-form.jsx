@@ -54,7 +54,7 @@ export default function CreateClientForm() {
       <div className="input-group">
           <label htmlFor="logoUrl" className="input-label">Logo Linki (URL) – Instagram hesabı @kullanıcıadi ya da https://instagram.com/kullanıcıadi</label>
           <input 
-            type="url" 
+            type="text" 
             id="logoUrl" 
             name="logoUrl" 
             className="input-field" 

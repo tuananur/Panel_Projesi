@@ -122,11 +122,11 @@ export default function SettingsForm({ client, role }) {
             <div className="input-group">
               <label className="input-label">Müşteri Logosu (URL)</label>
               <input 
-                type="url" 
+                type="text" 
                 name="logoUrl" 
                 className="input-field" 
                 defaultValue={client.logoUrl || ''}
-                placeholder="https://.../logo.png"
+                placeholder="https://.../logo.png veya @kullanıcıadi"
                 disabled={!isAdmin}
                 style={{ opacity: isAdmin ? 1 : 0.6 }}
               />
