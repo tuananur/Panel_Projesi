@@ -761,14 +761,14 @@ export async function getMetaAdsAction(clientId) {
       const campaignsData = await campaignsRes.json();
       const adsData = await adsRes.json();
 
-      if (insightsData.error || campaignsData.error || adsData.error) {
-        const err = insightsData.error || campaignsData.error || adsData.error;
-        return { 
-          error: 'API_ERROR', 
-          details: err.message,
-          code: err.code,
-          subcode: err.error_subcode
-        };
+      if (insightsData.error) {
+        return { error: 'API_ERROR', details: `Insights (Harcama) Hatası: ${insightsData.error.message}`, code: insightsData.error.code };
+      }
+      if (campaignsData.error) {
+        return { error: 'API_ERROR', details: `Kampanya Hatası: ${campaignsData.error.message}`, code: campaignsData.error.code };
+      }
+      if (adsData.error) {
+        return { error: 'API_ERROR', details: `Reklam Detay Hatası: ${adsData.error.message}`, code: adsData.error.code };
       }
 
       return {
@@ -782,7 +782,7 @@ export async function getMetaAdsAction(clientId) {
     }
   } catch (error) {
     console.error('Meta fetch failed:', error);
-    return { error: 'FETCH_FAILED' };
+    return { error: 'FETCH_FAILED', details: error.message };
   }
 }
 
