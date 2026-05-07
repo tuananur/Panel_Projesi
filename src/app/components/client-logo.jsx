@@ -13,8 +13,11 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
     // URL bir resim mi yoksa web sitesi mi kontrol et
     let normalizedUrl = logoUrl.trim();
     
-    // @username formatı kontrolü
-    if (normalizedUrl.startsWith('@')) {
+    // Eğer nokta (.) veya @ içermiyorsa muhtemelen geçerli bir link/alan adı değildir
+    if (!normalizedUrl.includes('.') && !normalizedUrl.startsWith('@')) {
+      setImgError(2); // Doğrudan fallback'e düşür
+    }
+    else if (normalizedUrl.startsWith('@')) {
       const username = normalizedUrl.substring(1);
       finalSrc = `https://unavatar.io/instagram/${username}`;
     } 
@@ -42,16 +45,13 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
             finalSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
           }
         } catch (e) {
-          const lowerUrl = normalizedUrl.toLowerCase();
-          if (lowerUrl.includes('instagram.com')) {
-            const parts = lowerUrl.split('/');
-            const username = parts.filter(p => p && p !== 'instagram.com' && p !== 'http:' && p !== 'https:').pop();
-            finalSrc = `https://unavatar.io/instagram/${username}`;
-          } else {
-            const cleanDomain = normalizedUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+          const cleanDomain = normalizedUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+          if (cleanDomain.includes('.')) {
             finalSrc = imgError === 0 
               ? `https://logo.clearbit.com/${cleanDomain}` 
               : `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`;
+          } else {
+            setImgError(2);
           }
         }
       } else {
@@ -82,21 +82,32 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
   }
   
   return (
-    <img 
-      key={finalSrc} // Link değişince resmi yeniden yükle
-      src={finalSrc} 
-      alt={companyName} 
-      onError={() => setImgError(prev => prev + 1)}
-      style={{ 
-        width: size, 
-        height: size, 
-        borderRadius: isCircular ? '50%' : borderRadius, 
-        objectFit: 'contain', 
-        padding: '2px',
-        border: '1px solid rgba(255,255,255,0.1)', 
-        flexShrink: 0,
-        backgroundColor: 'var(--bg-primary)'
-      }} 
-    />
+    <div style={{
+      width: size,
+      height: size,
+      borderRadius: isCircular ? '50%' : borderRadius,
+      backgroundColor: 'var(--bg-primary)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+      flexShrink: 0,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+      border: '1px solid rgba(255,255,255,0.1)'
+    }}>
+      <img 
+        key={finalSrc} 
+        src={finalSrc} 
+        alt={companyName} 
+        onError={() => setImgError(prev => prev + 1)}
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          objectFit: 'contain', 
+          padding: '2px',
+          display: 'block'
+        }} 
+      />
+    </div>
   );
 }
