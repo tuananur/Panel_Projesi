@@ -165,7 +165,7 @@ export default function StatsContent({ client }) {
   const specialTasksStats = [];
   
   const socialGrid = {}; 
-  const turkishDaysShort = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+  const turkishDaysFull = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
   
   let activePlatforms = [];
   try {
@@ -197,7 +197,7 @@ export default function StatsContent({ client }) {
   }).forEach(t => {
     const d = new Date(t.date);
     const week = getWeekOfMonth(d);
-    const dayName = turkishDaysShort[d.getDay()];
+    const dayName = turkishDaysFull[d.getDay()];
     
     if (!socialGrid[week]) socialGrid[week] = {};
     if (!socialGrid[week][dayName]) socialGrid[week][dayName] = {};
