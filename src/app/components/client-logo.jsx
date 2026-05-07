@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { User } from 'lucide-react';
 
 export default function ClientLogo({ logoUrl, companyName, size = '40px', borderRadius = '8px', isCircular = false }) {
-  const [imgError, setImgError] = useState(false);
+  const [imgError, setImgError] = useState(0); // 0: ok, 1: clearbit failed, 2: google failed
   
   // URL bir resim mi yoksa web sitesi mi kontrol et
   let finalSrc = logoUrl;
   
-  if (logoUrl && !imgError) {
+  if (logoUrl && imgError < 2) {
     // Başına https:// ekleyerek URL'yi normalize et (eğer yoksa)
     let normalizedUrl = logoUrl;
     if (!normalizedUrl.startsWith('http')) {
@@ -19,21 +19,26 @@ export default function ClientLogo({ logoUrl, companyName, size = '40px', border
     const isDirectImage = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/i.test(normalizedUrl.split('?')[0]);
     
     if (!isDirectImage) {
-      // Eğer bir web sitesi linki ise, domaini ayıkla ve servis üzerinden çek
       try {
         const domain = new URL(normalizedUrl).hostname.replace('www.', '');
-        finalSrc = `https://logo.clearbit.com/${domain}`;
+        if (imgError === 0) {
+          finalSrc = `https://logo.clearbit.com/${domain}`;
+        } else {
+          // Clearbit hata verirse Google Favicon servisini dene (daha güvenilirdir)
+          finalSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        }
       } catch (e) {
-        // Eğer hala hata veriyorsa, temizlenmiş metni domain olarak kullan
         const cleanDomain = logoUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-        finalSrc = `https://logo.clearbit.com/${cleanDomain}`;
+        finalSrc = imgError === 0 
+          ? `https://logo.clearbit.com/${cleanDomain}` 
+          : `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`;
       }
     } else {
       finalSrc = normalizedUrl;
     }
   }
 
-  if (!logoUrl || imgError) {
+  if (!logoUrl || imgError >= 2) {
     return (
       <div style={{ 
         width: size, 
@@ -56,18 +61,19 @@ export default function ClientLogo({ logoUrl, companyName, size = '40px', border
   
   return (
     <img 
+      key={finalSrc} // Link değişince resmi yeniden yükle
       src={finalSrc} 
       alt={companyName} 
-      onError={() => setImgError(true)}
+      onError={() => setImgError(prev => prev + 1)}
       style={{ 
         width: size, 
         height: size, 
         borderRadius: isCircular ? '50%' : borderRadius, 
-        objectFit: 'contain', // Logoların kesilmemesi için contain daha iyi
+        objectFit: 'contain', 
         padding: '2px',
         border: '1px solid rgba(255,255,255,0.1)', 
         flexShrink: 0,
-        backgroundColor: 'white' // Çoğu logo beyaz arka planda daha iyi durur
+        backgroundColor: 'white'
       }} 
     />
   );
