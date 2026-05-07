@@ -13,6 +13,7 @@ model User {
   password  String?  // Nullable, if null requires setting password
   role      String   @default("DESIGNER") // "ADMIN", "DESIGNER", "ADVERTISER"
   logs      ActivityLog[]
+  notes     Note[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -39,6 +40,7 @@ model Client {
   
   tasks            Task[]
   logs             ActivityLog[]
+  notes            Note[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -66,8 +68,20 @@ model ActivityLog {
   clientId    Int?
   client      Client?  @relation(fields: [clientId], references: [id])
   action      String   // "CREATE", "UPDATE", "DELETE", "TOGGLE"
-  entityType  String   // "TASK", "CLIENT", "USER"
+  entityType  String   // "TASK", "CLIENT", "USER", "NOTE"
   details     String   @db.Text
   createdAt   DateTime @default(now())
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  clientId  Int
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  title     String?
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 

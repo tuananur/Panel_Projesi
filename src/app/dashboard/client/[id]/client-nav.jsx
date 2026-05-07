@@ -8,6 +8,7 @@ export default function ClientNav({ clientId, canSeeSEO, canSeeSocial, canSeeSet
 
   const tabs = [
     { href: `/dashboard/client/${clientId}/stats`, label: 'İstatistikler', show: true },
+    { href: `/dashboard/client/${clientId}/notes`, label: 'Müşteri Notları', show: true },
     { href: `/dashboard/client/${clientId}/seo`, label: 'SEO Takibi', show: canSeeSEO },
     { href: `/dashboard/client/${clientId}/social`, label: 'Sosyal Medya Takvimi', show: canSeeSocial },
     { href: `/dashboard/client/${clientId}/settings`, label: 'Hizmet Ayarları', show: canSeeSettings },

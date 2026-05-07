@@ -608,3 +608,64 @@ export async function searchTasksAction(query) {
     return { error: 'Arama sırasında bir hata oluştu.' };
   }
 }
+
+export async function addNoteAction(formData) {
+  const clientId = parseInt(formData.get('clientId'));
+  const content = formData.get('content');
+  const title = formData.get('title') || null;
+
+  if (!clientId || !content) {
+    return { error: 'Not içeriği boş olamaz.' };
+  }
+
+  try {
+    const session = await getSession();
+    await prisma.note.create({
+      data: {
+        clientId,
+        userId: session.userId,
+        title,
+        content
+      }
+    });
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    await logActivity('CREATE', 'NOTE', `${client?.companyName} için yeni bir not eklendi.`, clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Not eklenemedi.' };
+  }
+}
+
+export async function deleteNoteAction(formData) {
+  const noteId = parseInt(formData.get('noteId'));
+  if (!noteId) return { error: 'Geçersiz ID' };
+
+  try {
+    const note = await prisma.note.findUnique({ where: { id: noteId }, include: { client: true } });
+    await prisma.note.delete({ where: { id: noteId } });
+    await logActivity('DELETE', 'NOTE', `${note?.client.companyName} için bir not silindi.`, note?.clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Not silinemedi.' };
+  }
+}
+
+export async function updateNoteAction(formData) {
+  const noteId = parseInt(formData.get('noteId'));
+  const content = formData.get('content');
+  const title = formData.get('title') || null;
+
+  if (!noteId || !content) return { error: 'Not içeriği boş olamaz.' };
+
+  try {
+    const note = await prisma.note.findUnique({ where: { id: noteId }, include: { client: true } });
+    await prisma.note.update({
+      where: { id: noteId },
+      data: { content, title }
+    });
+    await logActivity('UPDATE', 'NOTE', `${note?.client.companyName} için bir not güncellendi.`, note?.clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Not güncellenemedi.' };
+  }
+}
