@@ -61,7 +61,7 @@ export default async function UsersPage() {
                     </td>
                     <td style={{ padding: '0.4rem 0.3rem' }}>
                       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                        {user.role !== 'ADMIN' && (
+                        {user.id !== session.userId && (
                           <>
                             <EditUserModal user={user} />
                             <DeleteUserButton userId={user.id} />
