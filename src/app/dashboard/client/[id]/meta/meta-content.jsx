@@ -65,27 +65,33 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
       {/* Loading Overlay */}
       {isPending && (
         <div style={{
-          position: 'absolute',
-          inset: '-10px',
-          background: 'rgba(10, 10, 10, 0.7)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 100,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(10, 10, 10, 0.6)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 9999,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '1rem',
-          borderRadius: '16px'
+          gap: '1.5rem'
         }}>
           <div className="spinner" style={{ 
-            width: '40px', 
-            height: '40px', 
-            border: '3px solid rgba(255,255,255,0.1)', 
-            borderTop: '3px solid var(--accent-primary)', 
+            width: '50px', 
+            height: '50px', 
+            border: '4px solid rgba(255,255,255,0.1)', 
+            borderTop: '4px solid var(--accent-primary)', 
             borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
+            animation: 'spin 1s linear infinite',
+            boxShadow: '0 0 20px rgba(16, 185, 129, 0.2)'
           }}></div>
-          <p style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white', letterSpacing: '0.5px' }}>Veriler Güncelleniyor...</p>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', letterSpacing: '1px', marginBottom: '0.5rem' }}>META VERİLERİ GÜNCELLENİYOR</p>
+            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>Lütfen bekleyin, canlı veriler çekiliyor...</p>
+          </div>
           <style>{`
             @keyframes spin {
               0% { transform: rotate(0deg); }
