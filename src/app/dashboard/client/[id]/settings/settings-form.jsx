@@ -118,6 +118,20 @@ export default function SettingsForm({ client, role }) {
                 style={{ opacity: isAdmin ? 1 : 0.6 }}
               />
             </div>
+            
+            <div className="input-group">
+              <label className="input-label">Müşteri Logosu (URL)</label>
+              <input 
+                type="url" 
+                name="logoUrl" 
+                className="input-field" 
+                defaultValue={client.logoUrl || ''}
+                placeholder="https://.../logo.png"
+                disabled={!isAdmin}
+                style={{ opacity: isAdmin ? 1 : 0.6 }}
+              />
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Logonun görünmesi için doğrudan resim bağlantısını yapıştırın.</p>
+            </div>
 
             <div className="input-group">
               <label className="input-label">Özel Talimatlar / Notlar</label>

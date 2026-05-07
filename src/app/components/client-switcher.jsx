@@ -56,6 +56,17 @@ export default function ClientSwitcher({ currentClient, allClients }) {
         }}
         className="client-switcher-trigger"
       >
+        {currentClient.logoUrl ? (
+          <img 
+            src={currentClient.logoUrl} 
+            alt={currentClient.companyName} 
+            style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+          />
+        ) : (
+          <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 800, color: 'white' }}>
+            {currentClient.companyName[0]}
+          </div>
+        )}
         <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0' }}>
           {currentClient.companyName}
         </h1>
@@ -130,9 +141,14 @@ export default function ClientSwitcher({ currentClient, allClients }) {
                   background: client.id === currentClient.id ? 'rgba(255,255,255,0.2)' : 'var(--bg-primary)', 
                   display: 'flex', 
                   alignItems: 'center', 
-                  justifyContent: 'center' 
+                  justifyContent: 'center',
+                  overflow: 'hidden'
                 }}>
-                  <User size={16} />
+                  {client.logoUrl ? (
+                    <img src={client.logoUrl} alt={client.companyName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <User size={16} />
+                  )}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{client.companyName}</div>

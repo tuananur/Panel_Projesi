@@ -31,6 +31,7 @@ model Client {
   socialAccounts     String? @db.Text
   socialSchedule     String? @db.Text
   specialInstructions String? @db.Text
+  logoUrl            String? @db.Text
   
   // Website Integration
   websiteType        String? @default("OTHER") // "BEYIN_ATOLYESI", "IDEASOFT", "OTHER"

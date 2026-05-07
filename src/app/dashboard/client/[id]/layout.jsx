@@ -58,7 +58,7 @@ export default async function ClientDetailLayout({ children, params }) {
   if (!client) return null;
 
   const allClients = await prisma.client.findMany({
-    select: { id: true, companyName: true },
+    select: { id: true, companyName: true, logoUrl: true },
     orderBy: { companyName: 'asc' }
   });
 

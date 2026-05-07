@@ -65,9 +65,18 @@ export default async function DashboardPage() {
                     </div>
                   )}
                   
-                  <Link href={`/dashboard/client/${client.id}/stats`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{client.companyName}</h3>
-                    <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>{client.contactName}</p>
+                  <Link href={`/dashboard/client/${client.id}/stats`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                    {client.logoUrl ? (
+                      <img src={client.logoUrl} alt={client.companyName} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 800 }}>
+                        {client.companyName[0]}
+                      </div>
+                    )}
+                    <div>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.1rem' }}>{client.companyName}</h3>
+                      <p className="text-muted" style={{ fontSize: '0.8rem' }}>{client.contactName}</p>
+                    </div>
                   </Link>
 
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>

@@ -141,6 +141,7 @@ export async function createClientAction(formData) {
   const services = JSON.stringify(servicesList);
   const websiteType = formData.get('websiteType');
   const blogApiUrl = formData.get('blogApiUrl') || null;
+  const logoUrl = formData.get('logoUrl') || null;
 
   if (!companyName || !contactName || !phone) {
     return { error: 'Gerekli alanları doldurun.' };
@@ -156,7 +157,8 @@ export async function createClientAction(formData) {
         phone,
         services,
         websiteType,
-        blogApiUrl
+        blogApiUrl,
+        logoUrl
       },
     });
     const newClient = await prisma.client.findFirst({ where: { companyName }, orderBy: { createdAt: 'desc' } });
@@ -239,13 +241,14 @@ export async function updateClientAction(formData) {
   const services = JSON.stringify(servicesList);
   const websiteType = formData.get('websiteType');
   const blogApiUrl = formData.get('blogApiUrl') || null;
+  const logoUrl = formData.get('logoUrl') || null;
 
   if (!id || !companyName || !contactName || !phone) return { error: 'Gerekli alanlar eksik.' };
 
   try {
     await prisma.client.update({
       where: { id },
-      data: { companyName, website, contactName, email, phone, services, websiteType, blogApiUrl }
+      data: { companyName, website, contactName, email, phone, services, websiteType, blogApiUrl, logoUrl }
     });
     await logActivity('UPDATE', 'CLIENT', `${companyName} isimli müşterinin bilgileri güncellendi.`, id);
     return { success: true };
@@ -343,6 +346,7 @@ export async function updateClientSettingsAction(clientId, formData) {
   const socialAccounts = formData.get('socialAccounts'); // Already JSON string from client
   const socialSchedule = formData.get('socialSchedule'); // Already JSON string from client
   const specialInstructions = formData.get('specialInstructions');
+  const logoUrl = formData.get('logoUrl') || null;
 
   try {
     await prisma.client.update({
@@ -352,7 +356,8 @@ export async function updateClientSettingsAction(clientId, formData) {
         email,
         socialAccounts,
         socialSchedule,
-        specialInstructions
+        specialInstructions,
+        logoUrl
       }
     });
     await logActivity('UPDATE', 'SETTINGS', `Müşteri ayarları güncellendi.`, clientId);
