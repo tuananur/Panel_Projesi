@@ -64,7 +64,7 @@ model Task {
 model ActivityLog {
   id          Int      @id @default(autoincrement())
   userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   clientId    Int?
   client      Client?  @relation(fields: [clientId], references: [id])
   action      String   // "CREATE", "UPDATE", "DELETE", "TOGGLE"
@@ -78,7 +78,7 @@ model Note {
   clientId  Int?     // Null = Genel Not
   client    Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String?
   content   String   @db.Text
   isDone    Boolean  @default(false)

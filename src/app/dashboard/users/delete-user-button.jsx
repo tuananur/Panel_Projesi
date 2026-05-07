@@ -9,16 +9,24 @@ import CustomDialog from '@/app/components/custom-dialog';
 export default function DeleteUserButton({ userId }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
     setLoading(true);
+    setError('');
     const formData = new FormData();
     formData.append('id', userId);
-    await deleteUserAction(formData);
-    setIsOpen(false);
-    router.refresh();
-    setLoading(false);
+    const result = await deleteUserAction(formData);
+    
+    if (result?.error) {
+      setError(result.error);
+      setLoading(false);
+    } else {
+      setIsOpen(false);
+      router.refresh();
+      setLoading(false);
+    }
   }
 
   return (
@@ -49,7 +57,11 @@ export default function DeleteUserButton({ userId }) {
         loading={loading}
       >
         <div style={{ color: 'var(--text-secondary)' }}>
-          Bu kullanıcıyı silmek istediğinize emin misiniz?
+          {error ? (
+            <span style={{ color: '#ef4444' }}>{error}</span>
+          ) : (
+            "Bu kullanıcıyı silmek istediğinize emin misiniz?"
+          )}
         </div>
       </CustomDialog>
     </>
