@@ -9,9 +9,9 @@
       "services": "[\"SEO\",\"Sosyal Medya\"]",
       "createdAt": "2026-04-17T06:49:00.473Z",
       "updatedAt": "2026-04-17T13:23:17.887Z",
-      "socialAccounts": "{\"Instagram\":\"https://www.instagram.com/ciceksepeti/\",\"YouTube\":\"\",\"Facebook\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\",\"LinkedIn\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\",\"X\":\"\",\"TikTok\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\"}",
+      "socialAccounts": "{\"Instagram\":\"https://www.instagram.com/ciceksepeti/\",\"YouTube\":\"\",\"Facebook\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\",\"LinkedIn\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\",\"X\":\"\",\"Pinterest\":\"https://www.linkedin.com/company/ciceksepeti-com?originalSubdomain=tr\"}",
       "weeklyBlogTarget": 4,
-      "socialSchedule": "{\"Instagram\":[\"Monday\",\"Wednesday\",\"Friday\"],\"LinkedIn\":[\"Monday\",\"Wednesday\",\"Friday\"],\"Facebook\":[\"Monday\",\"Wednesday\",\"Friday\"],\"TikTok\":[\"Monday\",\"Wednesday\",\"Friday\",\"Sunday\"]}",
+      "socialSchedule": "{\"Instagram\":[\"Monday\",\"Wednesday\",\"Friday\"],\"LinkedIn\":[\"Monday\",\"Wednesday\",\"Friday\"],\"Facebook\":[\"Monday\",\"Wednesday\",\"Friday\"],\"Pinterest\":[\"Monday\",\"Wednesday\",\"Friday\",\"Sunday\"]}",
       "specialInstructions": "merhaba"
     }
   ],

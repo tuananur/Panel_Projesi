@@ -39,7 +39,7 @@ export default function SettingsForm({ client, role }) {
     Facebook: currentSocial.Facebook || '',
     LinkedIn: currentSocial.LinkedIn || '',
     X: currentSocial.X || '',
-    TikTok: currentSocial.TikTok || ''
+    Pinterest: currentSocial.Pinterest || ''
   });
 
   const [schedule, setSchedule] = useState(currentSchedule);
