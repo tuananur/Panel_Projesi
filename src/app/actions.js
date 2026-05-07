@@ -756,11 +756,11 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
     // Fetch active campaigns
     const campaignsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns?fields=name,status,objective,daily_budget,lifetime_budget,start_time&access_token=${accessToken}`;
 
-    // Fetch ad sets
-    const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,insights.${nestedParams}{spend,clicks,impressions}&access_token=${accessToken}`;
+    // Fetch ad sets with campaign_id
+    const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,campaign_id,insights.${nestedParams}{spend,clicks,impressions}&access_token=${accessToken}`;
 
-    // Fetch ads with corrected nested insights syntax
-    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,ctr}&limit=25&access_token=${accessToken}`;
+    // Fetch ads with adset_id
+    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,ctr}&limit=50&access_token=${accessToken}`;
 
     try {
       const [insightsRes, campaignsRes, adSetsRes, adsRes] = await Promise.all([

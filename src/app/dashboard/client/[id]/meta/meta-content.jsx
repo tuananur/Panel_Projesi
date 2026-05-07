@@ -23,6 +23,8 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('campaigns'); // campaigns, adsets, ads
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+  const [selectedAdSetId, setSelectedAdSetId] = useState(null);
   
   const [since, setSince] = useState(initSince || '');
   const [until, setUntil] = useState(initUntil || '');
@@ -54,13 +56,21 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredAdSets = result.adSets.filter(as => 
-    as.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAdSets = result.adSets.filter(as => {
+    const matchesSearch = as.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCampaign = selectedCampaignId ? as.campaign_id === selectedCampaignId : true;
+    return matchesSearch && matchesCampaign;
+  });
 
-  const filteredAds = result.ads.filter(ad => 
-    ad.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAds = result.ads.filter(ad => {
+    const matchesSearch = ad.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesAdSet = selectedAdSetId ? ad.adset_id === selectedAdSetId : true;
+    const matchesCampaign = selectedCampaignId ? result.adSets.find(as => as.id === ad.adset_id)?.campaign_id === selectedCampaignId : true;
+    return matchesSearch && matchesAdSet && matchesCampaign;
+  });
+
+  const selectedCampaignName = result.activeCampaigns.find(c => c.id === selectedCampaignId)?.name;
+  const selectedAdSetName = result.adSets.find(as => as.id === selectedAdSetId)?.name;
 
   const isCustom = !!(initSince && initUntil);
 
@@ -102,6 +112,55 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
               100% { transform: rotate(360deg); }
             }
           `}</style>
+        </div>
+      )}
+
+      {/* Filter Status Bar */}
+      {(selectedCampaignId || selectedAdSetId) && (
+        <div className="card" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '1rem', 
+          padding: '0.75rem 1rem', 
+          background: 'rgba(16, 185, 129, 0.05)', 
+          border: '1px solid rgba(16, 185, 129, 0.2)',
+          borderRadius: '12px'
+        }}>
+          <AlertCircle size={16} style={{ color: '#10b981' }} />
+          <div style={{ display: 'flex', flex: 1, gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Aktif Filtre:</span>
+            {selectedCampaignId && (
+              <span style={{ background: 'var(--accent-primary)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700 }}>
+                Kampanya: {selectedCampaignName}
+              </span>
+            )}
+            {selectedAdSetId && (
+              <>
+                <ChevronRight size={14} className="text-muted" />
+                <span style={{ background: '#f59e0b', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700 }}>
+                  Set: {selectedAdSetName}
+                </span>
+              </>
+            )}
+          </div>
+          <button 
+            onClick={() => {
+              setSelectedCampaignId(null);
+              setSelectedAdSetId(null);
+              setActiveTab('campaigns');
+            }}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'var(--text-primary)', 
+              fontSize: '0.8rem', 
+              fontWeight: 700, 
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Filtreleri Temizle
+          </button>
         </div>
       )}
 
@@ -233,7 +292,15 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                     <td style={tdStyle}>
                       <StatusBadge status={camp.status} />
                     </td>
-                    <td style={{ ...tdStyle, fontWeight: 700, color: 'var(--accent-primary)' }}>{camp.name}</td>
+                    <td 
+                      style={{ ...tdStyle, fontWeight: 700, color: 'var(--accent-primary)', cursor: 'pointer', textDecoration: 'underline' }}
+                      onClick={() => {
+                        setSelectedCampaignId(camp.id);
+                        setActiveTab('adsets');
+                      }}
+                    >
+                      {camp.name}
+                    </td>
                     <td style={tdStyle}>{camp.objective?.replace('_', ' ')}</td>
                     <td style={tdStyle}>
                       {camp.daily_budget ? `${(camp.daily_budget / 100).toFixed(2)} TL (Günlük)` : 
@@ -267,7 +334,15 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                       <td style={tdStyle}>
                         <StatusBadge status={as.status} />
                       </td>
-                      <td style={{ ...tdStyle, fontWeight: 700, color: '#f59e0b' }}>{as.name}</td>
+                      <td 
+                        style={{ ...tdStyle, fontWeight: 700, color: '#f59e0b', cursor: 'pointer', textDecoration: 'underline' }}
+                        onClick={() => {
+                          setSelectedAdSetId(as.id);
+                          setActiveTab('ads');
+                        }}
+                      >
+                        {as.name}
+                      </td>
                       <td style={tdStyle}>
                         {as.daily_budget ? `${(as.daily_budget / 100).toFixed(2)} TL (Günlük)` : 
                          as.lifetime_budget ? `${(as.lifetime_budget / 100).toFixed(2)} TL (Toplam)` : 'Bütçe Belirtilmedi'}
