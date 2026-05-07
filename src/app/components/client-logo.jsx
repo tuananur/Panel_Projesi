@@ -91,7 +91,7 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
       width: size,
       height: size,
       borderRadius: isCircular ? '50%' : borderRadius,
-      backgroundColor: 'white',
+      backgroundColor: 'transparent',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
