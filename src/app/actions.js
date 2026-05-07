@@ -722,43 +722,64 @@ export async function getMetaAdsAction(clientId) {
       where: { id: parseInt(clientId) }
     });
 
-    if (!client || !client.metaEnabled || !client.metaAdAccountId || !client.metaAccessToken) {
-      return { error: 'API_MISSING' };
+    if (!client) return { error: 'CLIENT_NOT_FOUND' };
+
+    if (!client.metaAdAccountId || !client.metaAccessToken) {
+      return { 
+        error: 'API_MISSING', 
+        debug: { 
+          hasId: !!client.metaAdAccountId, 
+          hasToken: !!client.metaAccessToken,
+          metaEnabled: client.metaEnabled
+        } 
+      };
     }
 
-    const accountId = client.metaAdAccountId;
-    const accessToken = client.metaAccessToken;
+    const accountId = client.metaAdAccountId.trim();
+    const accessToken = client.metaAccessToken.trim();
 
-    // Fetch account insights (spend, clicks, impressions) for the last 30 days
-    const insightsUrl = `https://graph.facebook.com/v19.0/${accountId}/insights?fields=spend,clicks,impressions,reach,cpc,ctr&date_preset=last_30d&access_token=${accessToken}`;
+    // Ensure accountId starts with act_
+    const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
+
+    // Fetch account insights
+    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?fields=spend,clicks,impressions,reach,cpc,ctr&date_preset=last_30d&access_token=${accessToken}`;
     
     // Fetch active campaigns
-    const campaignsUrl = `https://graph.facebook.com/v19.0/${accountId}/campaigns?fields=name,status,objective&status=['ACTIVE']&access_token=${accessToken}`;
+    const campaignsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns?fields=name,status,objective&status=['ACTIVE']&access_token=${accessToken}`;
 
-    // Fetch individual ads with creative details
-    const adsUrl = `https://graph.facebook.com/v19.0/${accountId}/ads?fields=name,status,creative{name,body,image_url,thumbnail_url}&limit=10&access_token=${accessToken}`;
+    // Fetch individual ads
+    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,creative{name,body,image_url,thumbnail_url}&limit=10&access_token=${accessToken}`;
 
-    const [insightsRes, campaignsRes, adsRes] = await Promise.all([
-      fetch(insightsUrl, { cache: 'no-store' }),
-      fetch(campaignsUrl, { cache: 'no-store' }),
-      fetch(adsUrl, { cache: 'no-store' })
-    ]);
+    try {
+      const [insightsRes, campaignsRes, adsRes] = await Promise.all([
+        fetch(insightsUrl, { cache: 'no-store' }),
+        fetch(campaignsUrl, { cache: 'no-store' }),
+        fetch(adsUrl, { cache: 'no-store' })
+      ]);
 
-    const insightsData = await insightsRes.json();
-    const campaignsData = await campaignsRes.json();
-    const adsData = await adsRes.json();
+      const insightsData = await insightsRes.json();
+      const campaignsData = await campaignsRes.json();
+      const adsData = await adsRes.json();
 
-    if (insightsData.error || campaignsData.error || adsData.error) {
-      console.error('Meta API Error:', insightsData.error || campaignsData.error || adsData.error);
-      return { error: 'API_ERROR', details: (insightsData.error || campaignsData.error || adsData.error)?.message };
+      if (insightsData.error || campaignsData.error || adsData.error) {
+        const err = insightsData.error || campaignsData.error || adsData.error;
+        return { 
+          error: 'API_ERROR', 
+          details: err.message,
+          code: err.code,
+          subcode: err.error_subcode
+        };
+      }
+
+      return {
+        success: true,
+        summary: insightsData.data[0] || null,
+        activeCampaigns: campaignsData.data || [],
+        ads: adsData.data || []
+      };
+    } catch (fetchErr) {
+      return { error: 'NETWORK_ERROR', details: fetchErr.message };
     }
-
-    return {
-      success: true,
-      summary: insightsData.data[0] || null,
-      activeCampaigns: campaignsData.data || [],
-      ads: adsData.data || []
-    };
   } catch (error) {
     console.error('Meta fetch failed:', error);
     return { error: 'FETCH_FAILED' };

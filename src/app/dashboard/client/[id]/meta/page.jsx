@@ -27,9 +27,14 @@ export default async function MetaAdsPage({ params }) {
         }}>
           <AlertCircle size={48} style={{ color: '#ef4444', marginBottom: '1.5rem' }} />
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Meta API Bilgileri Eksik</h2>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', marginBottom: '2rem' }}>
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', marginBottom: '1rem' }}>
             Reklam verilerini çekebilmemiz için Hizmet Ayarları bölümünden Meta Access Token ve Reklam Hesabı ID bilgilerini doldurmanız gerekmektedir.
           </p>
+          {result.debug && (
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '4px' }}>
+              Debug: ID: {result.debug.hasId ? 'OK' : 'Eksik'} | Token: {result.debug.hasToken ? 'OK' : 'Eksik'}
+            </div>
+          )}
           <Link href={`/dashboard/client/${id}/settings`} className="btn btn-primary" style={{ gap: '0.5rem' }}>
             Ayarlara Git ve Yapılandır
           </Link>
@@ -38,8 +43,9 @@ export default async function MetaAdsPage({ params }) {
         <div className="card animate-fade-in" style={{ padding: '2rem', textAlign: 'center', background: 'rgba(239, 68, 68, 0.05)' }}>
           <AlertCircle size={32} style={{ color: '#ef4444', marginBottom: '1rem' }} />
           <h3 style={{ color: '#ef4444' }}>Meta API Hatası</h3>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>{result.details || 'Veriler çekilirken bir hata oluştu.'}</p>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>Token süresi dolmuş veya ID hatalı olabilir.</p>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 600 }}>{result.details || 'Veriler çekilirken bir hata oluştu.'}</p>
+          {result.code && <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Hata Kodu: {result.code}</p>}
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>Token süresi dolmuş, izinleri eksik veya ID hatalı olabilir.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }} className="animate-fade-in">
