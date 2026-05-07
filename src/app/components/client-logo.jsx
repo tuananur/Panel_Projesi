@@ -10,19 +10,26 @@ export default function ClientLogo({ logoUrl, companyName, size = '40px', border
   let finalSrc = logoUrl;
   
   if (logoUrl && !imgError) {
-    const isDirectImage = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/i.test(logoUrl.split('?')[0]);
+    // Başına https:// ekleyerek URL'yi normalize et (eğer yoksa)
+    let normalizedUrl = logoUrl;
+    if (!normalizedUrl.startsWith('http')) {
+      normalizedUrl = 'https://' + normalizedUrl;
+    }
+
+    const isDirectImage = /\.(jpg|jpeg|png|webp|avif|gif|svg)$/i.test(normalizedUrl.split('?')[0]);
     
     if (!isDirectImage) {
       // Eğer bir web sitesi linki ise, domaini ayıkla ve servis üzerinden çek
       try {
-        const domain = new URL(logoUrl).hostname.replace('www.', '');
+        const domain = new URL(normalizedUrl).hostname.replace('www.', '');
         finalSrc = `https://logo.clearbit.com/${domain}`;
       } catch (e) {
-        // Geçersiz URL ise domain olarak kabul etmeyi dene
-        if (logoUrl.includes('.')) {
-          finalSrc = `https://logo.clearbit.com/${logoUrl.replace('www.', '')}`;
-        }
+        // Eğer hala hata veriyorsa, temizlenmiş metni domain olarak kullan
+        const cleanDomain = logoUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+        finalSrc = `https://logo.clearbit.com/${cleanDomain}`;
       }
+    } else {
+      finalSrc = normalizedUrl;
     }
   }
 
