@@ -4,6 +4,47 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ChevronDown, Search, User } from 'lucide-react';
 
+// Helper component for images with error fallback
+function LogoImage({ logoUrl, companyName, size, isCircular = false }) {
+  const [imgError, setImgError] = useState(false);
+  
+  if (!logoUrl || imgError) {
+    return (
+      <div style={{ 
+        width: size, 
+        height: size, 
+        borderRadius: isCircular ? '50%' : '8px', 
+        background: 'var(--accent-primary)', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        fontSize: parseInt(size) > 35 ? '1.2rem' : '0.8rem', 
+        fontWeight: 800, 
+        color: 'white', 
+        flexShrink: 0 
+      }}>
+        {companyName ? companyName[0] : <User size={parseInt(size) * 0.5} />}
+      </div>
+    );
+  }
+  
+  return (
+    <img 
+      src={logoUrl} 
+      alt={companyName} 
+      onError={() => setImgError(true)}
+      style={{ 
+        width: size, 
+        height: size, 
+        borderRadius: isCircular ? '50%' : '8px', 
+        objectFit: 'cover', 
+        border: '1px solid rgba(255,255,255,0.1)', 
+        flexShrink: 0 
+      }} 
+    />
+  );
+}
+
 export default function ClientSwitcher({ currentClient, allClients }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -27,8 +68,6 @@ export default function ClientSwitcher({ currentClient, allClients }) {
   );
 
   const handleSwitch = (clientId) => {
-    // pathname example: /dashboard/client/1/social
-    // we want to replace '1' with 'clientId'
     const pathParts = pathname.split('/');
     const clientIndex = pathParts.indexOf('client');
     if (clientIndex !== -1 && pathParts[clientIndex + 1]) {
@@ -56,17 +95,7 @@ export default function ClientSwitcher({ currentClient, allClients }) {
         }}
         className="client-switcher-trigger"
       >
-        {currentClient.logoUrl ? (
-          <img 
-            src={currentClient.logoUrl} 
-            alt={currentClient.companyName} 
-            style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
-          />
-        ) : (
-          <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 800, color: 'white' }}>
-            {currentClient.companyName[0]}
-          </div>
-        )}
+        <LogoImage logoUrl={currentClient.logoUrl} companyName={currentClient.companyName} size="38px" />
         <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0' }}>
           {currentClient.companyName}
         </h1>
@@ -134,22 +163,7 @@ export default function ClientSwitcher({ currentClient, allClients }) {
                 }}
                 className="client-option-hover"
               >
-                <div style={{ 
-                  width: '32px', 
-                  height: '32px', 
-                  borderRadius: '50%', 
-                  background: client.id === currentClient.id ? 'rgba(255,255,255,0.2)' : 'var(--bg-primary)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  overflow: 'hidden'
-                }}>
-                  {client.logoUrl ? (
-                    <img src={client.logoUrl} alt={client.companyName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <User size={16} />
-                  )}
-                </div>
+                <LogoImage logoUrl={client.logoUrl} companyName={client.companyName} size="32px" isCircular={true} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{client.companyName}</div>
                   <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>ID: #{client.id}</div>
