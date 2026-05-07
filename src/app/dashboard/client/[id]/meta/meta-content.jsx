@@ -61,7 +61,40 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
   const isCustom = !!(initSince && initUntil);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative' }}>
+      {/* Loading Overlay */}
+      {isPending && (
+        <div style={{
+          position: 'absolute',
+          inset: '-10px',
+          background: 'rgba(10, 10, 10, 0.7)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 100,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1rem',
+          borderRadius: '16px'
+        }}>
+          <div className="spinner" style={{ 
+            width: '40px', 
+            height: '40px', 
+            border: '3px solid rgba(255,255,255,0.1)', 
+            borderTop: '3px solid var(--accent-primary)', 
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+          <p style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white', letterSpacing: '0.5px' }}>Veriler Güncelleniyor...</p>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      )}
+
       {/* Top Filter Bar */}
       <div className="card" style={{ 
         display: 'flex', 
