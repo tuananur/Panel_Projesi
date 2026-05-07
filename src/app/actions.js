@@ -741,20 +741,23 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
     // Ensure accountId starts with act_
     const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
 
-    // Determine time range
-    let timeRangeParams = `date_preset=${datePreset}`;
+    // Determine time range for top-level and nested insights
+    let topLevelParams = `date_preset=${datePreset}`;
+    let nestedParams = `date_preset(${datePreset})`;
+    
     if (since && until) {
-      timeRangeParams = `time_range={"since":"${since}","until":"${until}"}`;
+      topLevelParams = `time_range={"since":"${since}","until":"${until}"}`;
+      nestedParams = `time_range({"since":"${since}","until":"${until}"})`;
     }
 
-    // Fetch account insights with dynamic date preset or time range
-    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?fields=spend,clicks,impressions,reach,cpc,ctr&${timeRangeParams}&access_token=${accessToken}`;
+    // Fetch account insights
+    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?fields=spend,clicks,impressions,reach,cpc,ctr&${topLevelParams}&access_token=${accessToken}`;
     
     // Fetch active campaigns
     const campaignsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns?fields=name,status,objective,daily_budget,lifetime_budget,start_time&access_token=${accessToken}`;
 
-    // Fetch ads
-    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,creative{name,body,image_url,thumbnail_url},insights.${timeRangeParams}{spend,clicks,impressions,ctr}&limit=25&access_token=${accessToken}`;
+    // Fetch ads with corrected nested insights syntax
+    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,ctr}&limit=25&access_token=${accessToken}`;
 
     try {
       const [insightsRes, campaignsRes, adsRes] = await Promise.all([
