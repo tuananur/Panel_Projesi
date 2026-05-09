@@ -143,7 +143,7 @@ export async function createClientAction(formData) {
   const blogApiUrl = formData.get('blogApiUrl') || null;
   const logoUrl = formData.get('logoUrl') || null;
 
-  if (!companyName || !contactName || !phone) {
+  if (!companyName || !contactName) {
     return { error: 'Gerekli alanları doldurun.' };
   }
 
@@ -243,7 +243,7 @@ export async function updateClientAction(formData) {
   const blogApiUrl = formData.get('blogApiUrl') || null;
   const logoUrl = formData.get('logoUrl') || null;
 
-  if (!id || !companyName || !contactName || !phone) return { error: 'Gerekli alanlar eksik.' };
+  if (!id || !companyName || !contactName) return { error: 'Gerekli alanlar eksik.' };
 
   try {
     await prisma.client.update({
