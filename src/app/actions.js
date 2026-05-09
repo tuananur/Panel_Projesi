@@ -651,7 +651,13 @@ export async function deleteNoteAction(formData) {
   if (!noteId) return { error: 'Geçersiz ID' };
 
   try {
+    const session = await getSession();
     const note = await prisma.note.findUnique({ where: { id: noteId }, include: { client: true } });
+    
+    if (!note || note.userId !== session.userId) {
+      return { error: 'Bu işlemi yapmaya yetkiniz yok.' };
+    }
+    
     await prisma.note.delete({ where: { id: noteId } });
     const details = note?.client ? `${note.client.companyName} için bir not silindi.` : 'Bir kişisel not silindi.';
     await logActivity('DELETE', 'NOTE', details, note?.clientId);
@@ -665,14 +671,20 @@ export async function updateNoteAction(formData) {
   const noteId = parseInt(formData.get('noteId'));
   const content = formData.get('content');
   const title = formData.get('title') || null;
+  const clientIdRaw = formData.get('clientId');
+  const clientId = clientIdRaw ? parseInt(clientIdRaw) : null;
 
   if (!noteId || !content) return { error: 'Not içeriği boş olamaz.' };
 
   try {
+    const session = await getSession();
     const note = await prisma.note.findUnique({ where: { id: noteId }, include: { client: true } });
+    if (!note || note.userId !== session.userId) {
+      return { error: 'Bu işlemi yapmaya yetkiniz yok.' };
+    }
     await prisma.note.update({
       where: { id: noteId },
-      data: { content, title }
+      data: { clientId, title, content }
     });
     const details = note?.client ? `${note.client.companyName} için bir not güncellendi.` : 'Bir kişisel not güncellendi.';
     await logActivity('UPDATE', 'NOTE', details, note?.clientId);
@@ -694,7 +706,7 @@ export async function toggleNoteStatusAction(formData) {
     });
 
     if (!note || note.userId !== session.userId) {
-      return { error: 'Sadece kendi notlarınızın durumunu değiştirebilirsiniz.' };
+      return { error: 'Bu işlemi yapmaya yetkiniz yok.' };
     }
 
     await prisma.note.update({
