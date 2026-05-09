@@ -101,6 +101,8 @@ export default function AccountingClient({ initialEntries, userRole }) {
   const cashProjection = useMemo(() => {
     let projections = [];
     const now = new Date();
+    let runningBalance = 0;
+    
     for (let i = 0; i < 12; i++) {
       const targetDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
       const m = targetDate.getMonth();
@@ -109,13 +111,16 @@ export default function AccountingClient({ initialEntries, userRole }) {
       const entries = getProcessedEntries(m, y);
       const inc = entries.filter(e => e.type === 'INCOME').reduce((sum, e) => sum + e.displayAmount, 0);
       const exp = entries.filter(e => e.type === 'EXPENSE').reduce((sum, e) => sum + e.displayAmount, 0);
+      const net = inc - exp;
+      runningBalance += net;
       
       projections.push({
         monthName: months[m],
         year: y,
         income: inc,
         expense: exp,
-        net: inc - exp
+        net: net,
+        cumulative: runningBalance
       });
     }
     return projections;
@@ -252,7 +257,8 @@ export default function AccountingClient({ initialEntries, userRole }) {
                 <th style={{ padding: '1rem' }}>AY / YIL</th>
                 <th style={{ padding: '1rem' }}>TAHMİNİ GELİR</th>
                 <th style={{ padding: '1rem' }}>TAHMİNİ GİDER</th>
-                <th style={{ padding: '1rem' }}>NET DURUM</th>
+                <th style={{ padding: '1rem' }}>AYLIK NET</th>
+                <th style={{ padding: '1rem' }}>KASA TOPLAMI</th>
                 <th style={{ padding: '1rem' }}>GİDİŞAT</th>
               </tr>
             </thead>
@@ -263,7 +269,10 @@ export default function AccountingClient({ initialEntries, userRole }) {
                   <td style={{ padding: '1rem', color: '#10b981' }}>+{proj.income.toLocaleString('tr-TR')} TL</td>
                   <td style={{ padding: '1rem', color: '#ef4444' }}>-{proj.expense.toLocaleString('tr-TR')} TL</td>
                   <td style={{ padding: '1rem', fontWeight: 800, color: proj.net >= 0 ? '#3b82f6' : '#f59e0b' }}>
-                    {proj.net.toLocaleString('tr-TR')} TL
+                    {proj.net >= 0 ? '+' : ''}{proj.net.toLocaleString('tr-TR')} TL
+                  </td>
+                  <td style={{ padding: '1rem', fontWeight: 900, fontSize: '1.1rem', color: proj.cumulative >= 0 ? '#10b981' : '#ef4444', background: 'rgba(255,255,255,0.02)' }}>
+                    {proj.cumulative.toLocaleString('tr-TR')} TL
                   </td>
                   <td style={{ padding: '1rem' }}>
                     <div style={{ 
