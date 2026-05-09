@@ -130,6 +130,46 @@
   scrollbar-width: none;  /* Firefox */
 }
 
+/* Global Loading Spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.global-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+.loading-text {
+  margin-top: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-primary);

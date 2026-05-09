@@ -10,9 +10,11 @@ import {
 } from 'lucide-react';
 import { addAccountingEntryAction, deleteAccountingEntryAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 export default function AccountingClient({ initialEntries, userRole }) {
   const router = useRouter();
+  const { setGlobalLoading } = useTheme();
   const [loading, setLoading] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [entryType, setEntryType] = useState('INCOME'); // INCOME or EXPENSE
@@ -80,6 +82,7 @@ export default function AccountingClient({ initialEntries, userRole }) {
   const handleAddEntry = async (formData) => {
     if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     const result = await addAccountingEntryAction(formData);
     if (result.success) {
       setIsAddModalOpen(false);
@@ -88,6 +91,7 @@ export default function AccountingClient({ initialEntries, userRole }) {
       alert(result.error);
     }
     setLoading(false);
+    setGlobalLoading(false);
   };
 
   const handleDeleteEntry = async (id) => {

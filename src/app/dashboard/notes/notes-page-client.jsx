@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Plus, Search, Trash2, Edit2, Clock, CheckCircle2, Circle, StickyNote, Building2, User as UserIcon } from 'lucide-react';
 import { addNoteAction, deleteNoteAction, updateNoteAction, toggleNoteStatusAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 export default function NotesPageClient({ initialNotes, clients, currentUserId }) {
   const router = useRouter();
+  const { setGlobalLoading } = useTheme();
   
   // Clear notification on mount
   useEffect(() => {
@@ -58,6 +60,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
   const handleAdd = async (formData) => {
     if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     const result = await addNoteAction(formData);
     if (result?.error) {
       setError(result.error);
@@ -66,11 +69,13 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
       router.refresh();
     }
     setLoading(false);
+    setGlobalLoading(false);
   };
 
   const handleEdit = async (formData) => {
     if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     formData.append('noteId', selectedNote.id);
     const result = await updateNoteAction(formData);
     if (result?.error) {
@@ -81,6 +86,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
       router.refresh();
     }
     setLoading(false);
+    setGlobalLoading(false);
   };
 
   const handleDelete = async () => {

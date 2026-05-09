@@ -7,6 +7,7 @@ const ThemeContext = createContext();
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState('dark');
   const [accent, setAccent] = useState('blue');
+  const [globalLoading, setGlobalLoading] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -33,8 +34,14 @@ export function ThemeProvider({ children }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, accent, changeTheme, changeAccent }}>
+    <ThemeContext.Provider value={{ theme, accent, changeTheme, changeAccent, globalLoading, setGlobalLoading }}>
       {children}
+      {globalLoading && (
+        <div className="global-loading-overlay">
+          <div className="spinner"></div>
+          <div className="loading-text">İşlem Yapılıyor...</div>
+        </div>
+      )}
     </ThemeContext.Provider>
   );
 }

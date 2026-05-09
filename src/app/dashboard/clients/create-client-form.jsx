@@ -4,27 +4,30 @@ import { useState } from 'react';
 import { createClientAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 export default function CreateClientForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { setGlobalLoading } = useTheme();
   const [websiteType, setWebsiteType] = useState('OTHER');
   const router = useRouter();
 
   async function handleSubmit(formData) {
     if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     setError('');
     
     const result = await createClientAction(formData);
     if (result?.error) {
       setError(result.error);
-      setLoading(false);
     } else {
       router.refresh();
-      setLoading(false);
       document.getElementById('create-client-form').reset();
     }
+    setLoading(false);
+    setGlobalLoading(false);
   }
 
   return (
