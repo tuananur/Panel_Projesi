@@ -95,7 +95,6 @@ export default function CreateClientForm() {
           id="phone" 
           name="phone" 
           className="input-field" 
-          required 
         />
       </div>
 

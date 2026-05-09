@@ -24,7 +24,7 @@ model Client {
   website     String?
   contactName String
   email       String?
-  phone       String
+  phone       String?
   services    String   // JSON or comma separated e.g. "SEO,SOCIAL_MEDIA"
   
   // Phase 2 fields

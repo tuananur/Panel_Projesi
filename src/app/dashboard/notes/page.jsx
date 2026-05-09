@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import NotesPageClient from './notes-page-client';
 
 export const metadata = {
-  title: 'Kişisel Notlar | Dashboard',
+  title: 'İş Takibi | Dashboard',
 };
 
 export default async function NotesPage() {
@@ -37,7 +37,7 @@ export default async function NotesPage() {
   return (
     <div className="animate-fade-in">
       <div style={{ marginBottom: '2rem' }}>
-        <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Kişisel Notlar</h1>
+        <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>İş Takibi</h1>
         <p className="text-muted" style={{ fontSize: '0.9rem' }}>Genel ve müşteriye özel notlarınızı buradan yönetebilirsiniz.</p>
       </div>
 
