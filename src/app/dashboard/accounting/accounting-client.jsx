@@ -293,7 +293,7 @@ export default function AccountingClient({ initialEntries, userRole }) {
         isOpen={isAddModalOpen}
         title={`${entryType === 'INCOME' ? 'Gelir' : 'Gider'} Ekle`}
         onClose={() => setIsAddModalOpen(false)}
-        showConfirm={false}
+        showButtons={false}
       >
         <form action={handleAddEntry} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <input type="hidden" name="type" value={entryType} />
