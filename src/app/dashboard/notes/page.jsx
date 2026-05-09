@@ -14,9 +14,9 @@ export default async function NotesPage() {
     redirect('/login');
   }
 
-  // Fetch all notes for the current user
+  // Fetch notes: All for Admin, only own for others
   const notes = await prisma.note.findMany({
-    where: { userId: session.userId },
+    where: session.role === 'ADMIN' ? {} : { userId: session.userId },
     include: {
       client: {
         select: { id: true, companyName: true }
@@ -45,6 +45,7 @@ export default async function NotesPage() {
         initialNotes={notes} 
         clients={clients} 
         currentUserId={session.userId} 
+        userRole={session.role}
       />
     </div>
   );

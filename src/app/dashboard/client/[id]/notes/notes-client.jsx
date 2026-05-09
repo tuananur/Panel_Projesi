@@ -154,7 +154,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
                     <button 
                       onClick={() => {
-                        if (note.userId !== currentUserId) {
+                        if (note.userId !== currentUserId && userRole !== 'ADMIN') {
                           setError('Bu işlemi yapmaya yetkiniz yok.');
                           return;
                         }
@@ -166,9 +166,9 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                         cursor: 'pointer', 
                         padding: 0, 
                         color: note.isDone ? '#10b981' : 'var(--text-secondary)',
-                        opacity: note.userId === currentUserId ? 1 : 0.4
+                        opacity: (note.userId === currentUserId || userRole === 'ADMIN') ? 1 : 0.4
                       }}
-                      title={note.userId === currentUserId ? (note.isDone ? "Yapılmadı olarak işaretle" : "Yapıldı olarak işaretle") : "Bu işlemi yapmaya yetkiniz yok."}
+                      title={(note.userId === currentUserId || userRole === 'ADMIN') ? (note.isDone ? "Yapılmadı olarak işaretle" : "Yapıldı olarak işaretle") : "Bu işlemi yapmaya yetkiniz yok."}
                     >
                       {note.isDone ? <CheckCircle2 size={22} /> : <Circle size={22} />}
                     </button>
@@ -207,7 +207,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                         <button 
                           onClick={() => {
-                            if (note.userId !== currentUserId) {
+                            if (note.userId !== currentUserId && userRole !== 'ADMIN') {
                               setError('Bu işlemi yapmaya yetkiniz yok.');
                               return;
                             }
@@ -220,15 +220,15 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                             color: 'var(--text-secondary)', 
                             cursor: 'pointer', 
                             padding: '0.25rem',
-                            opacity: note.userId === currentUserId ? 1 : 0.3
+                            opacity: (note.userId === currentUserId || userRole === 'ADMIN') ? 1 : 0.3
                           }}
-                          title={note.userId !== currentUserId ? "Bu işlemi yapmaya yetkiniz yok." : "Düzenle"}
+                          title={(note.userId !== currentUserId && userRole !== 'ADMIN') ? "Bu işlemi yapmaya yetkiniz yok." : "Düzenle"}
                         >
                           <Edit2 size={16} />
                         </button>
                         <button 
                           onClick={() => {
-                            if (note.userId !== currentUserId) {
+                            if (note.userId !== currentUserId && userRole !== 'ADMIN') {
                               setError('Bu işlemi yapmaya yetkiniz yok.');
                               return;
                             }
@@ -241,9 +241,9 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                             color: '#ef4444', 
                             cursor: 'pointer', 
                             padding: '0.25rem',
-                            opacity: note.userId === currentUserId ? 1 : 0.3
+                            opacity: (note.userId === currentUserId || userRole === 'ADMIN') ? 1 : 0.3
                           }}
-                          title={note.userId !== currentUserId ? "Bu işlemi yapmaya yetkiniz yok." : "Sil"}
+                          title={(note.userId !== currentUserId && userRole !== 'ADMIN') ? "Bu işlemi yapmaya yetkiniz yok." : "Sil"}
                         >
                           <Trash2 size={16} />
                         </button>
