@@ -268,7 +268,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
         isOpen={isAddModalOpen}
         title="Yeni Not Ekle"
         onClose={() => setIsAddModalOpen(false)}
-        showConfirm={false}
+        showButtons={false}
       >
         <form action={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {activeTab === 'client' && (
@@ -313,7 +313,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
         isOpen={isEditModalOpen}
         title="Notu Düzenle"
         onClose={() => setIsEditModalOpen(false)}
-        showConfirm={false}
+        showButtons={false}
       >
         <form action={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {selectedNote?.clientId && (

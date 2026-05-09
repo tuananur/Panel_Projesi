@@ -211,7 +211,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
         isOpen={isAddModalOpen}
         title="Yeni Not Ekle"
         onClose={() => setIsAddModalOpen(false)}
-        showConfirm={false}
+        showButtons={false}
       >
         <form action={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="input-group">
@@ -243,7 +243,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
         isOpen={isEditModalOpen}
         title="Notu Düzenle"
         onClose={() => setIsEditModalOpen(false)}
-        showConfirm={false}
+        showButtons={false}
       >
         <form action={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="input-group">
