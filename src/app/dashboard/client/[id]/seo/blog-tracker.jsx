@@ -7,6 +7,7 @@ import { CheckCircle2, Circle, Plus, Trash2, Calendar as CalendarIcon, Link as L
 import { syncBlogsAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
+import { useTheme } from '@/app/components/theme-provider';
 
 const MONTHS = [
   'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
@@ -17,6 +18,7 @@ const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', '
 
 export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteType, blogApiUrl }) {
   const router = useRouter();
+  const { setGlobalLoading } = useTheme();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
@@ -57,13 +59,13 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   async function handleToggle(taskId, currentStatus) {
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('taskId', taskId);
-      formData.append('status', (!currentStatus).toString());
-      await toggleTaskAction(formData);
-      router.refresh();
-    });
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('taskId', taskId);
+    formData.append('status', (!currentStatus).toString());
+    await toggleTaskAction(formData);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   const [newBlogLink, setNewBlogLink] = useState('');
@@ -81,6 +83,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
     }
     
     setLoading(true);
+    setGlobalLoading(true);
     const result = await addTaskAction(formData);
     if (result.success) {
       setAddConfirmDay(null);
@@ -88,17 +91,18 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
       router.refresh();
     }
     setLoading(false);
+    setGlobalLoading(false);
   }
 
   async function handleDelete() {
     if (!deleteTaskId) return;
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('taskId', deleteTaskId);
-      await deleteTaskAction(formData);
-      setDeleteTaskId(null);
-      router.refresh();
-    });
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('taskId', deleteTaskId);
+    await deleteTaskAction(formData);
+    setDeleteTaskId(null);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   const openDetailModal = (task) => {
@@ -108,19 +112,20 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
   };
 
   async function confirmUpdate() {
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('taskId', activeTask.id);
-      formData.append('link', linkInput);
-      formData.append('note', activeTask.note || '');
-      await updateTaskDetailAction(formData);
-      setIsDetailModalOpen(false);
-      router.refresh();
-    });
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('taskId', activeTask.id);
+    formData.append('link', linkInput);
+    formData.append('note', activeTask.note || '');
+    await updateTaskDetailAction(formData);
+    setIsDetailModalOpen(false);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   async function handleSync() {
     setLoading(true);
+    setGlobalLoading(true);
     const result = await syncBlogsAction(clientId);
     if (result.success) {
       router.refresh();
@@ -128,6 +133,7 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
       alert(result.error);
     }
     setLoading(false);
+    setGlobalLoading(false);
   }
 
   const renderDay = (day) => {

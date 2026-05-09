@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { updateClientSettingsAction, testMetaConnectionAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAY_LABELS = {
@@ -20,6 +21,7 @@ export default function SettingsForm({ client, role }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { setGlobalLoading } = useTheme();
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('seo');
   const [testResult, setTestResult] = useState(null);
@@ -62,6 +64,7 @@ export default function SettingsForm({ client, role }) {
 
   async function handleTestConnection() {
     setTesting(true);
+    setGlobalLoading(true);
     setTestResult(null);
     
     const formData = new FormData();
@@ -74,10 +77,12 @@ export default function SettingsForm({ client, role }) {
     const result = await testMetaConnectionAction(formData);
     setTestResult(result);
     setTesting(false);
+    setGlobalLoading(false);
   }
 
   async function handleSubmit(formData) {
     setLoading(true);
+    setGlobalLoading(true);
     setError('');
     
     formData.append('socialAccounts', JSON.stringify(social));
@@ -92,6 +97,7 @@ export default function SettingsForm({ client, role }) {
       setIsSuccessDialogOpen(true);
     }
     setLoading(false);
+    setGlobalLoading(false);
   }
 
   return (

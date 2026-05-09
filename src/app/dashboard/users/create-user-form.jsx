@@ -4,27 +4,29 @@ import { useState } from 'react';
 import { createUserAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 export default function CreateUserForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { setGlobalLoading } = useTheme();
   const router = useRouter();
 
   async function handleSubmit(formData) {
     if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     setError('');
     
     const result = await createUserAction(formData);
     if (result?.error) {
       setError(result.error);
-      setLoading(false);
     } else {
       router.refresh();
-      setLoading(false);
-      // Reset the form manually since it's a client component using action
       document.getElementById('create-user-form').reset();
     }
+    setLoading(false);
+    setGlobalLoading(false);
   }
 
   return (

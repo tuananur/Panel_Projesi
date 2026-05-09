@@ -5,15 +5,18 @@ import { deleteUserAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 export default function DeleteUserButton({ userId }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { setGlobalLoading } = useTheme();
 
   async function handleDelete() {
     setLoading(true);
+    setGlobalLoading(true);
     setError('');
     const formData = new FormData();
     formData.append('id', userId);
@@ -21,12 +24,12 @@ export default function DeleteUserButton({ userId }) {
     
     if (result?.error) {
       setError(result.error);
-      setLoading(false);
     } else {
       setIsOpen(false);
       router.refresh();
-      setLoading(false);
     }
+    setLoading(false);
+    setGlobalLoading(false);
   }
 
   return (

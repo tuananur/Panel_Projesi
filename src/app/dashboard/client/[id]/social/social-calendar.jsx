@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, Circle, ChevronLeft, ChevronRight, Plus, Trash2, Play, Link as LinkIcon, Calendar as CalendarIcon } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
+import { useTheme } from '@/app/components/theme-provider';
 
 const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 const PLATFORMS = ['Instagram', 'YouTube', 'Facebook', 'LinkedIn', 'X', 'Pinterest'];
@@ -60,6 +61,7 @@ const PLATFORM_ICONS = {
 
 export default function SocialCalendar({ clientId, initialTasks, platforms, schedule, socialAccounts, isAdmin }) {
   const router = useRouter();
+  const { setGlobalLoading } = useTheme();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState(false);
@@ -159,66 +161,66 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   };
 
   async function handleToggle(taskId, currentStatus) {
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('taskId', taskId);
-      formData.append('status', (!currentStatus).toString());
-      await toggleTaskAction(formData);
-      router.refresh();
-    });
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('taskId', taskId);
+    formData.append('status', (!currentStatus).toString());
+    await toggleTaskAction(formData);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   async function handleDelete() {
     if (!deleteTaskId) return;
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('taskId', deleteTaskId);
-      await deleteTaskAction(formData);
-      setDeleteTaskId(null);
-      router.refresh();
-    });
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('taskId', deleteTaskId);
+    await deleteTaskAction(formData);
+    setDeleteTaskId(null);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   async function handleRemoveFromSchedule() {
     if (!scheduleDeleteData) return;
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('clientId', clientId);
-      formData.append('platform', scheduleDeleteData.platform);
-      formData.append('dayName', scheduleDeleteData.dayName);
-      await removeScheduleDayAction(formData);
-      setScheduleDeleteData(null);
-      router.refresh();
-    });
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('clientId', clientId);
+    formData.append('platform', scheduleDeleteData.platform);
+    formData.append('dayName', scheduleDeleteData.dayName);
+    await removeScheduleDayAction(formData);
+    setScheduleDeleteData(null);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   async function handleBulkDelete() {
     if (!bulkDeleteData) return;
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('clientId', clientId);
-      formData.append('date', bulkDeleteData.date.toISOString());
-      formData.append('platformsToHide', JSON.stringify(bulkDeleteData.platformsToHide));
-      await bulkDeleteDayAction(formData);
-      setBulkDeleteData(null);
-      router.refresh();
-    });
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('clientId', clientId);
+    formData.append('date', bulkDeleteData.date.toISOString());
+    formData.append('platformsToHide', JSON.stringify(bulkDeleteData.platformsToHide));
+    await bulkDeleteDayAction(formData);
+    setBulkDeleteData(null);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   async function handleSingleGhostDelete() {
     if (!singleGhostDeleteData) return;
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('clientId', clientId);
-      formData.append('type', 'SOCIAL');
-      formData.append('date', singleGhostDeleteData.date.toISOString());
-      formData.append('platform', singleGhostDeleteData.platform);
-      formData.append('note', '__DELETED__');
-      formData.append('status', 'false');
-      await addTaskAction(formData);
-      setSingleGhostDeleteData(null);
-      router.refresh();
-    });
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('clientId', clientId);
+    formData.append('type', 'SOCIAL');
+    formData.append('date', singleGhostDeleteData.date.toISOString());
+    formData.append('platform', singleGhostDeleteData.platform);
+    formData.append('note', '__DELETED__');
+    formData.append('status', 'false');
+    await addTaskAction(formData);
+    setSingleGhostDeleteData(null);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   const openModal = (day, platform = null, task = null) => {
@@ -240,35 +242,34 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
   };
 
   async function handleSave() {
-    startTransition(async () => {
-      if (activeTask) {
+    setGlobalLoading(true);
+    if (activeTask) {
+      const formData = new FormData();
+      formData.append('taskId', activeTask.id);
+      formData.append('note', noteInput);
+      formData.append('link', linkInput);
+      formData.append('status', taskStatus.toString());
+      formData.append('platform', selectedPlatforms[0] || '');
+      await updateTaskDetailAction(formData);
+    } else {
+      const date = new Date(year, month, activeDay, 12);
+      const platformsToCreate = selectedPlatforms.length > 0 ? selectedPlatforms : [''];
+      
+      for (const p of platformsToCreate) {
         const formData = new FormData();
-        formData.append('taskId', activeTask.id);
+        formData.append('clientId', clientId);
+        formData.append('type', 'SOCIAL');
+        formData.append('date', date.toISOString());
+        formData.append('platform', p);
         formData.append('note', noteInput);
         formData.append('link', linkInput);
         formData.append('status', taskStatus.toString());
-        formData.append('platform', selectedPlatforms[0] || '');
-        await updateTaskDetailAction(formData);
-      } else {
-        const date = new Date(year, month, activeDay, 12);
-        const platformsToCreate = selectedPlatforms.length > 0 ? selectedPlatforms : [''];
-        
-        // Create a task for each selected platform
-        for (const p of platformsToCreate) {
-          const formData = new FormData();
-          formData.append('clientId', clientId);
-          formData.append('type', 'SOCIAL');
-          formData.append('date', date.toISOString());
-          formData.append('platform', p);
-          formData.append('note', noteInput);
-          formData.append('link', linkInput);
-          formData.append('status', taskStatus.toString());
-          await addTaskAction(formData);
-        }
+        await addTaskAction(formData);
       }
-      setIsModalOpen(false);
-      router.refresh();
-    });
+    }
+    setIsModalOpen(false);
+    router.refresh();
+    setGlobalLoading(false);
   }
 
   const renderDay = (day) => {

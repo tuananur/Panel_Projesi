@@ -5,26 +5,29 @@ import { updateUserAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { Edit } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 export default function EditUserModal({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { setGlobalLoading } = useTheme();
   const router = useRouter();
 
   async function handleSubmit(formData) {
     setLoading(true);
+    setGlobalLoading(true);
     setError('');
     
     const result = await updateUserAction(formData);
     if (result?.error) {
       setError(result.error);
-      setLoading(false);
     } else {
       setIsOpen(false);
       router.refresh();
-      setLoading(false);
     }
+    setLoading(false);
+    setGlobalLoading(false);
   }
 
   return (
