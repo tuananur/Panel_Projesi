@@ -61,7 +61,7 @@ export default function AccountingClient({ initialEntries, userRole }) {
         const startTarget = new Date(entryYear, entryMonth, 1);
         const endTarget = new Date(entryYear, entryMonth + 12, 1);
         if (targetDate >= startTarget && targetDate < endTarget) {
-          processed.push({ ...entry, displayAmount: entry.amount / 12, isRecurring: true, note: '(Yıllık)' });
+          processed.push({ ...entry, displayAmount: entry.amount / 12, isRecurring: true, note: '(Senelik)' });
         }
       }
     });
@@ -317,9 +317,9 @@ export default function AccountingClient({ initialEntries, userRole }) {
               <label className="input-label">Periyot</label>
               <select name="frequency" className="input-field">
                 <option value="MANUAL">Tek Seferlik (Manuel)</option>
-                <option value="MONTHLY">Aylık (Düzenli)</option>
-                <option value="QUARTERLY">3 Aylık (Bölünerek)</option>
-                <option value="YEARLY">Yıllık (Bölünerek)</option>
+                <option value="MONTHLY">Aylık</option>
+                <option value="QUARTERLY">3 Aylık</option>
+                <option value="YEARLY">Senelik</option>
               </select>
             </div>
           </div>
@@ -351,7 +351,7 @@ function EntryItem({ item, onDelete, color }) {
         <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{item.description}</div>
         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
           <Calendar size={10} /> {new Date(item.date).toLocaleDateString('tr-TR')}
-          {item.isRecurring && <span style={{ color, fontWeight: 700, marginLeft: '0.5rem' }}>• {item.frequency === 'MONTHLY' ? 'Aylık' : item.frequency}</span>}
+          {item.isRecurring && <span style={{ color, fontWeight: 700, marginLeft: '0.5rem' }}>• {item.frequency === 'MONTHLY' ? 'Aylık' : (item.frequency === 'QUARTERLY' ? '3 Aylık' : 'Senelik')}</span>}
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
