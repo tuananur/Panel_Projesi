@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from './sidebar';
 import Header from './header-client';
 import { usePathname } from 'next/navigation';
+import DailyQuote from './daily-quote';
 
 export default function DashboardClientLayout({ children, session }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -37,6 +38,7 @@ export default function DashboardClientLayout({ children, session }) {
         <div className="content-area">
           {children}
         </div>
+        <DailyQuote />
       </main>
     </div>
   );
