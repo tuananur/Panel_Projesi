@@ -78,7 +78,12 @@ export default async function CredentialsPage() {
             </thead>
             <tbody>
               {clients.map((client) => {
-                const socialAccounts = JSON.parse(client.socialAccounts || '{}');
+                let socialAccounts = {};
+                try {
+                  socialAccounts = JSON.parse(client.socialAccounts || '{}');
+                } catch (e) {
+                  console.error('Parse error for client:', client.companyName);
+                }
                 const activePlatforms = Object.entries(socialAccounts).filter(([_, url]) => url && url.trim() !== '');
 
                 return (

@@ -62,9 +62,18 @@ export default async function ClientDetailLayout({ children, params }) {
     orderBy: { companyName: 'asc' }
   });
 
-  const services = JSON.parse(client.services || '[]');
-  const socialAccounts = JSON.parse(client.socialAccounts || '{}');
-  const socialSchedule = JSON.parse(client.socialSchedule || '{}');
+  const getSafeJSON = (val, fallback) => {
+    try {
+      return JSON.parse(val || fallback);
+    } catch (e) {
+      if (fallback === '[]' && val) return val.split(',');
+      return JSON.parse(fallback);
+    }
+  };
+
+  const services = getSafeJSON(client.services, '[]');
+  const socialAccounts = getSafeJSON(client.socialAccounts, '{}');
+  const socialSchedule = getSafeJSON(client.socialSchedule, '{}');
   const activePlatforms = Object.keys(socialAccounts).filter(p => {
     const hasAccount = socialAccounts[p] && socialAccounts[p].trim() !== '';
     const hasSchedule = socialSchedule[p] && socialSchedule[p].length > 0;

@@ -35,7 +35,13 @@ export default async function DashboardPage() {
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
           <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Aktif Hizmetler</h3>
           <p style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--accent-secondary)' }}>
-            {clients.reduce((acc, c) => acc + JSON.parse(c.services || '[]').length, 0)}
+            {clients.reduce((acc, c) => {
+              try {
+                return acc + JSON.parse(c.services || '[]').length;
+              } catch (e) {
+                return acc + (c.services ? c.services.split(',').length : 0);
+              }
+            }, 0)}
           </p>
         </div>
       </div>
@@ -44,7 +50,14 @@ export default async function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
         {clients.length > 0 ? (
           clients.map(client => {
-            const services = JSON.parse(client.services || '[]');
+            const getSafeServices = (s) => {
+              try {
+                return JSON.parse(s || '[]');
+              } catch (e) {
+                return s ? s.split(',') : [];
+              }
+            };
+            const services = getSafeServices(client.services);
             const pendingTasks = client.tasks.filter(t => !t.status);
             
             return (
