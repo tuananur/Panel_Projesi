@@ -88,7 +88,7 @@ export default async function DashboardPage() {
                     </div>
                   </Link>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem', position: 'relative', zIndex: 2 }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem', position: 'relative', zIndex: 2, pointerEvents: 'none' }}>
                     {services.map(s => (
                       <span key={s} style={{ 
                         fontSize: '0.65rem', 
@@ -112,9 +112,10 @@ export default async function DashboardPage() {
                     justifyContent: 'space-between', 
                     alignItems: 'center',
                     position: 'relative',
-                    zIndex: 2 
+                    zIndex: 2,
+                    pointerEvents: 'none' // Click passes through to the stretched link
                   }}>
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', pointerEvents: 'auto' }}>
                       <a 
                         href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
                         target="_blank"
@@ -136,7 +137,7 @@ export default async function DashboardPage() {
                         </a>
                       )}
                     </div>
-                    <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+                    <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
                       <ChevronRight size={18} />
                     </div>
                   </div>
