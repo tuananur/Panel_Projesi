@@ -56,6 +56,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
   });
 
   const handleAdd = async (formData) => {
+    if (loading) return;
     setLoading(true);
     const result = await addNoteAction(formData);
     if (result?.error) {
@@ -68,6 +69,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
   };
 
   const handleEdit = async (formData) => {
+    if (loading) return;
     setLoading(true);
     formData.append('noteId', selectedNote.id);
     const result = await updateNoteAction(formData);

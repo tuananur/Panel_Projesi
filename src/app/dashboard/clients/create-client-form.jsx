@@ -12,6 +12,7 @@ export default function CreateClientForm() {
   const router = useRouter();
 
   async function handleSubmit(formData) {
+    if (loading) return;
     setLoading(true);
     setError('');
     

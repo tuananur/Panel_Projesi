@@ -35,6 +35,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
   });
 
   const handleAdd = async (formData) => {
+    if (loading) return;
     setLoading(true);
     formData.append('clientId', clientId);
     const result = await addNoteAction(formData);
@@ -48,6 +49,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
   };
 
   const handleEdit = async (formData) => {
+    if (loading) return;
     setLoading(true);
     formData.append('noteId', selectedNote.id);
     const result = await updateNoteAction(formData);

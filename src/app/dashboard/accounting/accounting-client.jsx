@@ -78,6 +78,7 @@ export default function AccountingClient({ initialEntries, userRole }) {
   const netProfit = totalIncome - totalExpense;
 
   const handleAddEntry = async (formData) => {
+    if (loading) return;
     setLoading(true);
     const result = await addAccountingEntryAction(formData);
     if (result.success) {
