@@ -894,3 +894,40 @@ export async function getAccountingEntriesAction() {
     return { error: 'Kayıtlar getirilemedi.' };
   }
 }
+
+export async function updateSocialCredentialsAction(clientId, platform, type, value) {
+  try {
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+    
+    let socialAccounts = {};
+    try {
+      socialAccounts = JSON.parse(client.socialAccounts || '{}');
+    } catch (e) {
+      socialAccounts = {};
+    }
+
+    // Ensure the platform object exists
+    if (!socialAccounts[platform] || typeof socialAccounts[platform] === 'string') {
+      // Convert old string URL to new object format if necessary
+      const oldUrl = typeof socialAccounts[platform] === 'string' ? socialAccounts[platform] : '';
+      socialAccounts[platform] = { url: oldUrl, username: '', password: '' };
+    }
+
+    // Update the specific field
+    socialAccounts[platform][type] = value;
+
+    await prisma.client.update({
+      where: { id: parseInt(clientId) },
+      data: {
+        socialAccounts: JSON.stringify(socialAccounts)
+      }
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Update credentials error:', error);
+    return { error: 'Bilgiler güncellenemedi.' };
+  }
+}
