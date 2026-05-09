@@ -33,6 +33,7 @@
 }
 
 :root {
+  color-scheme: dark;
   --bg-primary: #0f172a; /* Dark blue slate */
   --bg-secondary: #1e293b;
   --text-primary: #f8fafc;
@@ -202,6 +203,11 @@ input, button, select, textarea {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.input-field option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 /* Glass panel utility */
