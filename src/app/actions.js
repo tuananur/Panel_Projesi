@@ -687,6 +687,16 @@ export async function toggleNoteStatusAction(formData) {
   const isDone = formData.get('isDone') === 'true';
 
   try {
+    const session = await getSession();
+    const note = await prisma.note.findUnique({
+      where: { id: noteId },
+      select: { userId: true }
+    });
+
+    if (!note || note.userId !== session.userId) {
+      return { error: 'Sadece kendi notlarınızın durumunu değiştirebilirsiniz.' };
+    }
+
     await prisma.note.update({
       where: { id: noteId },
       data: { isDone }

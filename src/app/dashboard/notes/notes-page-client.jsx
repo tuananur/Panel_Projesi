@@ -200,8 +200,16 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
                 }}>
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
                     <button 
-                      onClick={() => handleToggleStatus(note.id, note.isDone)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: note.isDone ? '#10b981' : 'var(--text-secondary)' }}
+                      onClick={() => note.userId === currentUserId && handleToggleStatus(note.id, note.isDone)}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        cursor: note.userId === currentUserId ? 'pointer' : 'default', 
+                        padding: 0, 
+                        color: note.isDone ? '#10b981' : 'var(--text-secondary)',
+                        opacity: note.userId === currentUserId ? 1 : 0.4
+                      }}
+                      title={note.userId === currentUserId ? (note.isDone ? "Yapılmadı olarak işaretle" : "Yapıldı olarak işaretle") : "Bu not size ait değil"}
                     >
                       {note.isDone ? <CheckCircle2 size={22} /> : <Circle size={22} />}
                     </button>
@@ -248,18 +256,22 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
                   </td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                      <button 
-                        onClick={() => { setSelectedNote(note); setIsEditModalOpen(true); }}
-                        style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button 
-                        onClick={() => { setSelectedNote(note); setIsDeleteModalOpen(true); }}
-                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {note.userId === currentUserId && (
+                        <>
+                          <button 
+                            onClick={() => { setSelectedNote(note); setIsEditModalOpen(true); }}
+                            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button 
+                            onClick={() => { setSelectedNote(note); setIsDeleteModalOpen(true); }}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
