@@ -5,29 +5,33 @@ import { updateClientAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { Edit } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 export default function EditClientModal({ client }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [websiteType, setWebsiteType] = useState(client.websiteType || 'OTHER');
+  const { setGlobalLoading } = useTheme();
   const router = useRouter();
 
   const currentServices = JSON.parse(client.services || '[]');
 
   async function handleSubmit(formData) {
+    if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     setError('');
     
     const result = await updateClientAction(formData);
     if (result?.error) {
       setError(result.error);
-      setLoading(false);
     } else {
       setIsOpen(false);
       router.refresh();
-      setLoading(false);
     }
+    setLoading(false);
+    setGlobalLoading(false);
   }
 
   return (
@@ -75,7 +79,7 @@ export default function EditClientModal({ client }) {
 
               <div className="input-group">
                 <label className="input-label">Telefon Numarası</label>
-                <input type="tel" name="phone" className="input-field" defaultValue={client.phone} required />
+                <input type="tel" name="phone" className="input-field" defaultValue={client.phone} />
               </div>
 
               <div className="input-group">
