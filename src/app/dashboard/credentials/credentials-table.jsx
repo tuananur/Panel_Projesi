@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Copy, Check, Save, Lock, User, Globe } from 'lucide-react';
 import { updateSocialCredentialsAction } from '@/app/actions';
+import { useTheme } from '@/app/components/theme-provider';
 
 const PLATFORMS = ['Instagram', 'Facebook', 'LinkedIn', 'YouTube', 'X', 'Pinterest'];
 
@@ -49,6 +50,8 @@ export default function CredentialsTable({ initialClients }) {
   const [editingCell, setEditingCell] = useState(null); // { clientId, platform, field }
   const [tempValue, setTempValue] = useState('');
   const [copiedId, setCopiedId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { setGlobalLoading } = useTheme();
 
   const handleCopy = (text, id) => {
     if (!text) return;
@@ -63,9 +66,12 @@ export default function CredentialsTable({ initialClients }) {
   };
 
   const saveEdit = async () => {
-    if (!editingCell) return;
+    if (!editingCell || loading) return;
     const { clientId, platform, field } = editingCell;
     
+    setLoading(true);
+    setGlobalLoading(true);
+
     // Update local state immediately
     const updatedClients = clients.map(c => {
       if (c.id === clientId) {
@@ -87,6 +93,8 @@ export default function CredentialsTable({ initialClients }) {
     // Persist to DB
     await updateSocialCredentialsAction(clientId, platform, field, tempValue);
     setEditingCell(null);
+    setLoading(false);
+    setGlobalLoading(false);
   };
 
   return (

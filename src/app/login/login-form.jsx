@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTheme } from '@/app/components/theme-provider';
 
 import { loginAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -8,16 +9,20 @@ import CustomDialog from '@/app/components/custom-dialog';
 export default function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { setGlobalLoading } = useTheme();
 
   async function handleSubmit(formData) {
+    if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     setError('');
     
     const result = await loginAction(formData);
     if (result?.error) {
       setError(result.error);
-      setLoading(false);
     }
+    setLoading(false);
+    setGlobalLoading(false);
   }
 
   return (

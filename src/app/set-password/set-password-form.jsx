@@ -3,24 +3,29 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 import { setPasswordAction } from '@/app/actions';
 
 export default function SetPasswordForm({ userId }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { setGlobalLoading } = useTheme();
 
   // We bind the userId to the action
   const actionWithId = setPasswordAction.bind(null, userId);
 
   async function handleSubmit(formData) {
+    if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     setError('');
     
     const result = await actionWithId(formData);
     if (result?.error) {
       setError(result.error);
-      setLoading(false);
     }
+    setLoading(false);
+    setGlobalLoading(false);
   }
 
   return (

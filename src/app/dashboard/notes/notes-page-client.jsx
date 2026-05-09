@@ -90,7 +90,9 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
   };
 
   const handleDelete = async () => {
+    if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     const formData = new FormData();
     formData.append('noteId', selectedNote.id);
     const result = await deleteNoteAction(formData);
@@ -102,14 +104,20 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
       router.refresh();
     }
     setLoading(false);
+    setGlobalLoading(false);
   };
 
   const handleToggleStatus = async (noteId, currentStatus) => {
+    if (loading) return;
+    setLoading(true);
+    setGlobalLoading(true);
     const formData = new FormData();
     formData.append('noteId', noteId);
     formData.append('isDone', (!currentStatus).toString());
     await toggleNoteStatusAction(formData);
     router.refresh();
+    setLoading(false);
+    setGlobalLoading(false);
   };
 
   return (

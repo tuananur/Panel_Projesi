@@ -95,11 +95,17 @@ export default function AccountingClient({ initialEntries, userRole }) {
   };
 
   const handleDeleteEntry = async (id) => {
+    if (loading) return;
     if (!confirm('Bu kaydı silmek istediğinize emin misiniz?')) return;
+    
+    setLoading(true);
+    setGlobalLoading(true);
     const formData = new FormData();
     formData.append('id', id);
     await deleteAccountingEntryAction(formData);
     router.refresh();
+    setLoading(false);
+    setGlobalLoading(false);
   };
 
   // Cash Projection for 12 months
