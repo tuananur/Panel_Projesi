@@ -78,7 +78,7 @@ export default async function LogsPage() {
                             {log.action}
                           </span>
                           <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                            {new Date(log.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(log.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })}
                           </span>
                         </div>
                       </div>

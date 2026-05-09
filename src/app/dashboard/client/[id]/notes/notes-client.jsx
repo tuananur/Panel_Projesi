@@ -183,7 +183,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)', fontSize: '0.75rem' }}>
                         <Clock size={12} />
-                        {new Date(note.createdAt).toLocaleDateString('tr-TR')} {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(note.createdAt).toLocaleDateString('tr-TR')} {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })}
                       </div>
                     </div>
                   </td>

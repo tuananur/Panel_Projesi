@@ -227,7 +227,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId }
                         {new Date(note.createdAt).toLocaleDateString('tr-TR')}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)' }}>
-                        {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })}
                       </div>
                     </div>
                   </td>
