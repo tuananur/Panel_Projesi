@@ -31,7 +31,11 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
       const checkLogs = async () => {
         const latestId = await getLatestLogIdAction();
         const lastSeenId = parseInt(localStorage.getItem('last_seen_log_id') || '0');
-        if (latestId > lastSeenId) {
+        
+        if (pathname === '/dashboard/logs') {
+          localStorage.setItem('last_seen_log_id', latestId.toString());
+          setHasNewLogs(false);
+        } else if (latestId > lastSeenId) {
           setHasNewLogs(true);
         }
       };
@@ -53,7 +57,11 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
     const checkNotes = async () => {
       const latestId = await getLatestNoteIdAction();
       const lastSeenId = parseInt(localStorage.getItem('last_seen_note_id') || '0');
-      if (latestId > lastSeenId) {
+      
+      if (pathname === '/dashboard/notes') {
+        localStorage.setItem('last_seen_note_id', latestId.toString());
+        setHasNewNotes(false);
+      } else if (latestId > lastSeenId) {
         setHasNewNotes(true);
       } else {
         setHasNewNotes(false);
