@@ -72,7 +72,7 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
       { href: '/dashboard/users', label: 'Kullanıcılar', icon: <UserCircle size={20} /> },
       { href: '/dashboard/logs', label: 'Sistem Logları', icon: <ClipboardList size={20} /> },
     ] : []),
-    { href: '/dashboard/notes', label: 'İş Takibi', icon: <StickyNote size={20} /> },
+    { href: '/dashboard/notes', label: 'Kişisel Notlar', icon: <StickyNote size={20} /> },
     { href: '/dashboard/accounting', label: 'Muhasebe', icon: <Wallet size={20} /> },
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
@@ -199,7 +199,7 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
                     animation: 'pulse-red 2s infinite'
                   }}></span>
                 )}
-                {item.label === 'İş Takibi' && hasNewNotes && (
+                {item.label === 'Kişisel Notlar' && hasNewNotes && (
                   <span style={{
                     position: 'absolute',
                     top: '-2px',
