@@ -87,15 +87,17 @@ export default async function ClientDetailLayout({ children, params }) {
                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }} title="İletişim Kişisi">
                  <User size={14} /> {client.contactName}
                </span>
-               <a 
-                 href={`https://wa.me/${client.phone.replace(/\D/g, '')}`} 
-                 target="_blank" 
-                 rel="noopener noreferrer" 
-                 style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'inherit', textDecoration: 'none' }}
-                 title="WhatsApp ile Mesaj Gönder"
-               >
-                 <Phone size={14} /> {client.phone}
-               </a>
+               {client.phone && (
+                 <a 
+                   href={`https://wa.me/${client.phone.replace(/\D/g, '')}`} 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'inherit', textDecoration: 'none' }}
+                   title="WhatsApp ile Mesaj Gönder"
+                 >
+                   <Phone size={14} /> {client.phone}
+                 </a>
+               )}
                {client.email && (
                  <a 
                    href={`mailto:${client.email}`} 

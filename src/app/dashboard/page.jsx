@@ -117,7 +117,7 @@ export default async function DashboardPage() {
                   }}>
                     <div style={{ display: 'flex', gap: '0.75rem', pointerEvents: 'auto' }}>
                       <a 
-                        href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
+                        href={`https://wa.me/${(client.phone || '').replace(/\D/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="contact-icon-btn"
