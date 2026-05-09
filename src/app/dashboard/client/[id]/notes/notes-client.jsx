@@ -317,6 +317,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
             </tbody>
           </table>
         </div>
+      </div>
       ) : (
         /* Takvim Görünümü */
         <div className="responsive-flex" style={{ alignItems: 'stretch' }}>
