@@ -838,3 +838,59 @@ export async function testMetaConnectionAction(formData) {
     return { success: false, error: 'Ağ Hatası', details: err.message };
   }
 }
+
+// Accounting Actions
+export async function addAccountingEntryAction(formData) {
+  const type = formData.get('type');
+  const amount = parseFloat(formData.get('amount'));
+  const description = formData.get('description');
+  const date = new Date(formData.get('date'));
+  const frequency = formData.get('frequency') || 'MANUAL';
+
+  if (!type || !amount || !description || !date) {
+    return { error: 'Gerekli alanları doldurun.' };
+  }
+
+  try {
+    await prisma.accountingEntry.create({
+      data: {
+        type,
+        amount,
+        description,
+        date,
+        frequency
+      }
+    });
+    
+    await logActivity('CREATE', 'ACCOUNTING', `${type === 'INCOME' ? 'Gelir' : 'Gider'} eklendi: ${description} (${amount} TL)`);
+    return { success: true };
+  } catch (error) {
+    console.error('Accounting entry error:', error);
+    return { error: 'Kayıt eklenirken hata oluştu.' };
+  }
+}
+
+export async function deleteAccountingEntryAction(formData) {
+  const id = parseInt(formData.get('id'));
+  if (!id) return { error: 'Geçersiz ID' };
+
+  try {
+    const entry = await prisma.accountingEntry.findUnique({ where: { id } });
+    await prisma.accountingEntry.delete({ where: { id } });
+    await logActivity('DELETE', 'ACCOUNTING', `${entry?.type === 'INCOME' ? 'Gelir' : 'Gider'} silindi: ${entry?.description}`);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Kayıt silinemedi.' };
+  }
+}
+
+export async function getAccountingEntriesAction() {
+  try {
+    const entries = await prisma.accountingEntry.findMany({
+      orderBy: { date: 'desc' }
+    });
+    return { success: true, entries };
+  } catch (error) {
+    return { error: 'Kayıtlar getirilemedi.' };
+  }
+}
