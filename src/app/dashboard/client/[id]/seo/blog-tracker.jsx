@@ -283,6 +283,13 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
   const calendarDays = [];
   for (let i = 0; i < startOffset; i++) calendarDays.push(null);
   for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
+  
+  const getBlogCountByMonth = (monthIndex) => {
+    return initialTasks.filter(t => {
+      const tDate = new Date(t.date);
+      return tDate.getMonth() === monthIndex && tDate.getFullYear() === selectedYear;
+    }).length;
+  };
 
   return (
     <div className="responsive-flex" style={{ marginTop: '0.5rem', alignItems: 'stretch' }}>
@@ -303,25 +310,44 @@ export default function BlogTracker({ clientId, initialTasks, isAdmin, websiteTy
           <CalendarIcon size={14} /> AYLAR
         </div>
         <div style={{ padding: '0.5rem' }}>
-          {MONTHS.map((month, index) => (
-            <div 
-              key={month}
-              onClick={() => handleMonthChange(index)}
-              style={{
-                padding: '0.6rem 0.75rem',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                marginBottom: '2px',
-                transition: 'all 0.2s',
-                backgroundColor: selectedMonth === index ? 'var(--accent-primary)' : 'transparent',
-                color: selectedMonth === index ? 'white' : 'var(--text-secondary)',
-                fontWeight: selectedMonth === index ? 600 : 400
-              }}
-            >
-              {month}
-            </div>
-          ))}
+          {MONTHS.map((month, index) => {
+            const count = getBlogCountByMonth(index);
+            return (
+              <div 
+                key={month}
+                onClick={() => handleMonthChange(index)}
+                style={{
+                  padding: '0.6rem 0.75rem',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  marginBottom: '2px',
+                  transition: 'all 0.2s',
+                  backgroundColor: selectedMonth === index ? 'var(--accent-primary)' : 'transparent',
+                  color: selectedMonth === index ? 'white' : 'var(--text-secondary)',
+                  fontWeight: selectedMonth === index ? 600 : 400,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <span>{month}</span>
+                {count > 0 && (
+                  <span style={{ 
+                    fontSize: '0.7rem', 
+                    background: selectedMonth === index ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', 
+                    padding: '2px 6px', 
+                    borderRadius: '10px',
+                    minWidth: '22px',
+                    textAlign: 'center',
+                    fontWeight: 700
+                  }}>
+                    {count}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
