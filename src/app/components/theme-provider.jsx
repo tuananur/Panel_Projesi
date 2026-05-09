@@ -38,7 +38,10 @@ export function ThemeProvider({ children }) {
       {children}
       {globalLoading && (
         <div className="global-loading-overlay">
-          <div className="spinner"></div>
+          <div className="spinner-container">
+            <div className="spinner"></div>
+            <div className="spinner-inner"></div>
+          </div>
           <div className="loading-text">İşlem Yapılıyor...</div>
         </div>
       )}
