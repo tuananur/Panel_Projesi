@@ -617,6 +617,8 @@ export async function addNoteAction(formData) {
   const clientId = clientIdRaw ? parseInt(clientIdRaw) : null;
   const content = formData.get('content');
   const title = formData.get('title') || null;
+  const createdAtRaw = formData.get('createdAt');
+  const createdAt = createdAtRaw ? new Date(createdAtRaw) : undefined;
 
   if (!content) {
     return { error: 'Not içeriği boş olamaz.' };
@@ -629,7 +631,8 @@ export async function addNoteAction(formData) {
         clientId,
         userId: session.userId,
         title,
-        content
+        content,
+        createdAt
       }
     });
     

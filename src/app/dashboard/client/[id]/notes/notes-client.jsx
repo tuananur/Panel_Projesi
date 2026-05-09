@@ -15,8 +15,19 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
+  const [activeDay, setActiveDay] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const MONTHS = [
+    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+  ];
+  const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 
   const filteredNotes = notes.filter(note => {
     const lowerSearch = search.toLowerCase();
@@ -41,11 +52,16 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
     setLoading(true);
     setGlobalLoading(true);
     formData.append('clientId', clientId);
+    if (activeDay) {
+      const date = new Date(selectedYear, selectedMonth, activeDay, 12);
+      formData.append('createdAt', date.toISOString());
+    }
     const result = await addNoteAction(formData);
     if (result?.error) {
       setError(result.error);
     } else {
       setIsAddModalOpen(false);
+      setActiveDay(null);
       router.refresh();
     }
     setLoading(false);
@@ -123,16 +139,53 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
             style={{ paddingLeft: '2.75rem', width: '100%' }}
           />
         </div>
-        <button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="btn btn-primary"
-          style={{ gap: '0.5rem' }}
-        >
-          <Plus size={18} /> Yeni Not Ekle
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', border: '1px solid var(--border-color)', marginRight: '0.5rem' }}>
+            <button 
+              onClick={() => setViewMode('list')}
+              style={{ 
+                padding: '0.4rem 0.75rem', 
+                fontSize: '0.75rem', 
+                borderRadius: '6px', 
+                border: 'none',
+                cursor: 'pointer',
+                background: viewMode === 'list' ? 'var(--accent-primary)' : 'transparent',
+                color: viewMode === 'list' ? 'white' : 'var(--text-secondary)',
+                fontWeight: 600,
+                transition: 'all 0.2s'
+              }}
+            >
+              Liste
+            </button>
+            <button 
+              onClick={() => setViewMode('calendar')}
+              style={{ 
+                padding: '0.4rem 0.75rem', 
+                fontSize: '0.75rem', 
+                borderRadius: '6px', 
+                border: 'none',
+                cursor: 'pointer',
+                background: viewMode === 'calendar' ? 'var(--accent-primary)' : 'transparent',
+                color: viewMode === 'calendar' ? 'white' : 'var(--text-secondary)',
+                fontWeight: 600,
+                transition: 'all 0.2s'
+              }}
+            >
+              Takvim
+            </button>
+          </div>
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="btn btn-primary"
+            style={{ gap: '0.5rem' }}
+          >
+            <Plus size={18} /> Yeni Not Ekle
+          </button>
+        </div>
       </div>
 
-      {/* Notlar Listesi (Log Stili) */}
+      {viewMode === 'list' ? (
+        /* Notlar Listesi (Log Stili) */
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -264,16 +317,172 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
             </tbody>
           </table>
         </div>
-      </div>
+      ) : (
+        /* Takvim Görünümü */
+        <div className="responsive-flex" style={{ alignItems: 'stretch' }}>
+          {/* Sidebar */}
+          <div style={{ 
+            width: '160px', 
+            background: 'var(--bg-secondary)', 
+            borderRadius: '12px', 
+            border: '1px solid var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'fit-content',
+            flexShrink: 0
+          }}>
+            <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              AYLAR
+            </div>
+            <div style={{ padding: '0.5rem' }}>
+              {MONTHS.map((m, index) => (
+                <div 
+                  key={m}
+                  onClick={() => setSelectedMonth(index)}
+                  style={{
+                    padding: '0.6rem 0.75rem',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    marginBottom: '2px',
+                    transition: 'all 0.2s',
+                    backgroundColor: selectedMonth === index ? 'var(--accent-primary)' : 'transparent',
+                    color: selectedMonth === index ? 'white' : 'var(--text-secondary)',
+                    fontWeight: selectedMonth === index ? 600 : 400
+                  }}
+                >
+                  {m}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Takvim İçeriği */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>
+                {MONTHS[selectedMonth]} {selectedYear}
+              </h3>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="btn" onClick={() => setSelectedYear(selectedYear - 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear - 1}</button>
+                <button className="btn" style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', background: 'var(--accent-primary)', color: 'white' }}>{selectedYear}</button>
+                <button className="btn" onClick={() => setSelectedYear(selectedYear + 1)} style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}>{selectedYear + 1}</button>
+              </div>
+            </div>
+
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(7, 1fr)', 
+              gap: '1px', 
+              background: 'var(--border-color)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: '10px', 
+              overflow: 'hidden',
+              boxShadow: 'var(--shadow-lg)'
+            }}>
+              {DAYS_OF_WEEK.map(day => (
+                <div key={day} style={{ padding: '0.75rem', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.05)', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                  {day}
+                </div>
+              ))}
+              {(() => {
+                const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+                const firstDayOfMonth = new Date(selectedYear, selectedMonth, 1).getDay();
+                const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+                const calendarDays = [];
+                for (let i = 0; i < startOffset; i++) calendarDays.push(null);
+                for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
+
+                return calendarDays.map((day, idx) => {
+                  if (!day) return <div key={`empty-${idx}`} style={{ padding: '0.2rem', background: 'rgba(255,255,255,0.01)' }}></div>;
+
+                  const dayNotes = notes.filter(n => {
+                    const d = new Date(n.createdAt);
+                    return d.getDate() === day && d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+                  });
+
+                  const isToday = day === now.getDate() && selectedMonth === now.getMonth() && selectedYear === now.getFullYear();
+
+                  return (
+                    <div 
+                      key={day} 
+                      onClick={(e) => {
+                        if (e.target === e.currentTarget || e.target.tagName === 'SPAN') {
+                          setActiveDay(day);
+                          setIsAddModalOpen(true);
+                        }
+                      }}
+                      style={{ 
+                        padding: '0.5rem', 
+                        border: isToday ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)', 
+                        minHeight: '110px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.3rem',
+                        backgroundColor: dayNotes.length > 0 ? 'rgba(59, 130, 246, 0.02)' : 'transparent',
+                        position: 'relative',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <span style={{ 
+                        fontSize: '0.7rem', 
+                        fontWeight: 800, 
+                        color: isToday ? '#fff' : 'var(--text-secondary)',
+                        backgroundColor: isToday ? 'var(--accent-primary)' : 'transparent',
+                        width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%'
+                      }}>{day}</span>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1, overflowY: 'auto', paddingRight: '2px' }}>
+                        {dayNotes.map(note => (
+                          <div 
+                            key={note.id} 
+                            onClick={() => { setSelectedNote(note); setIsEditModalOpen(true); }}
+                            style={{ 
+                              fontSize: '0.6rem', 
+                              padding: '4px 6px', 
+                              borderRadius: '4px', 
+                              background: note.isDone ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)',
+                              color: note.isDone ? '#10b981' : 'var(--text-primary)',
+                              border: '1px solid',
+                              borderColor: note.isDone ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              fontWeight: 600
+                            }}
+                            title={note.title || note.content}
+                          >
+                            {note.isDone && <CheckCircle2 size={8} style={{ marginRight: '3px', display: 'inline' }} />}
+                            {note.title || note.content.substring(0, 15) + '...'}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Ekleme Modalı */}
       <CustomDialog
         isOpen={isAddModalOpen}
         title="Yeni Not Ekle"
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setActiveDay(null);
+        }}
         showButtons={false}
       >
         <form action={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {activeDay && (
+            <div style={{ padding: '0.5rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-primary)', textAlign: 'center' }}>
+              Tarih: {activeDay} {MONTHS[selectedMonth]} {selectedYear}
+            </div>
+          )}
           <div className="input-group">
             <label className="input-label">Başlık (İsteğe Bağlı)</label>
             <input type="text" name="title" className="input-field" placeholder="Örn: Strateji Değişikliği" />
