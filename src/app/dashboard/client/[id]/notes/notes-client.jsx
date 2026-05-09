@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Plus, Search, Trash2, Edit2, Clock, CheckCircle2, Circle, User as UserIcon, StickyNote } from 'lucide-react';
 import { addNoteAction, deleteNoteAction, updateNoteAction, toggleNoteStatusAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 
 export default function NotesClient({ clientId, notes, currentUserId, userRole }) {
   const router = useRouter();
+  const { setGlobalLoading } = useTheme();
   const [search, setSearch] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -37,6 +39,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
   const handleAdd = async (formData) => {
     if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     formData.append('clientId', clientId);
     const result = await addNoteAction(formData);
     if (result?.error) {
@@ -46,11 +49,13 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
       router.refresh();
     }
     setLoading(false);
+    setGlobalLoading(false);
   };
 
   const handleEdit = async (formData) => {
     if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     formData.append('noteId', selectedNote.id);
     const result = await updateNoteAction(formData);
     if (result?.error) {
@@ -61,10 +66,13 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
       router.refresh();
     }
     setLoading(false);
+    setGlobalLoading(false);
   };
 
   const handleDelete = async () => {
+    if (loading) return;
     setLoading(true);
+    setGlobalLoading(true);
     const formData = new FormData();
     formData.append('noteId', selectedNote.id);
     const result = await deleteNoteAction(formData);
@@ -76,14 +84,24 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
       router.refresh();
     }
     setLoading(false);
+    setGlobalLoading(false);
   };
 
   const handleToggleStatus = async (noteId, currentStatus) => {
+    if (loading) return;
+    setLoading(true);
+    setGlobalLoading(true);
     const formData = new FormData();
     formData.append('noteId', noteId);
     formData.append('isDone', (!currentStatus).toString());
-    await toggleNoteStatusAction(formData);
-    router.refresh();
+    const result = await toggleNoteStatusAction(formData);
+    if (result?.error) {
+      setError(result.error);
+    } else {
+      router.refresh();
+    }
+    setLoading(false);
+    setGlobalLoading(false);
   };
 
   const canManage = (note) => {
@@ -135,8 +153,22 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                 }}>
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
                     <button 
-                      onClick={() => handleToggleStatus(note.id, note.isDone)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: note.isDone ? '#10b981' : 'var(--text-secondary)' }}
+                      onClick={() => {
+                        if (note.userId !== currentUserId) {
+                          setError('Bu işlemi yapmaya yetkiniz yok.');
+                          return;
+                        }
+                        handleToggleStatus(note.id, note.isDone);
+                      }}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        cursor: 'pointer', 
+                        padding: 0, 
+                        color: note.isDone ? '#10b981' : 'var(--text-secondary)',
+                        opacity: note.userId === currentUserId ? 1 : 0.4
+                      }}
+                      title={note.userId === currentUserId ? (note.isDone ? "Yapılmadı olarak işaretle" : "Yapıldı olarak işaretle") : "Bu işlemi yapmaya yetkiniz yok."}
                     >
                       {note.isDone ? <CheckCircle2 size={22} /> : <Circle size={22} />}
                     </button>
@@ -172,24 +204,50 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                     </div>
                   </td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
-                    {canManage(note) && (
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                         <button 
-                          onClick={() => { setSelectedNote(note); setIsEditModalOpen(true); }}
-                          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
-                          title="Düzenle"
+                          onClick={() => {
+                            if (note.userId !== currentUserId) {
+                              setError('Bu işlemi yapmaya yetkiniz yok.');
+                              return;
+                            }
+                            setSelectedNote(note); 
+                            setIsEditModalOpen(true); 
+                          }}
+                          style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: 'var(--text-secondary)', 
+                            cursor: 'pointer', 
+                            padding: '0.25rem',
+                            opacity: note.userId === currentUserId ? 1 : 0.3
+                          }}
+                          title={note.userId !== currentUserId ? "Bu işlemi yapmaya yetkiniz yok." : "Düzenle"}
                         >
                           <Edit2 size={16} />
                         </button>
                         <button 
-                          onClick={() => { setSelectedNote(note); setIsDeleteModalOpen(true); }}
-                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.25rem' }}
-                          title="Sil"
+                          onClick={() => {
+                            if (note.userId !== currentUserId) {
+                              setError('Bu işlemi yapmaya yetkiniz yok.');
+                              return;
+                            }
+                            setSelectedNote(note); 
+                            setIsDeleteModalOpen(true); 
+                          }}
+                          style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: '#ef4444', 
+                            cursor: 'pointer', 
+                            padding: '0.25rem',
+                            opacity: note.userId === currentUserId ? 1 : 0.3
+                          }}
+                          title={note.userId !== currentUserId ? "Bu işlemi yapmaya yetkiniz yok." : "Sil"}
                         >
                           <Trash2 size={16} />
                         </button>
                       </div>
-                    )}
                   </td>
                 </tr>
               ))}
