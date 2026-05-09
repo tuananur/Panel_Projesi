@@ -931,3 +931,17 @@ export async function updateSocialCredentialsAction(clientId, platform, type, va
     return { error: 'Bilgiler güncellenemedi.' };
   }
 }
+
+export async function resetUserPasswordAction(userId) {
+  try {
+    await prisma.user.update({
+      where: { id: parseInt(userId) },
+      data: { password: null }
+    });
+    
+    await logActivity('UPDATE', 'USER', `Kullanıcı şifresi sıfırlandı (ID: ${userId})`);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Şifre sıfırlanamadı.' };
+  }
+}

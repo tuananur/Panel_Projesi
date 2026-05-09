@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import CreateUserForm from './create-user-form';
 import DeleteUserButton from './delete-user-button';
+import ResetPasswordButton from './reset-password-button';
 import EditUserModal from './edit-user-modal';
 import { getSession } from '@/lib/auth';
 
@@ -64,6 +65,7 @@ export default async function UsersPage() {
                         {user.id !== session.userId && (
                           <>
                             <EditUserModal user={user} />
+                            <ResetPasswordButton userId={user.id} />
                             <DeleteUserButton userId={user.id} />
                           </>
                         )}
