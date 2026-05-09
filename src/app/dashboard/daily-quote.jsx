@@ -60,31 +60,33 @@ export default function DailyQuote() {
       className="glass-panel animate-fade-in"
       style={{
         position: 'fixed',
-        bottom: '1.5rem',
+        top: '80px',
         right: '1.5rem',
-        padding: '1rem 1.5rem',
-        maxWidth: '320px',
-        zIndex: 50,
+        padding: '0.75rem 1.25rem',
+        maxWidth: '300px',
+        zIndex: 40,
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.5rem',
-        borderLeft: '4px solid var(--accent-primary)',
+        gap: '0.4rem',
+        borderRight: '4px solid var(--accent-primary)',
+        borderLeft: 'none',
         boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
-        background: 'rgba(30, 41, 59, 0.6)',
+        background: 'rgba(30, 41, 59, 0.5)',
         backdropFilter: 'blur(16px)',
-        pointerEvents: 'none' // Don't block clicks underneath
+        pointerEvents: 'none'
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)' }}>
-        <Quote size={16} />
-        <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Günün Sözü</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', justifyContent: 'flex-end' }}>
+        <span style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Günün Sözü</span>
+        <Quote size={14} />
       </div>
       <p style={{ 
-        fontSize: '0.85rem', 
+        fontSize: '0.8rem', 
         fontWeight: 500, 
-        lineHeight: 1.5, 
+        lineHeight: 1.4, 
         fontStyle: 'italic',
-        color: 'var(--text-primary)'
+        color: 'var(--text-primary)',
+        textAlign: 'right'
       }}>
         "{quote}"
       </p>
