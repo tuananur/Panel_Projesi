@@ -60,21 +60,35 @@ export default async function DashboardPage() {
                       fontWeight: 800, 
                       padding: '2px 8px', 
                       borderRadius: '100px',
-                      boxShadow: '0 2px 10px rgba(245, 158, 11, 0.3)'
+                      boxShadow: '0 2px 10px rgba(245, 158, 11, 0.3)',
+                      zIndex: 3
                     }}>
                       {pendingTasks.length} BEKLEYEN
                     </div>
                   )}
                   
-                  <Link href={`/dashboard/client/${client.id}/stats`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                  <Link 
+                    href={`/dashboard/client/${client.id}/stats`} 
+                    style={{ 
+                      textDecoration: 'none', 
+                      color: 'inherit', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.75rem', 
+                      marginBottom: '1rem'
+                    }}
+                  >
+                    {/* Stretched link covering the entire card */}
+                    <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 }}></span>
+                    
                     <ClientLogo logoUrl={client.logoUrl} companyName={client.companyName} size="40px" />
-                    <div>
+                    <div style={{ position: 'relative', zIndex: 2 }}>
                       <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.1rem' }}>{client.companyName}</h3>
                       <p className="text-muted" style={{ fontSize: '0.8rem' }}>{client.contactName}</p>
                     </div>
                   </Link>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem', position: 'relative', zIndex: 2 }}>
                     {services.map(s => (
                       <span key={s} style={{ 
                         fontSize: '0.65rem', 
@@ -90,7 +104,16 @@ export default async function DashboardPage() {
                     ))}
                   </div>
 
-                  <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ 
+                    marginTop: 'auto', 
+                    paddingTop: '1rem', 
+                    borderTop: '1px solid rgba(255,255,255,0.05)', 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    position: 'relative',
+                    zIndex: 2 
+                  }}>
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
                       <a 
                         href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
@@ -98,7 +121,7 @@ export default async function DashboardPage() {
                         rel="noopener noreferrer"
                         className="contact-icon-btn"
                         title="WhatsApp"
-                        style={{ color: '#10b981' }}
+                        style={{ color: '#10b981', position: 'relative', zIndex: 3 }}
                       >
                         <MessageCircle size={18} />
                       </a>
@@ -107,15 +130,15 @@ export default async function DashboardPage() {
                           href={`mailto:${client.email}`}
                           className="contact-icon-btn"
                           title="E-posta"
-                          style={{ color: 'var(--accent-primary)' }}
+                          style={{ color: 'var(--accent-primary)', position: 'relative', zIndex: 3 }}
                         >
                           <Mail size={18} />
                         </a>
                       )}
                     </div>
-                    <Link href={`/dashboard/client/${client.id}/stats`} style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+                    <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
                       <ChevronRight size={18} />
-                    </Link>
+                    </div>
                   </div>
                 </div>
             );
