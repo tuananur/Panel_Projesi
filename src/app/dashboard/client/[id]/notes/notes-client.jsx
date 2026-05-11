@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Trash2, Edit2, Clock, CheckCircle2, Circle, User as UserIcon, StickyNote } from 'lucide-react';
 import { addNoteAction, deleteNoteAction, updateNoteAction, toggleNoteStatusAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
 
-export default function NotesClient({ clientId, notes, currentUserId, userRole }) {
+export default function NotesClient({ clientId, notes, currentUserId, userRole, debugSnapshot }) {
   const router = useRouter();
   const { setGlobalLoading } = useTheme();
   const [search, setSearch] = useState('');
@@ -28,6 +28,12 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
   ];
   const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+
+  useEffect(() => {
+    if (debugSnapshot) {
+      console.log('[ClientNotes DEBUG client]', debugSnapshot);
+    }
+  }, [debugSnapshot]);
 
   const noteList = Array.isArray(notes) ? notes : [];
 
@@ -131,6 +137,44 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {debugSnapshot && (
+        <details
+          open
+          style={{
+            border: '1px solid #f59e0b',
+            borderRadius: '10px',
+            padding: '0.75rem 1rem',
+            background: 'rgba(0,0,0,0.25)',
+            fontSize: '0.7rem',
+          }}
+        >
+          <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#f59e0b', marginBottom: '0.5rem' }}>
+            DEBUG snapshot (sunucudan) — kapatmak için URL’den ?debug=1 kaldır
+          </summary>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+            İstemci konsolunda da basıldı: <code>[ClientNotes DEBUG client]</code>
+          </p>
+          <pre
+            style={{
+              margin: 0,
+              overflow: 'auto',
+              maxHeight: '320px',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              color: 'var(--text-primary)',
+            }}
+          >
+            {(() => {
+              try {
+                const text = JSON.stringify(debugSnapshot, null, 2);
+                return text.length > 24000 ? `${text.slice(0, 24000)}\n… (truncated)` : text;
+              } catch (e) {
+                return String(e);
+              }
+            })()}
+          </pre>
+        </details>
+      )}
       {/* Üst Bar: Arama ve Ekleme */}
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>

@@ -15,8 +15,9 @@ function sanitizeNotesForClient(notes) {
   }));
 }
 
-export default async function ClientNotesPage({ params }) {
+export default async function ClientNotesPage({ params, searchParams }) {
   const { id } = await params;
+  const sp = await searchParams;
   const session = await getSession();
 
   if (!session) {
@@ -28,6 +29,10 @@ export default async function ClientNotesPage({ params }) {
     console.error('[ClientNotesPage] invalid client id param', { id });
     redirect('/dashboard');
   }
+
+  const debugQuery = sp?.debug === '1';
+  const debugEnv = process.env.DASHBOARD_ROUTE_DEBUG === '1';
+  const debugEnabled = session.role === 'ADMIN' && (debugQuery || debugEnv);
 
   try {
     const client = await prisma.client.findUnique({
@@ -46,27 +51,56 @@ export default async function ClientNotesPage({ params }) {
       redirect('/dashboard');
     }
 
-    const notesForClient = sanitizeNotesForClient(client.notes);
+    const rawNotes = client.notes ?? [];
+    const notesForClient = sanitizeNotesForClient(rawNotes);
 
-    const showDebug =
-      process.env.DASHBOARD_ROUTE_DEBUG === '1' && session.role === 'ADMIN';
+    let debugSnapshot = null;
+    if (debugEnabled) {
+      debugSnapshot = {
+        generatedAt: new Date().toISOString(),
+        route: 'dashboard/client/[id]/notes',
+        paramId: id,
+        parsedClientId: clientIdNum,
+        companyName: client.companyName,
+        session: { userId: session.userId, role: session.role },
+        flags: { debugQuery, debugEnv, NODE_ENV: process.env.NODE_ENV },
+        notesCount: rawNotes.length,
+        rawNotesShape: rawNotes.slice(0, 50).map((n) => ({
+          id: n.id,
+          userId: n.userId,
+          clientId: n.clientId,
+          hasUser: !!n.user,
+          username: n.user?.username ?? null,
+          title: n.title ?? null,
+          contentType: n.content == null ? 'null/undefined' : typeof n.content,
+          contentLength: n.content == null ? null : String(n.content).length,
+          createdAt: n.createdAt instanceof Date ? n.createdAt.toISOString() : n.createdAt,
+        })),
+        afterSanitize: {
+          notesCount: notesForClient.length,
+          firstIds: notesForClient.slice(0, 10).map((n) => n.id),
+        },
+      };
+      console.log('[ClientNotes DEBUG server]', JSON.stringify(debugSnapshot, null, 2));
+    }
 
     return (
       <div className="animate-fade-in">
-        {showDebug && (
+        {debugEnabled && (
           <div
             style={{
               marginBottom: '1rem',
               padding: '0.75rem',
               fontSize: '0.75rem',
               borderRadius: '8px',
-              border: '1px dashed var(--border-color)',
+              border: '1px dashed #f59e0b',
               color: 'var(--text-secondary)',
+              background: 'rgba(245, 158, 11, 0.08)',
             }}
           >
-            <strong>DEBUG</strong> Vercel’de geçici olarak{' '}
-            <code>DASHBOARD_ROUTE_DEBUG=1</code> açık; bu panel sadece admin için. Sunucu loglarında da aynı
-            istekle ilişkili Prisma hatalarını kontrol edin.
+            <strong style={{ color: '#f59e0b' }}>DEBUG AKTİF</strong> — Admin + (
+            <code>?debug=1</code> veya <code>DASHBOARD_ROUTE_DEBUG=1</code>). Vercel / sunucu loglarında{' '}
+            <code>[ClientNotes DEBUG server</code> ile arat. Aşağıda istemci paneli de var.
           </div>
         )}
         <div
@@ -92,6 +126,7 @@ export default async function ClientNotesPage({ params }) {
           notes={notesForClient}
           currentUserId={session.userId}
           userRole={session.role}
+          debugSnapshot={debugSnapshot}
         />
       </div>
     );
