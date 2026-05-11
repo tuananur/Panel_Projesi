@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Search, Trash2, Edit2, Clock, CheckCircle2, Circle, StickyNote, Building2, User as UserIcon } from 'lucide-react';
+import { Plus, Search, Trash2, Edit2, Clock, CheckCircle2, Circle, StickyNote, User as UserIcon } from 'lucide-react';
 import { addNoteAction, deleteNoteAction, updateNoteAction, toggleNoteStatusAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
@@ -14,7 +14,9 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
   // Clear notification on mount
   useEffect(() => {
     if (initialNotes.length > 0) {
-      const latestOtherNote = initialNotes.find(n => n.userId !== currentUserId);
+      const latestOtherNote = initialNotes.find(
+        (n) => n.userId !== currentUserId && n.clientId
+      );
       if (latestOtherNote) {
         const lastSeen = parseInt(localStorage.getItem('last_seen_note_id') || '0');
         if (latestOtherNote.id > lastSeen) {
@@ -58,11 +60,12 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
       (note.title?.toLowerCase().includes(lowerSearch)) ||
       ((note.content || '').toLowerCase().includes(lowerSearch)) ||
       (note.client?.companyName.toLowerCase().includes(lowerSearch)) ||
+      ((note.user?.username || '').toLowerCase().includes(lowerSearch)) ||
       (dateStr.includes(lowerSearch)) ||
       (fullDateText.includes(lowerSearch));
     
     if (activeTab === 'general') {
-      return !note.clientId && matchesSearch;
+      return !note.clientId && note.userId === currentUserId && matchesSearch;
     } else {
       const matchesOwner = userRole === 'ADMIN' || note.userId === currentUserId;
       const matchesClient = selectedClientId === 'all' || String(note.clientId) === selectedClientId;
@@ -267,6 +270,9 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '60px' }}>Durum</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '200px' }}>Tarih / Yazılış</th>
+                {activeTab === 'client' && (
+                  <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '130px' }}>Yazan</th>
+                )}
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase' }}>Not Detayı</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '100px', textAlign: 'right' }}>İşlemler</th>
               </tr>
@@ -311,6 +317,16 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
                       </div>
                     </div>
                   </td>
+                  {activeTab === 'client' && (
+                    <td style={{ padding: '1rem', verticalAlign: 'top' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <UserIcon size={14} style={{ opacity: 0.55, flexShrink: 0 }} />
+                        <span style={{ fontWeight: 600, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'var(--text-primary)' }}>
+                          {note.user?.username ?? '—'}
+                        </span>
+                      </div>
+                    </td>
+                  )}
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                       {(note.title || (activeTab === 'client' && note.client)) && (
@@ -390,7 +406,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
               ))}
               {filteredNotes.length === 0 && (
                 <tr>
-                  <td colSpan="4" style={{ padding: '5rem', textAlign: 'center' }}>
+                  <td colSpan={activeTab === 'client' ? 5 : 4} style={{ padding: '5rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)' }}>
                       <StickyNote size={48} style={{ opacity: 0.1 }} />
                       <p>Henüz not bulunamadı.</p>

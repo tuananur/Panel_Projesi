@@ -14,15 +14,24 @@ export default async function NotesPage() {
     redirect('/login');
   }
 
-  // Fetch notes: All for Admin, only own for others
+  // Genel notlar (clientId yok): herkes yalnızca kendi notlarını görür (admin dahil).
+  // Müşteriye özel notlar: admin tüm kullanıcıları, diğer roller yalnızca kendini görür.
   const notes = await prisma.note.findMany({
-    where: session.role === 'ADMIN' ? {} : { userId: session.userId },
+    where:
+      session.role === 'ADMIN'
+        ? {
+            OR: [
+              { clientId: null, userId: session.userId },
+              { clientId: { not: null } },
+            ],
+          }
+        : { userId: session.userId },
     include: {
       client: {
         select: { id: true, companyName: true }
       },
       user: {
-        select: { username: true }
+        select: { id: true, username: true }
       }
     },
     orderBy: { createdAt: 'desc' }
@@ -38,7 +47,9 @@ export default async function NotesPage() {
     <div className="animate-fade-in">
       <div style={{ marginBottom: '2rem' }}>
         <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Kişisel Notlar</h1>
-        <p className="text-muted" style={{ fontSize: '0.9rem' }}>Genel ve müşteriye özel notlarınızı buradan yönetebilirsiniz.</p>
+        <p className="text-muted" style={{ fontSize: '0.9rem' }}>
+          Genel notlar yalnızca size özeldir. Müşteriye özel notlarda yöneticiler ekibin tümünü görebilir; diğer roller yalnızca kendi notlarını görür.
+        </p>
       </div>
 
       <NotesPageClient 
