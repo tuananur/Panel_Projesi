@@ -1,11 +1,11 @@
 'use client';
 
 import { Menu } from 'lucide-react';
+import DailyQuote from './daily-quote';
 
 export default function HeaderClient({ session, onMenuClick }) {
   if (!session) return null;
 
-  // Translate roles for display
   const roleDisplayMap = {
     'ADMIN': 'Yönetici',
     'DESIGNER': 'Tasarımcı',
@@ -15,13 +15,13 @@ export default function HeaderClient({ session, onMenuClick }) {
   const displayRole = roleDisplayMap[session.role] || session.role;
 
   return (
-    <header className="top-header">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+    <header className="top-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'nowrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
         <button 
           onClick={onMenuClick}
           className="mobile-menu-btn"
           style={{
-            display: 'none', // Hidden by default, shown via CSS or media query in JS
+            display: 'none',
             background: 'transparent',
             border: 'none',
             color: 'var(--text-primary)',
@@ -38,11 +38,12 @@ export default function HeaderClient({ session, onMenuClick }) {
           <span style={{ fontWeight: 600 }}>{session.username}</span>
         </div>
       </div>
+
+      <DailyQuote />
       
-      <div className="role-badge">
+      <div className="role-badge" style={{ flexShrink: 0 }}>
         {displayRole}
       </div>
-
     </header>
   );
 }

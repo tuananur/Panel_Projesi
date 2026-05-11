@@ -7,7 +7,7 @@ import { addNoteAction, deleteNoteAction, updateNoteAction, toggleNoteStatusActi
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
 
-export default function NotesClient({ clientId, notes, currentUserId, userRole, debugSnapshot }) {
+export default function NotesClient({ clientId, notes, currentUserId, userRole, users = [], debugSnapshot }) {
   const router = useRouter();
   const { setGlobalLoading } = useTheme();
   const [search, setSearch] = useState('');
@@ -228,7 +228,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
             className="btn btn-primary"
             style={{ gap: '0.5rem' }}
           >
-            <Plus size={18} /> Yeni Not Ekle
+            <Plus size={18} /> İş Ekle
           </button>
         </div>
       </div>
@@ -278,10 +278,19 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' }}>
+                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
                           <UserIcon size={12} style={{ opacity: 0.7, color: note.isDone ? '#10b981' : 'inherit' }} />
                         </div>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'inherit' }}>{note.user?.username ?? '—'}</div>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'inherit' }}>
+                            {note.user?.username ?? '—'}
+                          </div>
+                          {note.createdByUser && (
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                              ({note.createdByUser.username})
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)', fontSize: '0.75rem' }}>
                         <Clock size={12} />
@@ -496,19 +505,27 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
                               border: '1px solid',
                               borderColor: note.isDone ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
                               cursor: 'pointer',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              fontWeight: 600
+                              fontWeight: 600,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '1px',
                             }}
                             title={(note.title ?? '') || (note.content ?? '') || ''}
                           >
-                            {note.isDone && <CheckCircle2 size={8} style={{ marginRight: '3px', display: 'inline' }} />}
-                            {(() => {
-                              if (note.title) return note.title;
-                              const c = note.content ?? '';
-                              return c.length > 15 ? `${c.slice(0, 15)}...` : (c || '…');
-                            })()}
+                            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {note.isDone && <CheckCircle2 size={8} style={{ marginRight: '3px', display: 'inline' }} />}
+                              {(() => {
+                                if (note.title) return note.title;
+                                const c = note.content ?? '';
+                                return c.length > 15 ? `${c.slice(0, 15)}...` : (c || '…');
+                              })()}
+                            </div>
+                            <div style={{ fontSize: '0.55rem', opacity: 0.7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {note.user?.username ?? ''}
+                              {note.createdByUser && (
+                                <span style={{ opacity: 0.7 }}> ({note.createdByUser.username})</span>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -524,7 +541,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
       {/* Ekleme Modalı */}
       <CustomDialog
         isOpen={isAddModalOpen}
-        title="Yeni Not Ekle"
+        title="İş Ekle"
         onClose={() => {
           setIsAddModalOpen(false);
           setActiveDay(null);
@@ -537,17 +554,26 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
               Tarih: {activeDay} {MONTHS[selectedMonth]} {selectedYear}
             </div>
           )}
+          {userRole === 'ADMIN' && users.length > 0 && (
+            <div className="input-group">
+              <label className="input-label">Atanacak Kullanıcı</label>
+              <select name="assigneeUserId" className="input-field" defaultValue={currentUserId}>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>{u.username}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="input-group">
             <label className="input-label">Başlık (İsteğe Bağlı)</label>
             <input type="text" name="title" className="input-field" placeholder="Örn: Strateji Değişikliği" />
           </div>
           <div className="input-group">
-            <label className="input-label">Not İçeriği</label>
+            <label className="input-label">Not İçeriği <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>
             <textarea 
               name="content" 
               className="input-field" 
               rows={6} 
-              required 
               placeholder="Müşteri hakkında önemli notlar..."
               style={{ resize: 'vertical' }}
             />
@@ -555,7 +581,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
             <button type="button" onClick={() => setIsAddModalOpen(false)} className="btn" style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.05)' }}>İptal</button>
             <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
-              {loading ? 'Ekleniyor...' : 'Notu Kaydet'}
+              {loading ? 'Ekleniyor...' : 'Kaydet'}
             </button>
           </div>
         </form>
@@ -564,7 +590,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
       {/* Düzenleme Modalı */}
       <CustomDialog
         isOpen={isEditModalOpen}
-        title="Notu Düzenle"
+        title="İşi Düzenle"
         onClose={() => setIsEditModalOpen(false)}
         showButtons={false}
       >
@@ -574,12 +600,11 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
             <input type="text" name="title" className="input-field" defaultValue={selectedNote?.title || ''} />
           </div>
           <div className="input-group">
-            <label className="input-label">Not İçeriği</label>
+            <label className="input-label">Not İçeriği <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>
             <textarea 
               name="content" 
               className="input-field" 
               rows={6} 
-              required 
               defaultValue={selectedNote?.content || ''}
               style={{ resize: 'vertical' }}
             />

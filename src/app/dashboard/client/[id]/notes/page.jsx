@@ -12,6 +12,9 @@ function sanitizeNotesForClient(notes) {
     user: note.user
       ? { ...note.user, username: note.user.username ?? '' }
       : { id: 0, username: 'Bilinmiyor' },
+    createdByUser: note.createdByUser
+      ? { id: note.createdByUser.id, username: note.createdByUser.username ?? '' }
+      : null,
   }));
 }
 
@@ -35,17 +38,23 @@ export default async function ClientNotesPage({ params, searchParams }) {
   const debugEnabled = session.role === 'ADMIN' && (debugQuery || debugEnv);
 
   try {
-    const client = await prisma.client.findUnique({
-      where: { id: clientIdNum },
-      include: {
-        notes: {
-          include: {
-            user: true,
+    const [client, users] = await Promise.all([
+      prisma.client.findUnique({
+        where: { id: clientIdNum },
+        include: {
+          notes: {
+            include: {
+              user: true,
+              createdByUser: true,
+            },
+            orderBy: { createdAt: 'desc' },
           },
-          orderBy: { createdAt: 'desc' },
         },
-      },
-    });
+      }),
+      session.role === 'ADMIN'
+        ? prisma.user.findMany({ select: { id: true, username: true }, orderBy: { username: 'asc' } })
+        : Promise.resolve([]),
+    ]);
 
     if (!client) {
       redirect('/dashboard');
@@ -126,6 +135,7 @@ export default async function ClientNotesPage({ params, searchParams }) {
           notes={notesForClient}
           currentUserId={session.userId}
           userRole={session.role}
+          users={users}
           debugSnapshot={debugSnapshot}
         />
       </div>

@@ -75,6 +75,29 @@ export default function AccountingClient({ initialEntries, userRole }) {
   const incomes = currentMonthEntries.filter(e => e.type === 'INCOME');
   const expenses = currentMonthEntries.filter(e => e.type === 'EXPENSE');
 
+  // Ledger: all MANUAL entries across all time up to selected month, sorted by date
+  const ledgerEntries = useMemo(() => {
+    const cutoff = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59); // last second of selected month
+    const relevant = initialEntries
+      .filter(e => e.frequency === 'MANUAL' && new Date(e.date) <= cutoff)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    let running = 0;
+    return relevant.map(e => {
+      running += e.type === 'INCOME' ? e.amount : -e.amount;
+      return { ...e, balance: running };
+    });
+  }, [initialEntries, selectedMonth, selectedYear]);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const balanceAsOfToday = useMemo(() => {
+    const today = new Date();
+    const relevant = initialEntries
+      .filter(e => e.frequency === 'MANUAL' && new Date(e.date) <= today)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    return relevant.reduce((sum, e) => sum + (e.type === 'INCOME' ? e.amount : -e.amount), 0);
+  }, [initialEntries]);
+
   const totalIncome = incomes.reduce((sum, e) => sum + e.displayAmount, 0);
   const totalExpense = expenses.reduce((sum, e) => sum + e.displayAmount, 0);
   const netProfit = totalIncome - totalExpense;
@@ -249,6 +272,85 @@ export default function AccountingClient({ initialEntries, userRole }) {
             )) : <EmptyList message="Bu ay için gider kaydı yok." />}
           </div>
         </div>
+      </div>
+
+      {/* Kasa Defteri — running ledger */}
+      <div className="glass-panel" style={{ padding: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Wallet size={24} style={{ color: 'var(--accent-primary)' }} />
+            <div>
+              <h2 className="heading-2" style={{ marginBottom: '0.1rem' }}>Kasa Defteri</h2>
+              <p className="text-muted" style={{ fontSize: '0.85rem' }}>
+                {months[selectedMonth]} {selectedYear} sonuna kadar tüm tek seferlik kayıtlar — tarih sırasıyla.
+              </p>
+            </div>
+          </div>
+          <div style={{
+            padding: '0.6rem 1.2rem',
+            borderRadius: '10px',
+            background: balanceAsOfToday >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+            border: `1px solid ${balanceAsOfToday >= 0 ? '#10b981' : '#ef4444'}`,
+            textAlign: 'right',
+          }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bugünkü Kasa</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: balanceAsOfToday >= 0 ? '#10b981' : '#ef4444' }}>
+              {balanceAsOfToday.toLocaleString('tr-TR')} TL
+            </div>
+          </div>
+        </div>
+
+        {ledgerEntries.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+            {months[selectedMonth]} {selectedYear} sonuna kadar tek seferlik kayıt yok.
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase' }}>
+                  <th style={{ padding: '0.75rem 1rem' }}>Tarih</th>
+                  <th style={{ padding: '0.75rem 1rem' }}>Açıklama</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Giriş</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Çıkış</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Kasa Bakiyesi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ledgerEntries.map((e, i) => {
+                  const isToday = new Date(e.date).toISOString().split('T')[0] === todayStr;
+                  return (
+                    <tr key={e.id} style={{
+                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                      background: isToday ? 'rgba(99,102,241,0.06)' : 'transparent',
+                    }}>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: isToday ? 700 : 400 }}>
+                        {new Date(e.date).toLocaleDateString('tr-TR')}
+                        {isToday && <span style={{ marginLeft: '0.4rem', fontSize: '0.6rem', color: 'var(--accent-primary)', fontWeight: 800 }}>BUGÜN</span>}
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}>{e.description}</td>
+                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>
+                        {e.type === 'INCOME' ? `+${e.amount.toLocaleString('tr-TR')} TL` : ''}
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#ef4444', fontWeight: 700, fontSize: '0.85rem' }}>
+                        {e.type === 'EXPENSE' ? `-${e.amount.toLocaleString('tr-TR')} TL` : ''}
+                      </td>
+                      <td style={{
+                        padding: '0.75rem 1rem',
+                        textAlign: 'right',
+                        fontWeight: 900,
+                        fontSize: '0.95rem',
+                        color: e.balance >= 0 ? '#10b981' : '#ef4444',
+                      }}>
+                        {e.balance.toLocaleString('tr-TR')} TL
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Cash Projection (Kasa Önizlemesi) */}

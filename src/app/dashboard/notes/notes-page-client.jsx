@@ -56,7 +56,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
 
     const matchesSearch = 
       (note.title?.toLowerCase().includes(lowerSearch)) ||
-      (note.content.toLowerCase().includes(lowerSearch)) ||
+      ((note.content || '').toLowerCase().includes(lowerSearch)) ||
       (note.client?.companyName.toLowerCase().includes(lowerSearch)) ||
       (dateStr.includes(lowerSearch)) ||
       (fullDateText.includes(lowerSearch));
@@ -76,12 +76,39 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
     if (loading) return;
     setLoading(true);
     setGlobalLoading(true);
-    const result = await addNoteAction(formData);
-    if (result?.error) {
-      setError(result.error);
-    } else {
+    const selectedClients = formData.getAll('clientId');
+    if (activeTab === 'client' && selectedClients.length > 1) {
+      const title = formData.get('title');
+      const content = formData.get('content');
+      if (!title && !content) {
+        setError('Başlık veya not içeriğinden en az biri dolu olmalıdır.');
+        setLoading(false);
+        setGlobalLoading(false);
+        return;
+      }
+      for (const cid of selectedClients) {
+        const fd = new FormData();
+        fd.append('clientId', cid);
+        if (title) fd.append('title', title);
+        if (content) fd.append('content', content);
+        const result = await addNoteAction(fd);
+        if (result?.error) {
+          setError(result.error);
+          setLoading(false);
+          setGlobalLoading(false);
+          return;
+        }
+      }
       setIsAddModalOpen(false);
       router.refresh();
+    } else {
+      const result = await addNoteAction(formData);
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        setIsAddModalOpen(false);
+        router.refresh();
+      }
     }
     setLoading(false);
     setGlobalLoading(false);
@@ -386,13 +413,31 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
         <form action={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {activeTab === 'client' && (
             <div className="input-group">
-              <label className="input-label">Müşteri Seçin</label>
-              <select name="clientId" className="input-field" required>
-                <option value="">Müşteri Seçiniz...</option>
+              <label className="input-label">
+                Müşteri Seçin <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(birden fazla seçilebilir)</span>
+              </label>
+              <div style={{
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                maxHeight: '160px',
+                overflowY: 'auto',
+                background: 'var(--bg-secondary)',
+              }}>
                 {clients.map(c => (
-                  <option key={c.id} value={c.id}>{c.companyName}</option>
+                  <label key={c.id} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.6rem',
+                    padding: '0.5rem 0.75rem',
+                    cursor: 'pointer',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    fontSize: '0.85rem',
+                  }}>
+                    <input type="checkbox" name="clientId" value={c.id} style={{ accentColor: 'var(--accent-primary)', width: '14px', height: '14px' }} />
+                    {c.companyName}
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
           )}
           
@@ -402,12 +447,11 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
           </div>
 
           <div className="input-group">
-            <label className="input-label">Not İçeriği</label>
+            <label className="input-label">Not İçeriği <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>
             <textarea 
               name="content" 
               className="input-field" 
               rows={5} 
-              required 
               placeholder="Notunuzu yazın..."
               style={{ resize: 'vertical' }}
             />
@@ -446,12 +490,11 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
           </div>
 
           <div className="input-group">
-            <label className="input-label">Not İçeriği</label>
+            <label className="input-label">Not İçeriği <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>
             <textarea 
               name="content" 
               className="input-field" 
               rows={5} 
-              required 
               defaultValue={selectedNote?.content || ''}
               style={{ resize: 'vertical' }}
             />

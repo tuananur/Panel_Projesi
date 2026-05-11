@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String?  // Nullable, if null requires setting password
-  role      String   @default("DESIGNER") // "ADMIN", "DESIGNER", "ADVERTISER"
-  logs      ActivityLog[]
-  notes     Note[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int           @id @default(autoincrement())
+  username        String        @unique
+  password        String?
+  role            String        @default("DESIGNER") // "ADMIN", "DESIGNER", "ADVERTISER"
+  logs            ActivityLog[]
+  notes           Note[]        @relation("NoteAssignee")
+  createdNotes    Note[]        @relation("NoteCreator")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model Client {
@@ -79,16 +80,18 @@ model ActivityLog {
 }
 
 model Note {
-  id        Int      @id @default(autoincrement())
-  clientId  Int?     // Null = Genel Not
-  client    Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String?
-  content   String   @db.Text
-  isDone    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  clientId        Int?     // Null = Genel Not
+  client          Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId          Int
+  user            User     @relation("NoteAssignee", fields: [userId], references: [id], onDelete: Cascade)
+  createdByUserId Int?
+  createdByUser   User?    @relation("NoteCreator", fields: [createdByUserId], references: [id])
+  title           String?
+  content         String   @default("") @db.Text
+  isDone          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 model AccountingEntry {
   id          Int      @id @default(autoincrement())

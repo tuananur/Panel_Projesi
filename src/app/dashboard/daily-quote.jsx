@@ -4,48 +4,40 @@ import { useState, useEffect } from 'react';
 import { Quote } from 'lucide-react';
 
 const ATATURK_QUOTES = [
-  "Ne mutlu Türk'üm diyene!",
-  "İstikbal göklerdedir.",
-  "Egemenlik kayıtsız şartsız milletindir.",
-  "Hayatta en hakiki mürşit ilimdir.",
-  "Türk, Öğün, Çalış, Güven.",
-  "Yurtta sulh, cihanda sulh.",
-  "Bütün ümidim gençliktedir.",
-  "Sanatsız kalan bir milletin hayat damarlarından biri kopmuş demektir.",
-  "Milletin bağrından temiz bir nesil yetişiyor. Bu eseri ona bırakacağım ve gözüm arkada kalmayacak.",
-  "Vatanını en çok seven görevini en iyi yapandır.",
-  "Bir millet eğitim ordusuna sahip olmadıkça, savaş meydanlarında ne kadar parlak zaferler elde ederse etsin, o zaferlerin kalıcı sonuçlar vermesi ancak eğitim ordusuyla mümkündür.",
-  "Bizim gerçek dostumuz, bizi kırmayan değil, bize gerçeği söyleyendir.",
-  "Özgürlük ve bağımsızlık benim karakterimdir.",
-  "Gençler, cesaretimizi takviye ve idame eden sizlersiniz. Siz, almakta olduğunuz terbiye ve irfan ile insanlık ve medeniyetin, vatan sevgisinin, fikir hürriyetinin en kıymetli timsali olacaksınız."
+  { text: "Ne mutlu Türk'üm diyene!", author: "Mustafa Kemal Atatürk" },
+  { text: "İstikbal göklerdedir.", author: "Mustafa Kemal Atatürk" },
+  { text: "Egemenlik kayıtsız şartsız milletindir.", author: "Mustafa Kemal Atatürk" },
+  { text: "Hayatta en hakiki mürşit ilimdir.", author: "Mustafa Kemal Atatürk" },
+  { text: "Türk, Öğün, Çalış, Güven.", author: "Mustafa Kemal Atatürk" },
+  { text: "Yurtta sulh, cihanda sulh.", author: "Mustafa Kemal Atatürk" },
+  { text: "Bütün ümidim gençliktedir.", author: "Mustafa Kemal Atatürk" },
+  { text: "Sanatsız kalan bir milletin hayat damarlarından biri kopmuş demektir.", author: "Mustafa Kemal Atatürk" },
+  { text: "Vatanını en çok seven görevini en iyi yapandır.", author: "Mustafa Kemal Atatürk" },
+  { text: "Bizim gerçek dostumuz, bizi kırmayan değil, bize gerçeği söyleyendir.", author: "Mustafa Kemal Atatürk" },
+  { text: "Özgürlük ve bağımsızlık benim karakterimdir.", author: "Mustafa Kemal Atatürk" },
+  { text: "Gençler, cesaretimizi takviye ve idame eden sizlersiniz.", author: "Mustafa Kemal Atatürk" },
 ];
 
 const MOTIVATIONAL_QUOTES = [
-  "Başarı, her gün tekrarlanan küçük çabaların toplamıdır.",
-  "Hayallerinize ulaşmak için yapmanız gereken tek şey, vazgeçmemektir.",
-  "Gelecek, bugünden ona hazırlananlarındır.",
-  "Zorluklar, başarının değerini artıran süslerdir.",
-  "Engeller, gözünüzü hedeften ayırdığınızda gördüğünüz korkunç şeylerdir.",
-  "Hiç kimse başarı merdivenlerini elleri cebinde tırmanmamıştır.",
-  "Başlamak için mükemmel olmak zorunda değilsin ama mükemmel olmak için başlamak zorundasın.",
-  "Yarınlar yorgun olanların değil, rahatından vazgeçenlerin olacaktır."
+  { text: "Başarı, her gün tekrarlanan küçük çabaların toplamıdır.", author: "Anonim" },
+  { text: "Hayallerinize ulaşmak için yapmanız gereken tek şey, vazgeçmemektir.", author: "Anonim" },
+  { text: "Gelecek, bugünden ona hazırlananlarındır.", author: "Anonim" },
+  { text: "Zorluklar, başarının değerini artıran süslerdir.", author: "Anonim" },
+  { text: "Hiç kimse başarı merdivenlerini elleri cebinde tırmanmamıştır.", author: "Anonim" },
+  { text: "Başlamak için mükemmel olmak zorunda değilsin ama mükemmel olmak için başlamak zorundasın.", author: "Anonim" },
+  { text: "Yarınlar yorgun olanların değil, rahatından vazgeçenlerin olacaktır.", author: "Anonim" },
+  { text: "Engeller, gözünüzü hedeften ayırdığınızda gördüğünüz korkunç şeylerdir.", author: "Anonim" },
 ];
 
 export default function DailyQuote() {
-  const [quote, setQuote] = useState('');
+  const [quote, setQuote] = useState(null);
 
   useEffect(() => {
-    // Merge lists, but prioritize Atatürk (he gets more spots or we pick from him mostly)
-    // Actually, let's just combine them and pick based on day of year
     const allQuotes = [...ATATURK_QUOTES, ...MOTIVATIONAL_QUOTES];
-    
-    // For a daily effect, we can use the date as a seed
     const now = new Date();
     const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-    
-    // Pick from Atatürk more often (e.g. 70% of the time)
-    const isAtaturk = (dayOfYear % 10) < 7; // 70% chance
-    
+    const isAtaturk = (dayOfYear % 10) < 7;
+
     if (isAtaturk) {
       setQuote(ATATURK_QUOTES[dayOfYear % ATATURK_QUOTES.length]);
     } else {
@@ -56,39 +48,46 @@ export default function DailyQuote() {
   if (!quote) return null;
 
   return (
-    <div 
+    <div
       className="glass-panel animate-fade-in"
       style={{
-        position: 'fixed',
-        top: '80px',
-        right: '1.5rem',
-        padding: '0.75rem 1.25rem',
-        maxWidth: '300px',
-        zIndex: 40,
+        padding: '0.6rem 1rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.4rem',
-        borderRight: '4px solid var(--accent-primary)',
+        gap: '0.2rem',
+        borderRight: '3px solid var(--accent-primary)',
         borderLeft: 'none',
-        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
-        background: 'rgba(30, 41, 59, 0.5)',
-        backdropFilter: 'blur(16px)',
-        pointerEvents: 'none'
+        background: 'rgba(30, 41, 59, 0.4)',
+        backdropFilter: 'blur(12px)',
+        maxWidth: '280px',
+        pointerEvents: 'none',
+        flexShrink: 0,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', justifyContent: 'flex-end' }}>
-        <span style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Günün Sözü</span>
-        <Quote size={14} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-primary)', justifyContent: 'flex-end' }}>
+        <span style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Günün Sözü</span>
+        <Quote size={12} />
       </div>
-      <p style={{ 
-        fontSize: '0.8rem', 
-        fontWeight: 500, 
-        lineHeight: 1.4, 
+      <p style={{
+        fontSize: '0.75rem',
+        fontWeight: 500,
+        lineHeight: 1.4,
         fontStyle: 'italic',
         color: 'var(--text-primary)',
-        textAlign: 'right'
+        textAlign: 'right',
+        margin: 0,
       }}>
-        "{quote}"
+        "{quote.text}"
+      </p>
+      <p style={{
+        fontSize: '0.65rem',
+        fontWeight: 700,
+        color: 'var(--accent-primary)',
+        textAlign: 'right',
+        margin: 0,
+        opacity: 0.8,
+      }}>
+        — {quote.author}
       </p>
     </div>
   );

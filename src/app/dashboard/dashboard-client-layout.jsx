@@ -4,15 +4,16 @@ import { useState, useEffect } from 'react';
 import Sidebar from './sidebar';
 import Header from './header-client';
 import { usePathname } from 'next/navigation';
-import DailyQuote from './daily-quote';
 
 export default function DashboardClientLayout({ children, session }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
-  // Close sidebar on navigation (mobile)
   useEffect(() => {
     setIsSidebarOpen(false);
+    if (pathname.startsWith('/dashboard/client/')) {
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
 
   const toggleSidebar = () => {
@@ -38,7 +39,6 @@ export default function DashboardClientLayout({ children, session }) {
         <div className="content-area">
           {children}
         </div>
-        <DailyQuote />
       </main>
     </div>
   );

@@ -19,13 +19,15 @@ export default function SetPasswordForm({ userId }) {
     setLoading(true);
     setGlobalLoading(true);
     setError('');
-    
-    const result = await actionWithId(formData);
-    if (result?.error) {
-      setError(result.error);
+    try {
+      const result = await actionWithId(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+    } finally {
+      setLoading(false);
+      setGlobalLoading(false);
     }
-    setLoading(false);
-    setGlobalLoading(false);
   }
 
   return (

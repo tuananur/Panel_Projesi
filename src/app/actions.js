@@ -615,21 +615,29 @@ export async function searchTasksAction(query) {
 export async function addNoteAction(formData) {
   const clientIdRaw = formData.get('clientId');
   const clientId = clientIdRaw ? parseInt(clientIdRaw) : null;
-  const content = formData.get('content');
+  const content = formData.get('content') || '';
   const title = formData.get('title') || null;
   const createdAtRaw = formData.get('createdAt');
   const createdAt = createdAtRaw ? new Date(createdAtRaw) : undefined;
+  const assigneeUserIdRaw = formData.get('assigneeUserId');
 
-  if (!content) {
-    return { error: 'Not içeriği boş olamaz.' };
+  if (!title && !content) {
+    return { error: 'Başlık veya not içeriğinden en az biri dolu olmalıdır.' };
   }
 
   try {
     const session = await getSession();
+    const isAdmin = session.role === 'ADMIN';
+    const assigneeUserId = isAdmin && assigneeUserIdRaw ? parseInt(assigneeUserIdRaw) : session.userId;
+    const createdByUserId = (isAdmin && assigneeUserIdRaw && parseInt(assigneeUserIdRaw) !== session.userId)
+      ? session.userId
+      : null;
+
     await prisma.note.create({
       data: {
         clientId,
-        userId: session.userId,
+        userId: assigneeUserId,
+        createdByUserId,
         title,
         content,
         createdAt
@@ -677,7 +685,8 @@ export async function updateNoteAction(formData) {
   const clientIdRaw = formData.get('clientId');
   const clientId = clientIdRaw ? parseInt(clientIdRaw) : null;
 
-  if (!noteId || !content) return { error: 'Not içeriği boş olamaz.' };
+  if (!noteId) return { error: 'Geçersiz ID.' };
+  if (!title && !content) return { error: 'Başlık veya not içeriğinden en az biri dolu olmalıdır.' };
 
   try {
     const session = await getSession();
@@ -686,9 +695,9 @@ export async function updateNoteAction(formData) {
       return { error: 'Bu işlemi yapmaya yetkiniz yok.' };
     }
 
-    let finalContent = content;
+    let finalContent = content || '';
     if (note.userId !== session.userId && session.role === 'ADMIN') {
-      if (!finalContent.includes(`(Güncelleme: ${session.username})`)) {
+      if (finalContent && !finalContent.includes(`(Güncelleme: ${session.username})`)) {
         finalContent = `${finalContent}\n\n(Güncelleme: ${session.username})`;
       }
     }
