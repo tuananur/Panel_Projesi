@@ -12,6 +12,128 @@ import { addAccountingEntryAction, deleteAccountingEntryAction } from '@/app/act
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
 
+const MONTH_NAMES_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+function startOfDay(d) {
+  const x = new Date(d);
+  return new Date(x.getFullYear(), x.getMonth(), x.getDate());
+}
+
+function addMonths(d, n) {
+  const day = d.getDate();
+  const t = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  const last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+  t.setDate(Math.min(day, last));
+  return startOfDay(t);
+}
+
+function daysBetweenDates(from, to) {
+  return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / 86400000);
+}
+
+/** Kasa defteri: MANUAL + tekrarlayanların cutoff gününe kadar tüm tarihli oluşumları. */
+function expandLedgerEventsUpTo(entries, cutoffEnd) {
+  const cutoff = startOfDay(cutoffEnd);
+  const out = [];
+
+  entries.forEach((entry) => {
+    const anchor = startOfDay(new Date(entry.date));
+    const { amount, type, description, id, frequency } = entry;
+
+    if (frequency === 'MANUAL') {
+      if (anchor <= cutoff) {
+        out.push({
+          sortTime: anchor.getTime(),
+          date: anchor,
+          type,
+          amount,
+          description,
+          sourceId: id,
+          frequency: 'MANUAL',
+          isVirtual: false,
+        });
+      }
+      return;
+    }
+
+    if (frequency === 'MONTHLY') {
+      let n = 0;
+      while (true) {
+        const occ = addMonths(anchor, n);
+        if (occ > cutoff) break;
+        out.push({
+          sortTime: occ.getTime(),
+          date: occ,
+          type,
+          amount,
+          description: `${description} (Aylık)`,
+          sourceId: id,
+          frequency: 'MONTHLY',
+          isVirtual: true,
+        });
+        n += 1;
+      }
+      return;
+    }
+
+    if (frequency === 'QUARTERLY') {
+      let block = 0;
+      while (true) {
+        const base = addMonths(anchor, block * 3);
+        if (base > cutoff) break;
+        for (let j = 0; j < 3; j += 1) {
+          const occ = addMonths(base, j);
+          if (occ > cutoff) continue;
+          out.push({
+            sortTime: occ.getTime(),
+            date: occ,
+            type,
+            amount: amount / 3,
+            description: `${description} (3 aylık — dönem ${block + 1}, ${j + 1}. ay)`,
+            sourceId: id,
+            frequency: 'QUARTERLY',
+            isVirtual: true,
+          });
+        }
+        block += 1;
+      }
+      return;
+    }
+
+    if (frequency === 'YEARLY') {
+      let block = 0;
+      while (true) {
+        const yearStart = addMonths(anchor, block * 12);
+        if (yearStart > cutoff) break;
+        for (let m = 0; m < 12; m += 1) {
+          const occ = addMonths(yearStart, m);
+          if (occ > cutoff) break;
+          out.push({
+            sortTime: occ.getTime(),
+            date: occ,
+            type,
+            amount: amount / 12,
+            description: `${description} (Senelik — yıl ${block + 1}, ay ${m + 1}/12)`,
+            sourceId: id,
+            frequency: 'YEARLY',
+            isVirtual: true,
+          });
+        }
+        block += 1;
+      }
+    }
+  });
+
+  out.sort((a, b) => {
+    if (a.sortTime !== b.sortTime) return a.sortTime - b.sortTime;
+    if (a.type === b.type) return 0;
+    if (a.type === 'INCOME') return -1;
+    return 1;
+  });
+
+  return out;
+}
+
 export default function AccountingClient({ initialEntries, userRole }) {
   const router = useRouter();
   const { setGlobalLoading } = useTheme();
@@ -22,7 +144,7 @@ export default function AccountingClient({ initialEntries, userRole }) {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   // Generate helper for months
-  const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+  const months = MONTH_NAMES_TR;
   const years = [2024, 2025, 2026];
 
   // Logic to expand recurring entries for a specific month
@@ -75,27 +197,41 @@ export default function AccountingClient({ initialEntries, userRole }) {
   const incomes = currentMonthEntries.filter(e => e.type === 'INCOME');
   const expenses = currentMonthEntries.filter(e => e.type === 'EXPENSE');
 
-  // Ledger: all MANUAL entries across all time up to selected month, sorted by date
-  const ledgerEntries = useMemo(() => {
-    const cutoff = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59); // last second of selected month
-    const relevant = initialEntries
-      .filter(e => e.frequency === 'MANUAL' && new Date(e.date) <= cutoff)
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  const ledgerCutoffDate = useMemo(
+    () => new Date(selectedYear, selectedMonth + 1, 0),
+    [selectedYear, selectedMonth]
+  );
 
+  const ledgerEntries = useMemo(() => {
+    const cutoff = startOfDay(ledgerCutoffDate);
+    const expanded = expandLedgerEventsUpTo(initialEntries, cutoff);
     let running = 0;
-    return relevant.map(e => {
+    return expanded.map((e) => {
       running += e.type === 'INCOME' ? e.amount : -e.amount;
       return { ...e, balance: running };
     });
-  }, [initialEntries, selectedMonth, selectedYear]);
+  }, [initialEntries, selectedMonth, selectedYear, ledgerCutoffDate]);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const ledgerRowsWithPeriods = useMemo(() => {
+    return ledgerEntries.map((e, i) => {
+      const next = ledgerEntries[i + 1];
+      let daysUntilNext;
+      let nextLabel;
+      if (next) {
+        daysUntilNext = daysBetweenDates(e.date, next.date);
+        nextLabel = `${next.date.toLocaleDateString('tr-TR')} · ${next.description.length > 48 ? `${next.description.slice(0, 48)}…` : next.description}`;
+      } else {
+        daysUntilNext = daysBetweenDates(e.date, ledgerCutoffDate);
+        nextLabel = `${MONTH_NAMES_TR[selectedMonth]} sonu (${ledgerCutoffDate.toLocaleDateString('tr-TR')})`;
+      }
+      return { ...e, daysUntilNext, nextLabel };
+    });
+  }, [ledgerEntries, ledgerCutoffDate, selectedMonth]);
+
   const balanceAsOfToday = useMemo(() => {
-    const today = new Date();
-    const relevant = initialEntries
-      .filter(e => e.frequency === 'MANUAL' && new Date(e.date) <= today)
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-    return relevant.reduce((sum, e) => sum + (e.type === 'INCOME' ? e.amount : -e.amount), 0);
+    const today = startOfDay(new Date());
+    const expanded = expandLedgerEventsUpTo(initialEntries, today);
+    return expanded.reduce((sum, e) => sum + (e.type === 'INCOME' ? e.amount : -e.amount), 0);
   }, [initialEntries]);
 
   const totalIncome = incomes.reduce((sum, e) => sum + e.displayAmount, 0);
@@ -282,7 +418,8 @@ export default function AccountingClient({ initialEntries, userRole }) {
             <div>
               <h2 className="heading-2" style={{ marginBottom: '0.1rem' }}>Kasa Defteri</h2>
               <p className="text-muted" style={{ fontSize: '0.85rem' }}>
-                {months[selectedMonth]} {selectedYear} sonuna kadar tüm tek seferlik kayıtlar — tarih sırasıyla.
+                {months[selectedMonth]} {selectedYear} sonuna kadar tüm hareketler (tek seferlik + aylık / 3 aylık / senelik tekrarlar), tarih sırasıyla.
+                Sonraki sütunlar: işlem sonrası kasada ne kadar olduğunuz ve bir sonraki harekete kadar kaç gün bu bakiye geçerli sayılır.
               </p>
             </div>
           </div>
@@ -300,49 +437,66 @@ export default function AccountingClient({ initialEntries, userRole }) {
           </div>
         </div>
 
-        {ledgerEntries.length === 0 ? (
+        {ledgerRowsWithPeriods.length === 0 ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-            {months[selectedMonth]} {selectedYear} sonuna kadar tek seferlik kayıt yok.
+            {months[selectedMonth]} {selectedYear} sonuna kadar kasa hareketi yok.
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.7rem', textTransform: 'uppercase' }}>
-                  <th style={{ padding: '0.75rem 1rem' }}>Tarih</th>
-                  <th style={{ padding: '0.75rem 1rem' }}>Açıklama</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Giriş</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Çıkış</th>
-                  <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Kasa Bakiyesi</th>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.65rem', textTransform: 'uppercase' }}>
+                  <th style={{ padding: '0.75rem 0.6rem' }}>Tarih</th>
+                  <th style={{ padding: '0.75rem 0.6rem', minWidth: '140px' }}>Açıklama</th>
+                  <th style={{ padding: '0.75rem 0.6rem', textAlign: 'right' }}>Giriş</th>
+                  <th style={{ padding: '0.75rem 0.6rem', textAlign: 'right' }}>Çıkış</th>
+                  <th style={{ padding: '0.75rem 0.6rem', textAlign: 'right' }}>Kasa (işlem sonrası)</th>
+                  <th style={{ padding: '0.75rem 0.6rem', textAlign: 'right', whiteSpace: 'nowrap' }}>Süre (gün)</th>
+                  <th style={{ padding: '0.75rem 0.6rem', minWidth: '180px' }}>Sonraki hareket / dönem sonu</th>
                 </tr>
               </thead>
               <tbody>
-                {ledgerEntries.map((e, i) => {
-                  const isToday = new Date(e.date).toISOString().split('T')[0] === todayStr;
+                {ledgerRowsWithPeriods.map((e) => {
+                  const isToday = startOfDay(e.date).getTime() === startOfDay(new Date()).getTime();
+                  const rowKey = `ledger-${e.sourceId}-${e.sortTime}-${e.type}`;
                   return (
-                    <tr key={e.id} style={{
+                    <tr key={rowKey} style={{
                       borderBottom: '1px solid rgba(255,255,255,0.04)',
                       background: isToday ? 'rgba(99,102,241,0.06)' : 'transparent',
                     }}>
-                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: isToday ? 700 : 400 }}>
-                        {new Date(e.date).toLocaleDateString('tr-TR')}
-                        {isToday && <span style={{ marginLeft: '0.4rem', fontSize: '0.6rem', color: 'var(--accent-primary)', fontWeight: 800 }}>BUGÜN</span>}
+                      <td style={{ padding: '0.75rem 0.6rem', fontSize: '0.8rem', fontWeight: isToday ? 700 : 400, verticalAlign: 'top' }}>
+                        {e.date.toLocaleDateString('tr-TR')}
+                        {isToday && <span style={{ marginLeft: '0.35rem', fontSize: '0.6rem', color: 'var(--accent-primary)', fontWeight: 800 }}>BUGÜN</span>}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}>{e.description}</td>
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>
-                        {e.type === 'INCOME' ? `+${e.amount.toLocaleString('tr-TR')} TL` : ''}
+                      <td style={{ padding: '0.75rem 0.6rem', fontSize: '0.8rem', verticalAlign: 'top' }}>
+                        {e.description}
+                        {e.isVirtual && (
+                          <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                            Tekrarlayan kayıt (silme tüm seriyi kaldırır)
+                          </span>
+                        )}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#ef4444', fontWeight: 700, fontSize: '0.85rem' }}>
-                        {e.type === 'EXPENSE' ? `-${e.amount.toLocaleString('tr-TR')} TL` : ''}
+                      <td style={{ padding: '0.75rem 0.6rem', textAlign: 'right', color: '#10b981', fontWeight: 700, fontSize: '0.8rem', verticalAlign: 'top' }}>
+                        {e.type === 'INCOME' ? `+${e.amount.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} TL` : '—'}
+                      </td>
+                      <td style={{ padding: '0.75rem 0.6rem', textAlign: 'right', color: '#ef4444', fontWeight: 700, fontSize: '0.8rem', verticalAlign: 'top' }}>
+                        {e.type === 'EXPENSE' ? `-${e.amount.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} TL` : '—'}
                       </td>
                       <td style={{
-                        padding: '0.75rem 1rem',
+                        padding: '0.75rem 0.6rem',
                         textAlign: 'right',
-                        fontWeight: 900,
-                        fontSize: '0.95rem',
+                        fontWeight: 800,
+                        fontSize: '0.85rem',
                         color: e.balance >= 0 ? '#10b981' : '#ef4444',
+                        verticalAlign: 'top',
                       }}>
-                        {e.balance.toLocaleString('tr-TR')} TL
+                        {e.balance.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} TL
+                      </td>
+                      <td style={{ padding: '0.75rem 0.6rem', textAlign: 'right', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', verticalAlign: 'top' }}>
+                        {e.daysUntilNext}
+                      </td>
+                      <td style={{ padding: '0.75rem 0.6rem', fontSize: '0.72rem', color: 'var(--text-secondary)', lineHeight: 1.35, verticalAlign: 'top' }}>
+                        {e.nextLabel}
                       </td>
                     </tr>
                   );
