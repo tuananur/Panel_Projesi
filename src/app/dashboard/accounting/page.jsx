@@ -10,6 +10,7 @@ export const metadata = {
 export default async function AccountingPage() {
   const session = await getSession();
   if (!session) redirect('/login');
+  if (session.role !== 'ADMIN') redirect('/dashboard');
 
   const entries = await prisma.accountingEntry.findMany({
     orderBy: { date: 'desc' }
