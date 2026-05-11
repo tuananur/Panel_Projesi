@@ -12,6 +12,26 @@ import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/ap
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
 
+function parseClientJsonObject(raw, fallback = '{}') {
+  try {
+    const parsed = JSON.parse(raw || fallback);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    return JSON.parse(fallback);
+  } catch {
+    try {
+      return JSON.parse(fallback);
+    } catch {
+      return {};
+    }
+  }
+}
+
+function accountLinkText(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  return String(value);
+}
+
 const PLATFORM_ICONS = {
   Instagram: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -155,7 +175,7 @@ export default function StatsContent({ client }) {
   const pendingTasks = (client?.tasks || []).filter(t => !t.status);
   const successRate = totalTasks > 0 ? Math.round((completedTasks.length / totalTasks) * 100) : 0;
 
-  const currentMonthTasks = client.tasks.filter(t => {
+  const currentMonthTasks = (client.tasks || []).filter(t => {
     const d = new Date(t.date);
     return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
   });
@@ -169,8 +189,10 @@ export default function StatsContent({ client }) {
   
   let activePlatforms = [];
   try {
-    const accounts = JSON.parse(client?.socialAccounts || '{}');
-    const settingsPlatforms = Object.keys(accounts).filter(p => accounts[p] && accounts[p].trim() !== '');
+    const accounts = parseClientJsonObject(client?.socialAccounts, '{}');
+    const settingsPlatforms = Object.keys(accounts).filter(
+      (p) => accountLinkText(accounts[p]).trim() !== ''
+    );
     
     // Get platforms that have tasks in the current month
     const taskPlatforms = (client?.tasks || []).filter(t => {
@@ -205,11 +227,11 @@ export default function StatsContent({ client }) {
     socialGrid[week][dayName][t.platform] = t.status;
   });
 
-  const accounts = JSON.parse(client?.socialAccounts || '{}');
-  const schedule = JSON.parse(client?.socialSchedule || '{}');
-  const activeSettingsPlatforms = Object.keys(accounts).filter(p => {
-    const hasAccount = accounts[p] && accounts[p].trim() !== '';
-    const hasSchedule = schedule[p] && schedule[p].length > 0;
+  const accounts = parseClientJsonObject(client?.socialAccounts, '{}');
+  const schedule = parseClientJsonObject(client?.socialSchedule, '{}');
+  const activeSettingsPlatforms = Object.keys(accounts).filter((p) => {
+    const hasAccount = accountLinkText(accounts[p]).trim() !== '';
+    const hasSchedule = Array.isArray(schedule[p]) && schedule[p].length > 0;
     return hasAccount || hasSchedule;
   });
 
@@ -467,7 +489,7 @@ export default function StatsContent({ client }) {
                       }}
                       className="blog-item-compact"
                     >
-                      {blog.note.length > 25 ? blog.note.substring(0, 25) + '...' : blog.note}
+                      {(blog.note || '').length > 25 ? `${(blog.note || '').substring(0, 25)}...` : (blog.note || '')}
                     </div>
                   )) : (
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2, fontSize: '0.6rem', border: '1px dashed var(--border-color)', borderRadius: '6px' }}>
@@ -688,7 +710,11 @@ export default function StatsContent({ client }) {
                         {task.status && <CheckCircle size={14} />}
                       </span>
                       <button 
-                        onClick={(e) => { e.stopPropagation(); setDeleteTaskId(task.id); setIsDeleteDialogOpen(true); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveTask(task);
+                          setIsDeleteDialogOpen(true);
+                        }}
                         style={{ background: 'none', border: 'none', color: 'rgba(239, 68, 68, 0.4)', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
                         title="Görevi Sil"
                         className="hover-danger"
