@@ -33,7 +33,6 @@ export default function DailyQuote() {
   const [quote, setQuote] = useState(null);
 
   useEffect(() => {
-    const allQuotes = [...ATATURK_QUOTES, ...MOTIVATIONAL_QUOTES];
     const now = new Date();
     const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
     const isAtaturk = (dayOfYear % 10) < 7;
@@ -49,43 +48,51 @@ export default function DailyQuote() {
 
   return (
     <div
-      className="glass-panel animate-fade-in"
+      className="glass-panel animate-fade-in daily-quote-header"
       style={{
-        padding: '0.6rem 1rem',
+        padding: '0.45rem 0.75rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.2rem',
-        borderRight: '3px solid var(--accent-primary)',
-        borderLeft: 'none',
+        gap: '0.15rem',
+        borderLeft: '3px solid var(--accent-primary)',
+        borderRight: 'none',
         background: 'rgba(30, 41, 59, 0.4)',
         backdropFilter: 'blur(12px)',
-        maxWidth: '280px',
+        maxWidth: 'min(240px, 42vw)',
+        minWidth: 0,
         pointerEvents: 'none',
-        flexShrink: 0,
+        flexShrink: 1,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-primary)', justifyContent: 'flex-end' }}>
-        <span style={{ fontSize: '0.55rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Günün Sözü</span>
-        <Quote size={12} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--accent-primary)', justifyContent: 'flex-start' }}>
+        <Quote size={11} />
+        <span style={{ fontSize: '0.5rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Günün Sözü</span>
       </div>
       <p style={{
-        fontSize: '0.75rem',
+        fontSize: '0.7rem',
         fontWeight: 500,
-        lineHeight: 1.4,
+        lineHeight: 1.35,
         fontStyle: 'italic',
         color: 'var(--text-primary)',
-        textAlign: 'right',
+        textAlign: 'left',
         margin: 0,
+        overflow: 'hidden',
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
       }}>
         "{quote.text}"
       </p>
       <p style={{
-        fontSize: '0.65rem',
+        fontSize: '0.6rem',
         fontWeight: 700,
         color: 'var(--accent-primary)',
-        textAlign: 'right',
+        textAlign: 'left',
         margin: 0,
-        opacity: 0.8,
+        opacity: 0.85,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
       }}>
         — {quote.author}
       </p>

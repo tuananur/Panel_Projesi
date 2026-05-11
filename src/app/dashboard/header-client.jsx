@@ -15,8 +15,8 @@ export default function HeaderClient({ session, onMenuClick }) {
   const displayRole = roleDisplayMap[session.role] || session.role;
 
   return (
-    <header className="top-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'nowrap' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
+    <header className="top-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'nowrap', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0, minWidth: 0 }}>
         <button 
           onClick={onMenuClick}
           className="mobile-menu-btn"
@@ -39,10 +39,20 @@ export default function HeaderClient({ session, onMenuClick }) {
         </div>
       </div>
 
-      <DailyQuote />
-      
-      <div className="role-badge" style={{ flexShrink: 0 }}>
-        {displayRole}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          marginLeft: 'auto',
+          flexShrink: 1,
+          minWidth: 0,
+        }}
+      >
+        <DailyQuote />
+        <div className="role-badge" style={{ flexShrink: 0 }}>
+          {displayRole}
+        </div>
       </div>
     </header>
   );
