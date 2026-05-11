@@ -31,7 +31,7 @@ export default async function ClientNotesPage({ params }) {
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
-          <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Müşteri Notları</h1>
+          <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>İş Takip Listesi</h1>
           <p className="text-muted" style={{ fontSize: '0.9rem' }}>{client.companyName} için eklenen özel notlar ve hatırlatıcılar.</p>
         </div>
       </div>

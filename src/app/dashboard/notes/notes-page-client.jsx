@@ -26,6 +26,9 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
   }, [initialNotes, currentUserId]);
   const [activeTab, setActiveTab] = useState('general'); // 'general' or 'client'
   const [search, setSearch] = useState('');
+  const [selectedClientId, setSelectedClientId] = useState('all');
+  const [selectedUserId, setSelectedUserId] = useState('all');
+  const [selectedDate, setSelectedDate] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -34,6 +37,14 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
   const [error, setError] = useState('');
 
   // Filtering notes based on tab and search
+  const clientTabUsers = Array.from(
+    new Map(
+      initialNotes
+        .filter((note) => note.clientId && note.user)
+        .map((note) => [note.userId, { id: note.userId, username: note.user.username }])
+    ).values()
+  );
+
   const filteredNotes = initialNotes.filter(note => {
     const lowerSearch = search.toLowerCase();
     const createdAt = new Date(note.createdAt);
@@ -53,7 +64,11 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
     if (activeTab === 'general') {
       return !note.clientId && matchesSearch;
     } else {
-      return note.clientId && matchesSearch;
+      const matchesOwner = userRole === 'ADMIN' || note.userId === currentUserId;
+      const matchesClient = selectedClientId === 'all' || String(note.clientId) === selectedClientId;
+      const matchesDate = !selectedDate || note.createdAt.slice(0, 10) === selectedDate;
+      const matchesUser = userRole !== 'ADMIN' || selectedUserId === 'all' || String(note.userId) === selectedUserId;
+      return note.clientId && matchesSearch && matchesOwner && matchesClient && matchesDate && matchesUser;
     }
   });
 
@@ -178,6 +193,44 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
           <Plus size={18} /> Yeni Not Ekle
         </button>
       </div>
+
+      {activeTab === 'client' && (
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          {userRole === 'ADMIN' && (
+            <select
+              className="input-field"
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              style={{ minWidth: '180px' }}
+            >
+              <option value="all">Tüm Kullanıcılar</option>
+              {clientTabUsers.map((user) => (
+                <option key={user.id} value={user.id}>{user.username}</option>
+              ))}
+            </select>
+          )}
+
+          <select
+            className="input-field"
+            value={selectedClientId}
+            onChange={(e) => setSelectedClientId(e.target.value)}
+            style={{ minWidth: '220px' }}
+          >
+            <option value="all">Tüm Müşteriler</option>
+            {clients.map((client) => (
+              <option key={client.id} value={client.id}>{client.companyName}</option>
+            ))}
+          </select>
+
+          <input
+            type="date"
+            className="input-field"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            style={{ minWidth: '170px' }}
+          />
+        </div>
+      )}
 
       {/* Notlar Listesi (Log Stili Tablo) */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
