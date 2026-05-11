@@ -29,7 +29,9 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
   ];
   const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 
-  const filteredNotes = notes.filter(note => {
+  const noteList = Array.isArray(notes) ? notes : [];
+
+  const filteredNotes = noteList.filter(note => {
     const lowerSearch = search.toLowerCase();
     const createdAt = new Date(note.createdAt);
     const dateStr = createdAt.toLocaleDateString('tr-TR'); 
@@ -38,10 +40,13 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
     const day = createdAt.getDate().toString();
     const fullDateText = `${day} ${monthName}`;
 
+    const contentLower = (note.content ?? '').toLowerCase();
+    const userLower = (note.user?.username ?? '').toLowerCase();
+
     return (
       (note.title?.toLowerCase().includes(lowerSearch)) ||
-      (note.content.toLowerCase().includes(lowerSearch)) ||
-      (note.user.username.toLowerCase().includes(lowerSearch)) ||
+      contentLower.includes(lowerSearch) ||
+      userLower.includes(lowerSearch) ||
       (dateStr.includes(lowerSearch)) ||
       (fullDateText.includes(lowerSearch))
     );
@@ -232,7 +237,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                         <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' }}>
                           <UserIcon size={12} style={{ opacity: 0.7, color: note.isDone ? '#10b981' : 'inherit' }} />
                         </div>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'inherit' }}>{note.user.username}</div>
+                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'inherit' }}>{note.user?.username ?? '—'}</div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)', fontSize: '0.75rem' }}>
                         <Clock size={12} />
@@ -252,7 +257,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                         lineHeight: '1.6',
                         opacity: note.isDone ? 0.9 : 1
                       }}>
-                        {note.content}
+                        {note.content ?? ''}
                       </div>
                     </div>
                   </td>
@@ -397,7 +402,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                 return calendarDays.map((day, idx) => {
                   if (!day) return <div key={`empty-${idx}`} style={{ padding: '0.2rem', background: 'rgba(255,255,255,0.01)' }}></div>;
 
-                  const dayNotes = notes.filter(n => {
+                  const dayNotes = noteList.filter(n => {
                     const d = new Date(n.createdAt);
                     return d.getDate() === day && d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
                   });
@@ -452,10 +457,14 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole }
                               textOverflow: 'ellipsis',
                               fontWeight: 600
                             }}
-                            title={note.title || note.content}
+                            title={(note.title ?? '') || (note.content ?? '') || ''}
                           >
                             {note.isDone && <CheckCircle2 size={8} style={{ marginRight: '3px', display: 'inline' }} />}
-                            {note.title || note.content.substring(0, 15) + '...'}
+                            {(() => {
+                              if (note.title) return note.title;
+                              const c = note.content ?? '';
+                              return c.length > 15 ? `${c.slice(0, 15)}...` : (c || '…');
+                            })()}
                           </div>
                         ))}
                       </div>
