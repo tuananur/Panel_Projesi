@@ -5,6 +5,14 @@ import SocialCalendar from './social-calendar';
 
 export const revalidate = 0; // Disable cache to see new tasks immediately
 
+function parseJSONSafe(value, fallback) {
+  try {
+    return JSON.parse(value || fallback);
+  } catch {
+    return JSON.parse(fallback);
+  }
+}
+
 export default async function SocialPage({ params }) {
   const { id } = await params;
   const session = await getSession();
@@ -21,8 +29,8 @@ export default async function SocialPage({ params }) {
 
   if (!client) return null;
 
-  const socialAccounts = JSON.parse(client.socialAccounts || '{}');
-  const socialSchedule = JSON.parse(client.socialSchedule || '{}');
+  const socialAccounts = parseJSONSafe(client.socialAccounts, '{}');
+  const socialSchedule = parseJSONSafe(client.socialSchedule, '{}');
   const activePlatforms = Object.keys(socialAccounts).filter(p => {
     const hasAccount = socialAccounts[p] && socialAccounts[p].trim() !== '';
     const hasSchedule = socialSchedule[p] && socialSchedule[p].length > 0;

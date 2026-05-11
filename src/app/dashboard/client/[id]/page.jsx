@@ -2,6 +2,14 @@ import { getSession } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 
+function parseJSONSafe(value, fallback) {
+  try {
+    return JSON.parse(value || fallback);
+  } catch {
+    return JSON.parse(fallback);
+  }
+}
+
 export default async function ClientDetailPage({ params }) {
   const { id } = await params;
   const session = await getSession();
@@ -12,7 +20,7 @@ export default async function ClientDetailPage({ params }) {
 
   if (!client) redirect('/dashboard');
 
-  const services = JSON.parse(client.services || '[]');
+  const services = parseJSONSafe(client.services, '[]');
   
   // Logic to find first available tab based on role and services
   if (services.includes('SEO') && (session.role === 'ADMIN' || session.role === 'ADVERTISER')) {
