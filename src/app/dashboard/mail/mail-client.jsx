@@ -1,26 +1,48 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { getInboxMessageAction, getInboxMessagesAction, sendMailAction } from '@/app/actions';
-import { AlertCircle, CheckCircle, Download, FileText, Inbox, Mail, Paperclip, Plus, RefreshCw, Send, X } from 'lucide-react';
+import { useMemo, useState, useTransition } from 'react';
+import { deleteInboxMessagesAction, getInboxMessageAction, getInboxMessagesAction, markInboxMessagesReadAction, sendMailAction } from '@/app/actions';
+import { AlertCircle, Calendar, CheckCircle, Download, FileText, Inbox, Mail, Paperclip, Plus, RefreshCw, Search, Send, Trash2, X } from 'lucide-react';
 
 export default function MailClient({ initialResult }) {
   const [messages, setMessages] = useState(initialResult?.messages || []);
   const [selectedUid, setSelectedUid] = useState(messages[0]?.uid || null);
+  const [selectedUids, setSelectedUids] = useState([]);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [status, setStatus] = useState(initialResult?.error ? { type: 'error', text: initialResult.error } : null);
   const [isPending, startTransition] = useTransition();
+
+  const filteredMessages = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase('tr-TR');
+    const startTime = startDate ? new Date(`${startDate}T00:00:00`).getTime() : null;
+    const endTime = endDate ? new Date(`${endDate}T23:59:59`).getTime() : null;
+
+    return messages.filter((message) => {
+      const searchable = `${message.from || ''} ${message.subject || ''}`.toLocaleLowerCase('tr-TR');
+      const messageTime = message.date ? new Date(message.date).getTime() : null;
+      if (normalizedQuery && !searchable.includes(normalizedQuery)) return false;
+      if (startTime && (!messageTime || messageTime < startTime)) return false;
+      if (endTime && (!messageTime || messageTime > endTime)) return false;
+      return true;
+    });
+  }, [messages, query, startDate, endDate]);
+
+  const allFilteredSelected = filteredMessages.length > 0 && filteredMessages.every((message) => selectedUids.includes(message.uid));
 
   const refresh = () => {
     setStatus(null);
     startTransition(async () => {
-      const result = await getInboxMessagesAction(25);
+      const result = await getInboxMessagesAction(50);
       if (result?.error) {
         setStatus({ type: 'error', text: result.error });
         return;
       }
       setMessages(result.messages || []);
+      setSelectedUids([]);
       setStatus({ type: 'success', text: 'Mailler güncellendi.' });
     });
   };
@@ -36,6 +58,49 @@ export default function MailClient({ initialResult }) {
         return;
       }
       setSelectedMessage(result.message);
+    });
+  };
+
+  const toggleSelected = (uid) => {
+    setSelectedUids((current) => current.includes(uid) ? current.filter((item) => item !== uid) : [...current, uid]);
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedUids(allFilteredSelected ? [] : filteredMessages.map((message) => message.uid));
+  };
+
+  const markSelectedRead = () => {
+    if (selectedUids.length === 0) return;
+    setStatus(null);
+    startTransition(async () => {
+      const result = await markInboxMessagesReadAction(selectedUids);
+      if (result?.error) {
+        setStatus({ type: 'error', text: result.error });
+        return;
+      }
+      setMessages((current) => current.map((message) => selectedUids.includes(message.uid) ? { ...message, seen: true } : message));
+      if (selectedMessage && selectedUids.includes(selectedMessage.uid)) setSelectedMessage({ ...selectedMessage, seen: true });
+      setStatus({ type: 'success', text: `${selectedUids.length} mail okundu olarak işaretlendi.` });
+    });
+  };
+
+  const deleteSelected = () => {
+    if (selectedUids.length === 0) return;
+    const deleting = [...selectedUids];
+    setStatus(null);
+    startTransition(async () => {
+      const result = await deleteInboxMessagesAction(deleting);
+      if (result?.error) {
+        setStatus({ type: 'error', text: result.error });
+        return;
+      }
+      setMessages((current) => current.filter((message) => !deleting.includes(message.uid)));
+      setSelectedUids([]);
+      if (selectedUid && deleting.includes(selectedUid)) {
+        setSelectedUid(null);
+        setSelectedMessage(null);
+      }
+      setStatus({ type: 'success', text: `${deleting.length} mail silindi.` });
     });
   };
 
@@ -58,7 +123,7 @@ export default function MailClient({ initialResult }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div className="card" style={{ padding: '0.9rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <button onClick={() => setComposeOpen(true)} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Plus size={16} /> Yeni Mail Gönder
           </button>
@@ -67,7 +132,7 @@ export default function MailClient({ initialResult }) {
           </button>
         </div>
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
-          {messages.length} mail listeleniyor
+          {filteredMessages.length}/{messages.length} mail · {selectedUids.length} seçili
         </div>
       </div>
 
@@ -78,47 +143,89 @@ export default function MailClient({ initialResult }) {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 380px) minmax(0, 1fr)', gap: '1rem', alignItems: 'stretch' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(330px, 430px) minmax(0, 1fr)', gap: '1rem', alignItems: 'stretch' }}>
         <div className="card" style={{ padding: 0, overflow: 'hidden', minHeight: '650px' }}>
-          <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Inbox size={18} /> <strong>Gelen Kutusu</strong>
+          <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'grid', gap: '0.8rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Inbox size={18} /> <strong>Gelen Kutusu</strong>
+            </div>
+
+            <div style={{ display: 'grid', gap: '0.6rem' }}>
+              <label style={{ position: 'relative', display: 'block' }}>
+                <Search size={15} style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Mail ara: gönderen veya konu" style={{ ...inputStyle, width: '100%', paddingLeft: '2rem' }} />
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <label style={dateLabelStyle}><Calendar size={13} /> <input value={startDate} onChange={(event) => setStartDate(event.target.value)} type="date" style={dateInputStyle} /></label>
+                <label style={dateLabelStyle}><Calendar size={13} /> <input value={endDate} onChange={(event) => setEndDate(event.target.value)} type="date" style={dateInputStyle} /></label>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 800 }}>
+                <input type="checkbox" checked={allFilteredSelected} onChange={toggleSelectAll} /> Tümünü seç
+              </label>
+              <button onClick={markSelectedRead} disabled={isPending || selectedUids.length === 0} className="btn btn-secondary" style={smallButtonStyle}>
+                <CheckCircle size={14} /> Okundu
+              </button>
+              <button onClick={deleteSelected} disabled={isPending || selectedUids.length === 0} className="btn btn-secondary" style={{ ...smallButtonStyle, color: '#ef4444' }}>
+                <Trash2 size={14} /> Sil
+              </button>
+            </div>
           </div>
+
           {messages.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
               <Mail size={36} style={{ marginBottom: '1rem', opacity: 0.5 }} />
               <p>Mail bulunamadı veya bağlantı ayarı eksik.</p>
             </div>
+          ) : filteredMessages.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Filtreye uyan mail yok.</div>
           ) : (
             <div style={{ maxHeight: '720px', overflowY: 'auto' }}>
-              {messages.map((message) => (
-                <button
+              {filteredMessages.map((message) => (
+                <div
                   key={message.uid}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => openMessage(message.uid)}
+                  onKeyDown={(event) => event.key === 'Enter' && openMessage(message.uid)}
                   style={{
                     width: '100%',
                     textAlign: 'left',
                     background: selectedUid === message.uid ? 'rgba(59,130,246,0.14)' : 'transparent',
                     color: 'var(--text-primary)',
-                    border: 'none',
                     borderBottom: '1px solid var(--border-color)',
                     padding: '0.95rem',
                     cursor: 'pointer',
                     display: 'grid',
-                    gap: '0.35rem'
+                    gridTemplateColumns: 'auto minmax(0, 1fr)',
+                    gap: '0.7rem',
+                    alignItems: 'start'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'center' }}>
-                    <strong style={{ fontSize: '0.86rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{message.from}</strong>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>{message.date ? new Date(message.date).toLocaleDateString('tr-TR') : '-'}</span>
+                  <input
+                    type="checkbox"
+                    checked={selectedUids.includes(message.uid)}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={() => toggleSelected(message.uid)}
+                    style={{ marginTop: '0.15rem' }}
+                    aria-label={`${message.subject} seç`}
+                  />
+                  <div style={{ display: 'grid', gap: '0.35rem', minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'center' }}>
+                      <strong style={{ fontSize: '0.86rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{message.from}</strong>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>{message.date ? new Date(message.date).toLocaleDateString('tr-TR') : '-'}</span>
+                    </div>
+                    <div style={{ fontWeight: message.seen ? 600 : 900, fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {message.subject}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      {!message.seen ? <span style={badgeStyle}>OKUNMAMIŞ</span> : <span />}
+                      {message.hasAttachments && <Paperclip size={14} style={{ color: 'var(--text-secondary)' }} />}
+                    </div>
                   </div>
-                  <div style={{ fontWeight: message.seen ? 600 : 900, fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {message.subject}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {!message.seen ? <span style={badgeStyle}>OKUNMAMIŞ</span> : <span />}
-                    {message.hasAttachments && <Paperclip size={14} style={{ color: 'var(--text-secondary)' }} />}
-                  </div>
-                </button>
+                </div>
               ))}
             </div>
           )}
@@ -244,6 +351,34 @@ const badgeStyle = {
   background: 'rgba(16,185,129,0.12)',
   padding: '0.15rem 0.35rem',
   borderRadius: '4px'
+};
+
+const smallButtonStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.35rem',
+  padding: '0.45rem 0.65rem',
+  fontSize: '0.75rem'
+};
+
+const dateLabelStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.35rem',
+  background: 'rgba(255,255,255,0.05)',
+  color: 'var(--text-secondary)',
+  border: '1px solid var(--border-color)',
+  borderRadius: '8px',
+  padding: '0.55rem 0.6rem'
+};
+
+const dateInputStyle = {
+  width: '100%',
+  background: 'transparent',
+  color: 'var(--text-primary)',
+  border: 'none',
+  outline: 'none',
+  fontSize: '0.75rem'
 };
 
 const modalBackdropStyle = {

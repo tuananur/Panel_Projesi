@@ -192,6 +192,59 @@ export async function getInboxMessage(uid) {
   }
 }
 
+export async function markInboxMessagesSeen(uids = []) {
+  const config = await getMailConfig({ includePassword: true });
+  assertReadableConfig(config);
+
+  const normalizedUids = [...new Set(uids.map((uid) => Number(uid)).filter(Boolean))];
+  if (normalizedUids.length === 0) return { count: 0 };
+
+  const client = createImapClient(config);
+  await client.connect();
+  try {
+    const lock = await client.getMailboxLock('INBOX');
+    try {
+      await client.messageFlagsAdd(normalizedUids.join(','), ['\\Seen'], { uid: true });
+      return { count: normalizedUids.length };
+    } finally {
+      lock.release();
+    }
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
+export async function deleteInboxMessages(uids = []) {
+  const config = await getMailConfig({ includePassword: true });
+  assertReadableConfig(config);
+
+  const normalizedUids = [...new Set(uids.map((uid) => Number(uid)).filter(Boolean))];
+  if (normalizedUids.length === 0) return { count: 0 };
+
+  const client = createImapClient(config);
+  await client.connect();
+  try {
+    const mailboxes = await client.list();
+    const trashMailbox = mailboxes.find((box) => box.specialUse === '\\Trash')
+      || mailboxes.find((box) => /^(trash|deleted messages|çöp|çöp kutusu)$/i.test(box.path || box.name || ''));
+
+    const lock = await client.getMailboxLock('INBOX');
+    try {
+      const range = normalizedUids.join(',');
+      if (trashMailbox?.path) {
+        await client.messageMove(range, trashMailbox.path, { uid: true });
+      } else {
+        await client.messageDelete(range, { uid: true });
+      }
+      return { count: normalizedUids.length };
+    } finally {
+      lock.release();
+    }
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
 export async function sendMail({ to, cc, bcc, subject, text, html, attachments = [] }) {
   const config = await getMailConfig({ includePassword: true });
   assertSendableConfig(config);

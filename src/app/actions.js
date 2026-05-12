@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession, destroySession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { getInboxMessage, getMailConfig, listInboxMessages, saveMailConfig, sendMail } from '@/lib/mail';
+import { deleteInboxMessages, getInboxMessage, getMailConfig, listInboxMessages, markInboxMessagesSeen, saveMailConfig, sendMail } from '@/lib/mail';
 import { saveRolePermissions } from '@/lib/permissions';
 
 async function logActivity(action, entityType, details, clientId = null) {
@@ -1124,6 +1124,30 @@ export async function getInboxMessageAction(uid) {
     return { success: true, message };
   } catch (error) {
     return { error: error.message || 'Mail detayı alınamadı.' };
+  }
+}
+
+export async function markInboxMessagesReadAction(uids) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    const result = await markInboxMessagesSeen(Array.isArray(uids) ? uids : [uids]);
+    await logActivity('UPDATE', 'MAIL', `${result.count} mail okundu olarak işaretlendi.`);
+    return { success: true, result };
+  } catch (error) {
+    return { error: error.message || 'Mailler okundu olarak işaretlenemedi.' };
+  }
+}
+
+export async function deleteInboxMessagesAction(uids) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    const result = await deleteInboxMessages(Array.isArray(uids) ? uids : [uids]);
+    await logActivity('DELETE', 'MAIL', `${result.count} mail silindi.`);
+    return { success: true, result };
+  } catch (error) {
+    return { error: error.message || 'Mailler silinemedi.' };
   }
 }
 
