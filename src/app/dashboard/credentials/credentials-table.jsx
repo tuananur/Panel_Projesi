@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Copy, Check, Save, Lock, User, Globe } from 'lucide-react';
 import { updateSocialCredentialsAction } from '@/app/actions';
 import { useTheme } from '@/app/components/theme-provider';
+import ClientLogo from '@/app/components/client-logo';
 
 const PLATFORMS = ['Instagram', 'Facebook', 'LinkedIn', 'YouTube', 'X', 'Pinterest'];
 
@@ -122,8 +123,18 @@ export default function CredentialsTable({ initialClients }) {
 
               return (
                 <tr key={client.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                  <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {client.companyName}
+                  <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <ClientLogo
+                        logoUrl={client.logoUrl || client.website}
+                        companyName={client.companyName}
+                        size="36px"
+                        borderRadius="8px"
+                      />
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {client.companyName}
+                      </span>
+                    </div>
                   </td>
                   {PLATFORMS.map(p => {
                     const data = typeof social[p] === 'object' ? social[p] : { url: social[p] || '', username: '', password: '' };

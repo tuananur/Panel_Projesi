@@ -16,6 +16,8 @@ export default async function CredentialsPage() {
     select: {
       id: true,
       companyName: true,
+      logoUrl: true,
+      website: true,
       socialAccounts: true,
     }
   });
