@@ -691,8 +691,8 @@ export async function updateNoteAction(formData) {
   const noteId = parseInt(formData.get('noteId'));
   const content = formData.get('content');
   const title = formData.get('title') || null;
+  const hasClientIdField = formData.has('clientId');
   const clientIdRaw = formData.get('clientId');
-  const clientId = clientIdRaw ? parseInt(clientIdRaw) : null;
 
   if (!noteId) return { error: 'Geçersiz ID.' };
   if (!title && !content) return { error: 'Başlık veya not içeriğinden en az biri dolu olmalıdır.' };
@@ -703,6 +703,12 @@ export async function updateNoteAction(formData) {
     if (!note || (note.userId !== session.userId && session.role !== 'ADMIN')) {
       return { error: 'Bu işlemi yapmaya yetkiniz yok.' };
     }
+
+    // Form `clientId` alanını hiç içermiyorsa mevcut müşteri bağı korunur.
+    // Alan varsa: değer boşsa Genel Not (null), doluysa o müşteriye atanır.
+    const clientId = hasClientIdField
+      ? (clientIdRaw === '' || clientIdRaw == null ? null : parseInt(clientIdRaw))
+      : note.clientId;
 
     let finalContent = content || '';
     if (note.userId !== session.userId && session.role === 'ADMIN') {

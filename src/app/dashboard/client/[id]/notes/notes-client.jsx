@@ -605,6 +605,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
         showButtons={false}
       >
         <form action={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <input type="hidden" name="clientId" value={clientId} />
           {userRole === 'ADMIN' && users.length > 0 && (
             <div className="input-group">
               <label className="input-label">Atanan Kullanıcı</label>
