@@ -605,6 +605,21 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
         showButtons={false}
       >
         <form action={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {userRole === 'ADMIN' && users.length > 0 && (
+            <div className="input-group">
+              <label className="input-label">Atanan Kullanıcı</label>
+              <select
+                name="assigneeUserId"
+                className="input-field"
+                key={selectedNote?.id}
+                defaultValue={selectedNote?.userId ?? currentUserId}
+              >
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>{u.username}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="input-group">
             <label className="input-label">Başlık</label>
             <input type="text" name="title" className="input-field" defaultValue={selectedNote?.title || ''} />

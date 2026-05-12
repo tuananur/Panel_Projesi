@@ -710,9 +710,30 @@ export async function updateNoteAction(formData) {
         finalContent = `${finalContent}\n\n(Güncelleme: ${session.username})`;
       }
     }
+
+    let userId = note.userId;
+    let createdByUserId = note.createdByUserId;
+    if (session.role === 'ADMIN') {
+      const assigneeRaw = formData.get('assigneeUserId');
+      if (assigneeRaw != null && String(assigneeRaw).trim() !== '') {
+        const newAssignee = parseInt(assigneeRaw, 10);
+        if (Number.isNaN(newAssignee)) {
+          return { error: 'Geçersiz kullanıcı seçimi.' };
+        }
+        const targetUser = await prisma.user.findUnique({ where: { id: newAssignee } });
+        if (!targetUser) {
+          return { error: 'Seçilen kullanıcı bulunamadı.' };
+        }
+        if (newAssignee !== note.userId) {
+          userId = newAssignee;
+          createdByUserId = newAssignee !== session.userId ? session.userId : null;
+        }
+      }
+    }
+
     await prisma.note.update({
       where: { id: noteId },
-      data: { clientId, title, content: finalContent }
+      data: { clientId, title, content: finalContent, userId, createdByUserId }
     });
     const details = note?.client ? `${note.client.companyName} için bir not güncellendi.` : 'Bir kişisel not güncellendi.';
     await logActivity('UPDATE', 'NOTE', details, note?.clientId);
