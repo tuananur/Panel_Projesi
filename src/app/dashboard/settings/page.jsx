@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { CONFIGURABLE_ROLES, PERMISSION_GROUPS, getRolePermissions } from '@/lib/permissions';
 import ThemeSettings from './theme-settings';
 import RolePermissionsEditor from './role-permissions-editor';
+import MailSettings from './mail-settings';
+import { getMailSettingsAction } from '@/app/actions';
 
 export const metadata = {
   title: 'Ayarlar | Dashboard',
@@ -14,6 +16,7 @@ export default async function SettingsPage() {
 
   const isAdmin = session.role === 'ADMIN';
   const permissions = isAdmin ? await getRolePermissions() : null;
+  const mailSettings = isAdmin ? await getMailSettingsAction() : null;
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '900px' }}>
@@ -25,13 +28,19 @@ export default async function SettingsPage() {
       <ThemeSettings />
 
       {isAdmin && (
-        <div style={{ marginTop: '2rem' }}>
-          <RolePermissionsEditor
-            roles={CONFIGURABLE_ROLES}
-            groups={PERMISSION_GROUPS}
-            initialPermissions={permissions}
-          />
-        </div>
+        <>
+          <div style={{ marginTop: '2rem' }}>
+            <MailSettings initialConfig={mailSettings?.config} />
+          </div>
+
+          <div style={{ marginTop: '2rem' }}>
+            <RolePermissionsEditor
+              roles={CONFIGURABLE_ROLES}
+              groups={PERMISSION_GROUPS}
+              initialPermissions={permissions}
+            />
+          </div>
+        </>
       )}
     </div>
   );

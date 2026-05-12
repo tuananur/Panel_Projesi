@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getLatestLogIdAction, getLatestNoteIdAction } from '@/app/actions';
 import { can } from '@/lib/permissions';
@@ -90,6 +90,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
     ...(canNotes ? [
       { href: '/dashboard/notes', label: 'Kişisel Notlar', icon: <StickyNote size={20} /> },
     ] : []),
+    { href: '/dashboard/mail', label: 'Mail', icon: <Mail size={20} /> },
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
 

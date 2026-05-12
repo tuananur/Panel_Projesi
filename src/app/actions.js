@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession, destroySession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { getMailConfig, listInboxMessages, saveMailConfig, sendMail } from '@/lib/mail';
 import { saveRolePermissions } from '@/lib/permissions';
 
 async function logActivity(action, entityType, details, clientId = null) {
@@ -1064,6 +1065,72 @@ export async function testMetaConnectionAction(formData) {
     };
   } catch (err) {
     return { success: false, error: 'Ağ Hatası', details: err.message };
+  }
+}
+
+// Mail Actions
+export async function getMailSettingsAction() {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    return { success: true, config: await getMailConfig() };
+  } catch (error) {
+    return { error: 'Mail ayarları alınamadı.' };
+  }
+}
+
+export async function saveMailSettingsAction(formData) {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== 'ADMIN') return { error: 'Bu işlem için admin yetkisi gerekli.' };
+
+    const config = await saveMailConfig({
+      imapHost: formData.get('imapHost'),
+      imapPort: formData.get('imapPort'),
+      imapSecure: formData.get('imapSecure'),
+      smtpHost: formData.get('smtpHost'),
+      smtpPort: formData.get('smtpPort'),
+      smtpSecure: formData.get('smtpSecure'),
+      username: formData.get('username'),
+      password: formData.get('password'),
+      fromEmail: formData.get('fromEmail'),
+      fromName: formData.get('fromName'),
+    });
+
+    await logActivity('UPDATE', 'SETTINGS', 'Mail bağlantı ayarları güncellendi.');
+    return { success: true, config };
+  } catch (error) {
+    return { error: error.message || 'Mail ayarları kaydedilemedi.' };
+  }
+}
+
+export async function getInboxMessagesAction(limit = 25) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    const messages = await listInboxMessages({ limit });
+    return { success: true, messages };
+  } catch (error) {
+    return { error: error.message || 'Mailler alınamadı.' };
+  }
+}
+
+export async function sendMailAction(formData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+
+    const to = formData.get('to')?.toString().trim();
+    const subject = formData.get('subject')?.toString().trim();
+    const text = formData.get('text')?.toString().trim();
+
+    if (!to || !subject || !text) return { error: 'Alıcı, konu ve mesaj zorunludur.' };
+
+    const result = await sendMail({ to, subject, text });
+    await logActivity('CREATE', 'MAIL', `${to} adresine mail gönderildi.`);
+    return { success: true, result };
+  } catch (error) {
+    return { error: error.message || 'Mail gönderilemedi.' };
   }
 }
 
