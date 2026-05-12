@@ -87,6 +87,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
     if (activeTab === 'client' && selectedClients.length > 1) {
       const title = formData.get('title');
       const content = formData.get('content');
+      const createdAt = formData.get('createdAt');
       if (!title && !content) {
         setError('Başlık veya not içeriğinden en az biri dolu olmalıdır.');
         setLoading(false);
@@ -98,6 +99,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
         fd.append('clientId', cid);
         if (title) fd.append('title', title);
         if (content) fd.append('content', content);
+        if (createdAt) fd.append('createdAt', createdAt);
         const result = await addNoteAction(fd);
         if (result?.error) {
           setError(result.error);
@@ -464,6 +466,13 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
           <div className="input-group">
             <label className="input-label">Başlık</label>
             <input type="text" name="title" className="input-field" placeholder="Not başlığı..." />
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">
+              Tarih <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel — boş bırakılırsa şu an)</span>
+            </label>
+            <input type="datetime-local" name="createdAt" className="input-field" />
           </div>
 
           <div className="input-group">
