@@ -793,6 +793,157 @@ export async function getLatestNoteIdAction() {
   }
 }
 
+export async function getMetaArmyDashboardAction(clientId) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'UNAUTHORIZED' };
+
+    const parsedClientId = parseInt(clientId);
+    if (!parsedClientId) return { error: 'INVALID_CLIENT' };
+
+    const client = await prisma.client.findUnique({
+      where: { id: parsedClientId },
+      select: {
+        id: true,
+        companyName: true,
+        metaEnabled: true,
+        metaAdAccountId: true,
+        metaAccessToken: true,
+      }
+    });
+
+    if (!client) return { error: 'CLIENT_NOT_FOUND' };
+
+    const [commands, runs, findings, recommendations] = await Promise.all([
+      prisma.metaArmyCommand.findMany({
+        where: { clientId: parsedClientId },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      }),
+      prisma.metaArmyRun.findMany({
+        where: { clientId: parsedClientId },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      }),
+      prisma.metaArmyFinding.findMany({
+        where: { clientId: parsedClientId },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      }),
+      prisma.metaArmyRecommendation.findMany({
+        where: { clientId: parsedClientId },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      }),
+    ]);
+
+    const latestRun = runs[0] || null;
+    const pendingRecommendations = recommendations.filter((item) => item.status === 'PENDING_APPROVAL');
+
+    return {
+      success: true,
+      client: {
+        id: client.id,
+        companyName: client.companyName,
+        metaEnabled: client.metaEnabled,
+        hasAdAccountId: !!client.metaAdAccountId,
+        hasAccessToken: !!client.metaAccessToken,
+      },
+      summary: {
+        latestRunAt: latestRun?.createdAt || null,
+        latestRunStatus: latestRun?.status || null,
+        pendingCommands: commands.filter((item) => item.status === 'QUEUED' || item.status === 'IN_PROGRESS').length,
+        pendingApprovals: pendingRecommendations.length,
+        criticalFindings: findings.filter((item) => item.severity === 'CRITICAL' || item.severity === 'HIGH').length,
+      },
+      commands,
+      runs,
+      findings,
+      recommendations,
+    };
+  } catch (error) {
+    console.error('Meta Army dashboard failed:', error);
+    return { error: 'META_ARMY_FAILED', details: error.message };
+  }
+}
+
+export async function createMetaArmyCommandAction(clientId, formData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+
+    const parsedClientId = parseInt(clientId);
+    const command = formData.get('command')?.toString().trim();
+    const priority = formData.get('priority')?.toString() || 'NORMAL';
+
+    if (!parsedClientId) return { error: 'Geçersiz müşteri.' };
+    if (!command || command.length < 5) return { error: 'Komut en az 5 karakter olmalıdır.' };
+
+    const client = await prisma.client.findUnique({
+      where: { id: parsedClientId },
+      select: { id: true, companyName: true, metaAdAccountId: true, metaAccessToken: true }
+    });
+
+    if (!client) return { error: 'Müşteri bulunamadı.' };
+
+    const createdCommand = await prisma.metaArmyCommand.create({
+      data: {
+        clientId: parsedClientId,
+        command,
+        priority,
+        requestedBy: session.username || `user:${session.userId}`,
+        runs: {
+          create: {
+            clientId: parsedClientId,
+            agentName: 'meta-ads-orchestrator',
+            status: 'QUEUED',
+            summary: 'Panelden yeni komut alındı. Gateway/agent döngüsü bağlandığında işlenecek.',
+          }
+        }
+      },
+      include: { runs: true }
+    });
+
+    await logActivity('CREATE', 'META_ARMY', `${client.companyName} için Meta Ads Army komutu oluşturuldu.`, parsedClientId);
+
+    return { success: true, command: createdCommand };
+  } catch (error) {
+    console.error('Meta Army command create failed:', error);
+    return { error: 'Komut oluşturulamadı.' };
+  }
+}
+
+export async function approveMetaArmyRecommendationAction(recommendationId, approvalText) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+
+    const parsedId = parseInt(recommendationId);
+    if (!parsedId) return { error: 'Geçersiz öneri.' };
+
+    const recommendation = await prisma.metaArmyRecommendation.findUnique({ where: { id: parsedId } });
+    if (!recommendation) return { error: 'Öneri bulunamadı.' };
+    if (recommendation.status !== 'PENDING_APPROVAL') return { error: 'Bu öneri onay beklemiyor.' };
+
+    const text = approvalText?.toString().trim() || `ONAY: ${parsedId}`;
+    const updated = await prisma.metaArmyRecommendation.update({
+      where: { id: parsedId },
+      data: {
+        status: 'APPROVED',
+        approvedBy: session.username || `user:${session.userId}`,
+        approvalText: text,
+        approvedAt: new Date(),
+      }
+    });
+
+    await logActivity('UPDATE', 'META_ARMY', `Meta Ads Army önerisi onaylandı: ${updated.title}`, updated.clientId);
+    return { success: true, recommendation: updated };
+  } catch (error) {
+    console.error('Meta Army approval failed:', error);
+    return { error: 'Öneri onaylanamadı.' };
+  }
+}
+
 export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since = null, until = null) {
   try {
     const client = await prisma.client.findUnique({

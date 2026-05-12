@@ -1,4 +1,4 @@
-import { getMetaAdsAction } from '@/app/actions';
+import { getMetaAdsAction, getMetaArmyDashboardAction } from '@/app/actions';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -21,7 +21,10 @@ export default async function MetaAdsPage({ params, searchParams }) {
   const since = sParams.since || null;
   const until = sParams.until || null;
   
-  const result = await getMetaAdsAction(id, datePreset, since, until);
+  const [result, armyResult] = await Promise.all([
+    getMetaAdsAction(id, datePreset, since, until),
+    getMetaArmyDashboardAction(id),
+  ]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -64,7 +67,7 @@ export default async function MetaAdsPage({ params, searchParams }) {
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>Token süresi dolmuş, izinleri eksik veya ID hatalı olabilir.</p>
         </div>
       ) : (
-        <MetaContent result={result} id={id} datePreset={datePreset} since={since} until={until} />
+        <MetaContent result={result} armyResult={armyResult} id={id} datePreset={datePreset} since={since} until={until} />
       )}
     </div>
   );

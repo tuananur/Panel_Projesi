@@ -8,48 +8,121 @@ datasource db {
 }
 
 model User {
-  id              Int           @id @default(autoincrement())
-  username        String        @unique
-  password        String?
-  role            String        @default("DESIGNER") // "ADMIN", "DESIGNER", "ADVERTISER"
-  logs            ActivityLog[]
-  notes           Note[]        @relation("NoteAssignee")
-  createdNotes    Note[]        @relation("NoteCreator")
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  password     String?
+  role         String        @default("DESIGNER") // "ADMIN", "DESIGNER", "ADVERTISER"
+  logs         ActivityLog[]
+  notes        Note[]        @relation("NoteAssignee")
+  createdNotes Note[]        @relation("NoteCreator")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Client {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   companyName String
   website     String?
   contactName String
   email       String?
   phone       String?
-  services    String   // JSON or comma separated e.g. "SEO,SOCIAL_MEDIA"
-  
+  services    String // JSON or comma separated e.g. "SEO,SOCIAL_MEDIA"
+
   // Phase 2 fields
-  weeklyBlogTarget   Int?    @default(0)
-  socialAccounts     String? @db.Text
-  socialSchedule     String? @db.Text
+  weeklyBlogTarget    Int?    @default(0)
+  socialAccounts      String? @db.Text
+  socialSchedule      String? @db.Text
   specialInstructions String? @db.Text
-  logoUrl            String? @db.Text
-  
+  logoUrl             String? @db.Text
+
   // Website Integration
-  websiteType        String? @default("OTHER") // "BEYIN_ATOLYESI", "IDEASOFT", "OTHER"
-  blogApiUrl         String? @db.Text
-  
-  tasks            Task[]
-  logs             ActivityLog[]
-  notes            Note[]
+  websiteType String? @default("OTHER") // "BEYIN_ATOLYESI", "IDEASOFT", "OTHER"
+  blogApiUrl  String? @db.Text
+
+  tasks                   Task[]
+  logs                    ActivityLog[]
+  notes                   Note[]
+  metaArmyCommands        MetaArmyCommand[]
+  metaArmyRuns            MetaArmyRun[]
+  metaArmyFindings        MetaArmyFinding[]
+  metaArmyRecommendations MetaArmyRecommendation[]
 
   // Meta Ads Integration
-  metaEnabled        Boolean @default(false)
-  metaAdAccountId    String? @db.Text
-  metaAccessToken    String? @db.Text
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  metaEnabled     Boolean @default(false)
+  metaAdAccountId String? @db.Text
+  metaAccessToken String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MetaArmyCommand {
+  id          Int           @id @default(autoincrement())
+  clientId    Int
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  command     String        @db.Text
+  status      String        @default("QUEUED") // "QUEUED", "IN_PROGRESS", "COMPLETED", "FAILED", "CANCELLED"
+  priority    String        @default("NORMAL") // "LOW", "NORMAL", "HIGH", "URGENT"
+  source      String        @default("PANEL")
+  requestedBy String?
+  result      String?       @db.Text
+  runs        MetaArmyRun[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model MetaArmyRun {
+  id              Int                      @id @default(autoincrement())
+  clientId        Int
+  client          Client                   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  commandId       Int?
+  command         MetaArmyCommand?         @relation(fields: [commandId], references: [id], onDelete: SetNull)
+  agentName       String
+  status          String                   @default("QUEUED") // "QUEUED", "RUNNING", "COMPLETED", "FAILED", "WAITING_APPROVAL"
+  summary         String?                  @db.Text
+  rawOutput       String?                  @db.Text
+  startedAt       DateTime?
+  completedAt     DateTime?
+  findings        MetaArmyFinding[]
+  recommendations MetaArmyRecommendation[]
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+}
+
+model MetaArmyFinding {
+  id          Int          @id @default(autoincrement())
+  clientId    Int
+  client      Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  runId       Int?
+  run         MetaArmyRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+  severity    String       @default("INFO") // "INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"
+  category    String       @default("PERFORMANCE")
+  title       String
+  details     String       @db.Text
+  evidence    String?      @db.Text
+  metricsJson String?      @db.Text
+  createdAt   DateTime     @default(now())
+}
+
+model MetaArmyRecommendation {
+  id             Int          @id @default(autoincrement())
+  clientId       Int
+  client         Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  runId          Int?
+  run            MetaArmyRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+  actionType     String
+  status         String       @default("PENDING_APPROVAL") // "PENDING_APPROVAL", "APPROVED", "REJECTED", "EXECUTED", "FAILED"
+  title          String
+  details        String       @db.Text
+  expectedImpact String?      @db.Text
+  riskLevel      String       @default("MEDIUM")
+  actionPayload  String?      @db.Text
+  approvedBy     String?
+  approvalText   String?      @db.Text
+  approvedAt     DateTime?
+  executedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Task {
@@ -57,8 +130,8 @@ model Task {
   clientId  Int
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   date      DateTime // Date for the post/blog
-  type      String   // "BLOG" or "SOCIAL"
-  platform  String?  // Only for social e.g., "Instagram", "YouTube"
+  type      String // "BLOG" or "SOCIAL"
+  platform  String? // Only for social e.g., "Instagram", "YouTube"
   note      String?  @db.Text // Descriptive note for the task
   content   String?  @db.Text // Blog content or body
   link      String?  @db.Text // Link to the specific post
@@ -68,20 +141,20 @@ model Task {
 }
 
 model ActivityLog {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientId    Int?
-  client      Client?  @relation(fields: [clientId], references: [id])
-  action      String   // "CREATE", "UPDATE", "DELETE", "TOGGLE"
-  entityType  String   // "TASK", "CLIENT", "USER", "NOTE"
-  details     String   @db.Text
-  createdAt   DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId   Int?
+  client     Client?  @relation(fields: [clientId], references: [id])
+  action     String // "CREATE", "UPDATE", "DELETE", "TOGGLE"
+  entityType String // "TASK", "CLIENT", "USER", "NOTE"
+  details    String   @db.Text
+  createdAt  DateTime @default(now())
 }
 
 model Note {
   id              Int      @id @default(autoincrement())
-  clientId        Int?     // Null = Genel Not
+  clientId        Int? // Null = Genel Not
   client          Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   userId          Int
   user            User     @relation("NoteAssignee", fields: [userId], references: [id], onDelete: Cascade)
@@ -94,9 +167,10 @@ model Note {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
 model AccountingEntry {
   id          Int      @id @default(autoincrement())
-  type        String   // "INCOME" or "EXPENSE"
+  type        String // "INCOME" or "EXPENSE"
   amount      Float
   description String
   category    String?

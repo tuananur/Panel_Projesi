@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction } from '@/app/actions';
 import { 
   TrendingUp, MousePointer2, Eye, Users as UsersIcon, 
   Wallet, Search, Calendar, ChevronRight, 
-  AlertCircle, CheckCircle, Play, Pause, BarChart3
+  AlertCircle, CheckCircle, Play, Pause, BarChart3,
+  Bot, Send, ShieldCheck, Clock, Zap, ClipboardCheck
 } from 'lucide-react';
 
 const DATE_PRESETS = [
@@ -17,11 +19,11 @@ const DATE_PRESETS = [
   { id: 'last_month', label: 'Geçen Ay' }
 ];
 
-export default function MetaContent({ result, id, datePreset, since: initSince, until: initUntil }) {
+export default function MetaContent({ result, armyResult, id, datePreset, since: initSince, until: initUntil }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [activeTab, setActiveTab] = useState('campaigns'); // campaigns, adsets, ads
+  const [activeTab, setActiveTab] = useState('army'); // army, campaigns, adsets, ads
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedAdSetId, setSelectedAdSetId] = useState(null);
@@ -266,13 +268,17 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
       </div>
 
       {/* Tabs */}
-      <div style={{ borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '2rem' }}>
+      <div style={{ borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '2rem', overflowX: 'auto' }}>
+        <TabButton id="army" label="Meta Ads Army" count={armyResult?.summary?.pendingCommands || 0} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="campaigns" label="Kampanyalar" count={filteredCampaigns.length} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="adsets" label="Reklam Setleri" count={filteredAdSets.length} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="ads" label="Reklamlar" count={filteredAds.length} activeTab={activeTab} onClick={setActiveTab} />
       </div>
 
       {/* Main Table Content */}
+      {activeTab === 'army' ? (
+        <MetaArmyPanel clientId={id} armyResult={armyResult} />
+      ) : (
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           {activeTab === 'campaigns' && (
@@ -514,6 +520,194 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
           )}
         </div>
       </div>
+      )}
+    </div>
+  );
+}
+
+function MetaArmyPanel({ clientId, armyResult }) {
+  const router = useRouter();
+  const [isSubmitting, startCommandTransition] = useTransition();
+  const [message, setMessage] = useState(null);
+  const data = armyResult?.success ? armyResult : null;
+  const summary = data?.summary || {};
+  const commands = data?.commands || [];
+  const runs = data?.runs || [];
+  const findings = data?.findings || [];
+  const recommendations = data?.recommendations || [];
+
+  const submitCommand = (formData) => {
+    setMessage(null);
+    startCommandTransition(async () => {
+      const result = await createMetaArmyCommandAction(clientId, formData);
+      if (result?.error) {
+        setMessage({ type: 'error', text: result.error });
+        return;
+      }
+      setMessage({ type: 'success', text: 'Komut kuyruğa alındı. Agent döngüsü bağlandığında işlenecek.' });
+      router.refresh();
+    });
+  };
+
+  const approveRecommendation = (recommendationId) => {
+    setMessage(null);
+    startCommandTransition(async () => {
+      const result = await approveMetaArmyRecommendationAction(recommendationId, `ONAY: ${recommendationId}`);
+      if (result?.error) {
+        setMessage({ type: 'error', text: result.error });
+        return;
+      }
+      setMessage({ type: 'success', text: 'Öneri onaylandı. Executor bağlantısı aktif olduğunda uygulanabilir.' });
+      router.refresh();
+    });
+  };
+
+  if (armyResult?.error) {
+    return (
+      <div className="card" style={{ padding: '2rem', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <h3 style={{ color: '#ef4444', marginBottom: '0.5rem' }}>Meta Ads Army verisi alınamadı</h3>
+        <p style={{ color: 'var(--text-secondary)' }}>{armyResult.details || armyResult.error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1rem' }}>
+        <ArmyStat title="Son Kontrol" value={summary.latestRunAt ? new Date(summary.latestRunAt).toLocaleString('tr-TR') : 'Henüz yok'} icon={<Clock size={16} />} color="#3b82f6" />
+        <ArmyStat title="Bekleyen Komut" value={summary.pendingCommands || 0} icon={<Bot size={16} />} color="#a855f7" />
+        <ArmyStat title="Onay Bekleyen" value={summary.pendingApprovals || 0} icon={<ClipboardCheck size={16} />} color="#f59e0b" />
+        <ArmyStat title="Kritik Bulgu" value={summary.criticalFindings || 0} icon={<AlertCircle size={16} />} color="#ef4444" />
+      </div>
+
+      <div className="card" style={{ padding: '1.25rem', border: '1px solid rgba(16,185,129,0.18)', background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.04))' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <div>
+            <h2 style={{ fontSize: '1.2rem', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Bot size={20} /> Meta Ads Army Komut Merkezi
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+              Bu alandan orchestrator'a görev verilir. İlk fazda komutlar kuyruğa alınır; reklam değiştiren aksiyonlar açık onay olmadan uygulanmaz.
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#10b981', fontSize: '0.75rem', fontWeight: 800 }}>
+            <ShieldCheck size={16} /> Onaylı aksiyon modu
+          </div>
+        </div>
+
+        <form action={submitCommand} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <textarea
+            name="command"
+            rows={4}
+            placeholder="Örn: Son 7 günde CPC artan kampanya ve reklam setlerini analiz et, kötü placementları ve bütçe önerilerini çıkar."
+            disabled={isSubmitting}
+            style={{
+              width: '100%',
+              resize: 'vertical',
+              background: 'rgba(0,0,0,0.25)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '10px',
+              padding: '0.9rem',
+              outline: 'none',
+              fontSize: '0.9rem'
+            }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <select name="priority" defaultValue="NORMAL" disabled={isSubmitting} style={{ ...dateInputStyle, padding: '0.55rem 0.75rem' }}>
+              <option value="LOW">Düşük Öncelik</option>
+              <option value="NORMAL">Normal Öncelik</option>
+              <option value="HIGH">Yüksek Öncelik</option>
+              <option value="URGENT">Acil</option>
+            </select>
+            <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Send size={15} /> {isSubmitting ? 'Kuyruğa alınıyor...' : 'Agent Army’ye Gönder'}
+            </button>
+          </div>
+        </form>
+        {message && (
+          <div style={{ marginTop: '0.75rem', color: message.type === 'error' ? '#ef4444' : '#10b981', fontSize: '0.85rem', fontWeight: 700 }}>
+            {message.text}
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}> 
+        <ArmyList title="Son Komutlar" empty="Henüz komut yok." items={commands.map((item) => ({
+          id: item.id,
+          title: item.command,
+          meta: `${item.status} · ${item.priority} · ${new Date(item.createdAt).toLocaleString('tr-TR')}`,
+          badge: item.requestedBy || 'panel'
+        }))} />
+        <ArmyList title="Agent Run Geçmişi" empty="Henüz agent run yok." items={runs.map((item) => ({
+          id: item.id,
+          title: item.summary || item.agentName,
+          meta: `${item.agentName} · ${item.status} · ${new Date(item.createdAt).toLocaleString('tr-TR')}`,
+          badge: item.status
+        }))} />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+        <ArmyList title="Son Bulgular" empty="Henüz bulgu yok." items={findings.map((item) => ({
+          id: item.id,
+          title: item.title,
+          meta: `${item.category} · ${item.details}`,
+          badge: item.severity
+        }))} />
+        <div className="card" style={{ padding: '1rem' }}>
+          <h3 style={{ fontSize: '1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Zap size={16} /> Öneriler ve Onaylar</h3>
+          {recommendations.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Henüz öneri yok.</p>
+          ) : recommendations.map((item) => (
+            <div key={item.id} style={{ padding: '0.85rem 0', borderTop: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{item.title}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', marginTop: '0.25rem' }}>{item.details}</div>
+                  <div style={{ color: '#f59e0b', fontSize: '0.72rem', fontWeight: 800, marginTop: '0.35rem' }}>Risk: {item.riskLevel} · {item.status}</div>
+                </div>
+                {item.status === 'PENDING_APPROVAL' && (
+                  <button onClick={() => approveRecommendation(item.id)} disabled={isSubmitting} style={{ ...smallButtonStyle, background: 'rgba(16,185,129,0.14)', color: '#10b981' }}>
+                    Onayla
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ArmyStat({ title, value, icon, color }) {
+  return (
+    <div className="card" style={{ padding: '1rem', borderLeft: `3px solid ${color}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>
+        {title}<span style={{ color }}>{icon}</span>
+      </div>
+      <div style={{ fontSize: '1rem', fontWeight: 900, marginTop: '0.5rem' }}>{value}</div>
+    </div>
+  );
+}
+
+function ArmyList({ title, items, empty }) {
+  return (
+    <div className="card" style={{ padding: '1rem', minHeight: '220px' }}>
+      <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>{title}</h3>
+      {items.length === 0 ? (
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{empty}</p>
+      ) : items.map((item) => (
+        <div key={item.id} style={{ padding: '0.75rem 0', borderTop: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 800, fontSize: '0.86rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.74rem', marginTop: '0.25rem' }}>{item.meta}</div>
+            </div>
+            <span style={{ fontSize: '0.65rem', height: 'fit-content', padding: '0.2rem 0.4rem', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', fontWeight: 800 }}>{item.badge}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -588,6 +782,15 @@ function EmptyRow({ colSpan }) {
 const thStyle = { padding: '0.75rem 1rem', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' };
 const tdStyle = { padding: '1rem', fontSize: '0.85rem', borderBottom: '1px solid var(--border-color)' };
 const trStyle = { transition: 'background 0.2s' };
+const smallButtonStyle = {
+  border: '1px solid var(--border-color)',
+  borderRadius: '7px',
+  padding: '0.45rem 0.65rem',
+  fontSize: '0.72rem',
+  fontWeight: 800,
+  cursor: 'pointer',
+  whiteSpace: 'nowrap'
+};
 const dateInputStyle = {
   background: 'rgba(255,255,255,0.05)',
   border: '1px solid var(--border-color)',
