@@ -5,6 +5,11 @@ import prisma from './prisma';
 
 const MAIL_SETTING_KEY = 'mail_config';
 const MAX_SEND_ATTACHMENT_BYTES = 15 * 1024 * 1024;
+const FOLDERS = {
+  inbox: { label: 'Gelen Kutusu', specialUse: null, fallbacks: ['INBOX'] },
+  sent: { label: 'Gönderilen', specialUse: '\\Sent', fallbacks: ['Sent', 'Sent Mail', '[Gmail]/Sent Mail', 'Gönderilmiş Postalar'] },
+  trash: { label: 'Silinen', specialUse: '\\Trash', fallbacks: ['Trash', 'Deleted Messages', '[Gmail]/Trash', 'Çöp', 'Çöp Kutusu'] },
+};
 
 function toBool(value, fallback = true) {
   if (value === undefined || value === null || value === '') return fallback;
@@ -27,6 +32,23 @@ function getAddressValue(value) {
   return value.text || '';
 }
 
+function addressObjectToSuggestion(address) {
+  if (!address?.address) return null;
+  return {
+    name: address.name || '',
+    email: address.address,
+    label: address.name ? `${address.name} <${address.address}>` : address.address,
+  };
+}
+
+function addSuggestions(map, addresses = []) {
+  for (const address of addresses || []) {
+    const suggestion = addressObjectToSuggestion(address);
+    if (!suggestion) continue;
+    map.set(suggestion.email.toLocaleLowerCase('tr-TR'), suggestion);
+  }
+}
+
 function createImapClient(config) {
   return new ImapFlow({
     host: config.imapHost,
@@ -38,6 +60,25 @@ function createImapClient(config) {
     },
     logger: false,
   });
+}
+
+async function resolveMailboxPath(client, folder = 'inbox') {
+  if (folder === 'inbox') return 'INBOX';
+
+  const target = FOLDERS[folder] || FOLDERS.inbox;
+  const mailboxes = await client.list();
+  const bySpecialUse = target.specialUse ? mailboxes.find((box) => box.specialUse === target.specialUse) : null;
+  if (bySpecialUse?.path) return bySpecialUse.path;
+
+  const fallback = mailboxes.find((box) => target.fallbacks.some((name) => {
+    const path = (box.path || box.name || '').toLocaleLowerCase('tr-TR');
+    return path === name.toLocaleLowerCase('tr-TR') || path.endsWith(`/${name.toLocaleLowerCase('tr-TR')}`);
+  }));
+
+  if (fallback?.path) return fallback.path;
+  if (folder === 'sent') return target.fallbacks[0];
+  if (folder === 'trash') return target.fallbacks[0];
+  return 'INBOX';
 }
 
 export function sanitizeMailConfig(config) {
@@ -121,26 +162,26 @@ export async function getUnreadInboxCount() {
   }
 }
 
-export async function listInboxMessages({ limit = 'all' } = {}) {
+export async function listMessages({ folder = 'inbox', limit = 'all' } = {}) {
   const config = await getMailConfig({ includePassword: true });
   assertReadableConfig(config);
 
   const client = createImapClient(config);
   await client.connect();
   try {
-    const lock = await client.getMailboxLock('INBOX');
+    const mailboxPath = await resolveMailboxPath(client, folder);
+    const lock = await client.getMailboxLock(mailboxPath);
     try {
-      const status = await client.status('INBOX', { messages: true });
+      const status = await client.status(mailboxPath, { messages: true });
       const total = status.messages || 0;
       if (total === 0) return [];
 
       const shouldFetchAll = limit === 'all' || limit === 0 || limit === null || limit === undefined;
       const normalizedLimit = shouldFetchAll ? total : Math.max(1, Math.min(Number(limit || 50), total));
       const start = Math.max(1, total - normalizedLimit + 1);
-      const range = `${start}:*`;
       const messages = [];
 
-      for await (const message of client.fetch(range, {
+      for await (const message of client.fetch(`${start}:*`, {
         envelope: true,
         flags: true,
         internalDate: true,
@@ -148,10 +189,13 @@ export async function listInboxMessages({ limit = 'all' } = {}) {
         bodyStructure: true,
       })) {
         const from = message.envelope?.from?.[0];
+        const to = message.envelope?.to?.[0];
         messages.push({
           uid: message.uid,
+          folder,
           subject: message.envelope?.subject || '(Konu yok)',
           from: from ? `${from.name || from.address || ''}${from.name && from.address ? ` <${from.address}>` : ''}` : 'Bilinmiyor',
+          to: to ? `${to.name || to.address || ''}${to.name && to.address ? ` <${to.address}>` : ''}` : '',
           date: message.internalDate || message.envelope?.date || null,
           seen: Array.from(message.flags || []).includes('\\Seen'),
           hasAttachments: !!message.bodyStructure?.childNodes?.some((node) => node.disposition === 'attachment' || node.disposition === 'inline'),
@@ -167,14 +211,19 @@ export async function listInboxMessages({ limit = 'all' } = {}) {
   }
 }
 
-export async function getInboxMessage(uid) {
+export async function listInboxMessages(options = {}) {
+  return listMessages({ ...options, folder: 'inbox' });
+}
+
+export async function getMessage(uid, folder = 'inbox') {
   const config = await getMailConfig({ includePassword: true });
   assertReadableConfig(config);
 
   const client = createImapClient(config);
   await client.connect();
   try {
-    const lock = await client.getMailboxLock('INBOX');
+    const mailboxPath = await resolveMailboxPath(client, folder);
+    const lock = await client.getMailboxLock(mailboxPath);
     try {
       const message = await client.fetchOne(Number(uid), { source: true, flags: true, uid: true }, { uid: true });
       if (!message?.source) throw new Error('Mail bulunamadı.');
@@ -189,11 +238,15 @@ export async function getInboxMessage(uid) {
 
       return {
         uid: Number(uid),
+        folder,
         subject: parsed.subject || '(Konu yok)',
         from: getAddressValue(parsed.from),
         to: getAddressValue(parsed.to),
         cc: getAddressValue(parsed.cc),
+        bcc: getAddressValue(parsed.bcc),
         date: parsed.date || null,
+        messageId: parsed.messageId || '',
+        inReplyTo: parsed.inReplyTo || '',
         text: parsed.text || '',
         html: parsed.html || '',
         attachments,
@@ -207,7 +260,48 @@ export async function getInboxMessage(uid) {
   }
 }
 
-export async function markInboxMessagesSeen(uids = []) {
+export async function getInboxMessage(uid) {
+  return getMessage(uid, 'inbox');
+}
+
+export async function getMailAddressSuggestions() {
+  const config = await getMailConfig({ includePassword: true });
+  assertReadableConfig(config);
+
+  const client = createImapClient(config);
+  await client.connect();
+  try {
+    const suggestions = new Map();
+    for (const folder of ['inbox', 'sent']) {
+      try {
+        const mailboxPath = await resolveMailboxPath(client, folder);
+        const lock = await client.getMailboxLock(mailboxPath);
+        try {
+          const status = await client.status(mailboxPath, { messages: true });
+          const total = status.messages || 0;
+          if (!total) continue;
+          const start = Math.max(1, total - 300 + 1);
+          for await (const message of client.fetch(`${start}:*`, { envelope: true })) {
+            addSuggestions(suggestions, message.envelope?.from);
+            addSuggestions(suggestions, message.envelope?.to);
+            addSuggestions(suggestions, message.envelope?.cc);
+            addSuggestions(suggestions, message.envelope?.bcc);
+          }
+        } finally {
+          lock.release();
+        }
+      } catch (error) {
+        // Some providers do not expose Sent/Trash with predictable names. Skip silently.
+      }
+    }
+
+    return [...suggestions.values()].sort((a, b) => a.email.localeCompare(b.email));
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
+export async function markMessagesSeen(uids = [], folder = 'inbox') {
   const config = await getMailConfig({ includePassword: true });
   assertReadableConfig(config);
 
@@ -217,7 +311,8 @@ export async function markInboxMessagesSeen(uids = []) {
   const client = createImapClient(config);
   await client.connect();
   try {
-    const lock = await client.getMailboxLock('INBOX');
+    const mailboxPath = await resolveMailboxPath(client, folder);
+    const lock = await client.getMailboxLock(mailboxPath);
     try {
       await client.messageFlagsAdd(normalizedUids.join(','), ['\\Seen'], { uid: true });
       return { count: normalizedUids.length };
@@ -229,7 +324,11 @@ export async function markInboxMessagesSeen(uids = []) {
   }
 }
 
-export async function deleteInboxMessages(uids = []) {
+export async function markInboxMessagesSeen(uids = []) {
+  return markMessagesSeen(uids, 'inbox');
+}
+
+export async function deleteMessages(uids = [], folder = 'inbox') {
   const config = await getMailConfig({ includePassword: true });
   assertReadableConfig(config);
 
@@ -239,15 +338,13 @@ export async function deleteInboxMessages(uids = []) {
   const client = createImapClient(config);
   await client.connect();
   try {
-    const mailboxes = await client.list();
-    const trashMailbox = mailboxes.find((box) => box.specialUse === '\\Trash')
-      || mailboxes.find((box) => /^(trash|deleted messages|çöp|çöp kutusu)$/i.test(box.path || box.name || ''));
-
-    const lock = await client.getMailboxLock('INBOX');
+    const sourceMailbox = await resolveMailboxPath(client, folder);
+    const trashMailbox = await resolveMailboxPath(client, 'trash');
+    const lock = await client.getMailboxLock(sourceMailbox);
     try {
       const range = normalizedUids.join(',');
-      if (trashMailbox?.path) {
-        await client.messageMove(range, trashMailbox.path, { uid: true });
+      if (folder !== 'trash' && trashMailbox) {
+        await client.messageMove(range, trashMailbox, { uid: true });
       } else {
         await client.messageDelete(range, { uid: true });
       }
@@ -255,6 +352,24 @@ export async function deleteInboxMessages(uids = []) {
     } finally {
       lock.release();
     }
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
+export async function deleteInboxMessages(uids = []) {
+  return deleteMessages(uids, 'inbox');
+}
+
+async function appendToSent(rawMessage) {
+  const config = await getMailConfig({ includePassword: true });
+  assertReadableConfig(config);
+
+  const client = createImapClient(config);
+  await client.connect();
+  try {
+    const sentPath = await resolveMailboxPath(client, 'sent');
+    await client.append(sentPath, rawMessage, ['\\Seen'], new Date());
   } finally {
     await client.logout().catch(() => {});
   }
@@ -280,6 +395,17 @@ export async function sendMail({ to, cc, bcc, subject, text, html, attachments =
     });
   }
 
+  const mailOptions = {
+    from: config.fromName ? `"${config.fromName}" <${config.fromEmail || config.username}>` : (config.fromEmail || config.username),
+    to,
+    cc: cc || undefined,
+    bcc: bcc || undefined,
+    subject,
+    text,
+    html: html || undefined,
+    attachments: safeAttachments,
+  };
+
   const transporter = nodemailer.createTransport({
     host: config.smtpHost,
     port: Number(config.smtpPort || 465),
@@ -290,16 +416,15 @@ export async function sendMail({ to, cc, bcc, subject, text, html, attachments =
     },
   });
 
-  const info = await transporter.sendMail({
-    from: config.fromName ? `"${config.fromName}" <${config.fromEmail || config.username}>` : (config.fromEmail || config.username),
-    to,
-    cc: cc || undefined,
-    bcc: bcc || undefined,
-    subject,
-    text,
-    html: html || undefined,
-    attachments: safeAttachments,
-  });
+  const info = await transporter.sendMail(mailOptions);
+
+  try {
+    const rawTransporter = nodemailer.createTransport({ streamTransport: true, buffer: true });
+    const rawInfo = await rawTransporter.sendMail(mailOptions);
+    if (rawInfo.message) await appendToSent(rawInfo.message);
+  } catch (error) {
+    // Sending succeeded; do not fail the user if provider rejects appending to Sent.
+  }
 
   return { messageId: info.messageId, accepted: info.accepted, rejected: info.rejected };
 }

@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession, destroySession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { deleteInboxMessages, getInboxMessage, getMailConfig, getUnreadInboxCount, listInboxMessages, markInboxMessagesSeen, saveMailConfig, sendMail } from '@/lib/mail';
+import { deleteMessages, getMailAddressSuggestions, getMailConfig, getMessage, getUnreadInboxCount, listMessages, markMessagesSeen, saveMailConfig, sendMail } from '@/lib/mail';
 import { saveRolePermissions } from '@/lib/permissions';
 
 async function logActivity(action, entityType, details, clientId = null) {
@@ -1105,10 +1105,14 @@ export async function saveMailSettingsAction(formData) {
 }
 
 export async function getInboxMessagesAction(limit = 'all') {
+  return getMailMessagesAction('inbox', limit);
+}
+
+export async function getMailMessagesAction(folder = 'inbox', limit = 'all') {
   try {
     const session = await getSession();
     if (!session) return { error: 'Oturum bulunamadı.' };
-    const messages = await listInboxMessages({ limit });
+    const messages = await listMessages({ folder, limit });
     return { success: true, messages };
   } catch (error) {
     return { error: error.message || 'Mailler alınamadı.' };
@@ -1126,22 +1130,40 @@ export async function getUnreadMailCountAction() {
 }
 
 export async function getInboxMessageAction(uid) {
+  return getMailMessageAction(uid, 'inbox');
+}
+
+export async function getMailMessageAction(uid, folder = 'inbox') {
   try {
     const session = await getSession();
     if (!session) return { error: 'Oturum bulunamadı.' };
     if (!uid) return { error: 'Geçersiz mail.' };
-    const message = await getInboxMessage(uid);
+    const message = await getMessage(uid, folder);
     return { success: true, message };
   } catch (error) {
     return { error: error.message || 'Mail detayı alınamadı.' };
   }
 }
 
+export async function getMailAddressSuggestionsAction() {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.', suggestions: [] };
+    return { success: true, suggestions: await getMailAddressSuggestions() };
+  } catch (error) {
+    return { error: error.message || 'Adres önerileri alınamadı.', suggestions: [] };
+  }
+}
+
 export async function markInboxMessagesReadAction(uids) {
+  return markMailMessagesReadAction(uids, 'inbox');
+}
+
+export async function markMailMessagesReadAction(uids, folder = 'inbox') {
   try {
     const session = await getSession();
     if (!session) return { error: 'Oturum bulunamadı.' };
-    const result = await markInboxMessagesSeen(Array.isArray(uids) ? uids : [uids]);
+    const result = await markMessagesSeen(Array.isArray(uids) ? uids : [uids], folder);
     await logActivity('UPDATE', 'MAIL', `${result.count} mail okundu olarak işaretlendi.`);
     return { success: true, result };
   } catch (error) {
@@ -1150,10 +1172,14 @@ export async function markInboxMessagesReadAction(uids) {
 }
 
 export async function deleteInboxMessagesAction(uids) {
+  return deleteMailMessagesAction(uids, 'inbox');
+}
+
+export async function deleteMailMessagesAction(uids, folder = 'inbox') {
   try {
     const session = await getSession();
     if (!session) return { error: 'Oturum bulunamadı.' };
-    const result = await deleteInboxMessages(Array.isArray(uids) ? uids : [uids]);
+    const result = await deleteMessages(Array.isArray(uids) ? uids : [uids], folder);
     await logActivity('DELETE', 'MAIL', `${result.count} mail silindi.`);
     return { success: true, result };
   } catch (error) {
