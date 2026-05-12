@@ -56,6 +56,7 @@ export default function CreateUserForm() {
           <option value="ADMIN">Yönetici (Admin)</option>
           <option value="DESIGNER">Tasarımcı</option>
           <option value="ADVERTISER">Reklamcı</option>
+          <option value="DEVELOPER">Yazılımcı</option>
         </select>
       </div>
 

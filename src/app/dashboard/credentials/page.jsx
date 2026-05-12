@@ -10,6 +10,7 @@ export const metadata = {
 export default async function CredentialsPage() {
   const session = await getSession();
   if (!session) redirect('/login');
+  if (session.role === 'DEVELOPER') redirect('/dashboard');
 
   const clients = await prisma.client.findMany({
     orderBy: { companyName: 'asc' },

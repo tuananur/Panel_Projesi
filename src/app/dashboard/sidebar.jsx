@@ -23,6 +23,7 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
   };
 
   const isAdmin = role === 'ADMIN';
+  const isDeveloper = role === 'DEVELOPER';
   const [hasNewLogs, setHasNewLogs] = useState(false);
   const [hasNewNotes, setHasNewNotes] = useState(false);
 
@@ -81,7 +82,9 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
       { href: '/dashboard/logs', label: 'Sistem Logları', icon: <ClipboardList size={20} /> },
       { href: '/dashboard/accounting', label: 'Muhasebe', icon: <Wallet size={20} /> },
     ] : []),
-    { href: '/dashboard/credentials', label: 'Giriş Bilgileri', icon: <Lock size={20} /> },
+    ...(!isDeveloper ? [
+      { href: '/dashboard/credentials', label: 'Giriş Bilgileri', icon: <Lock size={20} /> },
+    ] : []),
     { href: '/dashboard/notes', label: 'Kişisel Notlar', icon: <StickyNote size={20} /> },
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];

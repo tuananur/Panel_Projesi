@@ -9,7 +9,8 @@ export default async function Header() {
   const roleDisplayMap = {
     'ADMIN': 'Yönetici',
     'DESIGNER': 'Tasarımcı',
-    'ADVERTISER': 'Reklamcı'
+    'ADVERTISER': 'Reklamcı',
+    'DEVELOPER': 'Yazılımcı'
   };
 
   const displayRole = roleDisplayMap[session.role] || session.role;
