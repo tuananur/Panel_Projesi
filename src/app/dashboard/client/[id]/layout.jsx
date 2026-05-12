@@ -64,19 +64,37 @@ export default async function ClientDetailLayout({ children, params }) {
 
   const getSafeJSON = (val, fallback) => {
     try {
-      return JSON.parse(val || fallback);
+      if (typeof val === 'string') {
+        return JSON.parse(val || fallback);
+      }
+      if (val == null) {
+        return JSON.parse(fallback);
+      }
+      if (fallback === '[]' && Array.isArray(val)) {
+        return val;
+      }
+      if (fallback === '{}' && typeof val === 'object' && !Array.isArray(val)) {
+        return val;
+      }
+      return JSON.parse(fallback);
     } catch (e) {
-      if (fallback === '[]' && val) return val.split(',');
+      if (fallback === '[]' && typeof val === 'string' && val) return val.split(',');
       return JSON.parse(fallback);
     }
+  };
+
+  const toText = (value) => {
+    if (typeof value === 'string') return value;
+    if (value == null) return '';
+    return String(value);
   };
 
   const services = getSafeJSON(client.services, '[]');
   const socialAccounts = getSafeJSON(client.socialAccounts, '{}');
   const socialSchedule = getSafeJSON(client.socialSchedule, '{}');
   const activePlatforms = Object.keys(socialAccounts).filter(p => {
-    const hasAccount = socialAccounts[p] && socialAccounts[p].trim() !== '';
-    const hasSchedule = socialSchedule[p] && socialSchedule[p].length > 0;
+    const hasAccount = toText(socialAccounts[p]).trim() !== '';
+    const hasSchedule = Array.isArray(socialSchedule[p]) && socialSchedule[p].length > 0;
     return hasAccount || hasSchedule;
   });
   
@@ -132,11 +150,12 @@ export default async function ClientDetailLayout({ children, params }) {
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1rem' }}>
                 {Object.keys(socialAccounts).map(platform => {
-                  if (!socialAccounts[platform]) return null;
+                  const href = toText(socialAccounts[platform]).trim();
+                  if (!href) return null;
                   return (
                     <a 
                       key={platform} 
-                      href={socialAccounts[platform]} 
+                      href={href} 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       title={platform}
