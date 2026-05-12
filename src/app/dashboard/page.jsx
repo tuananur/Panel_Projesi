@@ -13,8 +13,15 @@ export default async function DashboardPage() {
   const session = await getSession();
   const clients = await prisma.client.findMany({
     orderBy: { createdAt: 'desc' },
-    include: {
-      tasks: true
+    select: {
+      id: true,
+      companyName: true,
+      contactName: true,
+      email: true,
+      phone: true,
+      services: true,
+      logoUrl: true,
+      tasks: { select: { status: true } },
     }
   });
 
@@ -82,6 +89,7 @@ export default async function DashboardPage() {
                   
                   <Link 
                     href={`/dashboard/client/${client.id}/stats`} 
+                    prefetch={true}
                     style={{ 
                       textDecoration: 'none', 
                       color: 'inherit', 

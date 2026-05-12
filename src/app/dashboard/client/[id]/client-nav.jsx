@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function ClientNav({ clientId, canSeeStats = true, canSeeNotes = true, canSeeDev = false, canSeeSEO, canSeeSocial, canSeeSettings, canSeeMeta }) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const tabs = [
     { href: `/dashboard/client/${clientId}/stats`, label: 'İstatistikler', show: canSeeStats },
@@ -33,6 +34,9 @@ export default function ClientNav({ clientId, canSeeStats = true, canSeeNotes = 
           <Link 
             key={tab.href} 
             href={tab.href}
+            prefetch={true}
+            onMouseEnter={() => router.prefetch(tab.href)}
+            onFocus={() => router.prefetch(tab.href)}
             style={{
               padding: '0.5rem 1rem',
               textDecoration: 'none',

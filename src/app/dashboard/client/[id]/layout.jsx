@@ -51,8 +51,28 @@ export default async function ClientDetailLayout({ children, params }) {
   
   const client = await prisma.client.findUnique({
     where: { id: parseInt(id) },
-    include: {
-      tasks: true
+    select: {
+      id: true,
+      companyName: true,
+      website: true,
+      contactName: true,
+      email: true,
+      phone: true,
+      services: true,
+      socialAccounts: true,
+      socialSchedule: true,
+      logoUrl: true,
+      tasks: {
+        select: {
+          id: true,
+          date: true,
+          type: true,
+          platform: true,
+          note: true,
+          link: true,
+          status: true,
+        }
+      }
     }
   });
 

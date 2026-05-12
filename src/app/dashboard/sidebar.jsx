@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction } from '@/app/actions';
@@ -9,6 +9,7 @@ import { can } from '@/lib/permissions';
 
 export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Load state from localStorage on mount
@@ -210,6 +211,9 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
               href={item.href} 
               className={`nav-item ${isActive ? 'active' : ''}`}
               title={isCollapsed && !isMobileOpen ? item.label : ''}
+              prefetch={true}
+              onMouseEnter={() => router.prefetch(item.href)}
+              onFocus={() => router.prefetch(item.href)}
               style={{ justifyContent: (isCollapsed && !isMobileOpen) ? 'center' : 'flex-start', padding: (isCollapsed && !isMobileOpen) ? '0.75rem 0' : '0.75rem 1rem', position: 'relative' }}
             >
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
