@@ -50,11 +50,15 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
   const filteredNotes = initialNotes.filter(note => {
     const lowerSearch = search.toLowerCase();
     const createdAt = new Date(note.createdAt);
+    if (isNaN(createdAt.getTime())) {
+      return false;
+    }
     const dateStr = createdAt.toLocaleDateString('tr-TR'); // "19.05.2024"
     const monthNames = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
     const monthName = monthNames[createdAt.getMonth()];
     const day = createdAt.getDate().toString();
     const fullDateText = `${day} ${monthName}`; // "19 mayıs"
+    const localDateKey = `${createdAt.getFullYear()}-${String(createdAt.getMonth() + 1).padStart(2, '0')}-${String(createdAt.getDate()).padStart(2, '0')}`;
 
     const matchesSearch = 
       (note.title?.toLowerCase().includes(lowerSearch)) ||
@@ -69,7 +73,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
     } else {
       const matchesOwner = userRole === 'ADMIN' || note.userId === currentUserId;
       const matchesClient = selectedClientId === 'all' || String(note.clientId) === selectedClientId;
-      const matchesDate = !selectedDate || note.createdAt.slice(0, 10) === selectedDate;
+      const matchesDate = !selectedDate || localDateKey === selectedDate;
       const matchesUser = userRole !== 'ADMIN' || selectedUserId === 'all' || String(note.userId) === selectedUserId;
       return note.clientId && matchesSearch && matchesOwner && matchesClient && matchesDate && matchesUser;
     }
