@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession, destroySession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { deleteInboxMessages, getInboxMessage, getMailConfig, listInboxMessages, markInboxMessagesSeen, saveMailConfig, sendMail } from '@/lib/mail';
+import { deleteInboxMessages, getInboxMessage, getMailConfig, getUnreadInboxCount, listInboxMessages, markInboxMessagesSeen, saveMailConfig, sendMail } from '@/lib/mail';
 import { saveRolePermissions } from '@/lib/permissions';
 
 async function logActivity(action, entityType, details, clientId = null) {
@@ -1104,7 +1104,7 @@ export async function saveMailSettingsAction(formData) {
   }
 }
 
-export async function getInboxMessagesAction(limit = 25) {
+export async function getInboxMessagesAction(limit = 'all') {
   try {
     const session = await getSession();
     if (!session) return { error: 'Oturum bulunamadı.' };
@@ -1112,6 +1112,16 @@ export async function getInboxMessagesAction(limit = 25) {
     return { success: true, messages };
   } catch (error) {
     return { error: error.message || 'Mailler alınamadı.' };
+  }
+}
+
+export async function getUnreadMailCountAction() {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.', count: 0 };
+    return { success: true, count: await getUnreadInboxCount() };
+  } catch (error) {
+    return { error: error.message || 'Okunmamış mail sayısı alınamadı.', count: 0 };
   }
 }
 

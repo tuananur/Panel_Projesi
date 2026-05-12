@@ -11,7 +11,7 @@ export default async function MailPage() {
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const initialResult = await getInboxMessagesAction(25);
+  const initialResult = await getInboxMessagesAction('all');
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

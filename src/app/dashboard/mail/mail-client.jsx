@@ -36,7 +36,7 @@ export default function MailClient({ initialResult }) {
   const refresh = () => {
     setStatus(null);
     startTransition(async () => {
-      const result = await getInboxMessagesAction(50);
+      const result = await getInboxMessagesAction('all');
       if (result?.error) {
         setStatus({ type: 'error', text: result.error });
         return;
@@ -213,9 +213,9 @@ export default function MailClient({ initialResult }) {
                     aria-label={`${message.subject} seç`}
                   />
                   <div style={{ display: 'grid', gap: '0.35rem', minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'center' }}>
-                      <strong style={{ fontSize: '0.86rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{message.from}</strong>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>{message.date ? new Date(message.date).toLocaleDateString('tr-TR') : '-'}</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '0.75rem', alignItems: 'center' }}>
+                      <strong style={{ fontSize: '0.86rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{message.from}</strong>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.68rem', whiteSpace: 'nowrap', justifySelf: 'end' }}>{message.date ? new Date(message.date).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-'}</span>
                     </div>
                     <div style={{ fontWeight: message.seen ? 600 : 900, fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {message.subject}

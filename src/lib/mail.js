@@ -107,7 +107,21 @@ function assertSendableConfig(config) {
   }
 }
 
-export async function listInboxMessages({ limit = 25 } = {}) {
+export async function getUnreadInboxCount() {
+  const config = await getMailConfig({ includePassword: true });
+  assertReadableConfig(config);
+
+  const client = createImapClient(config);
+  await client.connect();
+  try {
+    const status = await client.status('INBOX', { unseen: true });
+    return Number(status.unseen || 0);
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
+export async function listInboxMessages({ limit = 'all' } = {}) {
   const config = await getMailConfig({ includePassword: true });
   assertReadableConfig(config);
 
@@ -120,7 +134,8 @@ export async function listInboxMessages({ limit = 25 } = {}) {
       const total = status.messages || 0;
       if (total === 0) return [];
 
-      const normalizedLimit = Math.max(1, Math.min(Number(limit || 25), 50));
+      const shouldFetchAll = limit === 'all' || limit === 0 || limit === null || limit === undefined;
+      const normalizedLimit = shouldFetchAll ? total : Math.max(1, Math.min(Number(limit || 50), total));
       const start = Math.max(1, total - normalizedLimit + 1);
       const range = `${start}:*`;
       const messages = [];

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getLatestLogIdAction, getLatestNoteIdAction } from '@/app/actions';
+import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction } from '@/app/actions';
 import { can } from '@/lib/permissions';
 
 export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
@@ -28,6 +28,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
   const canNotes = can(permissions, role, 'page.notes');
   const [hasNewLogs, setHasNewLogs] = useState(false);
   const [hasNewNotes, setHasNewNotes] = useState(false);
+  const [unreadMailCount, setUnreadMailCount] = useState(0);
 
   useEffect(() => {
     if (isAdmin) {
@@ -73,6 +74,17 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
     checkNotes();
     
     const interval = setInterval(checkNotes, 30000);
+    return () => clearInterval(interval);
+  }, [pathname]);
+
+  useEffect(() => {
+    const checkUnreadMail = async () => {
+      const result = await getUnreadMailCountAction();
+      setUnreadMailCount(result?.count || 0);
+    };
+    checkUnreadMail();
+
+    const interval = setInterval(checkUnreadMail, 60000);
     return () => clearInterval(interval);
   }, [pathname]);
 
@@ -229,6 +241,27 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
                     boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)',
                     animation: 'pulse-red 2s infinite'
                   }}></span>
+                )}
+                {item.label === 'Mail' && unreadMailCount > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-9px',
+                    right: '-12px',
+                    minWidth: '18px',
+                    height: '18px',
+                    padding: '0 5px',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    borderRadius: '999px',
+                    border: '2px solid var(--bg-secondary)',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.45)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.62rem',
+                    fontWeight: 900,
+                    lineHeight: 1
+                  }}>{unreadMailCount > 99 ? '99+' : unreadMailCount}</span>
                 )}
               </div>
               {(!isCollapsed || isMobileOpen) && <span>{item.label}</span>}
