@@ -1,6 +1,5 @@
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { getInboxMessagesAction } from '@/app/actions';
 import MailClient from './mail-client';
 
 export const metadata = {
@@ -11,8 +10,6 @@ export default async function MailPage() {
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const initialResult = await getInboxMessagesAction('all');
-
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div>
@@ -22,7 +19,7 @@ export default async function MailPage() {
         </p>
       </div>
 
-      <MailClient initialResult={initialResult} />
+      <MailClient initialResult={{ success: true, messages: [] }} />
     </div>
   );
 }

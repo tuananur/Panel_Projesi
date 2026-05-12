@@ -26,6 +26,9 @@ function uniqueCsv(values) {
 export default function MailClient({ initialResult }) {
   const [folder, setFolder] = useState('inbox');
   const [messagesByFolder, setMessagesByFolder] = useState({ inbox: initialResult?.messages || [] });
+  const [fullyLoadedFolders, setFullyLoadedFolders] = useState({});
+  const [loadingFolder, setLoadingFolder] = useState('inbox');
+  const [loadingMessageKey, setLoadingMessageKey] = useState(null);
   const messages = messagesByFolder[folder] || [];
   const [selectedKey, setSelectedKey] = useState(messages[0] ? messageKey('inbox', messages[0].uid) : null);
   const [selectedUids, setSelectedUids] = useState([]);
@@ -44,8 +47,19 @@ export default function MailClient({ initialResult }) {
 
   useEffect(() => {
     startTransition(async () => {
-      const result = await getMailAddressSuggestionsAction();
-      if (result?.success) setSuggestions(result.suggestions || []);
+      const [messagesResult, suggestionsResult] = await Promise.all([
+        getMailMessagesAction('inbox', 100),
+        getMailAddressSuggestionsAction()
+      ]);
+      if (messagesResult?.success) {
+        const nextMessages = messagesResult.messages || [];
+        setMessagesByFolder((current) => ({ ...current, inbox: nextMessages }));
+        setSelectedKey(nextMessages[0] ? messageKey('inbox', nextMessages[0].uid) : null);
+      } else if (messagesResult?.error) {
+        setStatus({ type: 'error', text: messagesResult.error });
+      }
+      if (suggestionsResult?.success) setSuggestions(suggestionsResult.suggestions || []);
+      setLoadingFolder(null);
     });
   }, []);
 
@@ -75,29 +89,52 @@ export default function MailClient({ initialResult }) {
       setSelectedKey(messageKey(nextFolder, existing[0].uid));
       return;
     }
+    setLoadingFolder(nextFolder);
     startTransition(async () => {
-      const result = await getMailMessagesAction(nextFolder, 'all');
+      const result = await getMailMessagesAction(nextFolder, 100);
       if (result?.error) {
         setStatus({ type: 'error', text: result.error });
+        setLoadingFolder(null);
         return;
       }
       const nextMessages = result.messages || [];
       setMessagesByFolder((current) => ({ ...current, [nextFolder]: nextMessages }));
       setSelectedKey(nextMessages[0] ? messageKey(nextFolder, nextMessages[0].uid) : null);
+      setLoadingFolder(null);
     });
   };
 
   const refresh = () => {
     setStatus(null);
+    setLoadingFolder(folder);
     startTransition(async () => {
-      const result = await getMailMessagesAction(folder, 'all');
+      const result = await getMailMessagesAction(folder, fullyLoadedFolders[folder] ? 'all' : 100);
       if (result?.error) {
         setStatus({ type: 'error', text: result.error });
+        setLoadingFolder(null);
         return;
       }
       setMessagesByFolder((current) => ({ ...current, [folder]: result.messages || [] }));
       setSelectedUids([]);
       setStatus({ type: 'success', text: 'Mailler güncellendi.' });
+      setLoadingFolder(null);
+    });
+  };
+
+  const loadAllMessages = () => {
+    setStatus(null);
+    setLoadingFolder(folder);
+    startTransition(async () => {
+      const result = await getMailMessagesAction(folder, 'all');
+      if (result?.error) {
+        setStatus({ type: 'error', text: result.error });
+        setLoadingFolder(null);
+        return;
+      }
+      setMessagesByFolder((current) => ({ ...current, [folder]: result.messages || [] }));
+      setFullyLoadedFolders((current) => ({ ...current, [folder]: true }));
+      setStatus({ type: 'success', text: 'Tüm mailler yüklendi.' });
+      setLoadingFolder(null);
     });
   };
 
@@ -106,14 +143,17 @@ export default function MailClient({ initialResult }) {
     setSelectedKey(key);
     setStatus(null);
     if (messageCache[key]) return;
+    setLoadingMessageKey(key);
 
     startTransition(async () => {
       const result = await getMailMessageAction(uid, folder);
       if (result?.error) {
         setStatus({ type: 'error', text: result.error });
+        setLoadingMessageKey(null);
         return;
       }
       setMessageCache((current) => ({ ...current, [key]: result.message }));
+      setLoadingMessageKey(null);
     });
   };
 
@@ -179,7 +219,7 @@ export default function MailClient({ initialResult }) {
 
   const activePreview = messages.find((message) => message.uid === selectedUid);
   const detail = selectedKey ? (messageCache[selectedKey] || activePreview) : null;
-  const isDetailLoading = !!selectedKey && !messageCache[selectedKey] && isPending;
+  const isDetailLoading = !!selectedKey && !messageCache[selectedKey] && loadingMessageKey === selectedKey;
 
   const openCompose = (draft = null) => {
     setComposeDraft(draft);
@@ -204,6 +244,9 @@ export default function MailClient({ initialResult }) {
           </button>
           <button onClick={refresh} disabled={isPending} className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <RefreshCw size={15} /> Yenile
+          </button>
+          <button onClick={loadAllMessages} disabled={isPending || fullyLoadedFolders[folder]} className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            Tümünü yükle
           </button>
         </div>
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
@@ -253,7 +296,12 @@ export default function MailClient({ initialResult }) {
             </div>
           </div>
 
-          {messages.length === 0 ? (
+          {loadingFolder === folder ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              <RefreshCw size={36} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+              <p>Mailler yükleniyor...</p>
+            </div>
+          ) : messages.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
               <Inbox size={36} style={{ marginBottom: '1rem', opacity: 0.5 }} />
               <p>Bu klasörde mail yok veya bağlantı ayarı eksik.</p>
