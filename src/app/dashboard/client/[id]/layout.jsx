@@ -102,6 +102,7 @@ export default async function ClientDetailLayout({ children, params }) {
   const permissions = await getRolePermissions();
   const canSeeStats = can(permissions, session.role, 'client.tab.stats');
   const canSeeNotes = can(permissions, session.role, 'client.tab.notes');
+  const canSeeDev = can(permissions, session.role, 'client.tab.dev');
   const canSeeSEO = services.includes('SEO') && can(permissions, session.role, 'client.tab.seo');
   const canSeeSocial = services.includes('Sosyal Medya') && can(permissions, session.role, 'client.tab.social');
   const canSeeSettings = can(permissions, session.role, 'client.tab.settings');
@@ -193,6 +194,7 @@ export default async function ClientDetailLayout({ children, params }) {
           clientId={id} 
           canSeeStats={canSeeStats}
           canSeeNotes={canSeeNotes}
+          canSeeDev={canSeeDev}
           canSeeSEO={canSeeSEO} 
           canSeeSocial={canSeeSocial} 
           canSeeSettings={canSeeSettings} 

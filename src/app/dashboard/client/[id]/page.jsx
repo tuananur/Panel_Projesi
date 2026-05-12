@@ -44,6 +44,10 @@ export default async function ClientDetailPage({ params }) {
     redirect(`/dashboard/client/${id}/notes`);
   }
 
+  if (can(permissions, session.role, 'client.tab.dev')) {
+    redirect(`/dashboard/client/${id}/dev`);
+  }
+
   if (can(permissions, session.role, 'client.tab.settings')) {
     redirect(`/dashboard/client/${id}/settings`);
   }

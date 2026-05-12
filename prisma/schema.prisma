@@ -89,6 +89,7 @@ model Note {
   createdByUser   User?    @relation("NoteCreator", fields: [createdByUserId], references: [id])
   title           String?
   content         String   @default("") @db.Text
+  category        String   @default("TASK") // "TASK" (iş takibi) | "DEV" (yazılım)
   isDone          Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

@@ -59,6 +59,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
     const day = createdAt.getDate().toString();
     const fullDateText = `${day} ${monthName}`; // "19 mayıs"
     const localDateKey = `${createdAt.getFullYear()}-${String(createdAt.getMonth() + 1).padStart(2, '0')}-${String(createdAt.getDate()).padStart(2, '0')}`;
+    const noteCategory = note.category || 'TASK';
 
     const matchesSearch = 
       (note.title?.toLowerCase().includes(lowerSearch)) ||
@@ -69,13 +70,19 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
       (fullDateText.includes(lowerSearch));
     
     if (activeTab === 'general') {
-      return !note.clientId && note.userId === currentUserId && matchesSearch;
+      return !note.clientId && note.userId === currentUserId && noteCategory === 'TASK' && matchesSearch;
+    } else if (activeTab === 'dev') {
+      if (userRole !== 'ADMIN') return false;
+      const matchesClient = selectedClientId === 'all' || String(note.clientId) === selectedClientId;
+      const matchesDate = !selectedDate || localDateKey === selectedDate;
+      const matchesUser = selectedUserId === 'all' || String(note.userId) === selectedUserId;
+      return note.clientId && noteCategory === 'DEV' && matchesSearch && matchesClient && matchesDate && matchesUser;
     } else {
       const matchesOwner = userRole === 'ADMIN' || note.userId === currentUserId;
       const matchesClient = selectedClientId === 'all' || String(note.clientId) === selectedClientId;
       const matchesDate = !selectedDate || localDateKey === selectedDate;
       const matchesUser = userRole !== 'ADMIN' || selectedUserId === 'all' || String(note.userId) === selectedUserId;
-      return note.clientId && matchesSearch && matchesOwner && matchesClient && matchesDate && matchesUser;
+      return note.clientId && noteCategory === 'TASK' && matchesSearch && matchesOwner && matchesClient && matchesDate && matchesUser;
     }
   });
 
@@ -206,6 +213,23 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
         >
           Müşteriye Özel Notlar
         </button>
+        {userRole === 'ADMIN' && (
+          <button 
+            onClick={() => setActiveTab('dev')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'dev' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+              color: activeTab === 'dev' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Yazılım
+          </button>
+        )}
       </div>
 
       {/* Arama ve Ekleme */}
@@ -214,23 +238,31 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
           <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
           <input 
             type="text" 
-            placeholder={activeTab === 'general' ? "Genel notlarda ara..." : "Müşteri notlarında ara..."}
+            placeholder={
+              activeTab === 'general'
+                ? 'Genel notlarda ara...'
+                : activeTab === 'dev'
+                  ? 'Yazılım notlarında ara...'
+                  : 'Müşteri notlarında ara...'
+            }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input-field"
             style={{ paddingLeft: '2.75rem', width: '100%' }}
           />
         </div>
-        <button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="btn btn-primary"
-          style={{ gap: '0.5rem' }}
-        >
-          <Plus size={18} /> Yeni Not Ekle
-        </button>
+        {activeTab !== 'dev' && (
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="btn btn-primary"
+            style={{ gap: '0.5rem' }}
+          >
+            <Plus size={18} /> Yeni Not Ekle
+          </button>
+        )}
       </div>
 
-      {activeTab === 'client' && (
+      {(activeTab === 'client' || activeTab === 'dev') && (
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           {userRole === 'ADMIN' && (
             <select
@@ -276,7 +308,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '60px' }}>Durum</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '200px' }}>Tarih / Yazılış</th>
-                {activeTab === 'client' && (
+                {(activeTab === 'client' || activeTab === 'dev') && (
                   <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '130px' }}>Yazan</th>
                 )}
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase' }}>Not Detayı</th>
@@ -323,7 +355,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
                       </div>
                     </div>
                   </td>
-                  {activeTab === 'client' && (
+                  {(activeTab === 'client' || activeTab === 'dev') && (
                     <td style={{ padding: '1rem', verticalAlign: 'top' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                         <UserIcon size={14} style={{ opacity: 0.55, flexShrink: 0 }} />
@@ -335,10 +367,10 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
                   )}
                   <td style={{ padding: '1rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                      {(note.title || (activeTab === 'client' && note.client)) && (
+                      {(note.title || ((activeTab === 'client' || activeTab === 'dev') && note.client)) && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           {note.title && <span style={{ fontWeight: 700, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'var(--accent-primary)' }}>{note.title}</span>}
-                          {activeTab === 'client' && note.client && (
+                          {(activeTab === 'client' || activeTab === 'dev') && note.client && (
                             <span style={{ 
                               fontSize: '0.7rem', 
                               padding: '1px 6px', 
@@ -412,7 +444,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
               ))}
               {filteredNotes.length === 0 && (
                 <tr>
-                  <td colSpan={activeTab === 'client' ? 5 : 4} style={{ padding: '5rem', textAlign: 'center' }}>
+                  <td colSpan={(activeTab === 'client' || activeTab === 'dev') ? 5 : 4} style={{ padding: '5rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)' }}>
                       <StickyNote size={48} style={{ opacity: 0.1 }} />
                       <p>Henüz not bulunamadı.</p>

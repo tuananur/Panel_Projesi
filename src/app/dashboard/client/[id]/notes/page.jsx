@@ -49,6 +49,7 @@ export default async function ClientNotesPage({ params, searchParams }) {
         where: { id: clientIdNum },
         include: {
           notes: {
+            where: { category: 'TASK' },
             include: {
               user: true,
               createdByUser: true,

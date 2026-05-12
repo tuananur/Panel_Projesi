@@ -621,6 +621,8 @@ export async function addNoteAction(formData) {
   const createdAtRaw = formData.get('createdAt');
   const createdAt = createdAtRaw ? new Date(createdAtRaw) : undefined;
   const assigneeUserIdRaw = formData.get('assigneeUserId');
+  const categoryRaw = formData.get('category');
+  const category = categoryRaw === 'DEV' ? 'DEV' : 'TASK';
 
   if (!title && !content) {
     return { error: 'Başlık veya not içeriğinden en az biri dolu olmalıdır.' };
@@ -641,14 +643,20 @@ export async function addNoteAction(formData) {
         createdByUserId,
         title,
         content,
+        category,
         createdAt
       }
     });
     
-    let details = 'Yeni bir kişisel not eklendi.';
+    const isDevNote = category === 'DEV';
+    let details = isDevNote ? 'Yeni bir yazılım notu eklendi.' : 'Yeni bir kişisel not eklendi.';
     if (clientId) {
       const client = await prisma.client.findUnique({ where: { id: clientId } });
-      if (client) details = `${client.companyName} için yeni bir not eklendi.`;
+      if (client) {
+        details = isDevNote
+          ? `${client.companyName} için yeni bir yazılım notu eklendi.`
+          : `${client.companyName} için yeni bir not eklendi.`;
+      }
     }
     
     await logActivity('CREATE', 'NOTE', details, clientId);

@@ -7,7 +7,16 @@ import { addNoteAction, deleteNoteAction, updateNoteAction, toggleNoteStatusActi
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
 
-export default function NotesClient({ clientId, notes, currentUserId, userRole, users = [], debugSnapshot }) {
+const DEFAULT_LABELS = {
+  addButton: 'İş Ekle',
+  addModalTitle: 'İş Ekle',
+  editModalTitle: 'İşi Düzenle',
+  searchPlaceholder: 'Notlarda ara...',
+  contentPlaceholder: 'Müşteri hakkında önemli notlar...',
+  emptyText: 'Henüz not eklenmemiş.',
+};
+
+export default function NotesClient({ clientId, notes, currentUserId, userRole, users = [], debugSnapshot, category = 'TASK', labels = DEFAULT_LABELS }) {
   const router = useRouter();
   const { setGlobalLoading } = useTheme();
   const [search, setSearch] = useState('');
@@ -63,6 +72,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
     setLoading(true);
     setGlobalLoading(true);
     formData.append('clientId', clientId);
+    formData.append('category', category);
     if (activeDay) {
       const date = new Date(selectedYear, selectedMonth, activeDay, 12);
       formData.append('createdAt', date.toISOString());
@@ -181,7 +191,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
           <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
           <input 
             type="text" 
-            placeholder="Notlarda ara..." 
+            placeholder={labels.searchPlaceholder || DEFAULT_LABELS.searchPlaceholder} 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input-field"
@@ -228,7 +238,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
             className="btn btn-primary"
             style={{ gap: '0.5rem' }}
           >
-            <Plus size={18} /> İş Ekle
+            <Plus size={18} /> {labels.addButton || DEFAULT_LABELS.addButton}
           </button>
         </div>
       </div>
@@ -367,7 +377,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
                   <td colSpan="4" style={{ padding: '5rem', textAlign: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)' }}>
                       <StickyNote size={48} style={{ opacity: 0.1 }} />
-                      <p>{search ? 'Arama sonucu bulunamadı.' : 'Henüz not eklenmemiş.'}</p>
+                      <p>{search ? 'Arama sonucu bulunamadı.' : (labels.emptyText || DEFAULT_LABELS.emptyText)}</p>
                     </div>
                   </td>
                 </tr>
@@ -541,7 +551,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
       {/* Ekleme Modalı */}
       <CustomDialog
         isOpen={isAddModalOpen}
-        title="İş Ekle"
+        title={labels.addModalTitle || DEFAULT_LABELS.addModalTitle}
         onClose={() => {
           setIsAddModalOpen(false);
           setActiveDay(null);
@@ -574,7 +584,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
               name="content" 
               className="input-field" 
               rows={6} 
-              placeholder="Müşteri hakkında önemli notlar..."
+              placeholder={labels.contentPlaceholder || DEFAULT_LABELS.contentPlaceholder}
               style={{ resize: 'vertical' }}
             />
           </div>
@@ -590,7 +600,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
       {/* Düzenleme Modalı */}
       <CustomDialog
         isOpen={isEditModalOpen}
-        title="İşi Düzenle"
+        title={labels.editModalTitle || DEFAULT_LABELS.editModalTitle}
         onClose={() => setIsEditModalOpen(false)}
         showButtons={false}
       >
