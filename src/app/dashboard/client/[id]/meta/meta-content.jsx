@@ -614,11 +614,11 @@ function MetaArmyPanel({ clientId, armyResult }) {
             }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <select name="priority" defaultValue="NORMAL" disabled={isSubmitting} style={{ ...dateInputStyle, padding: '0.55rem 0.75rem' }}>
-              <option value="LOW">Düşük Öncelik</option>
-              <option value="NORMAL">Normal Öncelik</option>
-              <option value="HIGH">Yüksek Öncelik</option>
-              <option value="URGENT">Acil</option>
+            <select name="priority" defaultValue="NORMAL" disabled={isSubmitting} style={prioritySelectStyle}>
+              <option value="LOW" style={priorityOptionStyle}>Düşük Öncelik</option>
+              <option value="NORMAL" style={priorityOptionStyle}>Normal Öncelik</option>
+              <option value="HIGH" style={priorityOptionStyle}>Yüksek Öncelik</option>
+              <option value="URGENT" style={priorityOptionStyle}>Acil</option>
             </select>
             <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Send size={15} /> {isSubmitting ? 'Kuyruğa alınıyor...' : 'Agent Army’ye Gönder'}
@@ -791,6 +791,22 @@ const smallButtonStyle = {
   cursor: 'pointer',
   whiteSpace: 'nowrap'
 };
+const prioritySelectStyle = {
+  background: '#0f1f2e',
+  border: '1px solid rgba(148, 163, 184, 0.35)',
+  borderRadius: '6px',
+  padding: '0.55rem 0.75rem',
+  fontSize: '0.75rem',
+  color: '#f8fafc',
+  outline: 'none',
+  colorScheme: 'dark'
+};
+
+const priorityOptionStyle = {
+  backgroundColor: '#f8fafc',
+  color: '#0f172a'
+};
+
 const dateInputStyle = {
   background: 'rgba(255,255,255,0.05)',
   border: '1px solid var(--border-color)',
