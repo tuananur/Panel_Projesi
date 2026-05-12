@@ -1,12 +1,43 @@
 import { ImapFlow } from 'imapflow';
+import { simpleParser } from 'mailparser';
 import nodemailer from 'nodemailer';
 import prisma from './prisma';
 
 const MAIL_SETTING_KEY = 'mail_config';
+const MAX_SEND_ATTACHMENT_BYTES = 15 * 1024 * 1024;
 
 function toBool(value, fallback = true) {
   if (value === undefined || value === null || value === '') return fallback;
   return value === true || value === 'true' || value === 'on';
+}
+
+function formatAddressList(addresses = []) {
+  return addresses.map((address) => {
+    const name = address.name || '';
+    const mail = address.address || '';
+    if (name && mail) return `${name} <${mail}>`;
+    return name || mail;
+  }).filter(Boolean).join(', ');
+}
+
+function getAddressValue(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value.value)) return formatAddressList(value.value);
+  return value.text || '';
+}
+
+function createImapClient(config) {
+  return new ImapFlow({
+    host: config.imapHost,
+    port: Number(config.imapPort || 993),
+    secure: config.imapSecure !== false,
+    auth: {
+      user: config.username,
+      pass: config.password,
+    },
+    logger: false,
+  });
 }
 
 export function sanitizeMailConfig(config) {
@@ -80,17 +111,7 @@ export async function listInboxMessages({ limit = 25 } = {}) {
   const config = await getMailConfig({ includePassword: true });
   assertReadableConfig(config);
 
-  const client = new ImapFlow({
-    host: config.imapHost,
-    port: Number(config.imapPort || 993),
-    secure: config.imapSecure !== false,
-    auth: {
-      user: config.username,
-      pass: config.password,
-    },
-    logger: false,
-  });
-
+  const client = createImapClient(config);
   await client.connect();
   try {
     const lock = await client.getMailboxLock('INBOX');
@@ -118,6 +139,7 @@ export async function listInboxMessages({ limit = 25 } = {}) {
           from: from ? `${from.name || from.address || ''}${from.name && from.address ? ` <${from.address}>` : ''}` : 'Bilinmiyor',
           date: message.internalDate || message.envelope?.date || null,
           seen: Array.from(message.flags || []).includes('\\Seen'),
+          hasAttachments: !!message.bodyStructure?.childNodes?.some((node) => node.disposition === 'attachment' || node.disposition === 'inline'),
         });
       }
 
@@ -130,9 +152,65 @@ export async function listInboxMessages({ limit = 25 } = {}) {
   }
 }
 
-export async function sendMail({ to, subject, text }) {
+export async function getInboxMessage(uid) {
+  const config = await getMailConfig({ includePassword: true });
+  assertReadableConfig(config);
+
+  const client = createImapClient(config);
+  await client.connect();
+  try {
+    const lock = await client.getMailboxLock('INBOX');
+    try {
+      const message = await client.fetchOne(Number(uid), { source: true, flags: true, uid: true }, { uid: true });
+      if (!message?.source) throw new Error('Mail bulunamadı.');
+
+      const parsed = await simpleParser(message.source);
+      const attachments = (parsed.attachments || []).map((attachment, index) => ({
+        id: index,
+        filename: attachment.filename || `ek-${index + 1}`,
+        contentType: attachment.contentType || 'application/octet-stream',
+        size: attachment.size || attachment.content?.length || 0,
+      }));
+
+      return {
+        uid: Number(uid),
+        subject: parsed.subject || '(Konu yok)',
+        from: getAddressValue(parsed.from),
+        to: getAddressValue(parsed.to),
+        cc: getAddressValue(parsed.cc),
+        date: parsed.date || null,
+        text: parsed.text || '',
+        html: parsed.html || '',
+        attachments,
+        seen: Array.from(message.flags || []).includes('\\Seen'),
+      };
+    } finally {
+      lock.release();
+    }
+  } finally {
+    await client.logout().catch(() => {});
+  }
+}
+
+export async function sendMail({ to, cc, bcc, subject, text, html, attachments = [] }) {
   const config = await getMailConfig({ includePassword: true });
   assertSendableConfig(config);
+
+  const safeAttachments = [];
+  let totalSize = 0;
+
+  for (const attachment of attachments) {
+    if (!attachment?.filename || !attachment?.content) continue;
+    totalSize += attachment.content.length;
+    if (totalSize > MAX_SEND_ATTACHMENT_BYTES) {
+      throw new Error('Ek dosya toplam boyutu 15 MB sınırını aşıyor.');
+    }
+    safeAttachments.push({
+      filename: attachment.filename,
+      content: attachment.content,
+      contentType: attachment.contentType || 'application/octet-stream',
+    });
+  }
 
   const transporter = nodemailer.createTransport({
     host: config.smtpHost,
@@ -147,8 +225,12 @@ export async function sendMail({ to, subject, text }) {
   const info = await transporter.sendMail({
     from: config.fromName ? `"${config.fromName}" <${config.fromEmail || config.username}>` : (config.fromEmail || config.username),
     to,
+    cc: cc || undefined,
+    bcc: bcc || undefined,
     subject,
     text,
+    html: html || undefined,
+    attachments: safeAttachments,
   });
 
   return { messageId: info.messageId, accepted: info.accepted, rejected: info.rejected };

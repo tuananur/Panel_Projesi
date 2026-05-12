@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession, destroySession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { getMailConfig, listInboxMessages, saveMailConfig, sendMail } from '@/lib/mail';
+import { getInboxMessage, getMailConfig, listInboxMessages, saveMailConfig, sendMail } from '@/lib/mail';
 import { saveRolePermissions } from '@/lib/permissions';
 
 async function logActivity(action, entityType, details, clientId = null) {
@@ -1115,18 +1115,45 @@ export async function getInboxMessagesAction(limit = 25) {
   }
 }
 
+export async function getInboxMessageAction(uid) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    if (!uid) return { error: 'Geçersiz mail.' };
+    const message = await getInboxMessage(uid);
+    return { success: true, message };
+  } catch (error) {
+    return { error: error.message || 'Mail detayı alınamadı.' };
+  }
+}
+
 export async function sendMailAction(formData) {
   try {
     const session = await getSession();
     if (!session) return { error: 'Oturum bulunamadı.' };
 
     const to = formData.get('to')?.toString().trim();
+    const cc = formData.get('cc')?.toString().trim();
+    const bcc = formData.get('bcc')?.toString().trim();
     const subject = formData.get('subject')?.toString().trim();
     const text = formData.get('text')?.toString().trim();
+    const html = text ? text.replace(/\n/g, '<br />') : '';
+    const files = formData.getAll('attachments');
+    const attachments = [];
+
+    for (const file of files) {
+      if (!file || typeof file === 'string' || !file.name || file.size === 0) continue;
+      const buffer = Buffer.from(await file.arrayBuffer());
+      attachments.push({
+        filename: file.name,
+        contentType: file.type || 'application/octet-stream',
+        content: buffer,
+      });
+    }
 
     if (!to || !subject || !text) return { error: 'Alıcı, konu ve mesaj zorunludur.' };
 
-    const result = await sendMail({ to, subject, text });
+    const result = await sendMail({ to, cc, bcc, subject, text, html, attachments });
     await logActivity('CREATE', 'MAIL', `${to} adresine mail gönderildi.`);
     return { success: true, result };
   } catch (error) {
