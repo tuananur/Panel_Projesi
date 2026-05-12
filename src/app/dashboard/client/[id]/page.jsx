@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 function parseJSONSafe(value, fallback) {
   try {
@@ -21,17 +22,29 @@ export default async function ClientDetailPage({ params }) {
   if (!client) redirect('/dashboard');
 
   const services = parseJSONSafe(client.services, '[]');
-  
-  // Logic to find first available tab based on role and services
-  if (services.includes('SEO') && (session.role === 'ADMIN' || session.role === 'ADVERTISER')) {
+  const permissions = await getRolePermissions();
+
+  if (can(permissions, session.role, 'client.tab.stats')) {
+    redirect(`/dashboard/client/${id}/stats`);
+  }
+
+  if (services.includes('SEO') && can(permissions, session.role, 'client.tab.seo')) {
     redirect(`/dashboard/client/${id}/seo`);
   }
-  
-  if (services.includes('Sosyal Medya') && (session.role === 'ADMIN' || session.role === 'ADVERTISER' || session.role === 'DESIGNER')) {
+
+  if (services.includes('Sosyal Medya') && can(permissions, session.role, 'client.tab.social')) {
     redirect(`/dashboard/client/${id}/social`);
   }
 
-  if (session.role === 'ADMIN') {
+  if (can(permissions, session.role, 'client.tab.meta')) {
+    redirect(`/dashboard/client/${id}/meta`);
+  }
+
+  if (can(permissions, session.role, 'client.tab.notes')) {
+    redirect(`/dashboard/client/${id}/notes`);
+  }
+
+  if (can(permissions, session.role, 'client.tab.settings')) {
     redirect(`/dashboard/client/${id}/settings`);
   }
 

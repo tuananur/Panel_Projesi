@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import CredentialsTable from './credentials-table';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 export const metadata = {
   title: 'Giriş Bilgileri | Dashboard',
@@ -10,7 +11,11 @@ export const metadata = {
 export default async function CredentialsPage() {
   const session = await getSession();
   if (!session) redirect('/login');
-  if (session.role === 'DEVELOPER') redirect('/dashboard');
+
+  const permissions = await getRolePermissions();
+  if (!can(permissions, session.role, 'page.credentials')) {
+    redirect('/dashboard');
+  }
 
   const clients = await prisma.client.findMany({
     orderBy: { companyName: 'asc' },

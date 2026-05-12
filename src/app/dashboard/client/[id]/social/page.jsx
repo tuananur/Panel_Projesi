@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import SocialCalendar from './social-calendar';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 export const revalidate = 0; // Disable cache to see new tasks immediately
 
@@ -16,6 +18,12 @@ function parseJSONSafe(value, fallback) {
 export default async function SocialPage({ params }) {
   const { id } = await params;
   const session = await getSession();
+  if (!session) redirect('/login');
+
+  const permissions = await getRolePermissions();
+  if (!can(permissions, session.role, 'client.tab.social')) {
+    redirect(`/dashboard/client/${id}`);
+  }
   
   const client = await prisma.client.findUnique({
     where: { id: parseInt(id) },

@@ -1,10 +1,21 @@
 import { getMetaAdsAction } from '@/app/actions';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import MetaContent from './meta-content';
+import { getSession } from '@/lib/auth';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 export default async function MetaAdsPage({ params, searchParams }) {
   const { id } = await params;
+  const session = await getSession();
+  if (!session) redirect('/login');
+
+  const permissions = await getRolePermissions();
+  if (!can(permissions, session.role, 'client.tab.meta')) {
+    redirect(`/dashboard/client/${id}`);
+  }
+
   const sParams = await searchParams;
   const datePreset = sParams.datePreset || 'last_30d';
   const since = sParams.since || null;

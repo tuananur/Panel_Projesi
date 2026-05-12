@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession, destroySession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { saveRolePermissions } from '@/lib/permissions';
 
 async function logActivity(action, entityType, details, clientId = null) {
   try {
@@ -984,5 +985,20 @@ export async function resetUserPasswordAction(userId) {
     return { success: true };
   } catch (error) {
     return { error: 'Şifre sıfırlanamadı.' };
+  }
+}
+
+export async function updateRolePermissionsAction(permissions) {
+  const session = await getSession();
+  if (!session || session.role !== 'ADMIN') {
+    return { error: 'Bu işlemi yapmaya yetkiniz yok.' };
+  }
+  try {
+    await saveRolePermissions(permissions || {});
+    await logActivity('UPDATE', 'SETTINGS', 'Rol izinleri güncellendi.');
+    return { success: true };
+  } catch (error) {
+    console.error('updateRolePermissionsAction error:', error);
+    return { error: 'İzinler kaydedilemedi.' };
   }
 }

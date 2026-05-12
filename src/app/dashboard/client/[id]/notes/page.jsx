@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import NotesClient from './notes-client';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 function sanitizeNotesForClient(notes) {
   const list = Array.isArray(notes) ? notes : [];
@@ -31,6 +32,11 @@ export default async function ClientNotesPage({ params, searchParams }) {
   if (Number.isNaN(clientIdNum)) {
     console.error('[ClientNotesPage] invalid client id param', { id });
     redirect('/dashboard');
+  }
+
+  const permissions = await getRolePermissions();
+  if (!can(permissions, session.role, 'client.tab.notes')) {
+    redirect(`/dashboard/client/${id}`);
   }
 
   const debugQuery = sp?.debug === '1';

@@ -5,7 +5,7 @@ import Sidebar from './sidebar';
 import Header from './header-client';
 import { usePathname } from 'next/navigation';
 
-export default function DashboardClientLayout({ children, session }) {
+export default function DashboardClientLayout({ children, session, permissions }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
@@ -28,6 +28,7 @@ export default function DashboardClientLayout({ children, session }) {
       />
       <Sidebar 
         role={session.role} 
+        permissions={permissions}
         isMobileOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)} 
       />

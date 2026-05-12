@@ -5,6 +5,7 @@ import ClientNav from './client-nav';
 import WeeklyStats from './social/weekly-stats';
 import ClientSwitcher from '@/app/components/client-switcher';
 import { Globe, Layout, Play, Share2, Info, User, Phone, Mail } from 'lucide-react';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 const BRAND_ICONS = {
   Instagram: (
@@ -98,10 +99,13 @@ export default async function ClientDetailLayout({ children, params }) {
     return hasAccount || hasSchedule;
   });
   
-  const canSeeSEO = services.includes('SEO') && (session.role === 'ADMIN' || session.role === 'ADVERTISER');
-  const canSeeSocial = services.includes('Sosyal Medya') && (session.role === 'ADMIN' || session.role === 'DESIGNER' || session.role === 'ADVERTISER');
-  const canSeeSettings = session.role === 'ADMIN' || session.role === 'DESIGNER' || session.role === 'ADVERTISER';
-  const canSeeMeta = session.role === 'ADMIN' || session.role === 'ADVERTISER';
+  const permissions = await getRolePermissions();
+  const canSeeStats = can(permissions, session.role, 'client.tab.stats');
+  const canSeeNotes = can(permissions, session.role, 'client.tab.notes');
+  const canSeeSEO = services.includes('SEO') && can(permissions, session.role, 'client.tab.seo');
+  const canSeeSocial = services.includes('Sosyal Medya') && can(permissions, session.role, 'client.tab.social');
+  const canSeeSettings = can(permissions, session.role, 'client.tab.settings');
+  const canSeeMeta = can(permissions, session.role, 'client.tab.meta');
 
   return (
     <div className="animate-fade-in">
@@ -187,6 +191,8 @@ export default async function ClientDetailLayout({ children, params }) {
       <div style={{ marginBottom: '1rem' }}>
         <ClientNav 
           clientId={id} 
+          canSeeStats={canSeeStats}
+          canSeeNotes={canSeeNotes}
           canSeeSEO={canSeeSEO} 
           canSeeSocial={canSeeSocial} 
           canSeeSettings={canSeeSettings} 

@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import NotesPageClient from './notes-page-client';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 export const metadata = {
   title: 'Kişisel Notlar | Dashboard',
@@ -12,6 +13,11 @@ export default async function NotesPage() {
   
   if (!session) {
     redirect('/login');
+  }
+
+  const permissions = await getRolePermissions();
+  if (!can(permissions, session.role, 'page.notes')) {
+    redirect('/dashboard');
   }
 
   // Genel notlar (clientId yok): herkes yalnızca kendi notlarını görür (admin dahil).

@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getLatestLogIdAction, getLatestNoteIdAction } from '@/app/actions';
+import { can } from '@/lib/permissions';
 
-export default function Sidebar({ role, isMobileOpen, onClose }) {
+export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -23,7 +24,8 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
   };
 
   const isAdmin = role === 'ADMIN';
-  const isDeveloper = role === 'DEVELOPER';
+  const canCredentials = can(permissions, role, 'page.credentials');
+  const canNotes = can(permissions, role, 'page.notes');
   const [hasNewLogs, setHasNewLogs] = useState(false);
   const [hasNewNotes, setHasNewNotes] = useState(false);
 
@@ -82,10 +84,12 @@ export default function Sidebar({ role, isMobileOpen, onClose }) {
       { href: '/dashboard/logs', label: 'Sistem Logları', icon: <ClipboardList size={20} /> },
       { href: '/dashboard/accounting', label: 'Muhasebe', icon: <Wallet size={20} /> },
     ] : []),
-    ...(!isDeveloper ? [
+    ...(canCredentials ? [
       { href: '/dashboard/credentials', label: 'Giriş Bilgileri', icon: <Lock size={20} /> },
     ] : []),
-    { href: '/dashboard/notes', label: 'Kişisel Notlar', icon: <StickyNote size={20} /> },
+    ...(canNotes ? [
+      { href: '/dashboard/notes', label: 'Kişisel Notlar', icon: <StickyNote size={20} /> },
+    ] : []),
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
 

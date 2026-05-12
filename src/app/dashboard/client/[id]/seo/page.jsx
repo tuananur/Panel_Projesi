@@ -1,11 +1,19 @@
 import { Suspense } from 'react';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import BlogTracker from './blog-tracker';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 export default async function SEOPage({ params }) {
   const { id } = await params;
   const session = await getSession();
+  if (!session) redirect('/login');
+
+  const permissions = await getRolePermissions();
+  if (!can(permissions, session.role, 'client.tab.seo')) {
+    redirect(`/dashboard/client/${id}`);
+  }
   
   const client = await prisma.client.findUnique({
     where: { id: parseInt(id) },
