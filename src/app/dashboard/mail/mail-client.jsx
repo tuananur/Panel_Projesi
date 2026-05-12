@@ -358,22 +358,69 @@ function ComposeModal({ draft, suggestions, onClose, onSubmit, isPending }) {
 }
 
 function AddressInput({ name, placeholder, defaultValue = '', suggestions }) {
-  const [value, setValue] = useState(defaultValue || '');
-  const lastToken = value.split(',').pop().trim().toLocaleLowerCase('tr-TR');
-  const matches = lastToken.length > 0 ? suggestions.filter((item) => item.email.toLocaleLowerCase('tr-TR').includes(lastToken) || item.name.toLocaleLowerCase('tr-TR').includes(lastToken)).slice(0, 6) : [];
+  const initialTokens = String(defaultValue || '').split(',').map((item) => item.trim()).filter(Boolean);
+  const [tokens, setTokens] = useState(initialTokens);
+  const [draft, setDraft] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const normalizedDraft = draft.trim().toLocaleLowerCase('tr-TR');
+  const matches = normalizedDraft.length > 0 && isOpen
+    ? suggestions
+      .filter((item) => !tokens.includes(item.email))
+      .filter((item) => item.email.toLocaleLowerCase('tr-TR').includes(normalizedDraft) || item.name.toLocaleLowerCase('tr-TR').includes(normalizedDraft))
+      .slice(0, 6)
+    : [];
 
-  const pick = (suggestion) => {
-    const parts = value.split(',');
-    parts[parts.length - 1] = ` ${suggestion.email}`;
-    setValue(parts.join(',').replace(/^,\s*/, '').trim());
+  const addToken = (rawValue) => {
+    const email = String(rawValue || '').trim().replace(/^<|>$/g, '');
+    if (!email) return;
+    setTokens((current) => current.includes(email) ? current : [...current, email]);
+    setDraft('');
+    setIsOpen(false);
+  };
+
+  const removeToken = (email) => {
+    setTokens((current) => current.filter((item) => item !== email));
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      if (matches[0] && event.key === 'Enter') addToken(matches[0].email);
+      else addToken(draft);
+    }
+    if (event.key === 'Backspace' && !draft && tokens.length > 0) {
+      setTokens((current) => current.slice(0, -1));
+    }
   };
 
   return (
     <div style={{ position: 'relative' }}>
-      <input name={name} value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} style={{ ...inputStyle, width: '100%' }} autoComplete="off" />
+      <input type="hidden" name={name} value={tokens.join(', ')} />
+      <div style={{ ...inputStyle, minHeight: '44px', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', padding: '0.45rem 0.6rem' }}>
+        {tokens.map((email) => (
+          <span key={email} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', maxWidth: '100%', background: 'rgba(59,130,246,0.16)', border: '1px solid rgba(59,130,246,0.28)', borderRadius: '999px', padding: '0.25rem 0.45rem', fontSize: '0.78rem', fontWeight: 800 }}>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '220px' }}>{email}</span>
+            <button type="button" onClick={() => removeToken(email)} style={{ ...iconButtonStyle, color: 'var(--text-primary)' }} aria-label={`${email} kaldır`}><X size={13} /></button>
+          </span>
+        ))}
+        <input
+          value={draft}
+          onChange={(event) => { setDraft(event.target.value); setIsOpen(true); }}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 120)}
+          onKeyDown={handleKeyDown}
+          placeholder={tokens.length === 0 ? placeholder : 'Başka adres yaz...'}
+          style={{ flex: '1 1 180px', minWidth: '130px', background: 'transparent', color: 'var(--text-primary)', border: 'none', outline: 'none', padding: '0.3rem' }}
+          autoComplete="off"
+        />
+      </div>
       {matches.length > 0 && (
         <div style={{ position: 'absolute', zIndex: 10020, left: 0, right: 0, top: 'calc(100% + 4px)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'var(--shadow-lg)', overflow: 'hidden' }}>
-          {matches.map((suggestion) => <button key={suggestion.email} type="button" onClick={() => pick(suggestion)} style={{ width: '100%', textAlign: 'left', padding: '0.65rem 0.75rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}><strong>{suggestion.email}</strong>{suggestion.name && <span style={{ color: 'var(--text-secondary)' }}> · {suggestion.name}</span>}</button>)}
+          {matches.map((suggestion) => (
+            <button key={suggestion.email} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => addToken(suggestion.email)} style={{ width: '100%', textAlign: 'left', padding: '0.65rem 0.75rem', background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>
+              <strong>{suggestion.email}</strong>{suggestion.name && <span style={{ color: 'var(--text-secondary)' }}> · {suggestion.name}</span>}
+            </button>
+          ))}
         </div>
       )}
     </div>
