@@ -59,11 +59,13 @@ export default function SettingsForm({ client, role }) {
   const [testing, setTesting] = useState(false);
 
   const isDesigner = role === 'DESIGNER';
+  const isDesignerManager = role === 'DESIGNER_MANAGER';
   const isAdvertiser = role === 'ADVERTISER';
+  const isAdvertiserManager = role === 'ADVERTISER_MANAGER';
   const isAdmin = role === 'ADMIN';
 
-  const canEditSEO = isAdmin || isAdvertiser;
-  const canEditSocial = isAdmin || isDesigner;
+  const canEditSEO = isAdmin || isAdvertiser || isAdvertiserManager;
+  const canEditSocial = isAdmin || isDesigner || isDesignerManager;
   
   const currentSocial = parseJSONObjectSafe(client.socialAccounts);
   const currentSchedule = parseJSONObjectSafe(client.socialSchedule);
