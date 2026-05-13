@@ -4,37 +4,7 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, CheckCircle2 } from 'lucide-react';
 import { getNotificationsAction, markNotificationReadAction } from '@/app/actions';
-
-function playNotificationSound(sound) {
-  if (sound === 'none' || typeof window === 'undefined') return;
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-    const patterns = {
-      soft: [660, 880],
-      bell: [784, 988, 1175],
-      digital: [520, 520, 780],
-    };
-    const notes = patterns[sound] || patterns.soft;
-    notes.forEach((freq, index) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = sound === 'digital' ? 'square' : 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0, ctx.currentTime + index * 0.12);
-      gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + index * 0.12 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.12 + 0.18);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + index * 0.12);
-      osc.stop(ctx.currentTime + index * 0.12 + 0.2);
-    });
-    setTimeout(() => ctx.close?.(), 1000);
-  } catch (error) {
-    // Browser may block audio before first user interaction.
-  }
-}
+import { getStoredNotificationSound, playNotificationSound, storeNotificationSound } from './notification-sound';
 
 export default function NotificationBell({ initialSound = 'soft' }) {
   const router = useRouter();
@@ -43,13 +13,13 @@ export default function NotificationBell({ initialSound = 'soft' }) {
   const [count, setCount] = useState(0);
   const [sound, setSound] = useState(() => initialSound || 'soft');
   const [isPending, startTransition] = useTransition();
-  const previousCount = useRef(0);
+  const previousCount = useRef(null);
   const originalTitle = useRef('');
   const blinkTimer = useRef(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('notification-sound', initialSound || 'soft');
+      storeNotificationSound(initialSound || 'soft');
     }
   }, [initialSound]);
 
@@ -61,22 +31,30 @@ export default function NotificationBell({ initialSound = 'soft' }) {
       if (!result?.success) return;
       setNotifications(result.notifications || []);
       setCount(result.count || 0);
-      const currentSound = window.localStorage.getItem('notification-sound') || sound;
-      if (previousCount.current > 0 && result.count > previousCount.current) {
+      const currentSound = getStoredNotificationSound(sound);
+      if (previousCount.current !== null && result.count > previousCount.current) {
         playNotificationSound(currentSound);
       }
       previousCount.current = result.count || 0;
     };
 
     load();
-    const interval = setInterval(load, 30000);
+    const interval = setInterval(load, 3000);
     const onStorage = (event) => {
       if (event.key === 'notification-sound') setSound(event.newValue || 'soft');
     };
+    const onSoundChange = (event) => setSound(event.detail?.sound || getStoredNotificationSound('soft'));
+    const onFocus = () => load();
     window.addEventListener('storage', onStorage);
+    window.addEventListener('notification-sound-change', onSoundChange);
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
     return () => {
       clearInterval(interval);
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('notification-sound-change', onSoundChange);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
     };
   }, [sound]);
 

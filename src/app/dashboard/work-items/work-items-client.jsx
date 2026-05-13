@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, ChevronDown, ChevronRight, Clock, Plus, RefreshCw, Send } from 'lucide-react';
 import {
@@ -67,7 +67,8 @@ export default function WorkItemsClient({ initialItems, clients, assignableUsers
   const items = initialItems;
   const notificationWorkItemId = Number(searchParams.get('notificationWorkItem') || 0);
   const notificationItem = items.find((item) => item.id === notificationWorkItemId);
-  const [activeTab, setActiveTab] = useState(() => (notificationItem && ['APPROVED', 'CANCELLED'].includes(notificationItem.status) && session.role === 'ADMIN' ? 'all' : 'allOpen'));
+  const itemRefs = useRef({});
+  const [activeTab, setActiveTab] = useState(() => (notificationItem && ['APPROVED', 'CANCELLED'].includes(notificationItem.status) ? 'all' : 'allOpen'));
   const [openIds, setOpenIds] = useState(() => (notificationWorkItemId ? new Set([notificationWorkItemId]) : new Set()));
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -83,8 +84,18 @@ export default function WorkItemsClient({ initialItems, clients, assignableUsers
   const displayedItems = tabs[activeTab] || tabs.allOpen;
 
   useEffect(() => {
-    if (!notificationWorkItemId || !notificationItem || !isUnreadFor(notificationItem, session.userId)) return;
-    markWorkItemReadAction(notificationWorkItemId).then(() => router.refresh());
+    if (!notificationWorkItemId || !notificationItem) return;
+    const frame = window.requestAnimationFrame(() => {
+      setOpenIds((prev) => new Set([...prev, notificationWorkItemId]));
+      if (['APPROVED', 'CANCELLED'].includes(notificationItem.status)) setActiveTab('all');
+      window.setTimeout(() => {
+        itemRefs.current[notificationWorkItemId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 250);
+    });
+    if (isUnreadFor(notificationItem, session.userId)) {
+      markWorkItemReadAction(notificationWorkItemId).then(() => router.refresh());
+    }
+    return () => window.cancelAnimationFrame(frame);
   }, [notificationWorkItemId, notificationItem, router, session.userId]);
 
   async function runAction(action) {
@@ -151,7 +162,7 @@ export default function WorkItemsClient({ initialItems, clients, assignableUsers
             ['mine', 'Bana Atananlar', tabs.mine.length],
             ['approvals', 'Onay Bekleyenler', tabs.approvals.length],
             ...(canAssign ? [['assigned', 'Atadıklarım', tabs.assigned.length]] : []),
-            ...(session.role === 'ADMIN' ? [['all', 'Arşiv / Tüm Kayıtlar', tabs.all.length]] : []),
+            ['all', 'Arşiv / Tüm Kayıtlar', tabs.all.length],
           ].map(([key, label, count]) => (
             <button key={key} type="button" onClick={() => setActiveTab(key)} className="btn" style={{ background: activeTab === key ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)', color: activeTab === key ? 'white' : 'var(--text-primary)', padding: '0.55rem 0.8rem', fontSize: '0.8rem' }}>{label} ({count})</button>
           ))}
@@ -162,7 +173,11 @@ export default function WorkItemsClient({ initialItems, clients, assignableUsers
             const isOpen = openIds.has(item.id);
             const unread = isUnreadFor(item, session.userId);
             return (
-              <div key={item.id} style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', background: unread ? 'rgba(239,68,68,0.06)' : 'rgba(255,255,255,0.025)', overflow: 'hidden' }}>
+              <div
+                key={item.id}
+                ref={(node) => { if (node) itemRefs.current[item.id] = node; }}
+                style={{ border: item.id === notificationWorkItemId ? '1px solid #f59e0b' : '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', background: item.id === notificationWorkItemId ? 'rgba(245,158,11,0.10)' : unread ? 'rgba(239,68,68,0.06)' : 'rgba(255,255,255,0.025)', overflow: 'hidden', scrollMarginTop: '120px' }}
+              >
                 <button type="button" onClick={() => toggleDetails(item)} style={{ width: '100%', border: 'none', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.9rem 1rem', display: 'grid', gridTemplateColumns: 'minmax(220px, 1.6fr) minmax(120px, .7fr) minmax(120px, .7fr) minmax(120px, .7fr) 34px', gap: '1rem', alignItems: 'center', textAlign: 'left' }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

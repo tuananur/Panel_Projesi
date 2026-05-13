@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { BellRing, Save } from 'lucide-react';
+import { BellRing, Play, Save } from 'lucide-react';
 import { saveNotificationSettingsAction } from '@/app/actions';
+import { playNotificationSound, storeNotificationSound } from '../notification-sound';
 
 const SOUND_OPTIONS = [
   { value: 'soft', label: 'Yumuşak' },
@@ -26,10 +27,17 @@ export default function NotificationSettings({ initialSettings }) {
       }
       const nextSound = result?.settings?.sound || sound;
       setSound(nextSound);
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('notification-sound', nextSound);
-      }
+      storeNotificationSound(nextSound);
       setMessage({ type: 'success', text: 'Bildirim ayarları kaydedildi.' });
+    });
+  };
+
+  const testSound = () => {
+    storeNotificationSound(sound);
+    const played = playNotificationSound(sound);
+    setMessage({
+      type: played ? 'success' : 'error',
+      text: played ? 'Ses testi çalındı.' : 'Tarayıcı sesi engelledi. Sayfaya tıklayıp tekrar deneyin.',
     });
   };
 
@@ -52,7 +60,7 @@ export default function NotificationSettings({ initialSettings }) {
             value={sound}
             onChange={(event) => setSound(event.target.value)}
             style={{
-              background: 'rgba(255,255,255,0.05)',
+              background: 'var(--bg-primary)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border-color)',
               borderRadius: '8px',
@@ -61,10 +69,13 @@ export default function NotificationSettings({ initialSettings }) {
             }}
           >
             {SOUND_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
+              <option key={option.value} value={option.value} style={{ background: '#111827', color: '#f9fafb' }}>{option.label}</option>
             ))}
           </select>
         </label>
+        <button type="button" className="btn" onClick={testSound} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Play size={16} /> Sesi Dene
+        </button>
         <button className="btn btn-primary" disabled={isPending} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
           <Save size={16} /> {isPending ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
