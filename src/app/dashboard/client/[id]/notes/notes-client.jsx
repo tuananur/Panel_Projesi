@@ -78,7 +78,10 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
     formData.append('category', category);
     const selectedDate = formData.get('date');
     if (selectedDate) {
-      formData.set('createdAt', new Date(`${selectedDate}T12:00:00`).toISOString());
+      const [year, month, day] = selectedDate.toString().split('-').map(Number);
+      const dateWithCurrentTime = new Date();
+      dateWithCurrentTime.setFullYear(year, month - 1, day);
+      formData.set('createdAt', dateWithCurrentTime.toISOString());
     } else {
       formData.set('createdAt', new Date().toISOString());
     }
@@ -258,7 +261,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '60px', textAlign: 'center' }}>DURUM</th>
-                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '25%' }}>Tarih</th>
+                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '25%' }}>Yazan / Tarih</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase' }}>Yapılacak</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '120px', textAlign: 'right' }}>İşlemler</th>
               </tr>
@@ -300,8 +303,13 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
                         </div>
                         <div>
                           <div style={{ fontWeight: 600, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'inherit' }}>
-                            Yapılacak
+                            {note.user?.username ?? '—'}
                           </div>
+                          {note.createdByUser && (
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                              ({note.createdByUser.username})
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)', fontSize: '0.75rem' }}>
