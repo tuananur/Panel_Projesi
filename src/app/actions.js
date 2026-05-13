@@ -623,15 +623,20 @@ export async function searchTasksAction(query) {
 export async function addNoteAction(formData) {
   const clientIdRaw = formData.get('clientId');
   const clientId = clientIdRaw ? parseInt(clientIdRaw) : null;
-  const content = formData.get('content') || '';
-  const title = formData.get('title') || null;
+  const content = (formData.get('content') || '').toString();
+  const titleText = (formData.get('title') || '').toString().trim();
+  const title = titleText || null;
   const createdAtRaw = formData.get('createdAt');
   const createdAt = createdAtRaw ? new Date(createdAtRaw) : undefined;
   const assigneeUserIdRaw = formData.get('assigneeUserId');
   const categoryRaw = formData.get('category');
   const category = categoryRaw === 'DEV' ? 'DEV' : 'TASK';
 
-  if (!title && !content) {
+  if (category === 'TASK' && !title) {
+    return { error: 'Başlık zorunlu.' };
+  }
+
+  if (!title && !content.trim()) {
     return { error: 'Başlık veya not içeriğinden en az biri dolu olmalıdır.' };
   }
 
@@ -696,13 +701,14 @@ export async function deleteNoteAction(formData) {
 
 export async function updateNoteAction(formData) {
   const noteId = parseInt(formData.get('noteId'));
-  const content = formData.get('content');
-  const title = formData.get('title') || null;
+  const content = (formData.get('content') || '').toString();
+  const titleText = (formData.get('title') || '').toString().trim();
+  const title = titleText || null;
   const hasClientIdField = formData.has('clientId');
   const clientIdRaw = formData.get('clientId');
 
   if (!noteId) return { error: 'Geçersiz ID.' };
-  if (!title && !content) return { error: 'Başlık veya not içeriğinden en az biri dolu olmalıdır.' };
+  if (!title && !content.trim()) return { error: 'Başlık veya not içeriğinden en az biri dolu olmalıdır.' };
 
   try {
     const session = await getSession();
@@ -1365,9 +1371,7 @@ function isWorkManagerRole(role) {
 }
 
 function managedWorkerRoles(role) {
-  if (role === 'ADMIN') return ['DESIGNER', 'DESIGNER_MANAGER', 'ADVERTISER', 'ADVERTISER_MANAGER', 'DEVELOPER'];
-  if (role === 'DESIGNER_MANAGER') return ['DESIGNER'];
-  if (role === 'ADVERTISER_MANAGER') return ['ADVERTISER'];
+  if (role === 'ADMIN' || role === 'DESIGNER_MANAGER' || role === 'ADVERTISER_MANAGER') return ['DESIGNER', 'DESIGNER_MANAGER', 'ADVERTISER', 'ADVERTISER_MANAGER', 'DEVELOPER'];
   return [];
 }
 
@@ -1383,7 +1387,7 @@ async function getAssignableUsersForSession(session) {
   const roles = managedWorkerRoles(session.role);
   if (roles.length === 0) return [];
   return prisma.user.findMany({
-    where: { managerId: session.userId, role: { in: roles } },
+    where: { id: { not: session.userId }, role: { in: roles } },
     select: { id: true, username: true, role: true, managerId: true },
     orderBy: { username: 'asc' }
   });
@@ -1425,16 +1429,7 @@ export async function getWorkItemBadgeCountAction() {
   const session = await getSession();
   if (!(await canAccessWorkItems(session))) return { count: 0 };
 
-  const where = session.role === 'ADMIN'
-    ? { status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REVISION_REQUESTED', 'SUBMITTED'] } }
-    : isWorkManagerRole(session.role)
-      ? {
-          OR: [
-            { createdById: session.userId, status: { in: ['SUBMITTED'] } },
-            { assignee: { managerId: session.userId }, status: { in: ['SUBMITTED'] } }
-          ]
-        }
-      : { assigneeId: session.userId, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REVISION_REQUESTED'] } };
+  const where = { unreadForUserIds: { contains: `\"${session.userId}\"` } };
 
   try {
     const count = await prisma.workItem.count({ where });
@@ -1479,6 +1474,7 @@ export async function createWorkItemAction(formData) {
         dueDate,
         priority,
         type,
+        unreadForUserIds: JSON.stringify([String(assigneeId)]),
         events: {
           create: {
             userId: session.userId,
@@ -1496,11 +1492,37 @@ export async function createWorkItemAction(formData) {
   }
 }
 
+function notificationUserIdsForWorkItem(item, actorUserId) {
+  const ids = new Set();
+  if (item?.assigneeId) ids.add(String(item.assigneeId));
+  if (item?.createdById) ids.add(String(item.createdById));
+  if (item?.assignee?.managerId) ids.add(String(item.assignee.managerId));
+  ids.delete(String(actorUserId));
+  return JSON.stringify([...ids]);
+}
+
+export async function markWorkItemReadAction(workItemId) {
+  const session = await getSession();
+  if (!(await canAccessWorkItems(session))) return { error: 'Yetkiniz yok.' };
+  const id = parseInt(workItemId);
+  const item = await prisma.workItem.findUnique({ where: { id }, include: { assignee: { select: { managerId: true } } } });
+  if (!item) return { error: 'İş bulunamadı.' };
+  const canSee = session.role === 'ADMIN' || item.assigneeId === session.userId || item.createdById === session.userId || item.assignee?.managerId === session.userId;
+  if (!canSee) return { error: 'Yetkiniz yok.' };
+  let unread = [];
+  try { unread = JSON.parse(item.unreadForUserIds || '[]'); } catch { unread = []; }
+  const nextUnread = unread.map(String).filter((userId) => userId !== String(session.userId));
+  if (nextUnread.length !== unread.length) {
+    await prisma.workItem.update({ where: { id }, data: { unreadForUserIds: JSON.stringify(nextUnread) } });
+  }
+  return { success: true };
+}
+
 export async function startWorkItemAction(workItemId) {
   const session = await getSession();
   if (!(await canAccessWorkItems(session))) return { error: 'Yetkiniz yok.' };
   const id = parseInt(workItemId);
-  const item = await prisma.workItem.findUnique({ where: { id } });
+  const item = await prisma.workItem.findUnique({ where: { id }, include: { assignee: { select: { managerId: true } } } });
   if (!item || item.assigneeId !== session.userId) return { error: 'Bu i�i ba�latamazs�n�z.' };
   if (!['ASSIGNED', 'REVISION_REQUESTED'].includes(item.status)) return { error: 'Bu i� ba�lat�lamaz.' };
 
@@ -1508,6 +1530,7 @@ export async function startWorkItemAction(workItemId) {
     where: { id },
     data: {
       status: 'IN_PROGRESS',
+      unreadForUserIds: notificationUserIdsForWorkItem(item, session.userId),
       events: { create: { userId: session.userId, type: 'STARTED' } }
     }
   });
@@ -1519,7 +1542,7 @@ export async function submitWorkItemAction(formData) {
   if (!(await canAccessWorkItems(session))) return { error: 'Yetkiniz yok.' };
   const id = parseInt(formData.get('workItemId'));
   const note = (formData.get('note') || '').toString().trim() || null;
-  const item = await prisma.workItem.findUnique({ where: { id } });
+  const item = await prisma.workItem.findUnique({ where: { id }, include: { assignee: { select: { managerId: true } } } });
   if (!item || item.assigneeId !== session.userId) return { error: 'Bu i�i teslim edemezsiniz.' };
   if (!['ASSIGNED', 'IN_PROGRESS', 'REVISION_REQUESTED'].includes(item.status)) return { error: 'Bu i� teslim edilemez.' };
 
@@ -1529,6 +1552,7 @@ export async function submitWorkItemAction(formData) {
       status: 'SUBMITTED',
       submittedAt: new Date(),
       lastSubmissionNote: note,
+      unreadForUserIds: notificationUserIdsForWorkItem(item, session.userId),
       events: { create: { userId: session.userId, type: 'SUBMITTED', note } }
     }
   });
@@ -1549,6 +1573,7 @@ export async function approveWorkItemAction(workItemId) {
       status: 'APPROVED',
       approvedAt: new Date(),
       approvedById: session.userId,
+      unreadForUserIds: notificationUserIdsForWorkItem(item, session.userId),
       events: { create: { userId: session.userId, type: 'APPROVED' } }
     }
   });
@@ -1570,6 +1595,7 @@ export async function requestWorkItemRevisionAction(formData) {
     data: {
       status: 'REVISION_REQUESTED',
       lastRevisionNote: note,
+      unreadForUserIds: notificationUserIdsForWorkItem(item, session.userId),
       events: { create: { userId: session.userId, type: 'REVISION_REQUESTED', note } }
     }
   });
@@ -1587,106 +1613,109 @@ export async function cancelWorkItemAction(workItemId) {
     where: { id },
     data: {
       status: 'CANCELLED',
+      unreadForUserIds: notificationUserIdsForWorkItem(item, session.userId),
       events: { create: { userId: session.userId, type: 'CANCELLED' } }
     }
   });
   return { success: true };
 }
-
-export async function runDatabaseMaintenanceAction() {
-  const session = await getSession();
-  if (!session || session.role !== 'ADMIN') {
-    return { error: 'Bu işlemi sadece admin çalıştırabilir.' };
-  }
-
-  const statements = [
-    'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "managerId" INTEGER',
-    `DO $$ BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'User_managerId_fkey') THEN
-        ALTER TABLE "User" ADD CONSTRAINT "User_managerId_fkey" FOREIGN KEY ("managerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-      END IF;
-    END $$`,
-    `CREATE TABLE IF NOT EXISTS "WorkItem" (
-      "id" SERIAL NOT NULL,
-      "title" TEXT NOT NULL,
-      "description" TEXT,
-      "dueDate" TIMESTAMP(3),
-      "priority" TEXT NOT NULL DEFAULT 'NORMAL',
-      "type" TEXT NOT NULL DEFAULT 'OTHER',
-      "status" TEXT NOT NULL DEFAULT 'ASSIGNED',
-      "clientId" INTEGER,
-      "assigneeId" INTEGER NOT NULL,
-      "createdById" INTEGER NOT NULL,
-      "approvedById" INTEGER,
-      "submittedAt" TIMESTAMP(3),
-      "approvedAt" TIMESTAMP(3),
-      "lastSubmissionNote" TEXT,
-      "lastRevisionNote" TEXT,
-      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "WorkItem_pkey" PRIMARY KEY ("id")
-    )`,
-    `CREATE TABLE IF NOT EXISTS "WorkItemEvent" (
-      "id" SERIAL NOT NULL,
-      "workItemId" INTEGER NOT NULL,
-      "userId" INTEGER NOT NULL,
-      "type" TEXT NOT NULL,
-      "note" TEXT,
-      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      CONSTRAINT "WorkItemEvent_pkey" PRIMARY KEY ("id")
-    )`,
-    `DO $$ BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItem_clientId_fkey') THEN
-        ALTER TABLE "WorkItem" ADD CONSTRAINT "WorkItem_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-      END IF;
-    END $$`,
-    `DO $$ BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItem_assigneeId_fkey') THEN
-        ALTER TABLE "WorkItem" ADD CONSTRAINT "WorkItem_assigneeId_fkey" FOREIGN KEY ("assigneeId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-      END IF;
-    END $$`,
-    `DO $$ BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItem_createdById_fkey') THEN
-        ALTER TABLE "WorkItem" ADD CONSTRAINT "WorkItem_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-      END IF;
-    END $$`,
-    `DO $$ BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItem_approvedById_fkey') THEN
-        ALTER TABLE "WorkItem" ADD CONSTRAINT "WorkItem_approvedById_fkey" FOREIGN KEY ("approvedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-      END IF;
-    END $$`,
-    `DO $$ BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItemEvent_workItemId_fkey') THEN
-        ALTER TABLE "WorkItemEvent" ADD CONSTRAINT "WorkItemEvent_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "WorkItem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-      END IF;
-    END $$`,
-    `DO $$ BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItemEvent_userId_fkey') THEN
-        ALTER TABLE "WorkItemEvent" ADD CONSTRAINT "WorkItemEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-      END IF;
-    END $$`,
-    'CREATE INDEX IF NOT EXISTS "User_managerId_idx" ON "User"("managerId")',
-    'CREATE INDEX IF NOT EXISTS "WorkItem_assigneeId_status_idx" ON "WorkItem"("assigneeId", "status")',
-    'CREATE INDEX IF NOT EXISTS "WorkItem_createdById_status_idx" ON "WorkItem"("createdById", "status")',
-    'CREATE INDEX IF NOT EXISTS "WorkItem_clientId_idx" ON "WorkItem"("clientId")',
-    'CREATE INDEX IF NOT EXISTS "WorkItemEvent_workItemId_idx" ON "WorkItemEvent"("workItemId")',
-  ];
-
-  try {
-    for (const statement of statements) {
-      await prisma.$executeRawUnsafe(statement);
-    }
-
-    await prisma.setting.upsert({
-      where: { key: 'db_maintenance_last_run' },
-      update: { value: new Date().toISOString() },
-      create: { key: 'db_maintenance_last_run', value: new Date().toISOString() },
-    });
-
-    await logActivity('UPDATE', 'SETTINGS', 'Veritabanı bakım/güncelleme işlemi çalıştırıldı.');
-    return { success: true, message: 'Veritabanı güncellemesi tamamlandı.' };
-  } catch (error) {
-    console.error('Database maintenance error:', error);
-    return { error: `Veritabanı güncellemesi başarısız: ${error.message}` };
-  }
+
+export async function runDatabaseMaintenanceAction() {
+  const session = await getSession();
+  if (!session || session.role !== 'ADMIN') {
+    return { error: 'Bu işlemi sadece admin çalıştırabilir.' };
+  }
+
+  const statements = [
+    'ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "managerId" INTEGER',
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'User_managerId_fkey') THEN
+        ALTER TABLE "User" ADD CONSTRAINT "User_managerId_fkey" FOREIGN KEY ("managerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+      END IF;
+    END $$`,
+    `CREATE TABLE IF NOT EXISTS "WorkItem" (
+      "id" SERIAL NOT NULL,
+      "title" TEXT NOT NULL,
+      "description" TEXT,
+      "dueDate" TIMESTAMP(3),
+      "priority" TEXT NOT NULL DEFAULT 'NORMAL',
+      "type" TEXT NOT NULL DEFAULT 'OTHER',
+      "status" TEXT NOT NULL DEFAULT 'ASSIGNED',
+      "clientId" INTEGER,
+      "assigneeId" INTEGER NOT NULL,
+      "createdById" INTEGER NOT NULL,
+      "approvedById" INTEGER,
+      "submittedAt" TIMESTAMP(3),
+      "approvedAt" TIMESTAMP(3),
+      "lastSubmissionNote" TEXT,
+      "lastRevisionNote" TEXT,
+      "unreadForUserIds" TEXT NOT NULL DEFAULT '[]',
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "WorkItem_pkey" PRIMARY KEY ("id")
+    )`,
+    `CREATE TABLE IF NOT EXISTS "WorkItemEvent" (
+      "id" SERIAL NOT NULL,
+      "workItemId" INTEGER NOT NULL,
+      "userId" INTEGER NOT NULL,
+      "type" TEXT NOT NULL,
+      "note" TEXT,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "WorkItemEvent_pkey" PRIMARY KEY ("id")
+    )`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItem_clientId_fkey') THEN
+        ALTER TABLE "WorkItem" ADD CONSTRAINT "WorkItem_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+      END IF;
+    END $$`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItem_assigneeId_fkey') THEN
+        ALTER TABLE "WorkItem" ADD CONSTRAINT "WorkItem_assigneeId_fkey" FOREIGN KEY ("assigneeId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+      END IF;
+    END $$`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItem_createdById_fkey') THEN
+        ALTER TABLE "WorkItem" ADD CONSTRAINT "WorkItem_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+      END IF;
+    END $$`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItem_approvedById_fkey') THEN
+        ALTER TABLE "WorkItem" ADD CONSTRAINT "WorkItem_approvedById_fkey" FOREIGN KEY ("approvedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+      END IF;
+    END $$`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItemEvent_workItemId_fkey') THEN
+        ALTER TABLE "WorkItemEvent" ADD CONSTRAINT "WorkItemEvent_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "WorkItem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+      END IF;
+    END $$`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'WorkItemEvent_userId_fkey') THEN
+        ALTER TABLE "WorkItemEvent" ADD CONSTRAINT "WorkItemEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+      END IF;
+    END $$`,
+    'CREATE INDEX IF NOT EXISTS "User_managerId_idx" ON "User"("managerId")',
+    'CREATE INDEX IF NOT EXISTS "WorkItem_assigneeId_status_idx" ON "WorkItem"("assigneeId", "status")',
+    'CREATE INDEX IF NOT EXISTS "WorkItem_createdById_status_idx" ON "WorkItem"("createdById", "status")',
+    'CREATE INDEX IF NOT EXISTS "WorkItem_clientId_idx" ON "WorkItem"("clientId")',
+    `ALTER TABLE "WorkItem" ADD COLUMN IF NOT EXISTS "unreadForUserIds" TEXT NOT NULL DEFAULT '[]'`,
+    'CREATE INDEX IF NOT EXISTS "WorkItemEvent_workItemId_idx" ON "WorkItemEvent"("workItemId")',
+  ];
+
+  try {
+    for (const statement of statements) {
+      await prisma.$executeRawUnsafe(statement);
+    }
+
+    await prisma.setting.upsert({
+      where: { key: 'db_maintenance_last_run' },
+      update: { value: new Date().toISOString() },
+      create: { key: 'db_maintenance_last_run', value: new Date().toISOString() },
+    });
+
+    await logActivity('UPDATE', 'SETTINGS', 'Veritabanı bakım/güncelleme işlemi çalıştırıldı.');
+    return { success: true, message: 'Veritabanı güncellemesi tamamlandı.' };
+  } catch (error) {
+    console.error('Database maintenance error:', error);
+    return { error: `Veritabanı güncellemesi başarısız: ${error.message}` };
+  }
 }

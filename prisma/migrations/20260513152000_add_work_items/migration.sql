@@ -22,6 +22,7 @@ CREATE TABLE "WorkItem" (
   "approvedAt" TIMESTAMP(3),
   "lastSubmissionNote" TEXT,
   "lastRevisionNote" TEXT,
+  "unreadForUserIds" TEXT NOT NULL DEFAULT '[]',
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -68,3 +69,5 @@ CREATE INDEX "WorkItem_assigneeId_status_idx" ON "WorkItem"("assigneeId", "statu
 CREATE INDEX "WorkItem_createdById_status_idx" ON "WorkItem"("createdById", "status");
 CREATE INDEX "WorkItem_clientId_idx" ON "WorkItem"("clientId");
 CREATE INDEX "WorkItemEvent_workItemId_idx" ON "WorkItemEvent"("workItemId");
+
+ALTER TABLE "WorkItem" ADD COLUMN IF NOT EXISTS "unreadForUserIds" TEXT NOT NULL DEFAULT '[]';

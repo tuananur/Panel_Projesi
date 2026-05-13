@@ -200,6 +200,7 @@ model WorkItem {
   approvedAt         DateTime?
   lastSubmissionNote String?   @db.Text
   lastRevisionNote   String?   @db.Text
+  unreadForUserIds   String    @default("[]") @db.Text
 
   events    WorkItemEvent[]
   createdAt DateTime        @default(now())

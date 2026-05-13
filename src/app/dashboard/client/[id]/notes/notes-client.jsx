@@ -8,15 +8,15 @@ import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
 
 const DEFAULT_LABELS = {
-  addButton: 'İş Ekle',
-  addModalTitle: 'İş Ekle',
-  editModalTitle: 'İşi Düzenle',
-  searchPlaceholder: 'Notlarda ara...',
-  contentPlaceholder: 'Müşteri hakkında önemli notlar...',
-  emptyText: 'Henüz not eklenmemiş.',
+  addButton: 'Yeni Ekle',
+  addModalTitle: 'Yeni Yapılacak Ekle',
+  editModalTitle: 'Yapılacağı Düzenle',
+  searchPlaceholder: 'Yapılacaklarda ara...',
+  contentPlaceholder: 'Açıklama (opsiyonel)...',
+  emptyText: 'Henüz yapılacak eklenmemiş.',
 };
 
-export default function NotesClient({ clientId, notes, currentUserId, userRole, users = [], debugSnapshot, category = 'TASK', labels = DEFAULT_LABELS }) {
+export default function NotesClient({ clientId, notes, currentUserId, userRole, debugSnapshot, category = 'TASK', labels = DEFAULT_LABELS }) {
   const router = useRouter();
   const { setGlobalLoading } = useTheme();
   const [search, setSearch] = useState('');
@@ -31,6 +31,9 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const defaultDateValue = activeDay
+    ? `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(activeDay).padStart(2, '0')}`
+    : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   const MONTHS = [
     'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
@@ -73,10 +76,13 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
     setGlobalLoading(true);
     formData.append('clientId', clientId);
     formData.append('category', category);
-    if (activeDay) {
-      const date = new Date(selectedYear, selectedMonth, activeDay, 12);
-      formData.append('createdAt', date.toISOString());
+    const selectedDate = formData.get('date');
+    if (selectedDate) {
+      formData.set('createdAt', new Date(`${selectedDate}T12:00:00`).toISOString());
+    } else {
+      formData.set('createdAt', new Date().toISOString());
     }
+    formData.delete('assigneeUserId');
     const result = await addNoteAction(formData);
     if (result?.error) {
       setError(result.error);
@@ -94,6 +100,7 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
     setLoading(true);
     setGlobalLoading(true);
     formData.append('noteId', selectedNote.id);
+    formData.delete('assigneeUserId');
     const result = await updateNoteAction(formData);
     if (result?.error) {
       setError(result.error);
@@ -251,8 +258,8 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)' }}>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '60px', textAlign: 'center' }}>DURUM</th>
-                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '25%' }}>Yazan / Tarih</th>
-                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase' }}>Not İçeriği</th>
+                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '25%' }}>Tarih</th>
+                <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase' }}>Yapılacak</th>
                 <th style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.7rem', textTransform: 'uppercase', width: '120px', textAlign: 'right' }}>İşlemler</th>
               </tr>
             </thead>
@@ -293,13 +300,8 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
                         </div>
                         <div>
                           <div style={{ fontWeight: 600, fontSize: '0.85rem', color: note.isDone ? '#10b981' : 'inherit' }}>
-                            {note.user?.username ?? '—'}
+                            Yapılacak
                           </div>
-                          {note.createdByUser && (
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                              ({note.createdByUser.username})
-                            </div>
-                          )}
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)', fontSize: '0.75rem' }}>
@@ -564,22 +566,16 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
               Tarih: {activeDay} {MONTHS[selectedMonth]} {selectedYear}
             </div>
           )}
-          {userRole === 'ADMIN' && users.length > 0 && (
-            <div className="input-group">
-              <label className="input-label">Atanacak Kullanıcı</label>
-              <select name="assigneeUserId" className="input-field" defaultValue={currentUserId}>
-                {users.map(u => (
-                  <option key={u.id} value={u.id}>{u.username}</option>
-                ))}
-              </select>
-            </div>
-          )}
           <div className="input-group">
-            <label className="input-label">Başlık (İsteğe Bağlı)</label>
-            <input type="text" name="title" className="input-field" placeholder="Örn: Strateji Değişikliği" />
+            <label className="input-label">Başlık *</label>
+            <input type="text" name="title" className="input-field" placeholder="Örn: İçerik metnini kontrol et" required />
           </div>
           <div className="input-group">
-            <label className="input-label">Not İçeriği <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>
+            <label className="input-label">Tarih <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(boş bırakılırsa bugün)</span></label>
+            <input type="date" name="date" className="input-field" defaultValue={defaultDateValue} />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Açıklama <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>
             <textarea 
               name="content" 
               className="input-field" 
@@ -606,27 +602,12 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
       >
         <form action={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <input type="hidden" name="clientId" value={clientId} />
-          {userRole === 'ADMIN' && users.length > 0 && (
-            <div className="input-group">
-              <label className="input-label">Atanan Kullanıcı</label>
-              <select
-                name="assigneeUserId"
-                className="input-field"
-                key={selectedNote?.id}
-                defaultValue={selectedNote?.userId ?? currentUserId}
-              >
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>{u.username}</option>
-                ))}
-              </select>
-            </div>
-          )}
           <div className="input-group">
-            <label className="input-label">Başlık</label>
-            <input type="text" name="title" className="input-field" defaultValue={selectedNote?.title || ''} />
+            <label className="input-label">Başlık *</label>
+            <input type="text" name="title" className="input-field" defaultValue={selectedNote?.title || ''} required />
           </div>
           <div className="input-group">
-            <label className="input-label">Not İçeriği <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>
+            <label className="input-label">Açıklama <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>
             <textarea 
               name="content" 
               className="input-field" 
@@ -647,14 +628,14 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
       {/* Silme Onay Modalı */}
       <CustomDialog
         isOpen={isDeleteModalOpen}
-        title="Notu Sil"
+        title="Yapılacağı Sil"
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
         confirmText="Evet, Sil"
         confirmColor="#ef4444"
         loading={loading}
       >
-        <p style={{ color: 'var(--text-secondary)' }}>Bu notu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Bu yapılacağı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
       </CustomDialog>
 
       {/* Hata Modalı */}

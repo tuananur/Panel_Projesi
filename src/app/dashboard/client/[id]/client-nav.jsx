@@ -9,7 +9,7 @@ export default function ClientNav({ clientId, canSeeStats = true, canSeeNotes = 
 
   const tabs = [
     { href: `/dashboard/client/${clientId}/stats`, label: 'İstatistikler', show: canSeeStats },
-    { href: `/dashboard/client/${clientId}/notes`, label: 'İş Takibi', show: canSeeNotes },
+    { href: `/dashboard/client/${clientId}/notes`, label: 'Yapılacaklar Listesi', show: canSeeNotes },
     { href: `/dashboard/client/${clientId}/dev`, label: 'Yazılım', show: canSeeDev },
     { href: `/dashboard/client/${clientId}/meta`, label: 'Meta Reklamları', show: canSeeMeta },
     { href: `/dashboard/client/${clientId}/seo`, label: 'SEO Takibi', show: canSeeSEO },

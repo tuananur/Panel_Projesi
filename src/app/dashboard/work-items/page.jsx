@@ -13,9 +13,7 @@ function isWorkManagerRole(role) {
 }
 
 function managedWorkerRoles(role) {
-  if (role === 'ADMIN') return ['DESIGNER', 'DESIGNER_MANAGER', 'ADVERTISER', 'ADVERTISER_MANAGER', 'DEVELOPER'];
-  if (role === 'DESIGNER_MANAGER') return ['DESIGNER'];
-  if (role === 'ADVERTISER_MANAGER') return ['ADVERTISER'];
+  if (role === 'ADMIN' || role === 'DESIGNER_MANAGER' || role === 'ADVERTISER_MANAGER') return ['DESIGNER', 'DESIGNER_MANAGER', 'ADVERTISER', 'ADVERTISER_MANAGER', 'DEVELOPER'];
   return [];
 }
 
@@ -68,7 +66,7 @@ export default async function WorkItemsPage() {
         })
       : isWorkManagerRole(session.role)
         ? prisma.user.findMany({
-            where: { managerId: session.userId, role: { in: managedWorkerRoles(session.role) } },
+            where: { id: { not: session.userId }, role: { in: managedWorkerRoles(session.role) } },
             select: { id: true, username: true, role: true, managerId: true },
             orderBy: { username: 'asc' },
           })
