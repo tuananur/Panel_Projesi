@@ -5,8 +5,9 @@ import { Shield, Save, Check, X } from 'lucide-react';
 import { updateRolePermissionsAction } from '@/app/actions';
 import { useTheme } from '@/app/components/theme-provider';
 
-export default function RolePermissionsEditor({ roles, groups, initialPermissions }) {
+export default function RolePermissionsEditor({ roles, groups, initialPermissions, initialAssignableRoles = {}, assignableRoleOptions = [] }) {
   const [permissions, setPermissions] = useState(initialPermissions);
+  const [assignableRoles, setAssignableRoles] = useState(initialAssignableRoles || {});
   const [activeRole, setActiveRole] = useState(roles[0]?.key || '');
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -23,12 +24,22 @@ export default function RolePermissionsEditor({ roles, groups, initialPermission
     setFeedback(null);
   };
 
+  const toggleAssignableRole = (roleKey, targetRole) => {
+    setAssignableRoles((prev) => {
+      const current = new Set(prev[roleKey] || []);
+      if (current.has(targetRole)) current.delete(targetRole);
+      else current.add(targetRole);
+      return { ...prev, [roleKey]: [...current] };
+    });
+    setFeedback(null);
+  };
+
   const handleSave = async () => {
     if (loading) return;
     setLoading(true);
     setGlobalLoading(true);
     setFeedback(null);
-    const result = await updateRolePermissionsAction(permissions);
+    const result = await updateRolePermissionsAction(permissions, assignableRoles);
     if (result?.error) {
       setFeedback({ kind: 'error', text: result.error });
     } else {
@@ -89,6 +100,75 @@ export default function RolePermissionsEditor({ roles, groups, initialPermission
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div>
+          <div style={{
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: 'var(--text-secondary)',
+            marginBottom: '0.6rem',
+          }}>
+            Kimlere İş Atayabilir?
+          </div>
+          <div style={{
+            border: '1px solid var(--border-color)',
+            borderRadius: '10px',
+            overflow: 'hidden',
+            background: 'rgba(255,255,255,0.02)',
+          }}>
+            {assignableRoleOptions.map((targetRole, idx) => {
+              const allowed = (assignableRoles[activeRole] || []).includes(targetRole.key);
+              return (
+                <label
+                  key={targetRole.key}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.75rem 1rem',
+                    borderBottom: idx === assignableRoleOptions.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)',
+                    cursor: 'pointer',
+                    gap: '1rem',
+                  }}
+                >
+                  <div>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{targetRole.label}</span>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-geist-mono, monospace)' }}>{targetRole.key}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleAssignableRole(activeRole, targetRole.key)}
+                    style={{
+                      width: '44px',
+                      height: '24px',
+                      background: allowed ? 'var(--accent-primary)' : 'rgba(255,255,255,0.08)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      padding: 0,
+                      flexShrink: 0,
+                    }}
+                    aria-pressed={allowed}
+                  >
+                    <span style={{
+                      position: 'absolute',
+                      top: '2px',
+                      left: allowed ? '22px' : '2px',
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      background: 'white',
+                      transition: 'left 0.2s',
+                    }} />
+                  </button>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
         {groups.map((group) => (
           <div key={group.section}>
             <div style={{

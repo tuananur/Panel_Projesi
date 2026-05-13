@@ -23,6 +23,8 @@ export const USER_ROLES = [
   ...CONFIGURABLE_ROLES,
 ];
 
+export const ASSIGNABLE_ROLE_OPTIONS = USER_ROLES;
+
 // Permission catalog grouped by section.
 export const PERMISSION_GROUPS = [
   {
@@ -115,6 +117,15 @@ export const DEFAULT_PERMISSIONS = {
 };
 
 const SETTING_KEY = 'role_permissions';
+const ASSIGNMENT_SETTING_KEY = 'role_assignment_permissions';
+
+export const DEFAULT_ASSIGNABLE_ROLES = {
+  DESIGNER: [],
+  DESIGNER_MANAGER: ['ADMIN', 'DESIGNER', 'DESIGNER_MANAGER', 'ADVERTISER', 'ADVERTISER_MANAGER', 'DEVELOPER'],
+  ADVERTISER: [],
+  ADVERTISER_MANAGER: ['ADMIN', 'DESIGNER', 'DESIGNER_MANAGER', 'ADVERTISER', 'ADVERTISER_MANAGER', 'DEVELOPER'],
+  DEVELOPER: [],
+};
 
 function mergeWithDefaults(stored) {
   const merged = {};
@@ -143,6 +154,37 @@ export async function getRolePermissions() {
   } catch (error) {
     return mergeWithDefaults(null);
   }
+}
+
+export async function getRoleAssignableRoles() {
+  try {
+    const setting = await prisma.setting.findUnique({ where: { key: ASSIGNMENT_SETTING_KEY } });
+    const stored = setting ? JSON.parse(setting.value || '{}') : {};
+    const merged = {};
+    for (const { key: roleKey } of CONFIGURABLE_ROLES) {
+      const values = Array.isArray(stored?.[roleKey]) ? stored[roleKey] : DEFAULT_ASSIGNABLE_ROLES[roleKey] || [];
+      const allowedKeys = new Set(ASSIGNABLE_ROLE_OPTIONS.map((role) => role.key));
+      merged[roleKey] = values.filter((key) => allowedKeys.has(key));
+    }
+    return merged;
+  } catch (error) {
+    return { ...DEFAULT_ASSIGNABLE_ROLES };
+  }
+}
+
+export async function saveRoleAssignableRoles(assignableRoles) {
+  const sanitized = {};
+  const allowedKeys = new Set(ASSIGNABLE_ROLE_OPTIONS.map((role) => role.key));
+  for (const { key: roleKey } of CONFIGURABLE_ROLES) {
+    const incoming = Array.isArray(assignableRoles?.[roleKey]) ? assignableRoles[roleKey] : [];
+    sanitized[roleKey] = [...new Set(incoming.filter((key) => allowedKeys.has(key)))];
+  }
+  await prisma.setting.upsert({
+    where: { key: ASSIGNMENT_SETTING_KEY },
+    update: { value: JSON.stringify(sanitized) },
+    create: { key: ASSIGNMENT_SETTING_KEY, value: JSON.stringify(sanitized) },
+  });
+  return sanitized;
 }
 
 export async function saveRolePermissions(permissions) {

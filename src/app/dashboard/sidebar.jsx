@@ -7,16 +7,13 @@ import { useState, useEffect } from 'react';
 import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction, getWorkItemBadgeCountAction } from '@/app/actions';
 import { can } from '@/lib/permissions';
 
-export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
+export default function Sidebar({ role, permissions, isMobileOpen, onClose, mailEnabled = false }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  // Load state from localStorage on mount
-  useEffect(() => {
-    const savedState = localStorage.getItem('sidebar-collapsed');
-    if (savedState === 'true') setIsCollapsed(true);
-  }, []);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('sidebar-collapsed') === 'true';
+  });
 
   const toggleSidebar = () => {
     const newState = !isCollapsed;
@@ -94,6 +91,10 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
 
   useEffect(() => {
     const checkUnreadMail = async () => {
+      if (!mailEnabled) {
+        setUnreadMailCount(0);
+        return;
+      }
       const result = await getUnreadMailCountAction();
       setUnreadMailCount(result?.count || 0);
     };
@@ -101,7 +102,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
 
     const interval = setInterval(checkUnreadMail, 60000);
     return () => clearInterval(interval);
-  }, [pathname]);
+  }, [pathname, mailEnabled]);
 
   const navItems = [
     { href: '/dashboard', label: 'Gösterge Paneli', icon: <LayoutDashboard size={20} /> },
@@ -120,7 +121,9 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
     ...(canWorkItems ? [
       { href: '/dashboard/work-items', label: 'İş Takip', icon: <CheckSquare size={20} /> },
     ] : []),
-    { href: '/dashboard/mail', label: 'Mail', icon: <Mail size={20} /> },
+    ...(mailEnabled ? [
+      { href: '/dashboard/mail', label: 'Mail', icon: <Mail size={20} /> },
+    ] : []),
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
 

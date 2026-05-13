@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { can, getRolePermissions } from '@/lib/permissions';
+import { ASSIGNABLE_ROLE_OPTIONS, can, getRoleAssignableRoles, getRolePermissions } from '@/lib/permissions';
 import WorkItemsClient from './work-items-client';
 
 export const metadata = {
@@ -12,23 +12,17 @@ function isWorkManagerRole(role) {
   return role === 'ADMIN' || role === 'DESIGNER_MANAGER' || role === 'ADVERTISER_MANAGER';
 }
 
-function managedWorkerRoles(role) {
-  if (role === 'ADMIN' || role === 'DESIGNER_MANAGER' || role === 'ADVERTISER_MANAGER') return ['DESIGNER', 'DESIGNER_MANAGER', 'ADVERTISER', 'ADVERTISER_MANAGER', 'DEVELOPER'];
-  return [];
-}
 
 function visibleWhere(session) {
   if (session.role === 'ADMIN') return {};
+  const ownVisibility = [
+    { assigneeId: session.userId },
+    { createdById: session.userId },
+  ];
   if (isWorkManagerRole(session.role)) {
-    return {
-      OR: [
-        { assigneeId: session.userId },
-        { createdById: session.userId },
-        { assignee: { managerId: session.userId } },
-      ],
-    };
+    ownVisibility.push({ assignee: { managerId: session.userId } });
   }
-  return { assigneeId: session.userId };
+  return { OR: ownVisibility };
 }
 
 function serialize(value) {
@@ -41,6 +35,11 @@ export default async function WorkItemsPage() {
 
   const permissions = await getRolePermissions();
   if (!can(permissions, session.role, 'page.work_items')) redirect('/dashboard');
+
+  const assignmentMatrix = await getRoleAssignableRoles();
+  const assignableRoleKeys = session.role === 'ADMIN'
+    ? ASSIGNABLE_ROLE_OPTIONS.map((role) => role.key)
+    : assignmentMatrix?.[session.role] || [];
 
   const [items, clients, assignableUsers] = await Promise.all([
     prisma.workItem.findMany({
@@ -58,19 +57,13 @@ export default async function WorkItemsPage() {
       orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
     }),
     prisma.client.findMany({ select: { id: true, companyName: true }, orderBy: { companyName: 'asc' } }),
-    session.role === 'ADMIN'
+    assignableRoleKeys.length > 0
       ? prisma.user.findMany({
-          where: { id: { not: session.userId } },
+          where: { id: { not: session.userId }, role: { in: assignableRoleKeys } },
           select: { id: true, username: true, role: true, managerId: true },
           orderBy: [{ role: 'asc' }, { username: 'asc' }],
         })
-      : isWorkManagerRole(session.role)
-        ? prisma.user.findMany({
-            where: { id: { not: session.userId }, role: { in: managedWorkerRoles(session.role) } },
-            select: { id: true, username: true, role: true, managerId: true },
-            orderBy: { username: 'asc' },
-          })
-        : [],
+      : [],
   ]);
 
   return (
@@ -79,7 +72,7 @@ export default async function WorkItemsPage() {
       clients={serialize(clients)}
       assignableUsers={serialize(assignableUsers)}
       session={{ userId: session.userId, username: session.username, role: session.role }}
-      canAssign={isWorkManagerRole(session.role)}
+      canAssign={assignableRoleKeys.length > 0}
     />
   );
 }

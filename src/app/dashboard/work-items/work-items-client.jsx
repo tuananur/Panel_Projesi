@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, ChevronDown, ChevronRight, Clock, Plus, RefreshCw, Send } from 'lucide-react';
 import {
   approveWorkItemAction,
@@ -62,10 +62,13 @@ function isUnreadFor(item, userId) {
 
 export default function WorkItemsClient({ initialItems, clients, assignableUsers, session, canAssign }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setGlobalLoading } = useTheme();
   const items = initialItems;
-  const [activeTab, setActiveTab] = useState('allOpen');
-  const [openIds, setOpenIds] = useState(new Set());
+  const notificationWorkItemId = Number(searchParams.get('notificationWorkItem') || 0);
+  const notificationItem = items.find((item) => item.id === notificationWorkItemId);
+  const [activeTab, setActiveTab] = useState(() => (notificationItem && ['APPROVED', 'CANCELLED'].includes(notificationItem.status) && session.role === 'ADMIN' ? 'all' : 'allOpen'));
+  const [openIds, setOpenIds] = useState(() => (notificationWorkItemId ? new Set([notificationWorkItemId]) : new Set()));
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -78,6 +81,11 @@ export default function WorkItemsClient({ initialItems, clients, assignableUsers
   }, [items, session]);
 
   const displayedItems = tabs[activeTab] || tabs.allOpen;
+
+  useEffect(() => {
+    if (!notificationWorkItemId || !notificationItem || !isUnreadFor(notificationItem, session.userId)) return;
+    markWorkItemReadAction(notificationWorkItemId).then(() => router.refresh());
+  }, [notificationWorkItemId, notificationItem, router, session.userId]);
 
   async function runAction(action) {
     if (loading) return;

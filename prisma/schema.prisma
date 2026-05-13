@@ -22,6 +22,7 @@ model User {
   createdWorkItems  WorkItem[]      @relation("WorkItemCreator")
   approvedWorkItems WorkItem[]      @relation("WorkItemApprover")
   workItemEvents    WorkItemEvent[]
+  notifications     Notification[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
@@ -222,6 +223,21 @@ model WorkItemEvent {
   createdAt  DateTime @default(now())
 
   @@index([workItemId])
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String    @db.Text
+  url       String?   @db.Text
+  type      String    @default("GENERAL")
+  dedupeKey String?   @unique
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt])
 }
 
 model AccountingEntry {

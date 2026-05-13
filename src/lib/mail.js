@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import prisma from './prisma';
 
 const MAIL_SETTING_KEY = 'mail_config';
+const mailSettingKey = (userId) => userId ? `mail_config_user_${userId}` : MAIL_SETTING_KEY;
 const MAX_SEND_ATTACHMENT_BYTES = 15 * 1024 * 1024;
 const FOLDERS = {
   inbox: { label: 'Gelen Kutusu', specialUse: null, fallbacks: ['INBOX'] },
@@ -83,6 +84,7 @@ async function resolveMailboxPath(client, folder = 'inbox') {
 
 export function sanitizeMailConfig(config) {
   return {
+    enabled: config?.enabled === true,
     imapHost: config?.imapHost || '',
     imapPort: Number(config?.imapPort || 993),
     imapSecure: toBool(config?.imapSecure, true),
@@ -96,8 +98,8 @@ export function sanitizeMailConfig(config) {
   };
 }
 
-export async function getMailConfig({ includePassword = false } = {}) {
-  const setting = await prisma.setting.findUnique({ where: { key: MAIL_SETTING_KEY } });
+export async function getMailConfig({ includePassword = false, userId = null } = {}) {
+  const setting = await prisma.setting.findUnique({ where: { key: mailSettingKey(userId) } });
   if (!setting) return includePassword ? {} : sanitizeMailConfig({});
 
   let parsed = {};
@@ -110,11 +112,12 @@ export async function getMailConfig({ includePassword = false } = {}) {
   return includePassword ? parsed : sanitizeMailConfig(parsed);
 }
 
-export async function saveMailConfig(input) {
-  const current = await getMailConfig({ includePassword: true });
+export async function saveMailConfig(input, { userId = null } = {}) {
+  const current = await getMailConfig({ includePassword: true, userId });
   const password = input.password ? String(input.password) : current.password || '';
 
   const config = {
+    enabled: toBool(input.enabled, false),
     imapHost: String(input.imapHost || '').trim(),
     imapPort: Number(input.imapPort || 993),
     imapSecure: toBool(input.imapSecure, true),
@@ -128,28 +131,34 @@ export async function saveMailConfig(input) {
   };
 
   await prisma.setting.upsert({
-    where: { key: MAIL_SETTING_KEY },
+    where: { key: mailSettingKey(userId) },
     update: { value: JSON.stringify(config) },
-    create: { key: MAIL_SETTING_KEY, value: JSON.stringify(config) },
+    create: { key: mailSettingKey(userId), value: JSON.stringify(config) },
   });
 
   return sanitizeMailConfig(config);
 }
 
 function assertReadableConfig(config) {
+  if (config.enabled !== true) {
+    throw new Error('Mail pasif. Ayarlardan maili aktif edip bilgileri kaydedin.');
+  }
   if (!config.imapHost || !config.username || !config.password) {
     throw new Error('Mail görüntülemek için IMAP host, kullanıcı adı ve şifre/app password gereklidir.');
   }
 }
 
 function assertSendableConfig(config) {
+  if (config.enabled !== true) {
+    throw new Error('Mail pasif. Ayarlardan maili aktif edip bilgileri kaydedin.');
+  }
   if (!config.smtpHost || !config.username || !config.password) {
     throw new Error('Mail göndermek için SMTP host, kullanıcı adı ve şifre/app password gereklidir.');
   }
 }
 
-export async function getUnreadInboxCount() {
-  const config = await getMailConfig({ includePassword: true });
+export async function getUnreadInboxCount({ userId = null } = {}) {
+  const config = await getMailConfig({ includePassword: true, userId });
   assertReadableConfig(config);
 
   const client = createImapClient(config);
@@ -162,8 +171,8 @@ export async function getUnreadInboxCount() {
   }
 }
 
-export async function listMessages({ folder = 'inbox', limit = 'all' } = {}) {
-  const config = await getMailConfig({ includePassword: true });
+export async function listMessages({ folder = 'inbox', limit = 'all', userId = null } = {}) {
+  const config = await getMailConfig({ includePassword: true, userId });
   assertReadableConfig(config);
 
   const client = createImapClient(config);
@@ -215,8 +224,8 @@ export async function listInboxMessages(options = {}) {
   return listMessages({ ...options, folder: 'inbox' });
 }
 
-export async function getMessage(uid, folder = 'inbox') {
-  const config = await getMailConfig({ includePassword: true });
+export async function getMessage(uid, folder = 'inbox', { userId = null } = {}) {
+  const config = await getMailConfig({ includePassword: true, userId });
   assertReadableConfig(config);
 
   const client = createImapClient(config);
@@ -264,8 +273,8 @@ export async function getInboxMessage(uid) {
   return getMessage(uid, 'inbox');
 }
 
-export async function getMailAddressSuggestions() {
-  const config = await getMailConfig({ includePassword: true });
+export async function getMailAddressSuggestions({ userId = null } = {}) {
+  const config = await getMailConfig({ includePassword: true, userId });
   assertReadableConfig(config);
 
   const client = createImapClient(config);
@@ -301,8 +310,8 @@ export async function getMailAddressSuggestions() {
   }
 }
 
-export async function markMessagesSeen(uids = [], folder = 'inbox') {
-  const config = await getMailConfig({ includePassword: true });
+export async function markMessagesSeen(uids = [], folder = 'inbox', { userId = null } = {}) {
+  const config = await getMailConfig({ includePassword: true, userId });
   assertReadableConfig(config);
 
   const normalizedUids = [...new Set(uids.map((uid) => Number(uid)).filter(Boolean))];
@@ -328,8 +337,8 @@ export async function markInboxMessagesSeen(uids = []) {
   return markMessagesSeen(uids, 'inbox');
 }
 
-export async function deleteMessages(uids = [], folder = 'inbox') {
-  const config = await getMailConfig({ includePassword: true });
+export async function deleteMessages(uids = [], folder = 'inbox', { userId = null } = {}) {
+  const config = await getMailConfig({ includePassword: true, userId });
   assertReadableConfig(config);
 
   const normalizedUids = [...new Set(uids.map((uid) => Number(uid)).filter(Boolean))];
@@ -361,8 +370,8 @@ export async function deleteInboxMessages(uids = []) {
   return deleteMessages(uids, 'inbox');
 }
 
-async function appendToSent(rawMessage) {
-  const config = await getMailConfig({ includePassword: true });
+async function appendToSent(rawMessage, { userId = null } = {}) {
+  const config = await getMailConfig({ includePassword: true, userId });
   assertReadableConfig(config);
 
   const client = createImapClient(config);
@@ -375,8 +384,8 @@ async function appendToSent(rawMessage) {
   }
 }
 
-export async function sendMail({ to, cc, bcc, subject, text, html, attachments = [] }) {
-  const config = await getMailConfig({ includePassword: true });
+export async function sendMail({ to, cc, bcc, subject, text, html, attachments = [], userId = null }) {
+  const config = await getMailConfig({ includePassword: true, userId });
   assertSendableConfig(config);
 
   const safeAttachments = [];
@@ -421,7 +430,7 @@ export async function sendMail({ to, cc, bcc, subject, text, html, attachments =
   try {
     const rawTransporter = nodemailer.createTransport({ streamTransport: true, buffer: true });
     const rawInfo = await rawTransporter.sendMail(mailOptions);
-    if (rawInfo.message) await appendToSent(rawInfo.message);
+    if (rawInfo.message) await appendToSent(rawInfo.message, { userId });
   } catch (error) {
     // Sending succeeded; do not fail the user if provider rejects appending to Sent.
   }

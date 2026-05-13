@@ -28,15 +28,17 @@ export default function MailSettings({ initialConfig }) {
             <Mail size={20} /> Mail Bağlantı Ayarları
           </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            Mail görüntüleme için IMAP, mail gönderme için SMTP bilgilerini girin. Şifre/app password kayıtlıysa geri gösterilmez.
+            Mail görüntüleme için IMAP, mail gönderme için SMTP bilgilerini girin. Bu ayarlar kullanıcıya özeldir; mail pasifse sidebar’da görünmez.
           </p>
         </div>
         <div style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <ShieldCheck size={16} /> Sadece admin düzenler
+          <ShieldCheck size={16} /> Kullanıcıya özel
         </div>
       </div>
 
       <form action={submit} style={{ display: 'grid', gap: '1rem' }}>
+        <CheckField label="Mail modülünü aktif et" name="enabled" defaultChecked={initialConfig?.enabled === true} />
+
         <div style={gridStyle}>
           <Field label="IMAP Host" name="imapHost" defaultValue={initialConfig?.imapHost} placeholder="imap.gmail.com" />
           <Field label="IMAP Port" name="imapPort" type="number" defaultValue={initialConfig?.imapPort || 993} />

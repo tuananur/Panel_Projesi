@@ -5,15 +5,16 @@ import Sidebar from './sidebar';
 import Header from './header-client';
 import { usePathname } from 'next/navigation';
 
-export default function DashboardClientLayout({ children, session, permissions }) {
+export default function DashboardClientLayout({ children, session, permissions, notificationSettings, mailEnabled }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    setIsSidebarOpen(false);
+    const frame = window.requestAnimationFrame(() => setIsSidebarOpen(false));
     if (pathname.startsWith('/dashboard/client/')) {
       window.scrollTo(0, 0);
     }
+    return () => window.cancelAnimationFrame(frame);
   }, [pathname]);
 
   const toggleSidebar = () => {
@@ -31,11 +32,13 @@ export default function DashboardClientLayout({ children, session, permissions }
         permissions={permissions}
         isMobileOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)} 
+        mailEnabled={mailEnabled}
       />
       <main className="main-content">
         <Header 
           session={session} 
           onMenuClick={toggleSidebar} 
+          notificationSettings={notificationSettings}
         />
         <div className="content-area">
           {children}

@@ -1,15 +1,17 @@
 'use client';
 
 import { Menu } from 'lucide-react';
-import DailyQuote from './daily-quote';
+import NotificationBell from './notification-bell';
 
-export default function HeaderClient({ session, onMenuClick }) {
+export default function HeaderClient({ session, onMenuClick, notificationSettings }) {
   if (!session) return null;
 
   const roleDisplayMap = {
     'ADMIN': 'Yönetici',
     'DESIGNER': 'Tasarımcı',
+    'DESIGNER_MANAGER': 'Tasarım Sorumlusu',
     'ADVERTISER': 'Reklamcı',
+    'ADVERTISER_MANAGER': 'Reklam Sorumlusu',
     'DEVELOPER': 'Yazılımcı'
   };
 
@@ -50,7 +52,7 @@ export default function HeaderClient({ session, onMenuClick }) {
           minWidth: 0,
         }}
       >
-        <DailyQuote />
+        <NotificationBell initialSound={notificationSettings?.sound || 'soft'} />
         <div className="role-badge" style={{ flexShrink: 0 }}>
           {displayRole}
         </div>

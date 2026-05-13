@@ -71,3 +71,26 @@ CREATE INDEX "WorkItem_clientId_idx" ON "WorkItem"("clientId");
 CREATE INDEX "WorkItemEvent_workItemId_idx" ON "WorkItemEvent"("workItemId");
 
 ALTER TABLE "WorkItem" ADD COLUMN IF NOT EXISTS "unreadForUserIds" TEXT NOT NULL DEFAULT '[]';
+
+
+CREATE TABLE IF NOT EXISTS "Notification" (
+  "id" SERIAL NOT NULL,
+  "userId" INTEGER NOT NULL,
+  "title" TEXT NOT NULL,
+  "message" TEXT NOT NULL,
+  "url" TEXT,
+  "type" TEXT NOT NULL DEFAULT 'GENERAL',
+  "dedupeKey" TEXT,
+  "readAt" TIMESTAMP(3),
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+);
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Notification_userId_fkey') THEN
+    ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "Notification_dedupeKey_key" ON "Notification"("dedupeKey");
+CREATE INDEX IF NOT EXISTS "Notification_userId_readAt_createdAt_idx" ON "Notification"("userId", "readAt", "createdAt");
