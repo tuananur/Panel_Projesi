@@ -28,8 +28,9 @@ function parseClientJsonObject(raw, fallback = '{}') {
 
 function accountLinkText(value) {
   if (value == null) return '';
-  if (typeof value === 'string') return value;
-  return String(value);
+  if (typeof value === 'string') return value === '[object Object]' ? '' : value;
+  if (typeof value === 'object') return value.url === '[object Object]' ? '' : (value.url || '');
+  return '';
 }
 
 const PLATFORM_ICONS = {

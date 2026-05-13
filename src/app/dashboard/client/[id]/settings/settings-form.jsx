@@ -17,6 +17,37 @@ const DAY_LABELS = {
   'Sunday': 'Paz'
 };
 
+function accountUrl(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value === '[object Object]' ? '' : value;
+  if (typeof value === 'object') return value.url === '[object Object]' ? '' : (value.url || '');
+  return '';
+}
+
+function mergeSocialAccountUrls(currentSocial, urlByPlatform) {
+  const merged = { ...currentSocial };
+
+  for (const [platform, url] of Object.entries(urlByPlatform)) {
+    const existing = currentSocial?.[platform];
+    if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
+      merged[platform] = { ...existing, url };
+    } else {
+      merged[platform] = url;
+    }
+  }
+
+  return merged;
+}
+
+function parseJSONObjectSafe(raw) {
+  try {
+    const parsed = JSON.parse(raw || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 export default function SettingsForm({ client, role }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -34,16 +65,16 @@ export default function SettingsForm({ client, role }) {
   const canEditSEO = isAdmin || isAdvertiser;
   const canEditSocial = isAdmin || isDesigner;
   
-  const currentSocial = JSON.parse(client.socialAccounts || '{}');
-  const currentSchedule = JSON.parse(client.socialSchedule || '{}');
+  const currentSocial = parseJSONObjectSafe(client.socialAccounts);
+  const currentSchedule = parseJSONObjectSafe(client.socialSchedule);
   
   const [social, setSocial] = useState({
-    Instagram: currentSocial.Instagram || '',
-    YouTube: currentSocial.YouTube || '',
-    Facebook: currentSocial.Facebook || '',
-    LinkedIn: currentSocial.LinkedIn || '',
-    X: currentSocial.X || '',
-    Pinterest: currentSocial.Pinterest || ''
+    Instagram: accountUrl(currentSocial.Instagram),
+    YouTube: accountUrl(currentSocial.YouTube),
+    Facebook: accountUrl(currentSocial.Facebook),
+    LinkedIn: accountUrl(currentSocial.LinkedIn),
+    X: accountUrl(currentSocial.X),
+    Pinterest: accountUrl(currentSocial.Pinterest)
   });
 
   const [schedule, setSchedule] = useState(currentSchedule);
@@ -85,7 +116,7 @@ export default function SettingsForm({ client, role }) {
     setGlobalLoading(true);
     setError('');
     
-    formData.append('socialAccounts', JSON.stringify(social));
+    formData.append('socialAccounts', JSON.stringify(mergeSocialAccountUrls(currentSocial, social)));
     formData.append('socialSchedule', JSON.stringify(schedule));
     
     const result = await updateClientSettingsAction(client.id, formData);
@@ -298,7 +329,7 @@ export default function SettingsForm({ client, role }) {
             <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
               <p style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>İpucu:</p>
               <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                Access Token almak için Meta Developers panelinden 'Ads Management' izinlerine sahip bir token oluşturmalısınız.
+                Access Token almak için Meta Developers panelinden &apos;Ads Management&apos; izinlerine sahip bir token oluşturmalısınız.
               </p>
             </div>
 

@@ -7,7 +7,16 @@ import { Edit } from 'lucide-react';
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
 
-export default function EditUserModal({ user }) {
+const ROLES = [
+  { key: 'ADMIN', label: 'Yönetici (Admin)' },
+  { key: 'DESIGNER_MANAGER', label: 'Tasarım Yetkilisi' },
+  { key: 'DESIGNER', label: 'Tasarımcı' },
+  { key: 'ADVERTISER_MANAGER', label: 'Reklam Yetkilisi' },
+  { key: 'ADVERTISER', label: 'Reklamcı' },
+  { key: 'DEVELOPER', label: 'Yazılımcı' },
+];
+
+export default function EditUserModal({ user, managerCandidates = [] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,10 +71,21 @@ export default function EditUserModal({ user }) {
               <div className="input-group">
                 <label className="input-label">Rol</label>
                 <select name="role" className="input-field" defaultValue={user.role} required>
-                  <option value="ADMIN">Yönetici (Admin)</option>
-                  <option value="DESIGNER">Tasarımcı</option>
-                  <option value="ADVERTISER">Reklamcı</option>
-                  <option value="DEVELOPER">Yazılımcı</option>
+                  {ROLES.map((role) => (
+                    <option key={role.key} value={role.key}>{role.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Bağlı Yetkili</label>
+                <select name="managerId" className="input-field" defaultValue={user.managerId || ''}>
+                  <option value="">Yok / Admin</option>
+                  {managerCandidates
+                    .filter((manager) => manager.id !== user.id)
+                    .map((manager) => (
+                      <option key={manager.id} value={manager.id}>{manager.username} ({manager.role})</option>
+                    ))}
                 </select>
               </div>
 

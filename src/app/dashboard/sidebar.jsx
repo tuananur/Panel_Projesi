@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction } from '@/app/actions';
+import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction, getWorkItemBadgeCountAction } from '@/app/actions';
 import { can } from '@/lib/permissions';
 
 export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
@@ -27,9 +27,11 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
   const isAdmin = role === 'ADMIN';
   const canCredentials = can(permissions, role, 'page.credentials');
   const canNotes = can(permissions, role, 'page.notes');
+  const canWorkItems = can(permissions, role, 'page.work_items');
   const [hasNewLogs, setHasNewLogs] = useState(false);
   const [hasNewNotes, setHasNewNotes] = useState(false);
   const [unreadMailCount, setUnreadMailCount] = useState(0);
+  const [workItemCount, setWorkItemCount] = useState(0);
 
   useEffect(() => {
     if (isAdmin) {
@@ -79,6 +81,18 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
   }, [pathname]);
 
   useEffect(() => {
+    const checkWorkItems = async () => {
+      if (!canWorkItems) return;
+      const result = await getWorkItemBadgeCountAction();
+      setWorkItemCount(result?.count || 0);
+    };
+    checkWorkItems();
+
+    const interval = setInterval(checkWorkItems, 30000);
+    return () => clearInterval(interval);
+  }, [pathname, canWorkItems]);
+
+  useEffect(() => {
     const checkUnreadMail = async () => {
       const result = await getUnreadMailCountAction();
       setUnreadMailCount(result?.count || 0);
@@ -102,6 +116,9 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
     ] : []),
     ...(canNotes ? [
       { href: '/dashboard/notes', label: 'Kişisel Notlar', icon: <StickyNote size={20} /> },
+    ] : []),
+    ...(canWorkItems ? [
+      { href: '/dashboard/work-items', label: 'İş Takip', icon: <CheckSquare size={20} /> },
     ] : []),
     { href: '/dashboard/mail', label: 'Mail', icon: <Mail size={20} /> },
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
@@ -245,6 +262,27 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose }) {
                     boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)',
                     animation: 'pulse-red 2s infinite'
                   }}></span>
+                )}
+                {item.label === 'İş Takip' && workItemCount > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-9px',
+                    right: '-12px',
+                    minWidth: '18px',
+                    height: '18px',
+                    padding: '0 5px',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    borderRadius: '999px',
+                    border: '2px solid var(--bg-secondary)',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.45)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.62rem',
+                    fontWeight: 900,
+                    lineHeight: 1
+                  }}>{workItemCount > 99 ? '99+' : workItemCount}</span>
                 )}
                 {item.label === 'Mail' && unreadMailCount > 0 && (
                   <span style={{

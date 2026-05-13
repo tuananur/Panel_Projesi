@@ -8,15 +8,24 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  username     String        @unique
-  password     String?
-  role         String        @default("DESIGNER") // "ADMIN", "DESIGNER", "ADVERTISER"
-  logs         ActivityLog[]
-  notes        Note[]        @relation("NoteAssignee")
-  createdNotes Note[]        @relation("NoteCreator")
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id                Int             @id @default(autoincrement())
+  username          String          @unique
+  password          String?
+  role              String          @default("DESIGNER") // "ADMIN", "DESIGNER", "DESIGNER_MANAGER", "ADVERTISER", "ADVERTISER_MANAGER", "DEVELOPER"
+  managerId         Int?
+  manager           User?           @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
+  managedUsers      User[]          @relation("UserManager")
+  logs              ActivityLog[]
+  notes             Note[]          @relation("NoteAssignee")
+  createdNotes      Note[]          @relation("NoteCreator")
+  assignedWorkItems WorkItem[]      @relation("WorkItemAssignee")
+  createdWorkItems  WorkItem[]      @relation("WorkItemCreator")
+  approvedWorkItems WorkItem[]      @relation("WorkItemApprover")
+  workItemEvents    WorkItemEvent[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([managerId])
 }
 
 model Client {
@@ -42,6 +51,7 @@ model Client {
   tasks                   Task[]
   logs                    ActivityLog[]
   notes                   Note[]
+  workItems               WorkItem[]
   metaArmyCommands        MetaArmyCommand[]
   metaArmyRuns            MetaArmyRun[]
   metaArmyFindings        MetaArmyFinding[]
@@ -166,6 +176,51 @@ model Note {
   isDone          Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model WorkItem {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?   @db.Text
+  dueDate     DateTime?
+  priority    String    @default("NORMAL") // "LOW", "NORMAL", "HIGH", "URGENT"
+  type        String    @default("OTHER")
+  status      String    @default("ASSIGNED") // "ASSIGNED", "IN_PROGRESS", "SUBMITTED", "APPROVED", "REVISION_REQUESTED", "CANCELLED"
+
+  clientId     Int?
+  client       Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  assigneeId   Int
+  assignee     User    @relation("WorkItemAssignee", fields: [assigneeId], references: [id], onDelete: Cascade)
+  createdById  Int
+  createdBy    User    @relation("WorkItemCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  approvedById Int?
+  approvedBy   User?   @relation("WorkItemApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  submittedAt        DateTime?
+  approvedAt         DateTime?
+  lastSubmissionNote String?   @db.Text
+  lastRevisionNote   String?   @db.Text
+
+  events    WorkItemEvent[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([assigneeId, status])
+  @@index([createdById, status])
+  @@index([clientId])
+}
+
+model WorkItemEvent {
+  id         Int      @id @default(autoincrement())
+  workItemId Int
+  workItem   WorkItem @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String // "CREATED", "STARTED", "SUBMITTED", "APPROVED", "REVISION_REQUESTED", "CANCELLED"
+  note       String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([workItemId])
 }
 
 model AccountingEntry {

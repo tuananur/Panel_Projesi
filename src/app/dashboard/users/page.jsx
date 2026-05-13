@@ -19,8 +19,11 @@ export default async function UsersPage() {
   }
 
   const users = await prisma.user.findMany({
+    include: { manager: { select: { id: true, username: true, role: true } } },
     orderBy: { createdAt: 'desc' }
   });
+
+  const managerCandidates = users.filter((user) => ['ADMIN', 'DESIGNER_MANAGER', 'ADVERTISER_MANAGER'].includes(user.role));
 
   return (
     <div>
@@ -52,6 +55,11 @@ export default async function UsersPage() {
                       <span className="role-badge" style={{ fontSize: '0.6rem', padding: '1px 4px' }}>
                         {user.role}
                       </span>
+                      {user.manager && (
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                          Yetkili: {user.manager.username}
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: '0.4rem 0.3rem' }}>
                       {user.password ? (
@@ -64,7 +72,7 @@ export default async function UsersPage() {
                       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                         {user.id !== session.userId && (
                           <>
-                            <EditUserModal user={user} />
+                            <EditUserModal user={user} managerCandidates={managerCandidates} />
                             <ResetPasswordButton userId={user.id} />
                             <DeleteUserButton userId={user.id} />
                           </>
@@ -88,7 +96,7 @@ export default async function UsersPage() {
           <p className="text-muted" style={{ fontSize: '0.875rem', marginBottom: '1.5rem' }}>
             Kullanıcının şifresi yoktur. İlk girişte şifresini kendisi belirleyecektir.
           </p>
-          <CreateUserForm />
+          <CreateUserForm managerCandidates={managerCandidates} />
         </div>
       </div>
     </div>

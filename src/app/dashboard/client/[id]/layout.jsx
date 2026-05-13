@@ -105,9 +105,10 @@ export default async function ClientDetailLayout({ children, params }) {
   };
 
   const toText = (value) => {
-    if (typeof value === 'string') return value;
+    if (typeof value === 'string') return value === '[object Object]' ? '' : value;
     if (value == null) return '';
-    return String(value);
+    if (typeof value === 'object') return value.url === '[object Object]' ? '' : (value.url || '');
+    return '';
   };
 
   const services = getSafeJSON(client.services, '[]');

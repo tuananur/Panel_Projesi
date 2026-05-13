@@ -4,6 +4,7 @@ import { CONFIGURABLE_ROLES, PERMISSION_GROUPS, getRolePermissions } from '@/lib
 import ThemeSettings from './theme-settings';
 import RolePermissionsEditor from './role-permissions-editor';
 import MailSettings from './mail-settings';
+import DatabaseMaintenance from './database-maintenance';
 import { getMailSettingsAction } from '@/app/actions';
 
 export const metadata = {
@@ -31,6 +32,10 @@ export default async function SettingsPage() {
         <>
           <div style={{ marginTop: '2rem' }}>
             <MailSettings initialConfig={mailSettings?.config} />
+          </div>
+
+          <div style={{ marginTop: '2rem' }}>
+            <DatabaseMaintenance />
           </div>
 
           <div style={{ marginTop: '2rem' }}>

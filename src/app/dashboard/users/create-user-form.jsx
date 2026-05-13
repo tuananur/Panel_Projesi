@@ -6,7 +6,16 @@ import { useRouter } from 'next/navigation';
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
 
-export default function CreateUserForm() {
+const ROLES = [
+  { key: 'ADMIN', label: 'Yönetici (Admin)' },
+  { key: 'DESIGNER_MANAGER', label: 'Tasarım Yetkilisi' },
+  { key: 'DESIGNER', label: 'Tasarımcı' },
+  { key: 'ADVERTISER_MANAGER', label: 'Reklam Yetkilisi' },
+  { key: 'ADVERTISER', label: 'Reklamcı' },
+  { key: 'DEVELOPER', label: 'Yazılımcı' },
+];
+
+export default function CreateUserForm({ managerCandidates = [] }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { setGlobalLoading } = useTheme();
@@ -53,10 +62,19 @@ export default function CreateUserForm() {
           required
           style={{ cursor: 'pointer' }}
         >
-          <option value="ADMIN">Yönetici (Admin)</option>
-          <option value="DESIGNER">Tasarımcı</option>
-          <option value="ADVERTISER">Reklamcı</option>
-          <option value="DEVELOPER">Yazılımcı</option>
+          {ROLES.map((role) => (
+            <option key={role.key} value={role.key}>{role.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="managerId" className="input-label">Bağlı Yetkili</label>
+        <select id="managerId" name="managerId" className="input-field" defaultValue="">
+          <option value="">Yok / Admin</option>
+          {managerCandidates.map((manager) => (
+            <option key={manager.id} value={manager.id}>{manager.username} ({manager.role})</option>
+          ))}
         </select>
       </div>
 

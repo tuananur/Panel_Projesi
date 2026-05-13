@@ -3,8 +3,24 @@ import prisma from './prisma';
 // Configurable roles. ADMIN is always allowed and not configurable.
 export const CONFIGURABLE_ROLES = [
   { key: 'DESIGNER', label: 'Tasarımcı' },
+  { key: 'DESIGNER_MANAGER', label: 'Tasarım Yetkilisi' },
   { key: 'ADVERTISER', label: 'Reklamcı' },
+  { key: 'ADVERTISER_MANAGER', label: 'Reklam Yetkilisi' },
   { key: 'DEVELOPER', label: 'Yazılımcı' },
+];
+
+export const ROLE_LABELS = {
+  ADMIN: 'Yönetici (Admin)',
+  DESIGNER: 'Tasarımcı',
+  DESIGNER_MANAGER: 'Tasarım Yetkilisi',
+  ADVERTISER: 'Reklamcı',
+  ADVERTISER_MANAGER: 'Reklam Yetkilisi',
+  DEVELOPER: 'Yazılımcı',
+};
+
+export const USER_ROLES = [
+  { key: 'ADMIN', label: ROLE_LABELS.ADMIN },
+  ...CONFIGURABLE_ROLES,
 ];
 
 // Permission catalog grouped by section.
@@ -14,6 +30,7 @@ export const PERMISSION_GROUPS = [
     items: [
       { key: 'page.credentials', label: 'Giriş Bilgileri' },
       { key: 'page.notes', label: 'Kişisel Notlar' },
+      { key: 'page.work_items', label: 'İş Takip' },
     ],
   },
   {
@@ -38,6 +55,19 @@ export const DEFAULT_PERMISSIONS = {
   DESIGNER: {
     'page.credentials': true,
     'page.notes': true,
+    'page.work_items': true,
+    'client.tab.stats': true,
+    'client.tab.notes': true,
+    'client.tab.dev': false,
+    'client.tab.meta': false,
+    'client.tab.seo': false,
+    'client.tab.social': true,
+    'client.tab.settings': true,
+  },
+  DESIGNER_MANAGER: {
+    'page.credentials': true,
+    'page.notes': true,
+    'page.work_items': true,
     'client.tab.stats': true,
     'client.tab.notes': true,
     'client.tab.dev': false,
@@ -49,6 +79,19 @@ export const DEFAULT_PERMISSIONS = {
   ADVERTISER: {
     'page.credentials': true,
     'page.notes': true,
+    'page.work_items': true,
+    'client.tab.stats': true,
+    'client.tab.notes': true,
+    'client.tab.dev': false,
+    'client.tab.meta': true,
+    'client.tab.seo': true,
+    'client.tab.social': true,
+    'client.tab.settings': true,
+  },
+  ADVERTISER_MANAGER: {
+    'page.credentials': true,
+    'page.notes': true,
+    'page.work_items': true,
     'client.tab.stats': true,
     'client.tab.notes': true,
     'client.tab.dev': false,
@@ -60,6 +103,7 @@ export const DEFAULT_PERMISSIONS = {
   DEVELOPER: {
     'page.credentials': false,
     'page.notes': true,
+    'page.work_items': true,
     'client.tab.stats': true,
     'client.tab.notes': false,
     'client.tab.dev': true,

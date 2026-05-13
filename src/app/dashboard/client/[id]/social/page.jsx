@@ -15,6 +15,13 @@ function parseJSONSafe(value, fallback) {
   }
 }
 
+function accountUrl(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value === '[object Object]' ? '' : value;
+  if (typeof value === 'object') return value.url === '[object Object]' ? '' : (value.url || '');
+  return '';
+}
+
 export default async function SocialPage({ params }) {
   const { id } = await params;
   const session = await getSession();
@@ -40,7 +47,7 @@ export default async function SocialPage({ params }) {
   const socialAccounts = parseJSONSafe(client.socialAccounts, '{}');
   const socialSchedule = parseJSONSafe(client.socialSchedule, '{}');
   const activePlatforms = Object.keys(socialAccounts).filter(p => {
-    const hasAccount = socialAccounts[p] && socialAccounts[p].trim() !== '';
+    const hasAccount = accountUrl(socialAccounts[p]).trim() !== '';
     const hasSchedule = socialSchedule[p] && socialSchedule[p].length > 0;
     return hasAccount || hasSchedule;
   });
