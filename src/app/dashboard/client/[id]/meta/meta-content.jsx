@@ -328,79 +328,98 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       {/* PREMIUM SIDE PANEL */}
       {showDetailsPanel && selectedEntity && (
         <>
-          <div onClick={() => setShowDetailsPanel(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', zIndex: 10000 }} />
-          <div style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '480px', background: '#0f172a', borderLeft: '1px solid rgba(255,255,255,0.1)', boxShadow: '-20px 0 60px rgba(0,0,0,0.7)', zIndex: 10001, display: 'flex', flexDirection: 'column', animation: 'slideInRight 0.3s ease-out' }}>
+          <div onClick={() => setShowDetailsPanel(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 10000 }} />
+          <div style={{ 
+            position: 'fixed', right: 0, top: 0, bottom: 0, width: '480px', 
+            background: '#1a1f2e', // Darker, matching app theme
+            boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', zIndex: 10001, 
+            display: 'flex', flexDirection: 'column',
+            animation: 'slideInRight 0.3s ease-out' 
+          }}>
             {/* Header */}
-            <div style={{ padding: '1.5rem 2rem', background: 'linear-gradient(90deg, rgba(30,58,138,0.2) 0%, rgba(15,23,42,0) 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(0,100,224,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0064e0' }}>
-                  <BarChart size={22} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>{selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} Detayı</h3>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {selectedEntity.data.id}</span>
-                </div>
-              </div>
-              <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer' }}><X size={20} /></button>
+            <div style={{ padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#fff' }}>
+                {selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} Detayı
+              </h2>
+              <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
             </div>
 
-            {/* Content */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
-              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem' }}>
-                  <ShieldCheck size={18} color="#3b82f6" />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase' }}>Temel Bilgiler</span>
-                </div>
+            {/* Content Area */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0 2rem 2rem 2rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '1.5rem', fontWeight: 600 }}>TEMEL BİLGİLER</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   <div>
-                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.6rem' }}>İsim</label>
-                    {isEditingEntity ? <input className="form-control" value={editName} onChange={e => setEditName(e.target.value)} style={{ background: 'rgba(0,0,0,0.3)', color: '#fff' }} /> : <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#fff' }}>{selectedEntity.data.name}</div>}
+                    <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.5rem' }}>İsim</label>
+                    {isEditingEntity ? (
+                      <input className="form-control" value={editName} onChange={e => setEditName(e.target.value)} style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+                    ) : (
+                      <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff' }}>{selectedEntity.data.name}</div>
+                    )}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     {(selectedEntity.type === 'campaign' || selectedEntity.type === 'adset') && (
                       <div>
-                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.6rem' }}>Günlük Bütçe</label>
-                        {isEditingEntity ? <input type="number" className="form-control" value={editBudget} onChange={e => setEditBudget(e.target.value)} style={{ background: 'rgba(0,0,0,0.3)', color: '#fff' }} /> : <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#10b981' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>}
+                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.5rem' }}>Günlük Bütçe</label>
+                        {isEditingEntity ? (
+                          <input type="number" className="form-control" value={editBudget} onChange={e => setEditBudget(e.target.value)} style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+                        ) : (
+                          <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#fff' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>
+                        )}
                       </div>
                     )}
                     <div>
-                      <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.6rem' }}>Durum</label>
+                      <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.5rem' }}>Durum</label>
                       <StatusBadge status={selectedEntity.data.status} />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Stats Card */}
-              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem' }}>
-                  <Zap size={18} color="#f59e0b" />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase' }}>Performans</span>
-                </div>
+              {/* Performance Section */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '1.5rem' }}>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '1.5rem', fontWeight: 600 }}>PERFORMANS ÖZETİ</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Harcama</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '12px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Harcama</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
                   </div>
-                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Gösterim</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedEntity.data.insights?.data?.[0]?.impressions || 0}</div>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '12px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Gösterim</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Footer */}
-            <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '1rem' }}>
+            {/* Footer Buttons - MATCHING SCREENSHOT */}
+            <div style={{ padding: '2rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.1)' }}>
               {isEditingEntity ? (
-                <><button onClick={() => setIsEditingEntity(false)} className="btn btn-secondary" style={{ flex: 1 }}>İptal</button><button onClick={handleUpdateName} className="btn btn-primary" style={{ flex: 1 }}>Kaydet</button></>
+                <>
+                  <button onClick={() => setIsEditingEntity(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>İptal</button>
+                  <button onClick={handleUpdateName} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #c026d3 0%, #db2777 100%)', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Kaydet</button>
+                </>
               ) : (
-                <><button onClick={() => handleToggleStatus(selectedEntity.data.id, selectedEntity.data.status, selectedEntity.type)} className="btn btn-secondary" style={{ flex: 1 }}>{selectedEntity.data.status === 'ACTIVE' ? 'Durdur' : 'Başlat'}</button><button onClick={() => setIsEditingEntity(true)} className="btn btn-primary" style={{ flex: 1 }}>Düzenle</button></>
+                <>
+                  <button 
+                    onClick={() => handleToggleStatus(selectedEntity.data.id, selectedEntity.data.status, selectedEntity.type)} 
+                    style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#4b5563', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    {selectedEntity.data.status === 'ACTIVE' || selectedEntity.data.status === 'ENABLED' ? 'Durdur' : 'Başlat'}
+                  </button>
+                  <button 
+                    onClick={() => setIsEditingEntity(true)} 
+                    style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #c026d3 0%, #db2777 100%)', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Düzenle
+                  </button>
+                </>
               )}
             </div>
           </div>
         </>
       )}
+
     </div>
   );
 }
