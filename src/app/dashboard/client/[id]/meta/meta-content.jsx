@@ -239,6 +239,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1100px' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
                 <th style={thStyle}>KAMPANYA</th>
                 <th style={thStyle}>DURUM</th>
                 <th style={thStyle}>SONUÇLAR</th>
@@ -251,6 +252,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
             <tbody>
               {filteredCampaigns.map(c => (
                 <tr key={c.id} style={trStyle}>
+                  <td style={tdStyle}><input type="checkbox" disabled /></td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                       <StatusToggle active={c.status === 'ACTIVE' || c.status === 'ENABLED'} onToggle={() => handleToggleStatus(c.id, c.status, 'campaign')} />
@@ -276,11 +278,19 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
         {activeTab === 'adsets' && (
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead><tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
-              <th style={thStyle}>REKLAM SETİ</th><th style={thStyle}>DURUM</th><th style={thStyle}>BÜTÇE</th><th style={thStyle}>HARCAMA</th><th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
-            </tr></thead>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                <th style={thStyle}>REKLAM SETİ</th>
+                <th style={thStyle}>DURUM</th>
+                <th style={thStyle}>BÜTÇE</th>
+                <th style={thStyle}>HARCAMA</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
+              </tr>
+            </thead>
             <tbody>{filteredAdSets.map(as => (
               <tr key={as.id} style={trStyle}>
+                <td style={tdStyle}><input type="checkbox" disabled /></td>
                 <td style={tdStyle}><div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                   <StatusToggle active={as.status === 'ACTIVE' || as.status === 'ENABLED'} onToggle={() => handleToggleStatus(as.id, as.status, 'adset')} />
                   <span onClick={() => openDetails(as, 'adset')} style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer' }}>{as.name}</span>
@@ -301,11 +311,19 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
         {activeTab === 'ads' && (
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead><tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
-              <th style={thStyle}>REKLAM</th><th style={thStyle}>DURUM</th><th style={thStyle}>HARCAMA</th><th style={thStyle}>CTR</th><th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
-            </tr></thead>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                <th style={thStyle}>REKLAM</th>
+                <th style={thStyle}>DURUM</th>
+                <th style={thStyle}>HARCAMA</th>
+                <th style={thStyle}>CTR</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
+              </tr>
+            </thead>
             <tbody>{filteredAds.map(ad => (
               <tr key={ad.id} style={trStyle}>
+                <td style={tdStyle}><input type="checkbox" disabled /></td>
                 <td style={tdStyle}><div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                   <StatusToggle active={ad.status === 'ACTIVE' || ad.status === 'ENABLED'} onToggle={() => handleToggleStatus(ad.id, ad.status, 'ad')} />
                   <span onClick={() => openDetails(ad, 'ad')} style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer' }}>{ad.name}</span>
