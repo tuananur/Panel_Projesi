@@ -722,13 +722,17 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
             onClick={e => e.stopPropagation()}
             className="animate-slide-in-right"
             style={{
-              width: '100%', maxWidth: '450px', height: '100%',
-              background: 'var(--card-bg)', borderLeft: '1px solid var(--border-color)',
-              padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto'
+              width: '100%', maxWidth: '480px', height: '100%',
+              background: '#0f172a', // Solid dark background to prevent overlap transparency
+              borderLeft: '1px solid rgba(255,255,255,0.1)',
+              padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', 
+              overflowY: 'auto', boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
+              position: 'relative',
+              zIndex: 100001
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-              <h2 className="heading-2" style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+              <h2 className="heading-2" style={{ fontSize: '1.4rem', margin: 0, display: 'flex', alignItems: 'center', gap: '1rem', color: '#fff' }}>
                 <div style={{ padding: '0.4rem', background: 'rgba(0,100,224,0.1)', borderRadius: '8px', color: '#0064e0' }}>
                   {selectedEntity.type === 'campaign' ? <BarChart3 size={20} /> : selectedEntity.type === 'adset' ? <Zap size={20} /> : <TrendingUp size={20} />}
                 </div>
@@ -759,23 +763,23 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
               </section>
 
               <section>
-                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Performans Özeti</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Harcama</div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.2rem' }}>{selectedEntity.data.insights?.data?.[0]?.spend || '0,00'} TL</div>
+                <h4 style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', marginBottom: '1.2rem', letterSpacing: '0.1em' }}>Performans Özeti</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                  <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Harcama</div>
+                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#fff' }}>{selectedEntity.data.insights?.data?.[0]?.spend || '0,00'} TL</div>
                   </div>
-                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Gösterim</div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.2rem' }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString('tr-TR')}</div>
+                  <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Gösterim</div>
+                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#fff' }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString('tr-TR')}</div>
                   </div>
-                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Tıklama</div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.2rem' }}>{selectedEntity.data.insights?.data?.[0]?.clicks || selectedEntity.data.insights?.data?.[0]?.inline_link_clicks || 0}</div>
+                  <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Tıklama</div>
+                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#fff' }}>{selectedEntity.data.insights?.data?.[0]?.clicks || selectedEntity.data.insights?.data?.[0]?.inline_link_clicks || 0}</div>
                   </div>
-                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Erişim</div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.2rem' }}>{Number(selectedEntity.data.insights?.data?.[0]?.reach || 0).toLocaleString('tr-TR')}</div>
+                  <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Erişim</div>
+                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#fff' }}>{Number(selectedEntity.data.insights?.data?.[0]?.reach || 0).toLocaleString('tr-TR')}</div>
                   </div>
                 </div>
               </section>
