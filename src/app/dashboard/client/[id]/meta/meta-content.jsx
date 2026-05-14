@@ -340,6 +340,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
               + Yeni Oluştur
             </button>
           )}
+          </div>
         </div>
       </div>
 
