@@ -707,8 +707,6 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
         </div>
       )}
 
-      )}
-
       {/* DETAILS / EDIT PANEL */}
       {showDetailsPanel && selectedEntity && (
         <div 
