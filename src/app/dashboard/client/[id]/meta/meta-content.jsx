@@ -344,6 +344,99 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       </div>
 
       {/* PREMIUM CENTERED MODAL */}
+      {/* CREATE ENTITY MODAL */}
+      {showCreateModal && (
+        <>
+          <div onClick={() => setShowCreateModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} />
+          <div style={{ 
+            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            width: '100%', maxWidth: '520px', maxHeight: '90vh',
+            background: '#1a1f2e', 
+            borderRadius: '24px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)', zIndex: 10001, 
+            display: 'flex', flexDirection: 'column',
+            animation: 'modalFadeIn 0.3s ease-out',
+            overflow: 'hidden'
+          }}>
+            <div style={{ padding: '2rem 2.5rem 1rem 2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700, color: '#fff' }}>
+                Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'}
+              </h2>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
+            </div>
+
+            <form onSubmit={handleCreateCampaign} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2.5rem 2.5rem 2.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>BAŞLIK *</label>
+                  <input 
+                    required
+                    className="form-control" 
+                    value={createFormData.name} 
+                    onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
+                    placeholder="Örn: Yaz İndirimi 2024"
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px' }} 
+                  />
+                </div>
+
+                {(activeTab === 'adsets' || activeTab === 'ads') && (
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>
+                      ÜST {activeTab === 'adsets' ? 'KAMPANYA' : 'REKLAM SETİ'} SEÇİN *
+                    </label>
+                    <select 
+                      required
+                      value={createFormData.parent_id}
+                      onChange={e => setCreateFormData({ ...createFormData, parent_id: e.target.value })}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px', outline: 'none' }}
+                    >
+                      <option value="">Seçiniz...</option>
+                      {(activeTab === 'adsets' ? campaigns : adSets).map(item => (
+                        <option key={item.id} value={item.id}>{item.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {activeTab !== 'ads' && (
+                  <div>
+                    <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>GÜNLÜK BÜTÇE (TL)</label>
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      value={createFormData.daily_budget} 
+                      onChange={e => setCreateFormData({ ...createFormData, daily_budget: e.target.value })} 
+                      placeholder="Örn: 500"
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px' }} 
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>İLK DURUM</label>
+                  <select 
+                    value={createFormData.status}
+                    onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px', outline: 'none' }}
+                  >
+                    <option value="ACTIVE">Aktif (Hemen Başlat)</option>
+                    <option value="PAUSED">Durdurulmuş (Taslak)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem' }}>
+                <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}>Vazgeç</button>
+                <button type="submit" disabled={isCreating} style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: 'linear-gradient(90deg, #0064e0 0%, #00d4ff 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: isCreating ? 'not-allowed' : 'pointer', fontSize: '1rem', opacity: isCreating ? 0.7 : 1 }}>
+                  {isCreating ? 'Oluşturuluyor...' : 'Oluştur'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </>
+      )}
+
+      {/* PREMIUM CENTERED MODAL */}
       {showDetailsPanel && selectedEntity && (
         <>
           <div onClick={() => setShowDetailsPanel(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} />
