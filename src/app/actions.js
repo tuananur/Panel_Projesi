@@ -1009,6 +1009,41 @@ export async function getGoogleAdsAction(clientId) {
   }
 }
 
+export async function getGoogleAdsGlobalSettingsAction() {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== 'ADMIN') return { error: 'Yetkisiz erişim.' };
+    const setting = await prisma.setting.findUnique({ where: { key: 'google_ads_global_config' } });
+    return { success: true, config: setting ? JSON.parse(setting.value) : {} };
+  } catch (error) {
+    return { error: 'Google Ads genel ayarları alınamadı.' };
+  }
+}
+
+export async function saveGoogleAdsGlobalSettingsAction(formData) {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== 'ADMIN') return { error: 'Yetkisiz erişim.' };
+    
+    const config = {
+      developerToken: formData.get('developerToken'),
+      clientId: formData.get('clientId'),
+      clientSecret: formData.get('clientSecret'),
+    };
+
+    await prisma.setting.upsert({
+      where: { key: 'google_ads_global_config' },
+      update: { value: JSON.stringify(config) },
+      create: { key: 'google_ads_global_config', value: JSON.stringify(config) }
+    });
+
+    await logActivity('UPDATE', 'SETTINGS', 'Google Ads global API ayarları güncellendi.');
+    return { success: true };
+  } catch (error) {
+    return { error: 'Ayarlar kaydedilemedi.' };
+  }
+}
+
 // Mail Actions
 export async function getMailSettingsAction() {
   try {

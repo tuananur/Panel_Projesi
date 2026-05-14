@@ -5,8 +5,9 @@ import ThemeSettings from './theme-settings';
 import RolePermissionsEditor from './role-permissions-editor';
 import MailSettings from './mail-settings';
 import DatabaseMaintenance from './database-maintenance';
-import { getMailSettingsAction, getNotificationSettingsAction } from '@/app/actions';
+import { getMailSettingsAction, getNotificationSettingsAction, getGoogleAdsGlobalSettingsAction } from '@/app/actions';
 import NotificationSettings from './notification-settings';
+import GoogleAdsGlobalSettings from './google-ads-settings';
 
 export const metadata = {
   title: 'Ayarlar | Dashboard',
@@ -19,9 +20,10 @@ export default async function SettingsPage() {
   const isAdmin = session.role === 'ADMIN';
   const permissions = isAdmin ? await getRolePermissions() : null;
   const assignableRoles = isAdmin ? await getRoleAssignableRoles() : null;
-  const [mailSettings, notificationSettings] = await Promise.all([
+  const [mailSettings, notificationSettings, googleAdsGlobalSettings] = await Promise.all([
     getMailSettingsAction(),
     getNotificationSettingsAction(),
+    getGoogleAdsGlobalSettingsAction(),
   ]);
 
   return (
@@ -45,6 +47,10 @@ export default async function SettingsPage() {
         <>
           <div style={{ marginTop: '2rem' }}>
             <DatabaseMaintenance />
+          </div>
+
+          <div style={{ marginTop: '2rem' }}>
+            <GoogleAdsGlobalSettings initialConfig={googleAdsGlobalSettings?.config} />
           </div>
 
           <div style={{ marginTop: '2rem' }}>
