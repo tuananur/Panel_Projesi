@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction } from '@/app/actions';
+import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction, updateMetaEntityAction } from '@/app/actions';
 import {
   TrendingUp, MousePointer2, Eye, Users as UsersIcon,
   Wallet, Search, Calendar, ChevronRight,
@@ -38,6 +38,8 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
   const [selectedEntity, setSelectedEntity] = useState(null); // { type: 'campaign'|'adset'|'ad', data: object }
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
+  const [isEditingEntity, setIsEditingEntity] = useState(false);
+  const [editName, setEditName] = useState('');
 
   const [since, setSince] = useState(initSince || '');
   const [until, setUntil] = useState(initUntil || '');
@@ -144,11 +146,36 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
   const openDetails = (entity, type) => {
     setSelectedEntity({ type, data: entity });
+    setEditName(entity.name);
+    setIsEditingEntity(false);
     setShowDetailsPanel(true);
   };
 
   const selectedCampaignName = campaigns.find(c => c.id === selectedCampaignId)?.name;
   const selectedAdSetName = adSets.find(as => as.id === selectedAdSetId)?.name;
+
+  const handleUpdateName = async () => {
+    if (!editName || editName === selectedEntity.data.name) {
+      setIsEditingEntity(false);
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await updateMetaEntityAction(id, selectedEntity.data.id, { name: editName });
+      if (res?.error) {
+        alert('Güncelleme hatası: ' + res.error);
+      } else {
+        // Update local state
+        const type = selectedEntity.type;
+        if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === selectedEntity.data.id ? { ...c, name: editName } : c));
+        if (type === 'adset') setAdSets(prev => prev.map(as => as.id === selectedEntity.data.id ? { ...as, name: editName } : as));
+        if (type === 'ad') setAds(prev => prev.map(ad => ad.id === selectedEntity.data.id ? { ...ad, name: editName } : ad));
+        
+        setSelectedEntity(prev => ({ ...prev, data: { ...prev.data, name: editName } }));
+        setIsEditingEntity(false);
+      }
+    });
+  };
 
   const isCustom = !!(initSince && initUntil);
 
@@ -747,7 +774,21 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
                     <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>İsim</label>
-                    <div style={{ fontWeight: 600 }}>{selectedEntity.data.name}</div>
+                    {isEditingEntity ? (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          value={editName}
+                          onChange={e => setEditName(e.target.value)}
+                          style={{ fontSize: '0.85rem', padding: '0.4rem 0.6rem' }}
+                          autoFocus
+                        />
+                        <button onClick={handleUpdateName} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Kaydet</button>
+                      </div>
+                    ) : (
+                      <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff' }}>{selectedEntity.data.name}</div>
+                    )}
                   </div>
                   <div>
                     <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Durum</label>
@@ -820,12 +861,12 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                 >
                   {selectedEntity.data.status === 'ACTIVE' || selectedEntity.data.status === 'ENABLED' ? 'Durdur' : 'Başlat'}
                 </button>
-                <button 
-                  onClick={() => alert('Düzenleme özelliği yakında eklenecek.')}
+                 <button 
+                  onClick={() => setIsEditingEntity(!isEditingEntity)}
                   className="btn btn-primary" 
                   style={{ flex: 1, justifyContent: 'center', background: '#0064e0', borderColor: '#0064e0' }}
                 >
-                  Düzenle
+                  {isEditingEntity ? 'İptal' : 'Düzenle'}
                 </button>
               </div>
             </div>

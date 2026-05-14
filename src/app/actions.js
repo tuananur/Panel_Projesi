@@ -1862,3 +1862,44 @@ export async function createMetaCampaignAction(clientId, campaignData) {
     return { error: 'Kampanya oluÅŸturulamadÄ±.' };
   }
 }
+
+export async function updateMetaEntityAction(clientId, entityId, updateData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: " Yetkisiz eriþim.\ };
+
+ const client = await prisma.client.findUnique({
+ where: { id: parseInt(clientId) }
+ });
+ 
+ if (!client || !client.metaAccessToken) {
+ return { error: \API_MISSING\ };
+ }
+
+ const accessToken = client.metaAccessToken.trim();
+ const url = \https://graph.facebook.com/v19.0/\ + entityId;
+ 
+ const payload = {
+ ...updateData,
+ access_token: accessToken
+ };
+
+ if (updateData.daily_budget) {
+ payload.daily_budget = Math.round(updateData.daily_budget * 100);
+ }
+
+ const response = await fetch(url, {
+ method: \POST\,
+ headers: { \Content-Type\: \application/json\ },
+ body: JSON.stringify(payload)
+ });
+
+ const data = await response.json();
+ if (data.error) return { error: data.error.message };
+
+ await logActivity(\UPDATE\, \META_ADS\, \Meta objesi güncellendi: \ + entityId, clientId);
+ return { success: true };
+ } catch (error) {
+ return { error: \Güncelleme yapýlamadý.\ };
+ }
+}
