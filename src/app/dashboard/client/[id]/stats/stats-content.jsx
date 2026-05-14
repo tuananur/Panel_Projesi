@@ -657,24 +657,49 @@ export default function StatsContent({ client, metaResult, googleResult }) {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Harcama</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#10b981' }}>{metaResult?.summary?.spend || 0} TL</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Harcama</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#10b981' }}>{metaResult?.summary?.spend || 0} TL</div>
                 </div>
-                <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Gösterim</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#3b82f6' }}>{Number(metaResult?.summary?.impressions || 0).toLocaleString()}</div>
+                <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Gösterim</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#3b82f6' }}>{Number(metaResult?.summary?.impressions || 0).toLocaleString()}</div>
                 </div>
-                <div style={{ padding: '1rem', background: 'rgba(168, 85, 247, 0.05)', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.1)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#a855f7' }}>{Number(metaResult?.summary?.clicks || 0).toLocaleString()}</div>
+                <div style={{ padding: '0.75rem', background: 'rgba(168, 85, 247, 0.05)', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.1)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#a855f7' }}>{Number(metaResult?.summary?.clicks || 0).toLocaleString()}</div>
                 </div>
-                <div style={{ padding: '1rem', background: 'rgba(236, 72, 153, 0.05)', borderRadius: '12px', border: '1px solid rgba(236, 72, 153, 0.1)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma Oranı (CTR)</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ec4899' }}>%{(Number(metaResult?.summary?.ctr || 0) * 100).toFixed(2)}</div>
+                <div style={{ padding: '0.75rem', background: 'rgba(236, 72, 153, 0.05)', borderRadius: '12px', border: '1px solid rgba(236, 72, 153, 0.1)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma Oranı (CTR)</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ec4899' }}>%{(Number(metaResult?.summary?.ctr || 0) * 100).toFixed(2)}</div>
                 </div>
               </div>
+
+              {metaResult?.activeCampaigns?.length > 0 && (
+                <div style={{ marginTop: '0.5rem', flex: 1 }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Aktif Kampanyalar ({metaResult.activeCampaigns.length})</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {metaResult.activeCampaigns.slice(0, 3).map(camp => (
+                      <div key={camp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: camp.status === 'ACTIVE' || camp.status === 'ENABLED' ? '#10b981' : 'var(--text-secondary)' }}></div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{camp.name}</span>
+                          </div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.75rem' }}>
+                            <span>{Number(camp.spend).toLocaleString()} TL Harcama</span>
+                            <span>{Number(camp.clicks).toLocaleString()} Tıklanma</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <div style={{ marginTop: 'auto', textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
                 <a href={`/dashboard/client/${client.id}/meta`} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
                   Detaylı Meta Raporu <ExternalLink size={12} />
@@ -698,24 +723,49 @@ export default function StatsContent({ client, metaResult, googleResult }) {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div style={{ padding: '1rem', background: 'rgba(66, 133, 244, 0.05)', borderRadius: '12px', border: '1px solid rgba(66, 133, 244, 0.1)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Harcama</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#4285F4' }}>{googleResult?.summary?.spend || 0} TL</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ padding: '0.75rem', background: 'rgba(66, 133, 244, 0.05)', borderRadius: '12px', border: '1px solid rgba(66, 133, 244, 0.1)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Harcama</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#4285F4' }}>{googleResult?.summary?.spend || 0} TL</div>
                 </div>
-                <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Gösterim</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#3b82f6' }}>{Number(googleResult?.summary?.impressions || 0).toLocaleString()}</div>
+                <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Gösterim</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#3b82f6' }}>{Number(googleResult?.summary?.impressions || 0).toLocaleString()}</div>
                 </div>
-                <div style={{ padding: '1rem', background: 'rgba(168, 85, 247, 0.05)', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.1)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#a855f7' }}>{Number(googleResult?.summary?.clicks || 0).toLocaleString()}</div>
+                <div style={{ padding: '0.75rem', background: 'rgba(168, 85, 247, 0.05)', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.1)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#a855f7' }}>{Number(googleResult?.summary?.clicks || 0).toLocaleString()}</div>
                 </div>
-                <div style={{ padding: '1rem', background: 'rgba(236, 72, 153, 0.05)', borderRadius: '12px', border: '1px solid rgba(236, 72, 153, 0.1)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma Oranı (CTR)</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ec4899' }}>%{(Number(googleResult?.summary?.ctr || 0) * 100).toFixed(2)}</div>
+                <div style={{ padding: '0.75rem', background: 'rgba(236, 72, 153, 0.05)', borderRadius: '12px', border: '1px solid rgba(236, 72, 153, 0.1)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma Oranı (CTR)</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ec4899' }}>%{(Number(googleResult?.summary?.ctr || 0) * 100).toFixed(2)}</div>
                 </div>
               </div>
+
+              {googleResult?.activeCampaigns?.length > 0 && (
+                <div style={{ marginTop: '0.5rem', flex: 1 }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Aktif Kampanyalar ({googleResult.activeCampaigns.length})</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {googleResult.activeCampaigns.slice(0, 3).map(camp => (
+                      <div key={camp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: camp.status === 'ENABLED' || camp.status === 'ACTIVE' ? '#4285F4' : 'var(--text-secondary)' }}></div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{camp.name}</span>
+                          </div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.75rem' }}>
+                            <span>{Number(camp.spend).toLocaleString()} TL Harcama</span>
+                            <span>{Number(camp.clicks).toLocaleString()} Tıklanma</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div style={{ marginTop: 'auto', textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
                 <a href={`/dashboard/client/${client.id}/google`} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
                   Detaylı Google Raporu <ExternalLink size={12} />
