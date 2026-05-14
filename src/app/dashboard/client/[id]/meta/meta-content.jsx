@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction } from '@/app/actions';
-import { 
-  TrendingUp, MousePointer2, Eye, Users as UsersIcon, 
-  Wallet, Search, Calendar, ChevronRight, 
+import {
+  TrendingUp, MousePointer2, Eye, Users as UsersIcon,
+  Wallet, Search, Calendar, ChevronRight,
   AlertCircle, CheckCircle, Play, Pause, BarChart3,
   Bot, Send, ShieldCheck, Clock, Zap, ClipboardCheck
 } from 'lucide-react';
@@ -27,7 +27,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedAdSetId, setSelectedAdSetId] = useState(null);
-  
+
   const [since, setSince] = useState(initSince || '');
   const [until, setUntil] = useState(initUntil || '');
 
@@ -54,7 +54,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     });
   };
 
-  const filteredCampaigns = result.activeCampaigns.filter(c => 
+  const filteredCampaigns = result.activeCampaigns.filter(c =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -95,11 +95,11 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
           justifyContent: 'center',
           gap: '1.5rem'
         }}>
-          <div className="spinner" style={{ 
-            width: '50px', 
-            height: '50px', 
-            border: '4px solid rgba(255,255,255,0.1)', 
-            borderTop: '4px solid var(--accent-primary)', 
+          <div className="spinner" style={{
+            width: '50px',
+            height: '50px',
+            border: '4px solid rgba(255,255,255,0.1)',
+            borderTop: '4px solid var(--accent-primary)',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             boxShadow: '0 0 20px rgba(16, 185, 129, 0.2)'
@@ -119,12 +119,12 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
       {/* Filter Status Bar */}
       {(selectedCampaignId || selectedAdSetId) && (
-        <div className="card" style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '1rem', 
-          padding: '0.75rem 1rem', 
-          background: 'rgba(16, 185, 129, 0.05)', 
+        <div className="card" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          padding: '0.75rem 1rem',
+          background: 'rgba(16, 185, 129, 0.05)',
           border: '1px solid rgba(16, 185, 129, 0.2)',
           borderRadius: '12px'
         }}>
@@ -145,18 +145,18 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
               </>
             )}
           </div>
-          <button 
+          <button
             onClick={() => {
               setSelectedCampaignId(null);
               setSelectedAdSetId(null);
               setActiveTab('campaigns');
             }}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: 'var(--text-primary)', 
-              fontSize: '0.8rem', 
-              fontWeight: 700, 
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-primary)',
+              fontSize: '0.8rem',
+              fontWeight: 700,
               cursor: 'pointer',
               textDecoration: 'underline'
             }}
@@ -167,10 +167,10 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       )}
 
       {/* Top Filter Bar */}
-      <div className="card" style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
+      <div className="card" style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         padding: '0.75rem 1.25rem',
         flexWrap: 'wrap',
         gap: '1.5rem',
@@ -205,20 +205,20 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Özel:</span>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 value={since}
                 onChange={(e) => setSince(e.target.value)}
                 style={dateInputStyle}
               />
               <span style={{ color: 'var(--text-secondary)' }}>-</span>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 value={until}
                 onChange={(e) => setUntil(e.target.value)}
                 style={dateInputStyle}
               />
-              <button 
+              <button
                 onClick={handleCustomDateApply}
                 disabled={!since || !until || isPending}
                 style={{
@@ -240,17 +240,17 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
         <div style={{ position: 'relative', width: '250px' }}>
           <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
-          <input 
-            type="text" 
-            placeholder="Ara..." 
+          <input
+            type="text"
+            placeholder="Ara..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ 
-              width: '100%', 
-              padding: '0.5rem 1rem 0.5rem 2rem', 
-              fontSize: '0.8rem', 
-              background: 'rgba(255,255,255,0.05)', 
-              border: '1px solid var(--border-color)', 
+            style={{
+              width: '100%',
+              padding: '0.5rem 1rem 0.5rem 2rem',
+              fontSize: '0.8rem',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid var(--border-color)',
               borderRadius: '8px',
               color: 'var(--text-primary)'
             }}
@@ -279,247 +279,317 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       {activeTab === 'army' ? (
         <MetaArmyPanel clientId={id} armyResult={armyResult} />
       ) : (
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          {activeTab === 'campaigns' && (
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1200px' }}>
-              <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-                  <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
-                  <th style={thStyle}>KAMPANYA</th>
-                  <th style={thStyle}>YAYIN DURUMU</th>
-                  <th style={thStyle}>SONUÇLAR</th>
-                  <th style={thStyle}>SONUÇ BAŞINA ÜCRET</th>
-                  <th style={thStyle}>BÜTÇE</th>
-                  <th style={thStyle}>HARCANAN TUTAR</th>
-                  <th style={thStyle}>GÖSTERİM</th>
-                  <th style={thStyle}>ERİŞİM</th>
-                  <th style={thStyle}>BİTİŞ</th>
-                  <th style={thStyle}>TEKLİF STRATEJİSİ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCampaigns.map(camp => {
-                  const insights = camp.insights?.data?.[0] || {};
-                  return (
-                    <tr key={camp.id} style={trStyle}>
-                      <td style={tdStyle}><input type="checkbox" disabled /></td>
-                      <td style={{ ...tdStyle, paddingLeft: '0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                          <div style={{ 
-                            width: '32px', 
-                            height: '18px', 
-                            background: camp.status === 'ACTIVE' ? '#0064e0' : 'rgba(255,255,255,0.1)', 
-                            borderRadius: '10px', 
-                            position: 'relative',
-                            cursor: 'pointer'
-                          }}>
-                            <div style={{ 
-                              width: '14px', 
-                              height: '14px', 
-                              background: 'white', 
-                              borderRadius: '50%', 
-                              position: 'absolute', 
-                              top: '2px', 
-                              left: camp.status === 'ACTIVE' ? '16px' : '2px',
-                              transition: 'left 0.2s'
-                            }} />
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto' }}>
+            {activeTab === 'campaigns' && (
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1200px' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
+                    <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                    <th style={thStyle}>KAMPANYA</th>
+                    <th style={thStyle}>YAYIN DURUMU</th>
+                    <th style={thStyle}>SONUÇLAR</th>
+                    <th style={thStyle}>SONUÇ BAŞINA ÜCRET</th>
+                    <th style={thStyle}>BÜTÇE</th>
+                    <th style={thStyle}>HARCANAN TUTAR</th>
+                    <th style={thStyle}>GÖSTERİM</th>
+                    <th style={thStyle}>ERİŞİM</th>
+                    <th style={thStyle}>BİTİŞ</th>
+                    <th style={thStyle}>TEKLİF STRATEJİSİ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCampaigns.map(camp => {
+                    const insights = camp.insights?.data?.[0] || {};
+                    return (
+                      <tr key={camp.id} style={trStyle}>
+                        <td style={tdStyle}><input type="checkbox" disabled /></td>
+                        <td style={{ ...tdStyle, paddingLeft: '0' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                            <div style={{
+                              width: '32px',
+                              height: '18px',
+                              background: camp.status === 'ACTIVE' ? '#0064e0' : 'rgba(255,255,255,0.1)',
+                              borderRadius: '10px',
+                              position: 'relative',
+                              cursor: 'pointer'
+                            }}>
+                              <div style={{
+                                width: '14px',
+                                height: '14px',
+                                background: 'white',
+                                borderRadius: '50%',
+                                position: 'absolute',
+                                top: '2px',
+                                left: camp.status === 'ACTIVE' ? '16px' : '2px',
+                                transition: 'left 0.2s'
+                              }} />
+                            </div>
+                            <span
+                              style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer', textDecoration: 'none' }}
+                              onClick={() => {
+                                setSelectedCampaignId(camp.id);
+                                setActiveTab('adsets');
+                              }}
+                              onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                              onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                            >
+                              {camp.name}
+                            </span>
                           </div>
-                          <span 
-                            style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer', textDecoration: 'none' }}
-                            onClick={() => {
-                              setSelectedCampaignId(camp.id);
-                              setActiveTab('adsets');
-                            }}
-                            onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                            onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                          >
-                            {camp.name}
-                          </span>
-                        </div>
-                      </td>
-                      <td style={tdStyle}>
-                        <StatusBadge status={camp.status} />
-                      </td>
-                      <td style={tdStyle}>
-                        <div style={{ fontWeight: 700 }}>{insights.inline_link_clicks || '-'}</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Bağlantı Tıklaması</div>
-                      </td>
-                      <td style={tdStyle}>
-                        {insights.cost_per_inline_link_click ? `${Number(insights.cost_per_inline_link_click).toFixed(2)} TL` : '-'}
-                      </td>
-                      <td style={tdStyle}>
-                        <div style={{ fontWeight: 700 }}>
-                          {camp.daily_budget ? `${(camp.daily_budget / 100).toFixed(2)} TL` : 
-                           camp.lifetime_budget ? `${(camp.lifetime_budget / 100).toFixed(2)} TL` : 'Bütçe Yok'}
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{camp.daily_budget ? 'Günlük' : 'Toplam'}</div>
-                      </td>
-                      <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
-                      <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
-                      <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
-                      <td style={tdStyle}>{camp.stop_time ? new Date(camp.stop_time).toLocaleDateString('tr-TR') : 'Sürekli'}</td>
-                      <td style={tdStyle}>{camp.bid_strategy?.replace(/_/g, ' ') || 'En yüksek hacim'}</td>
-                    </tr>
-                  );
-                })}
-                {filteredCampaigns.length === 0 && <EmptyRow colSpan={11} />}
-              </tbody>
-            </table>
-          )}
+                        </td>
+                        <td style={tdStyle}>
+                          <StatusBadge status={camp.status} />
+                        </td>
+                        <td style={tdStyle}>
+                          <div style={{ fontWeight: 700 }}>{insights.inline_link_clicks || '-'}</div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Bağlantı Tıklaması</div>
+                        </td>
+                        <td style={tdStyle}>
+                          {insights.cost_per_inline_link_click ? `${Number(insights.cost_per_inline_link_click).toFixed(2)} TL` : '-'}
+                        </td>
+                        <td style={tdStyle}>
+                          <div style={{ fontWeight: 700 }}>
+                            {camp.daily_budget ? `${(camp.daily_budget / 100).toFixed(2)} TL` :
+                              camp.lifetime_budget ? `${(camp.lifetime_budget / 100).toFixed(2)} TL` : 'Bütçe Yok'}
+                          </div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{camp.daily_budget ? 'Günlük' : 'Toplam'}</div>
+                        </td>
+                        <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
+                        <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
+                        <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
+                        <td style={tdStyle}>{camp.stop_time ? new Date(camp.stop_time).toLocaleDateString('tr-TR') : 'Sürekli'}</td>
+                        <td style={tdStyle}>{camp.bid_strategy?.replace(/_/g, ' ') || 'En yüksek hacim'}</td>
+                      </tr>
+                    );
+                  })}
+                  {filteredCampaigns.length === 0 && <EmptyRow colSpan={11} />}
+                </tbody>
+              </table>
+            )}
 
-          {activeTab === 'adsets' && (
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1100px' }}>
-              <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-                  <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
-                  <th style={thStyle}>REKLAM SETİ</th>
-                  <th style={thStyle}>YAYIN DURUMU</th>
-                  <th style={thStyle}>SONUÇLAR</th>
-                  <th style={thStyle}>BÜTÇE</th>
-                  <th style={thStyle}>HARCANAN TUTAR</th>
-                  <th style={thStyle}>GÖSTERİM</th>
-                  <th style={thStyle}>ERİŞİM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAdSets.map(as => {
-                  const insights = as.insights?.data?.[0] || {};
-                  return (
-                    <tr key={as.id} style={trStyle}>
-                      <td style={tdStyle}><input type="checkbox" disabled /></td>
-                      <td style={{ ...tdStyle, paddingLeft: '0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                          <div style={{ 
-                            width: '32px', 
-                            height: '18px', 
-                            background: as.status === 'ACTIVE' ? '#0064e0' : 'rgba(255,255,255,0.1)', 
-                            borderRadius: '10px', 
-                            position: 'relative'
-                          }}>
-                            <div style={{ 
-                              width: '14px', 
-                              height: '14px', 
-                              background: 'white', 
-                              borderRadius: '50%', 
-                              position: 'absolute', 
-                              top: '2px', 
-                              left: as.status === 'ACTIVE' ? '16px' : '2px',
-                              transition: 'left 0.2s'
-                            }} />
+            {activeTab === 'adsets' && (
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1100px' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
+                    <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                    <th style={thStyle}>REKLAM SETİ</th>
+                    <th style={thStyle}>YAYIN DURUMU</th>
+                    <th style={thStyle}>SONUÇLAR</th>
+                    <th style={thStyle}>BÜTÇE</th>
+                    <th style={thStyle}>HARCANAN TUTAR</th>
+                    <th style={thStyle}>GÖSTERİM</th>
+                    <th style={thStyle}>ERİŞİM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAdSets.map(as => {
+                    const insights = as.insights?.data?.[0] || {};
+                    return (
+                      <tr key={as.id} style={trStyle}>
+                        <td style={tdStyle}><input type="checkbox" disabled /></td>
+                        <td style={{ ...tdStyle, paddingLeft: '0' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                            <div 
+                              onClick={() => handleToggleStatus(as.id, as.status, 'adset')}
+                              style={{ 
+                                width: '32px', 
+                                height: '18px', 
+                                background: as.status === 'ACTIVE' || as.status === 'ENABLED' ? '#10b981' : 'rgba(255,255,255,0.1)', 
+                                borderRadius: '10px', 
+                                position: 'relative',
+                                cursor: 'pointer'
+                              }}>
+                              <div style={{ 
+                                width: '14px', 
+                                height: '14px', 
+                                background: 'white', 
+                                borderRadius: '50%', 
+                                position: 'absolute', 
+                                top: '2px', 
+                                left: as.status === 'ACTIVE' || as.status === 'ENABLED' ? '16px' : '2px',
+                                transition: 'left 0.2s'
+                              }} />
+                            </div>
+                            <span
+                              style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer', textDecoration: 'none' }}
+                              onClick={() => {
+                                setSelectedAdSetId(as.id);
+                                setActiveTab('ads');
+                              }}
+                              onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                              onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                            >
+                              {as.name}
+                            </span>
                           </div>
-                          <span 
-                            style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer', textDecoration: 'none' }}
-                            onClick={() => {
-                              setSelectedAdSetId(as.id);
-                              setActiveTab('ads');
-                            }}
-                            onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                            onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                          >
-                            {as.name}
-                          </span>
-                        </div>
-                      </td>
-                      <td style={tdStyle}>
-                        <StatusBadge status={as.status} />
-                      </td>
-                      <td style={tdStyle}>
-                        <div style={{ fontWeight: 700 }}>{insights.clicks || '-'}</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Tıklama</div>
-                      </td>
-                      <td style={tdStyle}>
-                        <div style={{ fontWeight: 700 }}>
-                          {as.daily_budget ? `${(as.daily_budget / 100).toFixed(2)} TL` : 
-                           as.lifetime_budget ? `${(as.lifetime_budget / 100).toFixed(2)} TL` : 'Bütçe Yok'}
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{as.daily_budget ? 'Günlük' : 'Toplam'}</div>
-                      </td>
-                      <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
-                      <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
-                      <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
-                    </tr>
-                  );
-                })}
-                {filteredAdSets.length === 0 && <EmptyRow colSpan={8} />}
-              </tbody>
-            </table>
-          )}
+                        </td>
+                        <td style={tdStyle}>
+                          <StatusBadge status={as.status} />
+                        </td>
+                        <td style={tdStyle}>
+                          <div style={{ fontWeight: 700 }}>{insights.clicks || '-'}</div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Tıklama</div>
+                        </td>
+                        <td style={tdStyle}>
+                          <div style={{ fontWeight: 700 }}>
+                            {as.daily_budget ? `${(as.daily_budget / 100).toFixed(2)} TL` :
+                              as.lifetime_budget ? `${(as.lifetime_budget / 100).toFixed(2)} TL` : 'Bütçe Yok'}
+                          </div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{as.daily_budget ? 'Günlük' : 'Toplam'}</div>
+                        </td>
+                        <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
+                        <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
+                        <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
+                      </tr>
+                    );
+                  })}
+                  {filteredAdSets.length === 0 && <EmptyRow colSpan={8} />}
+                </tbody>
+              </table>
+            )}
 
-          {activeTab === 'ads' && (
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1200px' }}>
-              <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-                  <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
-                  <th style={thStyle}>REKLAM</th>
-                  <th style={thStyle}>ÖNİZLEME</th>
-                  <th style={thStyle}>YAYIN DURUMU</th>
-                  <th style={thStyle}>SONUÇLAR</th>
-                  <th style={thStyle}>HARCANAN TUTAR</th>
-                  <th style={thStyle}>GÖSTERİM</th>
-                  <th style={thStyle}>ERİŞİM</th>
-                  <th style={thStyle}>CTR</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAds.map(ad => {
-                  const insights = ad.insights?.data?.[0] || {};
-                  return (
-                    <tr key={ad.id} style={trStyle}>
-                      <td style={tdStyle}><input type="checkbox" disabled /></td>
-                      <td style={{ ...tdStyle, paddingLeft: '0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                          <div style={{ 
-                            width: '32px', 
-                            height: '18px', 
-                            background: ad.status === 'ACTIVE' ? '#0064e0' : 'rgba(255,255,255,0.1)', 
-                            borderRadius: '10px', 
-                            position: 'relative'
-                          }}>
-                            <div style={{ 
-                              width: '14px', 
-                              height: '14px', 
-                              background: 'white', 
-                              borderRadius: '50%', 
-                              position: 'absolute', 
-                              top: '2px', 
-                              left: ad.status === 'ACTIVE' ? '16px' : '2px',
-                              transition: 'left 0.2s'
-                            }} />
-                          </div>
-                          <div style={{ maxWidth: '200px' }}>
-                            <div style={{ fontWeight: 700 }}>{ad.name}</div>
-                            <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {ad.creative?.body}
+            {activeTab === 'ads' && (
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1200px' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
+                    <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                    <th style={thStyle}>REKLAM</th>
+                    <th style={thStyle}>ÖNİZLEME</th>
+                    <th style={thStyle}>YAYIN DURUMU</th>
+                    <th style={thStyle}>SONUÇLAR</th>
+                    <th style={thStyle}>HARCANAN TUTAR</th>
+                    <th style={thStyle}>GÖSTERİM</th>
+                    <th style={thStyle}>ERİŞİM</th>
+                    <th style={thStyle}>CTR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAds.map(ad => {
+                    const insights = ad.insights?.data?.[0] || {};
+                    return (
+                      <tr key={ad.id} style={trStyle}>
+                        <td style={tdStyle}><input type="checkbox" disabled /></td>
+                        <td style={{ ...tdStyle, paddingLeft: '0' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                            <div 
+                              onClick={() => handleToggleStatus(ad.id, ad.status, 'ad')}
+                              style={{ 
+                                width: '32px', 
+                                height: '18px', 
+                                background: ad.status === 'ACTIVE' || ad.status === 'ENABLED' ? '#10b981' : 'rgba(255,255,255,0.1)', 
+                                borderRadius: '10px', 
+                                position: 'relative',
+                                cursor: 'pointer'
+                              }}>
+                              <div style={{ 
+                                width: '14px', 
+                                height: '14px', 
+                                background: 'white', 
+                                borderRadius: '50%', 
+                                position: 'absolute', 
+                                top: '2px', 
+                                left: ad.status === 'ACTIVE' || ad.status === 'ENABLED' ? '16px' : '2px',
+                                transition: 'left 0.2s'
+                              }} />
+                            </div>
+                            <div style={{ maxWidth: '200px' }}>
+                              <div style={{ fontWeight: 700 }}>{ad.name}</div>
+                              <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {ad.creative?.body}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td style={tdStyle}>
-                        {ad.creative?.image_url || ad.creative?.thumbnail_url ? (
-                          <img src={ad.creative.image_url || ad.creative.thumbnail_url} style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid var(--border-color)' }} />
-                        ) : <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />}
-                      </td>
-                      <td style={tdStyle}>
-                        <StatusBadge status={ad.status} />
-                      </td>
-                      <td style={tdStyle}>
-                        <div style={{ fontWeight: 700 }}>{insights.clicks || '-'}</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Tıklama</div>
-                      </td>
-                      <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
-                      <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
-                      <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
-                      <td style={tdStyle}>%{(Number(insights.ctr || 0) * 100).toFixed(2)}</td>
-                    </tr>
-                  );
-                })}
-                {filteredAds.length === 0 && <EmptyRow colSpan={9} />}
-              </tbody>
-            </table>
-          )}
+                        </td>
+                        <td style={tdStyle}>
+                          {ad.creative?.image_url || ad.creative?.thumbnail_url ? (
+                            <img src={ad.creative.image_url || ad.creative.thumbnail_url} style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid var(--border-color)' }} />
+                          ) : <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />}
+                        </td>
+                        <td style={tdStyle}>
+                          <StatusBadge status={ad.status} />
+                        </td>
+                        <td style={tdStyle}>
+                          <div style={{ fontWeight: 700 }}>{insights.clicks || '-'}</div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Tıklama</div>
+                        </td>
+                        <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
+                        <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
+                        <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
+                        <td style={tdStyle}>%{(Number(insights.ctr || 0) * 100).toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+                  {filteredAds.length === 0 && <EmptyRow colSpan={9} />}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* CREATE MODAL */}
+      {showCreateModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+          zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div className="card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 className="heading-2" style={{ fontSize: '1.25rem' }}>
+                Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'} Oluştur
+              </h3>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>✕</button>
+            </div>
+            
+            <form onSubmit={handleCreateCampaign} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">İsim</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  required
+                  placeholder="Kampanya/Reklam Adı"
+                  value={createFormData.name}
+                  onChange={e => setCreateFormData({...createFormData, name: e.target.value})}
+                />
+              </div>
+
+              {activeTab === 'campaigns' && (
+                <div className="form-group">
+                  <label className="form-label">Günlük Bütçe (TL)</label>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    placeholder="Örn: 100"
+                    value={createFormData.daily_budget}
+                    onChange={e => setCreateFormData({...createFormData, daily_budget: e.target.value})}
+                  />
+                </div>
+              )}
+
+              <div className="form-group">
+                <label className="form-label">Yayın Durumu</label>
+                <select 
+                  className="form-control"
+                  value={createFormData.status}
+                  onChange={e => setCreateFormData({...createFormData, status: e.target.value})}
+                >
+                  <option value="ACTIVE">Aktif (Yayınla)</option>
+                  <option value="PAUSED">Duraklatıldı (Taslak)</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button type="button" onClick={() => setShowCreateModal(false)} className="btn btn-secondary" style={{ flex: 1 }}>İptal</button>
+                <button type="submit" disabled={isCreating} className="btn btn-primary" style={{ flex: 1, background: '#0064e0', borderColor: '#0064e0' }}>
+                  {isCreating ? 'Oluşturuluyor...' : 'Oluştur'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -632,7 +702,7 @@ function MetaArmyPanel({ clientId, armyResult }) {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}> 
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
         <ArmyList title="Son Komutlar" empty="Henüz komut yok." items={commands.map((item) => ({
           id: item.id,
           title: item.command,
@@ -715,14 +785,14 @@ function ArmyList({ title, items, empty }) {
 function TabButton({ id, label, count, activeTab, onClick }) {
   const isActive = activeTab === id;
   return (
-    <button 
+    <button
       onClick={() => onClick(id)}
-      style={{ 
-        padding: '1rem 0.5rem', 
-        fontSize: '0.9rem', 
-        fontWeight: 700, 
-        background: 'none', 
-        border: 'none', 
+      style={{
+        padding: '1rem 0.5rem',
+        fontSize: '0.9rem',
+        fontWeight: 700,
+        background: 'none',
+        border: 'none',
         borderBottom: isActive ? '2px solid var(--accent-primary)' : '2px solid transparent',
         color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
         cursor: 'pointer',
@@ -751,11 +821,11 @@ function StatCard({ label, value, icon, color }) {
 function StatusBadge({ status }) {
   const isActive = status === 'ACTIVE';
   return (
-    <div style={{ 
-      display: 'inline-flex', 
-      alignItems: 'center', 
-      gap: '0.4rem', 
-      padding: '0.2rem 0.5rem', 
+    <div style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '0.4rem',
+      padding: '0.2rem 0.5rem',
       borderRadius: '4px',
       background: isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)',
       color: isActive ? '#10b981' : 'var(--text-secondary)',
