@@ -1903,3 +1903,34 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
     return { error: 'Güncelleme yapılamadı.' };
   }
 }
+
+export async function deleteMetaEntityAction(clientId, entityId) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+    
+    if (!client || !client.metaAccessToken) {
+      return { error: 'API_MISSING' };
+    }
+
+    const accessToken = client.metaAccessToken.trim();
+    const url = `https://graph.facebook.com/v19.0/${entityId}?access_token=${accessToken}`;
+    
+    const response = await fetch(url, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+    if (data.error) return { error: data.error.message };
+
+    await logActivity('DELETE', 'META_ADS', `Meta objesi silindi: ${entityId}`, clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Silme işlemi yapılamadı.' };
+  }
+}
+

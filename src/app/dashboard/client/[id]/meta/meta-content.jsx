@@ -2,12 +2,12 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction, updateMetaEntityAction } from '@/app/actions';
+import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction, updateMetaEntityAction, deleteMetaEntityAction } from '@/app/actions';
 import {
   TrendingUp, MousePointer2, Eye, Users as UsersIcon,
   Wallet, Search, Calendar, ChevronRight,
   AlertCircle, CheckCircle, Play, Pause, BarChart3,
-  Bot, Send, ShieldCheck, Clock, Zap, ClipboardCheck
+  Bot, Send, ShieldCheck, Clock, Zap, ClipboardCheck, Edit, Trash2
 } from 'lucide-react';
 
 const DATE_PRESETS = [
@@ -65,6 +65,21 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       params.set('since', since);
       params.set('until', until);
       router.push(`?${params.toString()}`);
+    });
+  };
+
+  const handleDeleteEntity = async (entity, type) => {
+    if (!confirm(`${entity.name} öğesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) return;
+    startTransition(async () => {
+      const res = await deleteMetaEntityAction(id, entity.id);
+      if (res?.error) {
+        alert('Silme hatası: ' + res.error);
+      } else {
+        if (type === 'campaign') setCampaigns(prev => prev.filter(c => c.id !== entity.id));
+        if (type === 'adset') setAdSets(prev => prev.filter(as => as.id !== entity.id));
+        if (type === 'ad') setAds(prev => prev.filter(ad => ad.id !== entity.id));
+        alert('Başarıyla silindi.');
+      }
     });
   };
 
@@ -418,6 +433,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                     <th style={thStyle}>ERİŞİM</th>
                     <th style={thStyle}>BİTİŞ</th>
                     <th style={thStyle}>TEKLİF STRATEJİSİ</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -481,10 +497,20 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                         <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
                         <td style={tdStyle}>{camp.stop_time ? new Date(camp.stop_time).toLocaleDateString('tr-TR') : 'Sürekli'}</td>
                         <td style={tdStyle}>{camp.bid_strategy?.replace(/_/g, ' ') || 'En yüksek hacim'}</td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                            <button onClick={() => openDetails(camp, 'campaign')} style={{ padding: '0.4rem', color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer' }} title="Düzenle">
+                              <Edit size={16} />
+                            </button>
+                            <button onClick={() => handleDeleteEntity(camp, 'campaign')} style={{ padding: '0.4rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }} title="Sil">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
-                  {filteredCampaigns.length === 0 && <EmptyRow colSpan={11} />}
+                  {filteredCampaigns.length === 0 && <EmptyRow colSpan={12} />}
                 </tbody>
               </table>
             )}
@@ -501,6 +527,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                     <th style={thStyle}>HARCANAN TUTAR</th>
                     <th style={thStyle}>GÖSTERİM</th>
                     <th style={thStyle}>ERİŞİM</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -559,10 +586,20 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                         <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
                         <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
                         <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                            <button onClick={() => openDetails(as, 'adset')} style={{ padding: '0.4rem', color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer' }} title="Düzenle">
+                              <Edit size={16} />
+                            </button>
+                            <button onClick={() => handleDeleteEntity(as, 'adset')} style={{ padding: '0.4rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }} title="Sil">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
-                  {filteredAdSets.length === 0 && <EmptyRow colSpan={8} />}
+                  {filteredAdSets.length === 0 && <EmptyRow colSpan={9} />}
                 </tbody>
               </table>
             )}
