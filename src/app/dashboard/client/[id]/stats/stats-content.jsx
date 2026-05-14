@@ -76,7 +76,7 @@ const PLATFORM_ICONS = {
   )
 };
 
-export default function StatsContent({ client }) {
+export default function StatsContent({ client, metaResult, googleResult }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -643,22 +643,87 @@ export default function StatsContent({ client }) {
           </div>
         </div>
 
-        {/* BÖLÜM 5-6: BOŞ KUTULAR */}
-        {[5, 6].map(i => (
-          <div key={i} className="card" style={{ 
-            background: 'var(--bg-secondary)', 
-            border: '1px solid var(--border-color)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            height: '100%',
-            minHeight: '400px',
-            opacity: 0.3,
-            borderStyle: 'dashed'
-          }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>BÖLÜM {i}</span>
+        {/* BÖLÜM 5: META ADS */}
+        <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Meta Reklam Özeti (Son 30 Gün)</h3>
+            <TrendingUp size={16} style={{ color: '#10b981' }} />
           </div>
-        ))}
+          
+          {metaResult?.error ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1rem' }}>
+              <AlertCircle size={32} style={{ color: '#ef4444', marginBottom: '1rem', opacity: 0.5 }} />
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{metaResult.error === 'API_MISSING' ? 'Meta API Bilgileri Eksik' : 'Meta Verisi Alınamadı'}</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Harcama</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#10b981' }}>{metaResult?.summary?.spend || 0} TL</div>
+                </div>
+                <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Gösterim</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#3b82f6' }}>{Number(metaResult?.summary?.impressions || 0).toLocaleString()}</div>
+                </div>
+                <div style={{ padding: '1rem', background: 'rgba(168, 85, 247, 0.05)', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.1)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#a855f7' }}>{Number(metaResult?.summary?.clicks || 0).toLocaleString()}</div>
+                </div>
+                <div style={{ padding: '1rem', background: 'rgba(236, 72, 153, 0.05)', borderRadius: '12px', border: '1px solid rgba(236, 72, 153, 0.1)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma Oranı (CTR)</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ec4899' }}>%{(Number(metaResult?.summary?.ctr || 0) * 100).toFixed(2)}</div>
+                </div>
+              </div>
+              <div style={{ marginTop: 'auto', textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                <a href={`/dashboard/client/${client.id}/meta`} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                  Detaylı Meta Raporu <ExternalLink size={12} />
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* BÖLÜM 6: GOOGLE ADS */}
+        <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Google Ads Özeti (Son 30 Gün)</h3>
+            <TrendingUp size={16} style={{ color: '#4285F4' }} />
+          </div>
+          
+          {googleResult?.error ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1rem' }}>
+              <AlertCircle size={32} style={{ color: '#ef4444', marginBottom: '1rem', opacity: 0.5 }} />
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{googleResult.error === 'API_MISSING' ? 'Google API Bilgileri Eksik' : 'Google Verisi Alınamadı'}</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ padding: '1rem', background: 'rgba(66, 133, 244, 0.05)', borderRadius: '12px', border: '1px solid rgba(66, 133, 244, 0.1)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Harcama</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#4285F4' }}>{googleResult?.summary?.spend || 0} TL</div>
+                </div>
+                <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Gösterim</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#3b82f6' }}>{Number(googleResult?.summary?.impressions || 0).toLocaleString()}</div>
+                </div>
+                <div style={{ padding: '1rem', background: 'rgba(168, 85, 247, 0.05)', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.1)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#a855f7' }}>{Number(googleResult?.summary?.clicks || 0).toLocaleString()}</div>
+                </div>
+                <div style={{ padding: '1rem', background: 'rgba(236, 72, 153, 0.05)', borderRadius: '12px', border: '1px solid rgba(236, 72, 153, 0.1)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tıklanma Oranı (CTR)</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ec4899' }}>%{(Number(googleResult?.summary?.ctr || 0) * 100).toFixed(2)}</div>
+                </div>
+              </div>
+              <div style={{ marginTop: 'auto', textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                <a href={`/dashboard/client/${client.id}/google`} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+                  Detaylı Google Raporu <ExternalLink size={12} />
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
