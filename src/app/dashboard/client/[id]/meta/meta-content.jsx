@@ -7,7 +7,7 @@ import {
   TrendingUp, MousePointer2, Eye, Users as UsersIcon,
   Wallet, Search, Calendar, ChevronRight,
   AlertCircle, CheckCircle, Play, Pause, BarChart3,
-  Bot, Send, ShieldCheck, Clock, Zap, ClipboardCheck, Edit, Trash2
+  Bot, Send, ShieldCheck, Clock, Zap, ClipboardCheck, Edit, Trash2, X, BarChart
 } from 'lucide-react';
 
 const DATE_PRESETS = [
@@ -79,6 +79,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
         if (type === 'adset') setAdSets(prev => prev.filter(as => as.id !== entity.id));
         if (type === 'ad') setAds(prev => prev.filter(ad => ad.id !== entity.id));
         alert('Başarıyla silindi.');
+        if (selectedEntity?.data?.id === entity.id) setShowDetailsPanel(false);
       }
     });
   };
@@ -103,7 +104,6 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const handleToggleStatus = async (entityId, currentStatus, type) => {
     const newStatus = currentStatus === 'ACTIVE' || currentStatus === 'ENABLED' ? 'PAUSED' : 'ACTIVE';
     
-    // Optimistic Update
     if (type === 'campaign') {
       setCampaigns(prev => prev.map(c => c.id === entityId ? { ...c, status: newStatus } : c));
     } else if (type === 'adset') {
@@ -116,14 +116,9 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       const res = await toggleMetaStatusAction(id, entityId, newStatus);
       if (res?.error) {
         alert('Durum güncellenirken hata oluştu: ' + res.error);
-        // Revert on error
-        if (type === 'campaign') {
-          setCampaigns(prev => prev.map(c => c.id === entityId ? { ...c, status: currentStatus } : c));
-        } else if (type === 'adset') {
-          setAdSets(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
-        } else if (type === 'ad') {
-          setAds(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
-        }
+        if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === entityId ? { ...c, status: currentStatus } : c));
+        if (type === 'adset') setAdSets(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
+        if (type === 'ad') setAds(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
       }
     });
   };
@@ -136,26 +131,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     setIsCreating(false);
     
     if (res?.error) {
-      alert('Kampanya oluşturulurken hata oluştu: ' + res.error);
+      alert('Hata: ' + res.error);
     } else {
-      alert(`${activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'} başarıyla oluşturuldu!`);
+      alert('Başarıyla oluşturuldu!');
       setShowCreateModal(false);
-      
-      const newEntity = { 
-        id: res.id || Math.random().toString(), 
-        name: createFormData.name, 
-        status: createFormData.status,
-        insights: { data: [{ spend: 0, impressions: 0, clicks: 0, reach: 0 }] }
-      };
-
-      if (activeTab === 'campaigns') {
-        setCampaigns([{ ...newEntity, daily_budget: createFormData.daily_budget ? Number(createFormData.daily_budget) * 100 : null }, ...campaigns]);
-      } else if (activeTab === 'adsets') {
-        setAdSets([{ ...newEntity, campaign_id: createFormData.parent_id }, ...adSets]);
-      } else if (activeTab === 'ads') {
-        setAds([{ ...newEntity, adset_id: createFormData.parent_id }, ...ads]);
-      }
-      
+      const newEntity = { id: res.id, name: createFormData.name, status: createFormData.status, insights: { data: [] } };
+      if (activeTab === 'campaigns') setCampaigns([newEntity, ...campaigns]);
+      else if (activeTab === 'adsets') setAdSets([newEntity, ...adSets]);
+      else if (activeTab === 'ads') setAds([newEntity, ...ads]);
       setCreateFormData({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
     }
   };
@@ -168,776 +151,309 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     setShowDetailsPanel(true);
   };
 
-  const selectedCampaignName = campaigns.find(c => c.id === selectedCampaignId)?.name;
-  const selectedAdSetName = adSets.find(as => as.id === selectedAdSetId)?.name;
-
   const handleUpdateName = async () => {
-    if (!editName || editName === selectedEntity.data.name) {
-      setIsEditingEntity(false);
-      return;
-    }
-
     startTransition(async () => {
       const updateData = { name: editName };
-      if (editBudget && !isNaN(editBudget)) {
-        updateData.daily_budget = parseFloat(editBudget);
-      }
-
+      if (editBudget) updateData.daily_budget = parseFloat(editBudget);
       const res = await updateMetaEntityAction(id, selectedEntity.data.id, updateData);
-      if (res?.error) {
-        alert('Güncelleme hatası: ' + res.error);
-      } else {
-        // Update local state
+      if (res?.error) alert('Hata: ' + res.error);
+      else {
         const type = selectedEntity.type;
         const updatedObj = { ...selectedEntity.data, name: editName, daily_budget: editBudget };
         if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === selectedEntity.data.id ? { ...c, ...updatedObj } : c));
         if (type === 'adset') setAdSets(prev => prev.map(as => as.id === selectedEntity.data.id ? { ...as, ...updatedObj } : as));
         if (type === 'ad') setAds(prev => prev.map(ad => ad.id === selectedEntity.data.id ? { ...ad, ...updatedObj } : ad));
-        
-        setSelectedEntity(prev => ({ ...prev, data: updatedObj }));
+        setSelectedEntity({ type, data: updatedObj });
         setIsEditingEntity(false);
       }
     });
   };
 
+  const selectedCampaignName = campaigns.find(c => c.id === selectedCampaignId)?.name;
+  const selectedAdSetName = adSets.find(as => as.id === selectedAdSetId)?.name;
   const isCustom = !!(initSince && initUntil);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative' }}>
       {/* Loading Overlay */}
       {isPending && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(10, 10, 10, 0.6)',
-          backdropFilter: 'blur(6px)',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '1.5rem'
-        }}>
-          <div className="spinner" style={{
-            width: '50px',
-            height: '50px',
-            border: '4px solid rgba(255,255,255,0.1)',
-            borderTop: '4px solid var(--accent-primary)',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            boxShadow: '0 0 20px rgba(16, 185, 129, 0.2)'
-          }}></div>
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', letterSpacing: '1px', marginBottom: '0.5rem' }}>META VERİLERİ GÜNCELLENİYOR</p>
-            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>Lütfen bekleyin, canlı veriler çekiliyor...</p>
-          </div>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10, 10, 10, 0.6)', backdropFilter: 'blur(6px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
+          <div className="spinner" style={{ width: '50px', height: '50px', border: '4px solid rgba(255,255,255,0.1)', borderTop: '4px solid #10b981', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <p style={{ color: 'white', fontWeight: 800 }}>META VERİLERİ GÜNCELLENİYOR...</p>
         </div>
       )}
 
       {/* Filter Status Bar */}
       {(selectedCampaignId || selectedAdSetId) && (
-        <div className="card" style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          padding: '0.75rem 1rem',
-          background: 'rgba(16, 185, 129, 0.05)',
-          border: '1px solid rgba(16, 185, 129, 0.2)',
-          borderRadius: '12px'
-        }}>
-          <AlertCircle size={16} style={{ color: '#10b981' }} />
-          <div style={{ display: 'flex', flex: 1, gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>Aktif Filtre:</span>
-            {selectedCampaignId && (
-              <span style={{ background: 'var(--accent-primary)', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700 }}>
-                Kampanya: {selectedCampaignName}
-              </span>
-            )}
-            {selectedAdSetId && (
-              <>
-                <ChevronRight size={14} className="text-muted" />
-                <span style={{ background: '#f59e0b', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 700 }}>
-                  Set: {selectedAdSetName}
-                </span>
-              </>
-            )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '12px' }}>
+          <AlertCircle size={16} color="#10b981" />
+          <div style={{ flex: 1, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Filtre:</span>
+            {selectedCampaignId && <span style={{ background: '#0064e0', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{selectedCampaignName}</span>}
+            {selectedAdSetId && <><ChevronRight size={14} /><span style={{ background: '#f59e0b', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{selectedAdSetName}</span></>}
           </div>
-          <button
-            onClick={() => {
-              setSelectedCampaignId(null);
-              setSelectedAdSetId(null);
-              setActiveTab('campaigns');
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-primary)',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              textDecoration: 'underline'
-            }}
-          >
-            Filtreleri Temizle
-          </button>
+          <button onClick={() => { setSelectedCampaignId(null); setSelectedAdSetId(null); }} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.8rem' }}>Temizle</button>
         </div>
       )}
 
-      {/* Top Filter Bar */}
-      <div className="card" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0.75rem 1.25rem',
-        flexWrap: 'wrap',
-        gap: '1.5rem',
-        background: 'rgba(255,255,255,0.02)'
-      }}>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <Calendar size={16} className="text-muted" />
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '2px' }}>
-              {DATE_PRESETS.map(preset => (
-                <button
-                  key={preset.id}
-                  onClick={() => handleDateChange(preset.id)}
-                  style={{
-                    padding: '0.4rem 0.75rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    borderRadius: '6px',
-                    border: 'none',
-                    background: (!isCustom && datePreset === preset.id) ? 'var(--accent-primary)' : 'transparent',
-                    color: (!isCustom && datePreset === preset.id) ? 'white' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
+      {/* Top Bar */}
+      <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem 1.5rem', gap: '1rem', background: 'rgba(255,255,255,0.02)' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <Calendar size={16} color="var(--text-secondary)" />
+          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '2px' }}>
+            {DATE_PRESETS.map(preset => (
+              <button key={preset.id} onClick={() => handleDateChange(preset.id)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', borderRadius: '6px', border: 'none', background: (!isCustom && datePreset === preset.id) ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer' }}>{preset.label}</button>
+            ))}
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderLeft: '1px solid var(--border-color)', paddingLeft: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Özel:</span>
-              <input
-                type="date"
-                value={since}
-                onChange={(e) => setSince(e.target.value)}
-                style={dateInputStyle}
-              />
-              <span style={{ color: 'var(--text-secondary)' }}>-</span>
-              <input
-                type="date"
-                value={until}
-                onChange={(e) => setUntil(e.target.value)}
-                style={dateInputStyle}
-              />
-              <button
-                onClick={handleCustomDateApply}
-                disabled={!since || !until || isPending}
-                style={{
-                  padding: '0.4rem 0.8rem',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  borderRadius: '6px',
-                  background: isCustom ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
-                  color: isCustom ? 'white' : 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
-                  cursor: 'pointer'
-                }}
-              >
-                Uygula
-              </button>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ position: 'relative', width: '250px' }}>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ position: 'relative', width: '240px' }}>
             <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
-            <input 
-              type="text" 
-              placeholder="Ara..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ 
-                width: '100%', 
-                padding: '0.5rem 1rem 0.5rem 2rem', 
-                fontSize: '0.8rem', 
-                background: 'rgba(255,255,255,0.05)', 
-                border: '1px solid var(--border-color)', 
-                borderRadius: '8px',
-                color: 'var(--text-primary)'
-              }}
-            />
+            <input type="text" placeholder="Ara..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }} />
           </div>
-          {activeTab !== 'army' && (
-            <button 
-              onClick={() => setShowCreateModal(true)}
-              className="btn btn-primary" 
-              style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', gap: '0.5rem', background: '#0064e0', borderColor: '#0064e0' }}
-            >
-              + Yeni Oluştur
-            </button>
-          )}
-          </div>
+          {activeTab !== 'army' && <button onClick={() => setShowCreateModal(true)} className="btn btn-primary" style={{ background: '#0064e0', padding: '0.5rem 1.2rem' }}>+ Yeni Oluştur</button>}
         </div>
       </div>
 
-
-      {/* Summary Stats */}
+      {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         <StatCard label="Harcama" value={`${result.summary?.spend || 0} TL`} icon={<Wallet size={16} />} color="#10b981" />
         <StatCard label="Gösterim" value={Number(result.summary?.impressions || 0).toLocaleString()} icon={<Eye size={16} />} color="#3b82f6" />
         <StatCard label="Tıklanma" value={Number(result.summary?.clicks || 0).toLocaleString()} icon={<MousePointer2 size={16} />} color="#a855f7" />
         <StatCard label="CTR" value={`%${(Number(result.summary?.ctr || 0) * 100).toFixed(2)}`} icon={<TrendingUp size={16} />} color="#f59e0b" />
-        <StatCard label="CPC" value={`${Number(result.summary?.cpc || 0).toFixed(2)} TL`} icon={<BarChart3 size={16} />} color="#ec4899" />
       </div>
 
       {/* Tabs */}
-      <div style={{ borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '2rem', overflowX: 'auto' }}>
+      <div style={{ borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '2rem' }}>
         <TabButton id="army" label="Meta Ads Army" count={armyResult?.summary?.pendingCommands || 0} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="campaigns" label="Kampanyalar" count={filteredCampaigns.length} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="adsets" label="Reklam Setleri" count={filteredAdSets.length} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="ads" label="Reklamlar" count={filteredAds.length} activeTab={activeTab} onClick={setActiveTab} />
       </div>
 
-      {/* Main Table Content */}
-      {activeTab === 'army' ? (
-        <MetaArmyPanel clientId={id} armyResult={armyResult} />
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            {activeTab === 'campaigns' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1200px' }}>
-                <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-                    <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
-                    <th style={thStyle}>KAMPANYA</th>
-                    <th style={thStyle}>YAYIN DURUMU</th>
-                    <th style={thStyle}>SONUÇLAR</th>
-                    <th style={thStyle}>SONUÇ BAŞINA ÜCRET</th>
-                    <th style={thStyle}>BÜTÇE</th>
-                    <th style={thStyle}>HARCANAN TUTAR</th>
-                    <th style={thStyle}>GÖSTERİM</th>
-                    <th style={thStyle}>ERİŞİM</th>
-                    <th style={thStyle}>BİTİŞ</th>
-                    <th style={thStyle}>TEKLİF STRATEJİSİ</th>
-                    <th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCampaigns.map(camp => {
-                    const insights = camp.insights?.data?.[0] || {};
-                    return (
-                      <tr key={camp.id} style={trStyle}>
-                        <td style={tdStyle}><input type="checkbox" disabled /></td>
-                        <td style={{ ...tdStyle, paddingLeft: '0' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            <div 
-                              onClick={() => handleToggleStatus(camp.id, camp.status, 'campaign')}
-                              style={{ 
-                                width: '32px', 
-                                height: '18px', 
-                                background: camp.status === 'ACTIVE' || camp.status === 'ENABLED' ? '#10b981' : 'rgba(255,255,255,0.1)', 
-                                borderRadius: '10px', 
-                                position: 'relative',
-                                cursor: 'pointer'
-                              }}>
-                              <div style={{ 
-                                width: '14px', 
-                                height: '14px', 
-                                background: 'white', 
-                                borderRadius: '50%', 
-                                position: 'absolute', 
-                                top: '2px', 
-                                left: camp.status === 'ACTIVE' || camp.status === 'ENABLED' ? '16px' : '2px',
-                                transition: 'left 0.2s'
-                              }} />
-                            </div>
-                            <span
-                              style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer', textDecoration: 'none' }}
-                              onClick={() => openDetails(camp, 'campaign')}
-                              onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                              onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                            >
-                              {camp.name}
-                            </span>
-                          </div>
-                        </td>
-                        <td style={tdStyle}>
-                          <StatusBadge status={camp.status} />
-                        </td>
-                        <td style={tdStyle}>
-                          <div style={{ fontWeight: 700 }}>{insights.inline_link_clicks || '-'}</div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Bağlantı Tıklaması</div>
-                        </td>
-                        <td style={tdStyle}>
-                          {insights.cost_per_inline_link_click ? `${Number(insights.cost_per_inline_link_click).toFixed(2)} TL` : '-'}
-                        </td>
-                        <td style={tdStyle}>
-                          <div style={{ fontWeight: 700 }}>
-                            {camp.daily_budget ? `${(camp.daily_budget / 100).toFixed(2)} TL` :
-                              camp.lifetime_budget ? `${(camp.lifetime_budget / 100).toFixed(2)} TL` : 'Bütçe Yok'}
-                          </div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{camp.daily_budget ? 'Günlük' : 'Toplam'}</div>
-                        </td>
-                        <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
-                        <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
-                        <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
-                        <td style={tdStyle}>{camp.stop_time ? new Date(camp.stop_time).toLocaleDateString('tr-TR') : 'Sürekli'}</td>
-                        <td style={tdStyle}>{camp.bid_strategy?.replace(/_/g, ' ') || 'En yüksek hacim'}</td>
-                        <td style={{ ...tdStyle, textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                            <button onClick={() => openDetails(camp, 'campaign')} style={{ padding: '0.4rem', color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer' }} title="Düzenle">
-                              <Edit size={16} />
-                            </button>
-                            <button onClick={() => handleDeleteEntity(camp, 'campaign')} style={{ padding: '0.4rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }} title="Sil">
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {filteredCampaigns.length === 0 && <EmptyRow colSpan={12} />}
-                </tbody>
-              </table>
-            )}
+      {/* Tables */}
+      <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
+        {activeTab === 'army' && <MetaArmyPanel clientId={id} armyResult={armyResult} />}
+        
+        {activeTab === 'campaigns' && (
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1100px' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={thStyle}>KAMPANYA</th>
+                <th style={thStyle}>DURUM</th>
+                <th style={thStyle}>SONUÇLAR</th>
+                <th style={thStyle}>BÜTÇE</th>
+                <th style={thStyle}>HARCAMA</th>
+                <th style={thStyle}>STRATEJİ</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCampaigns.map(c => (
+                <tr key={c.id} style={trStyle}>
+                  <td style={tdStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                      <StatusToggle active={c.status === 'ACTIVE' || c.status === 'ENABLED'} onToggle={() => handleToggleStatus(c.id, c.status, 'campaign')} />
+                      <span onClick={() => openDetails(c, 'campaign')} style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer' }}>{c.name}</span>
+                    </div>
+                  </td>
+                  <td style={tdStyle}><StatusBadge status={c.status} /></td>
+                  <td style={tdStyle}>{c.insights?.data?.[0]?.inline_link_clicks || 0} Tık</td>
+                  <td style={tdStyle}>{c.daily_budget ? (c.daily_budget / 100).toFixed(2) + ' TL' : 'Bütçe Yok'}</td>
+                  <td style={tdStyle}>{c.insights?.data?.[0]?.spend || 0} TL</td>
+                  <td style={tdStyle}>{c.bid_strategy?.replace(/_/g, ' ') || 'Lowest Cost'}</td>
+                  <td style={{ ...tdStyle, textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                      <button onClick={() => openDetails(c, 'campaign')} className="btn-icon"><Edit size={16} /></button>
+                      <button onClick={() => handleDeleteEntity(c, 'campaign')} className="btn-icon danger"><Trash2 size={16} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
 
-            {activeTab === 'adsets' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1100px' }}>
-                <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-                    <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
-                    <th style={thStyle}>REKLAM SETİ</th>
-                    <th style={thStyle}>YAYIN DURUMU</th>
-                    <th style={thStyle}>SONUÇLAR</th>
-                    <th style={thStyle}>BÜTÇE</th>
-                    <th style={thStyle}>HARCANAN TUTAR</th>
-                    <th style={thStyle}>GÖSTERİM</th>
-                    <th style={thStyle}>ERİŞİM</th>
-                    <th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAdSets.map(as => {
-                    const insights = as.insights?.data?.[0] || {};
-                    return (
-                      <tr key={as.id} style={trStyle}>
-                        <td style={tdStyle}><input type="checkbox" disabled /></td>
-                        <td style={{ ...tdStyle, paddingLeft: '0' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            <div 
-                              onClick={() => handleToggleStatus(as.id, as.status, 'adset')}
-                              style={{ 
-                                width: '32px', 
-                                height: '18px', 
-                                background: as.status === 'ACTIVE' || as.status === 'ENABLED' ? '#10b981' : 'rgba(255,255,255,0.1)', 
-                                borderRadius: '10px', 
-                                position: 'relative',
-                                cursor: 'pointer'
-                              }}>
-                              <div style={{ 
-                                width: '14px', 
-                                height: '14px', 
-                                background: 'white', 
-                                borderRadius: '50%', 
-                                position: 'absolute', 
-                                top: '2px', 
-                                left: as.status === 'ACTIVE' || as.status === 'ENABLED' ? '16px' : '2px',
-                                transition: 'left 0.2s'
-                              }} />
-                            </div>
-                            <span
-                              style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer', textDecoration: 'none' }}
-                              onClick={() => openDetails(as, 'adset')}
-                              onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                              onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                            >
-                              {as.name}
-                            </span>
-                          </div>
-                        </td>
-                        <td style={tdStyle}>
-                          <StatusBadge status={as.status} />
-                        </td>
-                        <td style={tdStyle}>
-                          <div style={{ fontWeight: 700 }}>{insights.clicks || '-'}</div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Tıklama</div>
-                        </td>
-                        <td style={tdStyle}>
-                          <div style={{ fontWeight: 700 }}>
-                            {as.daily_budget ? `${(as.daily_budget / 100).toFixed(2)} TL` :
-                              as.lifetime_budget ? `${(as.lifetime_budget / 100).toFixed(2)} TL` : 'Bütçe Yok'}
-                          </div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{as.daily_budget ? 'Günlük' : 'Toplam'}</div>
-                        </td>
-                        <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
-                        <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
-                        <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
-                        <td style={{ ...tdStyle, textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                            <button onClick={() => openDetails(as, 'adset')} style={{ padding: '0.4rem', color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer' }} title="Düzenle">
-                              <Edit size={16} />
-                            </button>
-                            <button onClick={() => handleDeleteEntity(as, 'adset')} style={{ padding: '0.4rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }} title="Sil">
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {filteredAdSets.length === 0 && <EmptyRow colSpan={9} />}
-                </tbody>
-              </table>
-            )}
+        {activeTab === 'adsets' && (
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead><tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
+              <th style={thStyle}>REKLAM SETİ</th><th style={thStyle}>DURUM</th><th style={thStyle}>BÜTÇE</th><th style={thStyle}>HARCAMA</th><th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
+            </tr></thead>
+            <tbody>{filteredAdSets.map(as => (
+              <tr key={as.id} style={trStyle}>
+                <td style={tdStyle}><div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                  <StatusToggle active={as.status === 'ACTIVE' || as.status === 'ENABLED'} onToggle={() => handleToggleStatus(as.id, as.status, 'adset')} />
+                  <span onClick={() => openDetails(as, 'adset')} style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer' }}>{as.name}</span>
+                </div></td>
+                <td style={tdStyle}><StatusBadge status={as.status} /></td>
+                <td style={tdStyle}>{as.daily_budget ? (as.daily_budget / 100).toFixed(2) + ' TL' : 'Bütçe Yok'}</td>
+                <td style={tdStyle}>{as.insights?.data?.[0]?.spend || 0} TL</td>
+                <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                    <button onClick={() => openDetails(as, 'adset')} className="btn-icon"><Edit size={16} /></button>
+                    <button onClick={() => handleDeleteEntity(as, 'adset')} className="btn-icon danger"><Trash2 size={16} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}</tbody>
+          </table>
+        )}
 
-            {activeTab === 'ads' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1200px' }}>
-                <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-                    <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
-                    <th style={thStyle}>REKLAM</th>
-                    <th style={thStyle}>ÖNİZLEME</th>
-                    <th style={thStyle}>YAYIN DURUMU</th>
-                    <th style={thStyle}>SONUÇLAR</th>
-                    <th style={thStyle}>HARCANAN TUTAR</th>
-                    <th style={thStyle}>GÖSTERİM</th>
-                    <th style={thStyle}>ERİŞİM</th>
-                    <th style={thStyle}>CTR</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAds.map(ad => {
-                    const insights = ad.insights?.data?.[0] || {};
-                    return (
-                      <tr key={ad.id} style={trStyle}>
-                        <td style={tdStyle}><input type="checkbox" disabled /></td>
-                        <td style={{ ...tdStyle, paddingLeft: '0' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            <div 
-                              onClick={() => handleToggleStatus(ad.id, ad.status, 'ad')}
-                              style={{ 
-                                width: '32px', 
-                                height: '18px', 
-                                background: ad.status === 'ACTIVE' || ad.status === 'ENABLED' ? '#10b981' : 'rgba(255,255,255,0.1)', 
-                                borderRadius: '10px', 
-                                position: 'relative',
-                                cursor: 'pointer'
-                              }}>
-                              <div style={{ 
-                                width: '14px', 
-                                height: '14px', 
-                                background: 'white', 
-                                borderRadius: '50%', 
-                                position: 'absolute', 
-                                top: '2px', 
-                                left: ad.status === 'ACTIVE' || ad.status === 'ENABLED' ? '16px' : '2px',
-                                transition: 'left 0.2s'
-                              }} />
-                            </div>
-                            <div style={{ maxWidth: '200px' }}>
-                              <div 
-                                style={{ fontWeight: 700, cursor: 'pointer', color: '#0064e0' }}
-                                onClick={() => openDetails(ad, 'ad')}
-                              >{ad.name}</div>
-                              <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {ad.creative?.body}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td style={tdStyle}>
-                          {ad.creative?.image_url || ad.creative?.thumbnail_url ? (
-                            <img src={ad.creative.image_url || ad.creative.thumbnail_url} style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid var(--border-color)' }} />
-                          ) : <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />}
-                        </td>
-                        <td style={tdStyle}>
-                          <StatusBadge status={ad.status} />
-                        </td>
-                        <td style={tdStyle}>
-                          <div style={{ fontWeight: 700 }}>{insights.clicks || '-'}</div>
-                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Tıklama</div>
-                        </td>
-                        <td style={tdStyle}>{insights.spend || '0,00'} TL</td>
-                        <td style={tdStyle}>{Number(insights.impressions || 0).toLocaleString('tr-TR')}</td>
-                        <td style={tdStyle}>{Number(insights.reach || 0).toLocaleString('tr-TR')}</td>
-                        <td style={tdStyle}>%{(Number(insights.ctr || 0) * 100).toFixed(2)}</td>
-                      </tr>
-                    );
-                  })}
-                  {filteredAds.length === 0 && <EmptyRow colSpan={9} />}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-      )}
+        {activeTab === 'ads' && (
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead><tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
+              <th style={thStyle}>REKLAM</th><th style={thStyle}>DURUM</th><th style={thStyle}>HARCAMA</th><th style={thStyle}>CTR</th><th style={{ ...thStyle, textAlign: 'right' }}>AKSİYONLAR</th>
+            </tr></thead>
+            <tbody>{filteredAds.map(ad => (
+              <tr key={ad.id} style={trStyle}>
+                <td style={tdStyle}><div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                  <StatusToggle active={ad.status === 'ACTIVE' || ad.status === 'ENABLED'} onToggle={() => handleToggleStatus(ad.id, ad.status, 'ad')} />
+                  <span onClick={() => openDetails(ad, 'ad')} style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer' }}>{ad.name}</span>
+                </div></td>
+                <td style={tdStyle}><StatusBadge status={ad.status} /></td>
+                <td style={tdStyle}>{ad.insights?.data?.[0]?.spend || 0} TL</td>
+                <td style={tdStyle}>%{(Number(ad.insights?.data?.[0]?.ctr || 0) * 100).toFixed(2)}</td>
+                <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                    <button onClick={() => openDetails(ad, 'ad')} className="btn-icon"><Edit size={16} /></button>
+                    <button onClick={() => handleDeleteEntity(ad, 'ad')} className="btn-icon danger"><Trash2 size={16} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}</tbody>
+          </table>
+        )}
+      </div>
 
-      {/* CREATE MODAL */}
-      {showCreateModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
-          zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <div className="card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 className="heading-2" style={{ fontSize: '1.25rem' }}>
-                Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'} Oluştur
-              </h3>
-              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>✕</button>
-            </div>
-            
-            <form onSubmit={handleCreateCampaign} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">İsim</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  required
-                  placeholder="Kampanya/Reklam Adı"
-                  value={createFormData.name}
-                  onChange={e => setCreateFormData({...createFormData, name: e.target.value})}
-                />
-              </div>
-
-              {activeTab === 'campaigns' && (
-                <div className="form-group">
-                  <label className="form-label">Günlük Bütçe (TL)</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    placeholder="Örn: 100"
-                    value={createFormData.daily_budget}
-                    onChange={e => setCreateFormData({...createFormData, daily_budget: e.target.value})}
-                  />
-                </div>
-              )}
-
-              {activeTab === 'adsets' && (
-                <div className="form-group">
-                  <label className="form-label">Üst Kampanya Seçin</label>
-                  <select 
-                    className="form-control"
-                    required
-                    value={createFormData.parent_id}
-                    onChange={e => setCreateFormData({...createFormData, parent_id: e.target.value})}
-                  >
-                    <option value="">Kampanya Seçin...</option>
-                    {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-              )}
-
-              {activeTab === 'ads' && (
-                <div className="form-group">
-                  <label className="form-label">Üst Reklam Seti Seçin</label>
-                  <select 
-                    className="form-control"
-                    required
-                    value={createFormData.parent_id}
-                    onChange={e => setCreateFormData({...createFormData, parent_id: e.target.value})}
-                  >
-                    <option value="">Reklam Seti Seçin...</option>
-                    {adSets.map(as => <option key={as.id} value={as.id}>{as.name}</option>)}
-                  </select>
-                </div>
-              )}
-
-              <div className="form-group">
-                <label className="form-label">Yayın Durumu</label>
-                <select 
-                  className="form-control"
-                  value={createFormData.status}
-                  onChange={e => setCreateFormData({...createFormData, status: e.target.value})}
-                >
-                  <option value="ACTIVE">Aktif (Yayınla)</option>
-                  <option value="PAUSED">Duraklatıldı (Taslak)</option>
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                <button type="button" onClick={() => setShowCreateModal(false)} className="btn btn-secondary" style={{ flex: 1 }}>İptal</button>
-                <button type="submit" disabled={isCreating} className="btn btn-primary" style={{ flex: 1, background: '#0064e0', borderColor: '#0064e0' }}>
-                  {isCreating ? 'Oluşturuluyor...' : 'Oluştur'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* DETAILS / EDIT PANEL */}
+      {/* PREMIUM SIDE PANEL */}
       {showDetailsPanel && selectedEntity && (
-        <div 
-          onClick={() => setShowDetailsPanel(false)}
-          style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.4)', zIndex: 100000,
-            display: 'flex', justifyContent: 'flex-end'
-          }}
-        >
-          <div 
-            onClick={e => e.stopPropagation()}
-            className="animate-slide-in-right"
-            style={{
-              width: '100%', maxWidth: '480px', height: '100%',
-              background: '#0f172a', // Solid dark background to prevent overlap transparency
-              borderLeft: '1px solid rgba(255,255,255,0.1)',
-              padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', 
-              overflowY: 'auto', boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
-              position: 'relative',
-              zIndex: 100001
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-              <h2 className="heading-2" style={{ fontSize: '1.4rem', margin: 0, display: 'flex', alignItems: 'center', gap: '1rem', color: '#fff' }}>
-                <div style={{ padding: '0.4rem', background: 'rgba(0,100,224,0.1)', borderRadius: '8px', color: '#0064e0' }}>
-                  {selectedEntity.type === 'campaign' ? <BarChart3 size={20} /> : selectedEntity.type === 'adset' ? <Zap size={20} /> : <TrendingUp size={20} />}
+        <>
+          <div onClick={() => setShowDetailsPanel(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', zIndex: 10000 }} />
+          <div style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '480px', background: '#0f172a', borderLeft: '1px solid rgba(255,255,255,0.1)', boxShadow: '-20px 0 60px rgba(0,0,0,0.7)', zIndex: 10001, display: 'flex', flexDirection: 'column', animation: 'slideInRight 0.3s ease-out' }}>
+            {/* Header */}
+            <div style={{ padding: '1.5rem 2rem', background: 'linear-gradient(90deg, rgba(30,58,138,0.2) 0%, rgba(15,23,42,0) 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(0,100,224,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0064e0' }}>
+                  <BarChart size={22} />
                 </div>
-                {selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} Detayı
-              </h2>
-              <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>{selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} Detayı</h3>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {selectedEntity.data.id}</span>
+                </div>
+              </div>
+              <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              <section>
-                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Temel Bilgiler</h4>
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Content */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                  <ShieldCheck size={18} color="#3b82f6" />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase' }}>Temel Bilgiler</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>İsim</label>
-                    {isEditingEntity ? (
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          value={editName}
-                          onChange={e => setEditName(e.target.value)}
-                          style={{ fontSize: '0.85rem', padding: '0.4rem 0.6rem' }}
-                          autoFocus
-                        />
-                        <button onClick={handleUpdateName} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Kaydet</button>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.6rem' }}>İsim</label>
+                    {isEditingEntity ? <input className="form-control" value={editName} onChange={e => setEditName(e.target.value)} style={{ background: 'rgba(0,0,0,0.3)', color: '#fff' }} /> : <div style={{ fontWeight: 600, fontSize: '1.1rem', color: '#fff' }}>{selectedEntity.data.name}</div>}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                    {(selectedEntity.type === 'campaign' || selectedEntity.type === 'adset') && (
+                      <div>
+                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.6rem' }}>Günlük Bütçe</label>
+                        {isEditingEntity ? <input type="number" className="form-control" value={editBudget} onChange={e => setEditBudget(e.target.value)} style={{ background: 'rgba(0,0,0,0.3)', color: '#fff' }} /> : <div style={{ fontWeight: 800, fontSize: '1.2rem', color: '#10b981' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>}
                       </div>
-                    ) : (
-                      <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff' }}>{selectedEntity.data.name}</div>
                     )}
-                  </div>
-                  {(selectedEntity.type === 'campaign' || selectedEntity.type === 'adset') && (
                     <div>
-                      <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Günlük Bütçe (TL)</label>
-                      {isEditingEntity ? (
-                        <input 
-                          type="number" 
-                          className="form-control" 
-                          value={editBudget}
-                          onChange={e => setEditBudget(e.target.value)}
-                          style={{ fontSize: '0.85rem', padding: '0.4rem 0.6rem' }}
-                        />
-                      ) : (
-                        <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff' }}>{selectedEntity.data.daily_budget ? (selectedEntity.data.daily_budget / 100).toFixed(2) : '0.00'} TL</div>
-                      )}
+                      <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.6rem' }}>Durum</label>
+                      <StatusBadge status={selectedEntity.data.status} />
                     </div>
-                  )}
-                  <div>
-                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Durum</label>
-                    <StatusBadge status={selectedEntity.data.status} />
-                  </div>
-                  {selectedEntity.data.objective && (
-                    <div>
-                      <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Hedef</label>
-                      <div style={{ fontSize: '0.85rem' }}>{selectedEntity.data.objective}</div>
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              <section>
-                <h4 style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', marginBottom: '1.2rem', letterSpacing: '0.1em' }}>Performans Özeti</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                  <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Harcama</div>
-                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#fff' }}>{selectedEntity.data.insights?.data?.[0]?.spend || '0,00'} TL</div>
-                  </div>
-                  <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Gösterim</div>
-                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#fff' }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString('tr-TR')}</div>
-                  </div>
-                  <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Tıklama</div>
-                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#fff' }}>{selectedEntity.data.insights?.data?.[0]?.clicks || selectedEntity.data.insights?.data?.[0]?.inline_link_clicks || 0}</div>
-                  </div>
-                  <div style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Erişim</div>
-                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#fff' }}>{Number(selectedEntity.data.insights?.data?.[0]?.reach || 0).toLocaleString('tr-TR')}</div>
                   </div>
                 </div>
-              </section>
+              </div>
 
-              {selectedEntity.type === 'campaign' && (
-                <button 
-                  onClick={() => {
-                    setSelectedCampaignId(selectedEntity.data.id);
-                    setActiveTab('adsets');
-                    setShowDetailsPanel(false);
-                  }}
-                  className="btn btn-secondary" 
-                  style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}
-                >
-                  Reklam Setlerini Görüntüle <ChevronRight size={16} />
-                </button>
-              )}
-
-              {selectedEntity.type === 'adset' && (
-                <button 
-                  onClick={() => {
-                    setSelectedAdSetId(selectedEntity.data.id);
-                    setActiveTab('ads');
-                    setShowDetailsPanel(false);
-                  }}
-                  className="btn btn-secondary" 
-                  style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}
-                >
-                  Reklamları Görüntüle <ChevronRight size={16} />
-                </button>
-              )}
-              
-              <div style={{ marginTop: 'auto', paddingTop: '2rem', display: 'flex', gap: '1rem' }}>
-                <button 
-                  onClick={() => handleToggleStatus(selectedEntity.data.id, selectedEntity.data.status, selectedEntity.type)}
-                  className="btn btn-secondary" 
-                  style={{ flex: 1, justifyContent: 'center' }}
-                >
-                  {selectedEntity.data.status === 'ACTIVE' || selectedEntity.data.status === 'ENABLED' ? 'Durdur' : 'Başlat'}
-                </button>
-                 <button 
-                  onClick={() => setIsEditingEntity(!isEditingEntity)}
-                  className="btn btn-primary" 
-                  style={{ flex: 1, justifyContent: 'center', background: '#0064e0', borderColor: '#0064e0' }}
-                >
-                  {isEditingEntity ? 'İptal' : 'Düzenle'}
-                </button>
+              {/* Stats Card */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                  <Zap size={18} color="#f59e0b" />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase' }}>Performans</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Harcama</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
+                  </div>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Gösterim</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedEntity.data.insights?.data?.[0]?.impressions || 0}</div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Footer */}
+            <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '1rem' }}>
+              {isEditingEntity ? (
+                <><button onClick={() => setIsEditingEntity(false)} className="btn btn-secondary" style={{ flex: 1 }}>İptal</button><button onClick={handleUpdateName} className="btn btn-primary" style={{ flex: 1 }}>Kaydet</button></>
+              ) : (
+                <><button onClick={() => handleToggleStatus(selectedEntity.data.id, selectedEntity.data.status, selectedEntity.type)} className="btn btn-secondary" style={{ flex: 1 }}>{selectedEntity.data.status === 'ACTIVE' ? 'Durdur' : 'Başlat'}</button><button onClick={() => setIsEditingEntity(true)} className="btn btn-primary" style={{ flex: 1 }}>Düzenle</button></>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
 }
 
+function StatusToggle({ active, onToggle }) {
+  return (
+    <div onClick={onToggle} style={{ width: '32px', height: '18px', background: active ? '#10b981' : 'rgba(255,255,255,0.1)', borderRadius: '10px', position: 'relative', cursor: 'pointer' }}>
+      <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', left: active ? '16px' : '2px', transition: 'left 0.2s' }} />
+    </div>
+  );
+}
+
+function StatCard({ label, value, icon, color }) {
+  return (
+    <div className="card" style={{ padding: '1.25rem', borderLeft: `4px solid ${color}`, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700 }}>{label}<span style={{ color }}>{icon}</span></div>
+      <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{value}</div>
+    </div>
+  );
+}
+
+function TabButton({ id, label, count, activeTab, onClick }) {
+  const active = activeTab === id;
+  return (
+    <button onClick={() => onClick(id)} style={{ padding: '1rem 0', background: 'none', border: 'none', borderBottom: active ? '2px solid #0064e0' : '2px solid transparent', color: active ? '#fff' : 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s' }}>
+      {label} <span style={{ background: active ? '#0064e0' : 'rgba(255,255,255,0.1)', color: active ? '#fff' : 'var(--text-secondary)', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.7rem' }}>{count}</span>
+    </button>
+  );
+}
+
+function StatusBadge({ status }) {
+  const active = status === 'ACTIVE' || status === 'ENABLED';
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.75rem', borderRadius: '20px', background: active ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: active ? '#10b981' : '#ef4444', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>
+      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: active ? '#10b981' : '#ef4444' }} />
+      {active ? 'AKTİF' : 'DURDURULDU'}
+    </div>
+  );
+}
+
+function EmptyRow({ colSpan }) {
+  return (<tr><td colSpan={colSpan} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Veri bulunamadı.</td></tr>);
+}
+
+const thStyle = { padding: '1rem 1.5rem', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' };
+const tdStyle = { padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' };
+const trStyle = { transition: 'background 0.2s' };
+const dateInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', padding: '0.3rem 0.5rem', fontSize: '0.75rem', outline: 'none' };
+const prioritySelectStyle = { background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.4rem 0.8rem', fontSize: '0.8rem', outline: 'none' };
+const priorityOptionStyle = { background: '#0f172a', color: '#fff' };
+const smallButtonStyle = { padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, border: 'none', cursor: 'pointer' };
+
+// META ARMY PANEL COMPONENT
 function MetaArmyPanel({ clientId, armyResult }) {
   const router = useRouter();
   const [isSubmitting, startCommandTransition] = useTransition();
@@ -953,140 +469,59 @@ function MetaArmyPanel({ clientId, armyResult }) {
     setMessage(null);
     startCommandTransition(async () => {
       const result = await createMetaArmyCommandAction(clientId, formData);
-      if (result?.error) {
-        setMessage({ type: 'error', text: result.error });
-        return;
-      }
-      setMessage({ type: 'success', text: 'Komut kuyruğa alındı. Agent döngüsü bağlandığında işlenecek.' });
+      if (result?.error) { setMessage({ type: 'error', text: result.error }); return; }
+      setMessage({ type: 'success', text: 'Komut kuyruğa alındı.' });
       router.refresh();
     });
   };
 
   const approveRecommendation = (recommendationId) => {
-    setMessage(null);
     startCommandTransition(async () => {
       const result = await approveMetaArmyRecommendationAction(recommendationId, `ONAY: ${recommendationId}`);
-      if (result?.error) {
-        setMessage({ type: 'error', text: result.error });
-        return;
-      }
-      setMessage({ type: 'success', text: 'Öneri onaylandı. Executor bağlantısı aktif olduğunda uygulanabilir.' });
+      if (result?.error) { alert(result.error); return; }
       router.refresh();
     });
   };
 
-  if (armyResult?.error) {
-    return (
-      <div className="card" style={{ padding: '2rem', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)' }}>
-        <h3 style={{ color: '#ef4444', marginBottom: '0.5rem' }}>Meta Ads Army verisi alınamadı</h3>
-        <p style={{ color: 'var(--text-secondary)' }}>{armyResult.details || armyResult.error}</p>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1rem' }}>
-        <ArmyStat title="Son Kontrol" value={summary.latestRunAt ? new Date(summary.latestRunAt).toLocaleString('tr-TR') : 'Henüz yok'} icon={<Clock size={16} />} color="#3b82f6" />
-        <ArmyStat title="Bekleyen Komut" value={summary.pendingCommands || 0} icon={<Bot size={16} />} color="#a855f7" />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        <ArmyStat title="Son Kontrol" value={summary.latestRunAt ? new Date(summary.latestRunAt).toLocaleTimeString('tr-TR') : 'Yok'} icon={<Clock size={16} />} color="#3b82f6" />
+        <ArmyStat title="Bekleyen" value={summary.pendingCommands || 0} icon={<Bot size={16} />} color="#a855f7" />
         <ArmyStat title="Onay Bekleyen" value={summary.pendingApprovals || 0} icon={<ClipboardCheck size={16} />} color="#f59e0b" />
         <ArmyStat title="Kritik Bulgu" value={summary.criticalFindings || 0} icon={<AlertCircle size={16} />} color="#ef4444" />
       </div>
 
-      <div className="card" style={{ padding: '1.25rem', border: '1px solid rgba(16,185,129,0.18)', background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.04))' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <div>
-            <h2 style={{ fontSize: '1.2rem', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Bot size={20} /> Meta Ads Army Komut Merkezi
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-              Bu alandan orchestrator'a görev verilir. İlk fazda komutlar kuyruğa alınır; reklam değiştiren aksiyonlar açık onay olmadan uygulanmaz.
-            </p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#10b981', fontSize: '0.75rem', fontWeight: 800 }}>
-            <ShieldCheck size={16} /> Onaylı aksiyon modu
-          </div>
-        </div>
-
-        <form action={submitCommand} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <textarea
-            name="command"
-            rows={4}
-            placeholder="Örn: Son 7 günde CPC artan kampanya ve reklam setlerini analiz et, kötü placementları ve bütçe önerilerini çıkar."
-            disabled={isSubmitting}
-            style={{
-              width: '100%',
-              resize: 'vertical',
-              background: 'rgba(0,0,0,0.25)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '10px',
-              padding: '0.9rem',
-              outline: 'none',
-              fontSize: '0.9rem'
-            }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <select name="priority" defaultValue="NORMAL" disabled={isSubmitting} style={prioritySelectStyle}>
-              <option value="LOW" style={priorityOptionStyle}>Düşük Öncelik</option>
-              <option value="NORMAL" style={priorityOptionStyle}>Normal Öncelik</option>
-              <option value="HIGH" style={priorityOptionStyle}>Yüksek Öncelik</option>
-              <option value="URGENT" style={priorityOptionStyle}>Acil</option>
+      <div className="card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(16,185,129,0.05), rgba(59,130,246,0.05))' }}>
+        <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Bot size={22} /> Komut Merkezi</h2>
+        <form action={submitCommand} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <textarea name="command" rows={4} placeholder="Agent'a görev verin..." style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', color: '#fff' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <select name="priority" defaultValue="NORMAL" style={prioritySelectStyle}>
+              <option value="LOW">Düşük</option><option value="NORMAL">Normal</option><option value="HIGH">Yüksek</option>
             </select>
-            <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Send size={15} /> {isSubmitting ? 'Kuyruğa alınıyor...' : 'Agent Army’ye Gönder'}
-            </button>
+            <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ background: '#10b981' }}>{isSubmitting ? 'Gönderiliyor...' : 'Army’ye Gönder'}</button>
           </div>
         </form>
-        {message && (
-          <div style={{ marginTop: '0.75rem', color: message.type === 'error' ? '#ef4444' : '#10b981', fontSize: '0.85rem', fontWeight: 700 }}>
-            {message.text}
-          </div>
-        )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-        <ArmyList title="Son Komutlar" empty="Henüz komut yok." items={commands.map((item) => ({
-          id: item.id,
-          title: item.command,
-          meta: `${item.status} · ${item.priority} · ${new Date(item.createdAt).toLocaleString('tr-TR')}`,
-          badge: item.requestedBy || 'panel'
-        }))} />
-        <ArmyList title="Agent Run Geçmişi" empty="Henüz agent run yok." items={runs.map((item) => ({
-          id: item.id,
-          title: item.summary || item.agentName,
-          meta: `${item.agentName} · ${item.status} · ${new Date(item.createdAt).toLocaleString('tr-TR')}`,
-          badge: item.status
-        }))} />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-        <ArmyList title="Son Bulgular" empty="Henüz bulgu yok." items={findings.map((item) => ({
-          id: item.id,
-          title: item.title,
-          meta: `${item.category} · ${item.details}`,
-          badge: item.severity
-        }))} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
         <div className="card" style={{ padding: '1rem' }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Zap size={16} /> Öneriler ve Onaylar</h3>
-          {recommendations.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Henüz öneri yok.</p>
-          ) : recommendations.map((item) => (
-            <div key={item.id} style={{ padding: '0.85rem 0', borderTop: '1px solid var(--border-color)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{item.title}</div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', marginTop: '0.25rem' }}>{item.details}</div>
-                  <div style={{ color: '#f59e0b', fontSize: '0.72rem', fontWeight: 800, marginTop: '0.35rem' }}>Risk: {item.riskLevel} · {item.status}</div>
-                </div>
-                {item.status === 'PENDING_APPROVAL' && (
-                  <button onClick={() => approveRecommendation(item.id)} disabled={isSubmitting} style={{ ...smallButtonStyle, background: 'rgba(16,185,129,0.14)', color: '#10b981' }}>
-                    Onayla
-                  </button>
-                )}
-              </div>
+          <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Bulgular</h3>
+          {findings.map(f => <div key={f.id} style={{ padding: '0.8rem 0', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{f.title}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{f.details}</div>
+          </div>)}
+        </div>
+        <div className="card" style={{ padding: '1rem' }}>
+          <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Öneriler</h3>
+          {recommendations.map(r => <div key={r.id} style={{ padding: '0.8rem 0', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{r.title}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{r.details}</div>
             </div>
-          ))}
+            {r.status === 'PENDING_APPROVAL' && <button onClick={() => approveRecommendation(r.id)} className="btn btn-primary" style={{ padding: '0.2rem 0.6rem', fontSize: '0.7rem' }}>Onayla</button>}
+          </div>)}
         </div>
       </div>
     </div>
@@ -1094,139 +529,8 @@ function MetaArmyPanel({ clientId, armyResult }) {
 }
 
 function ArmyStat({ title, value, icon, color }) {
-  return (
-    <div className="card" style={{ padding: '1rem', borderLeft: `3px solid ${color}` }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>
-        {title}<span style={{ color }}>{icon}</span>
-      </div>
-      <div style={{ fontSize: '1rem', fontWeight: 900, marginTop: '0.5rem' }}>{value}</div>
-    </div>
-  );
+  return (<div className="card" style={{ padding: '1rem', borderLeft: `4px solid ${color}` }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{title}<span style={{ color }}>{icon}</span></div>
+    <div style={{ fontSize: '1.2rem', fontWeight: 900, marginTop: '0.4rem' }}>{value}</div>
+  </div>);
 }
-
-function ArmyList({ title, items, empty }) {
-  return (
-    <div className="card" style={{ padding: '1rem', minHeight: '220px' }}>
-      <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>{title}</h3>
-      {items.length === 0 ? (
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{empty}</p>
-      ) : items.map((item) => (
-        <div key={item.id} style={{ padding: '0.75rem 0', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontWeight: 800, fontSize: '0.86rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.74rem', marginTop: '0.25rem' }}>{item.meta}</div>
-            </div>
-            <span style={{ fontSize: '0.65rem', height: 'fit-content', padding: '0.2rem 0.4rem', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', fontWeight: 800 }}>{item.badge}</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function TabButton({ id, label, count, activeTab, onClick }) {
-  const isActive = activeTab === id;
-  return (
-    <button
-      onClick={() => onClick(id)}
-      style={{
-        padding: '1rem 0.5rem',
-        fontSize: '0.9rem',
-        fontWeight: 700,
-        background: 'none',
-        border: 'none',
-        borderBottom: isActive ? '2px solid var(--accent-primary)' : '2px solid transparent',
-        color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem'
-      }}
-    >
-      {label} <span style={{ fontSize: '0.7rem', background: isActive ? 'var(--accent-primary)22' : 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{count}</span>
-    </button>
-  );
-}
-
-function StatCard({ label, value, icon, color }) {
-  return (
-    <div className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', borderLeft: `3px solid ${color}` }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{label}</span>
-        <div style={{ color, opacity: 0.8 }}>{icon}</div>
-      </div>
-      <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{value}</div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }) {
-  const isActive = status === 'ACTIVE';
-  return (
-    <div style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '0.4rem',
-      padding: '0.2rem 0.5rem',
-      borderRadius: '4px',
-      background: isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)',
-      color: isActive ? '#10b981' : 'var(--text-secondary)',
-      fontSize: '0.65rem',
-      fontWeight: 800
-    }}>
-      {isActive ? <Play size={10} fill="#10b981" /> : <Pause size={10} fill="var(--text-secondary)" />}
-      {isActive ? 'AKTİF' : 'DURDURULDU'}
-    </div>
-  );
-}
-
-function EmptyRow({ colSpan }) {
-  return (
-    <tr>
-      <td colSpan={colSpan} style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-        <BarChart3 size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-        <p>Veri bulunamadı.</p>
-      </td>
-    </tr>
-  );
-}
-
-const thStyle = { padding: '0.75rem 1rem', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' };
-const tdStyle = { padding: '1rem', fontSize: '0.85rem', borderBottom: '1px solid var(--border-color)' };
-const trStyle = { transition: 'background 0.2s' };
-const smallButtonStyle = {
-  border: '1px solid var(--border-color)',
-  borderRadius: '7px',
-  padding: '0.45rem 0.65rem',
-  fontSize: '0.72rem',
-  fontWeight: 800,
-  cursor: 'pointer',
-  whiteSpace: 'nowrap'
-};
-const prioritySelectStyle = {
-  background: '#0f1f2e',
-  border: '1px solid rgba(148, 163, 184, 0.35)',
-  borderRadius: '6px',
-  padding: '0.55rem 0.75rem',
-  fontSize: '0.75rem',
-  color: '#f8fafc',
-  outline: 'none',
-  colorScheme: 'dark'
-};
-
-const priorityOptionStyle = {
-  backgroundColor: '#f8fafc',
-  color: '#0f172a'
-};
-
-const dateInputStyle = {
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid var(--border-color)',
-  borderRadius: '6px',
-  padding: '0.3rem 0.5rem',
-  fontSize: '0.75rem',
-  color: 'var(--text-primary)',
-  outline: 'none',
-  colorScheme: 'dark'
-};
