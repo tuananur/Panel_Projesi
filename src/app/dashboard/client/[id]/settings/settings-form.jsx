@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { updateClientSettingsAction, testMetaConnectionAction } from '@/app/actions';
+import { updateClientSettingsAction, testMetaConnectionAction, testGoogleConnectionAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
@@ -56,7 +56,9 @@ export default function SettingsForm({ client, role }) {
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('seo');
   const [testResult, setTestResult] = useState(null);
+  const [googleTestResult, setGoogleTestResult] = useState(null);
   const [testing, setTesting] = useState(false);
+  const [googleTesting, setGoogleTesting] = useState(false);
 
   const isDesigner = role === 'DESIGNER';
   const isDesignerManager = role === 'DESIGNER_MANAGER';
@@ -110,6 +112,24 @@ export default function SettingsForm({ client, role }) {
     const result = await testMetaConnectionAction(formData);
     setTestResult(result);
     setTesting(false);
+    setGlobalLoading(false);
+  }
+
+  async function handleGoogleTestConnection() {
+    setGoogleTesting(true);
+    setGlobalLoading(true);
+    setGoogleTestResult(null);
+    
+    const formData = new FormData();
+    const idInput = document.querySelector('input[name="googleCustomerId"]');
+    const tokenInput = document.querySelector('textarea[name="googleRefreshToken"]');
+    
+    formData.append('googleCustomerId', idInput?.value || '');
+    formData.append('googleRefreshToken', tokenInput?.value || '');
+    
+    const result = await testGoogleConnectionAction(formData);
+    setGoogleTestResult(result);
+    setGoogleTesting(false);
     setGlobalLoading(false);
   }
 
@@ -378,6 +398,99 @@ export default function SettingsForm({ client, role }) {
               disabled={loading}
             >
               {loading ? 'Kaydediliyor...' : 'Meta Ayarlarını Kaydet'}
+            </button>
+          </div>
+        </div>
+
+        {/* YENİ PANEL: Google Ads Ayarları */}
+        <div className="card animate-fade-in" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#4285F4', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
+            Google Ads API Ayarları
+          </h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <input type="hidden" name="googleEnabled" value="on" />
+
+            <div className="input-group">
+              <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                Google Customer ID (xxx-xxx-xxxx)
+                <a href="https://ads.google.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: '#4285F4', textDecoration: 'underline' }}>ID Bul</a>
+              </label>
+              <input 
+                type="text" 
+                name="googleCustomerId" 
+                className="input-field" 
+                defaultValue={client.googleCustomerId || ''}
+                placeholder="Örn: 123-456-7890"
+              />
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Müşteri hesabınızın 10 haneli kimlik numarası.</p>
+            </div>
+
+            <div className="input-group">
+              <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                Google Refresh Token
+                <a href="https://developers.google.com/google-ads/api/docs/oauth/overview" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: '#4285F4', textDecoration: 'underline' }}>Token Al</a>
+              </label>
+              <textarea 
+                name="googleRefreshToken" 
+                className="input-field" 
+                rows={4}
+                defaultValue={client.googleRefreshToken || ''}
+                placeholder="1//..."
+                style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
+              />
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Google Ads API yenileme jetonu.</p>
+            </div>
+
+            <div style={{ background: 'rgba(66, 133, 244, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(66, 133, 244, 0.2)' }}>
+              <p style={{ fontSize: '0.75rem', color: '#4285F4', fontWeight: 600 }}>Bilgi:</p>
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                Verilere erişebilmemiz için Google Cloud Console üzerinden oluşturulmuş bir Refresh Token gereklidir.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+              <button 
+                type="button" 
+                onClick={handleGoogleTestConnection}
+                disabled={googleTesting}
+                className="btn"
+                style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  color: 'var(--text-primary)', 
+                  border: '1px solid var(--border-color)',
+                  width: '100%',
+                  fontSize: '0.8rem',
+                  padding: '0.6rem'
+                }}
+              >
+                {googleTesting ? 'Bağlantı Test Ediliyor...' : 'Bağlantıyı Test Et'}
+              </button>
+
+              {googleTestResult && (
+                <div style={{ 
+                  padding: '0.75rem', 
+                  borderRadius: '8px', 
+                  fontSize: '0.75rem',
+                  background: googleTestResult.success ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                  border: `1px solid ${googleTestResult.success ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                  color: googleTestResult.success ? '#10b981' : '#ef4444'
+                }}>
+                  <div style={{ fontWeight: 800, marginBottom: '0.25rem' }}>
+                    {googleTestResult.success ? 'BAŞARILI' : 'BAĞLANTI HATASI'}
+                  </div>
+                  <div style={{ opacity: 0.9 }}>{googleTestResult.message || googleTestResult.details}</div>
+                </div>
+              )}
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn" 
+              style={{ width: '100%', marginTop: '0.5rem', padding: '0.8rem', fontSize: '1rem', background: 'rgba(66, 133, 244, 0.1)', color: '#4285F4', border: '1px solid rgba(66, 133, 244, 0.3)' }}
+              disabled={loading}
+            >
+              {loading ? 'Kaydediliyor...' : 'Google Ayarlarını Kaydet'}
             </button>
           </div>
         </div>

@@ -128,6 +128,7 @@ export default async function ClientDetailLayout({ children, params }) {
   const canSeeSocial = services.includes('Sosyal Medya') && can(permissions, session.role, 'client.tab.social');
   const canSeeSettings = can(permissions, session.role, 'client.tab.settings');
   const canSeeMeta = can(permissions, session.role, 'client.tab.meta');
+  const canSeeGoogle = can(permissions, session.role, 'client.tab.google');
 
   return (
     <div className="animate-fade-in">
@@ -220,6 +221,7 @@ export default async function ClientDetailLayout({ children, params }) {
           canSeeSocial={canSeeSocial} 
           canSeeSettings={canSeeSettings} 
           canSeeMeta={canSeeMeta}
+          canSeeGoogle={canSeeGoogle}
         />
       </div>
 

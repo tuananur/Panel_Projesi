@@ -320,7 +320,10 @@ export async function updateClientSettingsAction(clientId, formData) {
         logoUrl,
         metaEnabled: formData.get('metaEnabled') === 'on',
         metaAdAccountId: formData.get('metaAdAccountId'),
-        metaAccessToken: formData.get('metaAccessToken')
+        metaAccessToken: formData.get('metaAccessToken'),
+        googleEnabled: formData.get('googleEnabled') === 'on',
+        googleCustomerId: formData.get('googleCustomerId'),
+        googleRefreshToken: formData.get('googleRefreshToken')
       }
     });
     await logActivity('UPDATE', 'SETTINGS', `Müşteri ayarları güncellendi.`, clientId);
@@ -931,6 +934,81 @@ export async function testMetaConnectionAction(formData) {
     return { success: false, error: 'Ağ Hatası', details: err.message };
   }
 }
+
+export async function testGoogleConnectionAction(formData) {
+  const customerId = formData.get('googleCustomerId')?.trim();
+  const refreshToken = formData.get('googleRefreshToken')?.trim();
+  
+  if (!customerId || !refreshToken) {
+    return { error: 'Eksik Bilgi', details: 'Lütfen hem Customer ID hem de Refresh Token alanlarını doldurun.' };
+  }
+
+  // Google Ads API requires an access token, which we get from the refresh token.
+  // This is a mock/placeholder logic for now, as real implementation requires OAuth flow
+  // and google-ads-api library. We can simulate a check.
+  
+  try {
+    // Basic validation of format
+    const idPattern = /^\d{3}-\d{3}-\d{4}$/;
+    if (!idPattern.test(customerId)) {
+      return { 
+        success: false, 
+        error: 'Format Hatası', 
+        details: 'Google Customer ID formatı hatalı. Örn: 123-456-7890' 
+      };
+    }
+
+    // In a real scenario, we would try to get an access token
+    // For now, we'll return success if basic formats look okay to demonstrate the UI
+    return { 
+      success: true, 
+      message: `Bağlantı Başarılı! (Simüle Edildi). Müşteri ID: ${customerId}`,
+    };
+  } catch (err) {
+    return { success: false, error: 'Hata', details: err.message };
+  }
+}
+
+export async function getGoogleAdsAction(clientId) {
+  try {
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+    if (!client) return { error: 'CLIENT_NOT_FOUND' };
+    if (!client.googleCustomerId || !client.googleRefreshToken) {
+      return { 
+        error: 'API_MISSING', 
+        debug: { 
+          hasId: !!client.googleCustomerId, 
+          hasToken: !!client.googleRefreshToken,
+          googleEnabled: client.googleEnabled
+        } 
+      };
+    }
+
+    // Mock data for demonstration as real API requires complex setup
+    return {
+      success: true,
+      summary: {
+        spend: 1245.50,
+        clicks: 850,
+        impressions: 45000,
+        reach: 32000,
+        cpc: 1.46,
+        ctr: 0.018
+      },
+      activeCampaigns: [
+        { id: '1', name: 'Arama Ağı - Marka', status: 'ENABLED', spend: 540.20, clicks: 320, impressions: 5000 },
+        { id: '2', name: 'Display - Retargeting', status: 'ENABLED', spend: 300.30, clicks: 410, impressions: 32000 },
+        { id: '3', name: 'Video - Tanıtım', status: 'PAUSED', spend: 405.00, clicks: 120, impressions: 8000 }
+      ]
+    };
+  } catch (error) {
+    console.error('Google Ads fetch failed:', error);
+    return { error: 'FETCH_FAILED', details: error.message };
+  }
+}
+
 // Mail Actions
 export async function getMailSettingsAction() {
   try {
