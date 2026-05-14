@@ -1514,11 +1514,11 @@ export async function createWorkItemAction(formData) {
   const dueDate = dueDateRaw ? new Date(`${dueDateRaw}T12:00:00`) : null;
   const priority = (formData.get('priority') || 'NORMAL').toString();
   const type = (formData.get('type') || 'OTHER').toString();
-  if (!title) return { error: 'Ba�l�k zorunlu.' };
-  if (!assigneeId) return { error: 'Atanacak ki�i se�ilmeli.' };
+  if (!title) return { error: 'Başlık zorunlu.' };
+  if (!assigneeId) return { error: 'Atanacak kişi seçilmeli.' };
   const assignableUsers = await getAssignableUsersForSession(session);
   if (!assignableUsers.some((u) => u.id === assigneeId)) {
-    return { error: 'Bu kullan�c�ya i� atama yetkiniz yok.' };
+    return { error: 'Bu kullanıcıya iş atama yetkiniz yok.' };
   }
   try {
     const item = await prisma.workItem.create({
@@ -1546,7 +1546,7 @@ export async function createWorkItemAction(formData) {
     await logActivity('CREATE', 'WORK_ITEM', `${title} işi ${item.assignee.username} kullanıcısına atandı.`, clientId);
     return { success: true, item };
   } catch (error) {
-    return { error: '�� atan�rken hata olu�tu.' };
+    return { error: 'İş atanırken hata oluştu.' };
   }
 }
 function notificationUserIdsForWorkItem(item, actorUserId) {
@@ -1578,8 +1578,8 @@ export async function startWorkItemAction(workItemId) {
   if (!(await canAccessWorkItems(session))) return { error: 'Yetkiniz yok.' };
   const id = parseInt(workItemId);
   const item = await prisma.workItem.findUnique({ where: { id }, include: { assignee: { select: { managerId: true } } } });
-  if (!item || item.assigneeId !== session.userId) return { error: 'Bu i�i ba�latamazs�n�z.' };
-  if (!['ASSIGNED', 'REVISION_REQUESTED'].includes(item.status)) return { error: 'Bu i� ba�lat�lamaz.' };
+  if (!item || item.assigneeId !== session.userId) return { error: 'Bu işi başlatamazsınız.' };
+  if (!['ASSIGNED', 'REVISION_REQUESTED'].includes(item.status)) return { error: 'Bu iş başlatılamaz.' };
   await prisma.workItem.update({
     where: { id },
     data: {
@@ -1596,8 +1596,8 @@ export async function submitWorkItemAction(formData) {
   const id = parseInt(formData.get('workItemId'));
   const note = (formData.get('note') || '').toString().trim() || null;
   const item = await prisma.workItem.findUnique({ where: { id }, include: { assignee: { select: { managerId: true } } } });
-  if (!item || item.assigneeId !== session.userId) return { error: 'Bu i�i teslim edemezsiniz.' };
-  if (!['ASSIGNED', 'IN_PROGRESS', 'REVISION_REQUESTED'].includes(item.status)) return { error: 'Bu i� teslim edilemez.' };
+  if (!item || item.assigneeId !== session.userId) return { error: 'Bu işi teslim edemezsiniz.' };
+  if (!['ASSIGNED', 'IN_PROGRESS', 'REVISION_REQUESTED'].includes(item.status)) return { error: 'Bu iş teslim edilemez.' };
   await prisma.workItem.update({
     where: { id },
     data: {
@@ -1616,8 +1616,8 @@ export async function approveWorkItemAction(workItemId) {
   if (!(await canAccessWorkItems(session))) return { error: 'Yetkiniz yok.' };
   const id = parseInt(workItemId);
   const item = await prisma.workItem.findUnique({ where: { id }, include: { assignee: { select: { managerId: true } } } });
-  if (!(await canManageWorkItem(session, item))) return { error: 'Bu i�i onaylama yetkiniz yok.' };
-  if (item.status !== 'SUBMITTED') return { error: 'Sadece onay bekleyen i�ler onaylanabilir.' };
+  if (!(await canManageWorkItem(session, item))) return { error: 'Bu işi onaylama yetkiniz yok.' };
+  if (item.status !== 'SUBMITTED') return { error: 'Sadece onay bekleyen işler onaylanabilir.' };
   await prisma.workItem.update({
     where: { id },
     data: {
@@ -1636,10 +1636,10 @@ export async function requestWorkItemRevisionAction(formData) {
   if (!(await canAccessWorkItems(session))) return { error: 'Yetkiniz yok.' };
   const id = parseInt(formData.get('workItemId'));
   const note = (formData.get('note') || '').toString().trim();
-  if (!note) return { error: 'Revize a��klamas� zorunlu.' };
+  if (!note) return { error: 'Revize açıklaması zorunlu.' };
   const item = await prisma.workItem.findUnique({ where: { id }, include: { assignee: { select: { managerId: true } } } });
-  if (!(await canManageWorkItem(session, item))) return { error: 'Bu i�e revize isteme yetkiniz yok.' };
-  if (item.status !== 'SUBMITTED') return { error: 'Sadece onay bekleyen i�ler revizeye g�nderilebilir.' };
+  if (!(await canManageWorkItem(session, item))) return { error: 'Bu işe revize isteme yetkiniz yok.' };
+  if (item.status !== 'SUBMITTED') return { error: 'Sadece onay bekleyen işler revizeye gönderilebilir.' };
   await prisma.workItem.update({
     where: { id },
     data: {
@@ -1657,7 +1657,7 @@ export async function cancelWorkItemAction(workItemId) {
   if (!(await canAccessWorkItems(session))) return { error: 'Yetkiniz yok.' };
   const id = parseInt(workItemId);
   const item = await prisma.workItem.findUnique({ where: { id }, include: { assignee: { select: { managerId: true } } } });
-  if (!(await canManageWorkItem(session, item))) return { error: 'Bu i�i iptal etme yetkiniz yok.' };
+  if (!(await canManageWorkItem(session, item))) return { error: 'Bu işi iptal etme yetkiniz yok.' };
   await prisma.workItem.update({
     where: { id },
     data: {
@@ -1866,40 +1866,40 @@ export async function createMetaCampaignAction(clientId, campaignData) {
 export async function updateMetaEntityAction(clientId, entityId, updateData) {
   try {
     const session = await getSession();
-    if (!session) return { error: " Yetkisiz eri�im.\ };
+    if (!session) return { error: 'Yetkisiz erişim.' };
 
- const client = await prisma.client.findUnique({
- where: { id: parseInt(clientId) }
- });
- 
- if (!client || !client.metaAccessToken) {
- return { error: \API_MISSING\ };
- }
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+    
+    if (!client || !client.metaAccessToken) {
+      return { error: 'API_MISSING' };
+    }
 
- const accessToken = client.metaAccessToken.trim();
- const url = \https://graph.facebook.com/v19.0/\ + entityId;
- 
- const payload = {
- ...updateData,
- access_token: accessToken
- };
+    const accessToken = client.metaAccessToken.trim();
+    const url = `https://graph.facebook.com/v19.0/${entityId}`;
+    
+    const payload = {
+      ...updateData,
+      access_token: accessToken
+    };
 
- if (updateData.daily_budget) {
- payload.daily_budget = Math.round(updateData.daily_budget * 100);
- }
+    if (updateData.daily_budget) {
+      payload.daily_budget = Math.round(updateData.daily_budget * 100);
+    }
 
- const response = await fetch(url, {
- method: \POST\,
- headers: { \Content-Type\: \application/json\ },
- body: JSON.stringify(payload)
- });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
- const data = await response.json();
- if (data.error) return { error: data.error.message };
+    const data = await response.json();
+    if (data.error) return { error: data.error.message };
 
- await logActivity(\UPDATE\, \META_ADS\, \Meta objesi g�ncellendi: \ + entityId, clientId);
- return { success: true };
- } catch (error) {
- return { error: \G�ncelleme yap�lamad�.\ };
- }
+    await logActivity('UPDATE', 'META_ADS', `Meta objesi güncellendi: ${entityId}`, clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Güncelleme yapılamadı.' };
+  }
 }
