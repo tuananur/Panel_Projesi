@@ -948,7 +948,7 @@ export async function testGoogleConnectionAction(formData) {
   }
 
   if (!customerId || !refreshToken) {
-    return { error: 'Eksik Bilgi', details: 'Lütfen hem Customer ID alanını doldurun hem de Genel Ayarlar'da Refresh Token tanımlı olduğundan emin olun.' };
+    return { error: 'Eksik Bilgi', details: "Lütfen hem Customer ID alanını doldurun hem de Genel Ayarlar'da Refresh Token tanımlı olduğundan emin olun." };
   }
 
   // Google Ads API requires an access token, which we get from the refresh token.
