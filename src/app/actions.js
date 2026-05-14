@@ -1782,3 +1782,83 @@ export async function runDatabaseMaintenanceAction() {
     return { error: `Veritabanı güncellemesi başarısız: ${error.message}` };
   }
 }
+
+export async function toggleMetaStatusAction(clientId, entityId, newStatus) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+    
+    if (!client || !client.metaAccessToken) {
+      return { error: 'API_MISSING' };
+    }
+
+    const accessToken = client.metaAccessToken.trim();
+    const status = newStatus === 'ACTIVE' ? 'ACTIVE' : 'PAUSED';
+
+    const url = `https://graph.facebook.com/v19.0/${entityId}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: status, access_token: accessToken })
+    });
+
+    const data = await response.json();
+    if (data.error) return { error: data.error.message };
+
+    await logActivity('UPDATE', 'META_ADS', `Meta objesi durumu güncellendi: ${entityId} -> ${status}`, clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Durum güncellenemedi.' };
+  }
+}
+
+export async function createMetaCampaignAction(clientId, campaignData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+    
+    if (!client || !client.metaAdAccountId || !client.metaAccessToken) {
+      return { error: 'API_MISSING' };
+    }
+
+    const accountId = client.metaAdAccountId.trim();
+    const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
+    const accessToken = client.metaAccessToken.trim();
+    
+    const url = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns`;
+    
+    const payload = {
+      name: campaignData.name,
+      objective: campaignData.objective || 'OUTCOME_TRAFFIC',
+      status: campaignData.status || 'PAUSED',
+      special_ad_categories: [], 
+      access_token: accessToken
+    };
+
+    if (campaignData.daily_budget) {
+      payload.daily_budget = Math.round(campaignData.daily_budget * 100); 
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    if (data.error) return { error: data.error.message };
+
+    await logActivity('CREATE', 'META_ADS', `Yeni kampanya oluşturuldu: ${campaignData.name}`, clientId);
+    return { success: true, id: data.id };
+  } catch (error) {
+    return { error: 'Kampanya oluşturulamadı.' };
+  }
+}
