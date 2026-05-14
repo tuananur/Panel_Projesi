@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction } from '@/app/actions';
+import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction } from '@/app/actions';
 import {
   TrendingUp, MousePointer2, Eye, Users as UsersIcon,
   Wallet, Search, Calendar, ChevronRight,
@@ -27,6 +27,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedAdSetId, setSelectedAdSetId] = useState(null);
+
+  const [campaigns, setCampaigns] = useState(result.activeCampaigns || []);
+  const [adSets, setAdSets] = useState(result.adSets || []);
+  const [ads, setAds] = useState(result.ads || []);
+  
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createFormData, setCreateFormData] = useState({ name: '', daily_budget: '', status: 'ACTIVE' });
+  const [isCreating, setIsCreating] = useState(false);
 
   const [since, setSince] = useState(initSince || '');
   const [until, setUntil] = useState(initUntil || '');
@@ -54,25 +62,77 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     });
   };
 
-  const filteredCampaigns = result.activeCampaigns.filter(c =>
+  const filteredCampaigns = campaigns.filter(c =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredAdSets = result.adSets.filter(as => {
+  const filteredAdSets = adSets.filter(as => {
     const matchesSearch = as.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCampaign = selectedCampaignId ? as.campaign_id === selectedCampaignId : true;
     return matchesSearch && matchesCampaign;
   });
 
-  const filteredAds = result.ads.filter(ad => {
+  const filteredAds = ads.filter(ad => {
     const matchesSearch = ad.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesAdSet = selectedAdSetId ? ad.adset_id === selectedAdSetId : true;
-    const matchesCampaign = selectedCampaignId ? result.adSets.find(as => as.id === ad.adset_id)?.campaign_id === selectedCampaignId : true;
+    const matchesCampaign = selectedCampaignId ? adSets.find(as => as.id === ad.adset_id)?.campaign_id === selectedCampaignId : true;
     return matchesSearch && matchesAdSet && matchesCampaign;
   });
 
-  const selectedCampaignName = result.activeCampaigns.find(c => c.id === selectedCampaignId)?.name;
-  const selectedAdSetName = result.adSets.find(as => as.id === selectedAdSetId)?.name;
+  const handleToggleStatus = async (entityId, currentStatus, type) => {
+    const newStatus = currentStatus === 'ACTIVE' || currentStatus === 'ENABLED' ? 'PAUSED' : 'ACTIVE';
+    
+    // Optimistic Update
+    if (type === 'campaign') {
+      setCampaigns(prev => prev.map(c => c.id === entityId ? { ...c, status: newStatus } : c));
+    } else if (type === 'adset') {
+      setAdSets(prev => prev.map(a => a.id === entityId ? { ...a, status: newStatus } : a));
+    } else if (type === 'ad') {
+      setAds(prev => prev.map(a => a.id === entityId ? { ...a, status: newStatus } : a));
+    }
+
+    startTransition(async () => {
+      const res = await toggleMetaStatusAction(id, entityId, newStatus);
+      if (res?.error) {
+        alert('Durum güncellenirken hata oluştu: ' + res.error);
+        // Revert on error
+        if (type === 'campaign') {
+          setCampaigns(prev => prev.map(c => c.id === entityId ? { ...c, status: currentStatus } : c));
+        } else if (type === 'adset') {
+          setAdSets(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
+        } else if (type === 'ad') {
+          setAds(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
+        }
+      }
+    });
+  };
+
+  const handleCreateCampaign = async (e) => {
+    e.preventDefault();
+    if (!createFormData.name) return;
+    setIsCreating(true);
+    const res = await createMetaCampaignAction(id, createFormData);
+    setIsCreating(false);
+    
+    if (res?.error) {
+      alert('Kampanya oluşturulurken hata oluştu: ' + res.error);
+    } else {
+      alert('Kampanya başarıyla oluşturuldu!');
+      setShowCreateModal(false);
+      // Geçici olarak UI'a ekle
+      setCampaigns([{ 
+        id: res.id || Math.random().toString(), 
+        name: createFormData.name, 
+        status: createFormData.status,
+        daily_budget: createFormData.daily_budget ? Number(createFormData.daily_budget) * 100 : null,
+        insights: { data: [{ spend: 0, impressions: 0, clicks: 0 }] }
+      }, ...campaigns]);
+      setCreateFormData({ name: '', daily_budget: '', status: 'ACTIVE' });
+    }
+  };
+
+  const selectedCampaignName = campaigns.find(c => c.id === selectedCampaignId)?.name;
+  const selectedAdSetName = adSets.find(as => as.id === selectedAdSetId)?.name;
 
   const isCustom = !!(initSince && initUntil);
 
@@ -236,26 +296,36 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
               </button>
             </div>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ position: 'relative', width: '250px' }}>
+            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+            <input 
+              type="text" 
+              placeholder="Ara..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ 
+                width: '100%', 
+                padding: '0.5rem 1rem 0.5rem 2rem', 
+                fontSize: '0.8rem', 
+                background: 'rgba(255,255,255,0.05)', 
+                border: '1px solid var(--border-color)', 
+                borderRadius: '8px',
+                color: 'var(--text-primary)'
+              }}
+            />
+          </div>
+          {activeTab !== 'army' && (
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="btn btn-primary" 
+              style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', gap: '0.5rem', background: '#0064e0', borderColor: '#0064e0' }}
+            >
+              + Yeni Oluştur
+            </button>
+          )}
         </div>
-
-        <div style={{ position: 'relative', width: '250px' }}>
-          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
-          <input
-            type="text"
-            placeholder="Ara..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.5rem 1rem 0.5rem 2rem',
-              fontSize: '0.8rem',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              color: 'var(--text-primary)'
-            }}
-          />
-        </div>
+      </div> 
       </div>
 
       {/* Summary Stats */}
@@ -306,22 +376,24 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                         <td style={tdStyle}><input type="checkbox" disabled /></td>
                         <td style={{ ...tdStyle, paddingLeft: '0' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            <div style={{
-                              width: '32px',
-                              height: '18px',
-                              background: camp.status === 'ACTIVE' ? '#0064e0' : 'rgba(255,255,255,0.1)',
-                              borderRadius: '10px',
-                              position: 'relative',
-                              cursor: 'pointer'
-                            }}>
-                              <div style={{
-                                width: '14px',
-                                height: '14px',
-                                background: 'white',
-                                borderRadius: '50%',
-                                position: 'absolute',
-                                top: '2px',
-                                left: camp.status === 'ACTIVE' ? '16px' : '2px',
+                            <div 
+                              onClick={() => handleToggleStatus(camp.id, camp.status, 'campaign')}
+                              style={{ 
+                                width: '32px', 
+                                height: '18px', 
+                                background: camp.status === 'ACTIVE' || camp.status === 'ENABLED' ? '#10b981' : 'rgba(255,255,255,0.1)', 
+                                borderRadius: '10px', 
+                                position: 'relative',
+                                cursor: 'pointer'
+                              }}>
+                              <div style={{ 
+                                width: '14px', 
+                                height: '14px', 
+                                background: 'white', 
+                                borderRadius: '50%', 
+                                position: 'absolute', 
+                                top: '2px', 
+                                left: camp.status === 'ACTIVE' || camp.status === 'ENABLED' ? '16px' : '2px',
                                 transition: 'left 0.2s'
                               }} />
                             </div>
@@ -524,6 +596,70 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                 </tbody>
               </table>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* CREATE MODAL */}
+      {showCreateModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+          zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div className="card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 className="heading-2" style={{ fontSize: '1.25rem' }}>
+                Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'} Oluştur
+              </h3>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>✕</button>
+            </div>
+            
+            <form onSubmit={handleCreateCampaign} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">İsim</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  required
+                  placeholder="Kampanya/Reklam Adı"
+                  value={createFormData.name}
+                  onChange={e => setCreateFormData({...createFormData, name: e.target.value})}
+                />
+              </div>
+
+              {activeTab === 'campaigns' && (
+                <div className="form-group">
+                  <label className="form-label">Günlük Bütçe (TL)</label>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    placeholder="Örn: 100"
+                    value={createFormData.daily_budget}
+                    onChange={e => setCreateFormData({...createFormData, daily_budget: e.target.value})}
+                  />
+                </div>
+              )}
+
+              <div className="form-group">
+                <label className="form-label">Yayın Durumu</label>
+                <select 
+                  className="form-control"
+                  value={createFormData.status}
+                  onChange={e => setCreateFormData({...createFormData, status: e.target.value})}
+                >
+                  <option value="ACTIVE">Aktif (Yayınla)</option>
+                  <option value="PAUSED">Duraklatıldı (Taslak)</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button type="button" onClick={() => setShowCreateModal(false)} className="btn btn-secondary" style={{ flex: 1 }}>İptal</button>
+                <button type="submit" disabled={isCreating} className="btn btn-primary" style={{ flex: 1, background: '#0064e0', borderColor: '#0064e0' }}>
+                  {isCreating ? 'Oluşturuluyor...' : 'Oluştur'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
