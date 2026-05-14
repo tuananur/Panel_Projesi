@@ -122,10 +122,7 @@ export default function SettingsForm({ client, role }) {
     
     const formData = new FormData();
     const idInput = document.querySelector('input[name="googleCustomerId"]');
-    const tokenInput = document.querySelector('textarea[name="googleRefreshToken"]');
-    
     formData.append('googleCustomerId', idInput?.value || '');
-    formData.append('googleRefreshToken', tokenInput?.value || '');
     
     const result = await testGoogleConnectionAction(formData);
     setGoogleTestResult(result);
@@ -426,26 +423,11 @@ export default function SettingsForm({ client, role }) {
               <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Müşteri hesabınızın 10 haneli kimlik numarası.</p>
             </div>
 
-            <div className="input-group">
-              <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                Google Refresh Token
-                <a href="https://developers.google.com/google-ads/api/docs/oauth/overview" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: '#4285F4', textDecoration: 'underline' }}>Token Al</a>
-              </label>
-              <textarea 
-                name="googleRefreshToken" 
-                className="input-field" 
-                rows={4}
-                defaultValue={client.googleRefreshToken || ''}
-                placeholder="1//..."
-                style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
-              />
-              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Google Ads API yenileme jetonu.</p>
-            </div>
-
             <div style={{ background: 'rgba(66, 133, 244, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(66, 133, 244, 0.2)' }}>
               <p style={{ fontSize: '0.75rem', color: '#4285F4', fontWeight: 600 }}>Bilgi:</p>
               <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                Verilere erişebilmemiz için Google Cloud Console üzerinden oluşturulmuş bir Refresh Token gereklidir.
+                Refresh Token artık <strong>Genel Ayarlar</strong> kısmından otomatik olarak alınmaktadır. 
+                Burada sadece müşteriye özel ID numarasını girmeniz yeterlidir.
               </p>
             </div>
 

@@ -82,6 +82,22 @@ export default function GoogleAdsGlobalSettings({ initialConfig }) {
           </div>
         </div>
 
+        <div className="input-group">
+          <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            Refresh Token (Ana Erişim Jetonu)
+            <a href="https://developers.google.com/oauthplayground" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: '#4285F4', textDecoration: 'underline' }}>Token Üret (Playground)</a>
+          </label>
+          <textarea 
+            name="refreshToken" 
+            className="input-field" 
+            rows={3}
+            defaultValue={config.refreshToken || ''}
+            placeholder="1//..."
+            style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
+          />
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>beyinatölyesi@gmail.com ile üretilen ana yenileme jetonu.</p>
+        </div>
+
         <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <ShieldCheck size={14} style={{ color: '#10b981' }} /> 

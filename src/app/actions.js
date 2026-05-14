@@ -937,10 +937,18 @@ export async function testMetaConnectionAction(formData) {
 
 export async function testGoogleConnectionAction(formData) {
   const customerId = formData.get('googleCustomerId')?.trim();
-  const refreshToken = formData.get('googleRefreshToken')?.trim();
+  let refreshToken = formData.get('googleRefreshToken')?.trim();
   
+  if (!refreshToken) {
+    const globalSetting = await prisma.setting.findUnique({ where: { key: 'google_ads_global_config' } });
+    if (globalSetting) {
+      const globalConfig = JSON.parse(globalSetting.value);
+      refreshToken = globalConfig.refreshToken;
+    }
+  }
+
   if (!customerId || !refreshToken) {
-    return { error: 'Eksik Bilgi', details: 'Lütfen hem Customer ID hem de Refresh Token alanlarını doldurun.' };
+    return { error: 'Eksik Bilgi', details: 'Lütfen hem Customer ID alanını doldurun hem de Genel Ayarlar'da Refresh Token tanımlı olduğundan emin olun.' };
   }
 
   // Google Ads API requires an access token, which we get from the refresh token.
@@ -971,16 +979,23 @@ export async function testGoogleConnectionAction(formData) {
 
 export async function getGoogleAdsAction(clientId) {
   try {
-    const client = await prisma.client.findUnique({
-      where: { id: parseInt(clientId) }
-    });
+    const [client, globalSetting] = await Promise.all([
+      prisma.client.findUnique({ where: { id: parseInt(clientId) } }),
+      prisma.setting.findUnique({ where: { key: 'google_ads_global_config' } })
+    ]);
+
     if (!client) return { error: 'CLIENT_NOT_FOUND' };
-    if (!client.googleCustomerId || !client.googleRefreshToken) {
+    
+    const globalConfig = globalSetting ? JSON.parse(globalSetting.value) : {};
+    const refreshToken = client.googleRefreshToken || globalConfig.refreshToken;
+    const customerId = client.googleCustomerId;
+
+    if (!customerId || !refreshToken) {
       return { 
         error: 'API_MISSING', 
         debug: { 
-          hasId: !!client.googleCustomerId, 
-          hasToken: !!client.googleRefreshToken,
+          hasId: !!customerId, 
+          hasToken: !!refreshToken,
           googleEnabled: client.googleEnabled
         } 
       };
@@ -1029,6 +1044,7 @@ export async function saveGoogleAdsGlobalSettingsAction(formData) {
       developerToken: formData.get('developerToken'),
       clientId: formData.get('clientId'),
       clientSecret: formData.get('clientSecret'),
+      refreshToken: formData.get('refreshToken'),
     };
 
     await prisma.setting.upsert({
