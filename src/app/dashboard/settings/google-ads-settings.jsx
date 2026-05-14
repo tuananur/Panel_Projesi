@@ -39,7 +39,10 @@ export default function GoogleAdsGlobalSettings({ initialConfig }) {
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <div className="input-group">
-          <label className="input-label">Developer Token</label>
+          <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            Developer Token
+            <a href="https://developers.google.com/google-ads/api/docs/first-call/dev-token" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: '#4285F4', textDecoration: 'underline' }}>Nasıl Alınır?</a>
+          </label>
           <input 
             type="password" 
             name="developerToken" 
@@ -52,7 +55,10 @@ export default function GoogleAdsGlobalSettings({ initialConfig }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <div className="input-group">
-            <label className="input-label">Client ID</label>
+            <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Client ID
+              <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: '#4285F4', textDecoration: 'underline' }}>Console Git</a>
+            </label>
             <input 
               type="text" 
               name="clientId" 
@@ -62,7 +68,10 @@ export default function GoogleAdsGlobalSettings({ initialConfig }) {
             />
           </div>
           <div className="input-group">
-            <label className="input-label">Client Secret</label>
+            <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Client Secret
+              <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: '#4285F4', textDecoration: 'underline' }}>Console Git</a>
+            </label>
             <input 
               type="password" 
               name="clientSecret" 
