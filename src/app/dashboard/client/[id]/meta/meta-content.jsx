@@ -40,6 +40,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
   const [isEditingEntity, setIsEditingEntity] = useState(false);
   const [editName, setEditName] = useState('');
+  const [editBudget, setEditBudget] = useState('');
 
   const [since, setSince] = useState(initSince || '');
   const [until, setUntil] = useState(initUntil || '');
@@ -147,6 +148,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const openDetails = (entity, type) => {
     setSelectedEntity({ type, data: entity });
     setEditName(entity.name);
+    setEditBudget(entity.daily_budget || entity.lifetime_budget || '0');
     setIsEditingEntity(false);
     setShowDetailsPanel(true);
   };
@@ -161,17 +163,23 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     }
 
     startTransition(async () => {
-      const res = await updateMetaEntityAction(id, selectedEntity.data.id, { name: editName });
+      const updateData = { name: editName };
+      if (editBudget && !isNaN(editBudget)) {
+        updateData.daily_budget = parseFloat(editBudget);
+      }
+
+      const res = await updateMetaEntityAction(id, selectedEntity.data.id, updateData);
       if (res?.error) {
         alert('Güncelleme hatası: ' + res.error);
       } else {
         // Update local state
         const type = selectedEntity.type;
-        if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === selectedEntity.data.id ? { ...c, name: editName } : c));
-        if (type === 'adset') setAdSets(prev => prev.map(as => as.id === selectedEntity.data.id ? { ...as, name: editName } : as));
-        if (type === 'ad') setAds(prev => prev.map(ad => ad.id === selectedEntity.data.id ? { ...ad, name: editName } : ad));
+        const updatedObj = { ...selectedEntity.data, name: editName, daily_budget: editBudget };
+        if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === selectedEntity.data.id ? { ...c, ...updatedObj } : c));
+        if (type === 'adset') setAdSets(prev => prev.map(as => as.id === selectedEntity.data.id ? { ...as, ...updatedObj } : as));
+        if (type === 'ad') setAds(prev => prev.map(ad => ad.id === selectedEntity.data.id ? { ...ad, ...updatedObj } : ad));
         
-        setSelectedEntity(prev => ({ ...prev, data: { ...prev.data, name: editName } }));
+        setSelectedEntity(prev => ({ ...prev, data: updatedObj }));
         setIsEditingEntity(false);
       }
     });
@@ -790,6 +798,22 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                       <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff' }}>{selectedEntity.data.name}</div>
                     )}
                   </div>
+                  {(selectedEntity.type === 'campaign' || selectedEntity.type === 'adset') && (
+                    <div>
+                      <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Günlük Bütçe (TL)</label>
+                      {isEditingEntity ? (
+                        <input 
+                          type="number" 
+                          className="form-control" 
+                          value={editBudget}
+                          onChange={e => setEditBudget(e.target.value)}
+                          style={{ fontSize: '0.85rem', padding: '0.4rem 0.6rem' }}
+                        />
+                      ) : (
+                        <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff' }}>{selectedEntity.data.daily_budget ? (selectedEntity.data.daily_budget / 100).toFixed(2) : '0.00'} TL</div>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Durum</label>
                     <StatusBadge status={selectedEntity.data.status} />
