@@ -33,8 +33,11 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const [ads, setAds] = useState(result.ads || []);
   
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createFormData, setCreateFormData] = useState({ name: '', daily_budget: '', status: 'ACTIVE' });
+  const [createFormData, setCreateFormData] = useState({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
   const [isCreating, setIsCreating] = useState(false);
+
+  const [selectedEntity, setSelectedEntity] = useState(null); // { type: 'campaign'|'adset'|'ad', data: object }
+  const [showDetailsPanel, setShowDetailsPanel] = useState(false);
 
   const [since, setSince] = useState(initSince || '');
   const [until, setUntil] = useState(initUntil || '');
@@ -117,18 +120,31 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     if (res?.error) {
       alert('Kampanya oluşturulurken hata oluştu: ' + res.error);
     } else {
-      alert('Kampanya başarıyla oluşturuldu!');
+      alert(`${activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'} başarıyla oluşturuldu!`);
       setShowCreateModal(false);
-      // Geçici olarak UI'a ekle
-      setCampaigns([{ 
+      
+      const newEntity = { 
         id: res.id || Math.random().toString(), 
         name: createFormData.name, 
         status: createFormData.status,
-        daily_budget: createFormData.daily_budget ? Number(createFormData.daily_budget) * 100 : null,
-        insights: { data: [{ spend: 0, impressions: 0, clicks: 0 }] }
-      }, ...campaigns]);
-      setCreateFormData({ name: '', daily_budget: '', status: 'ACTIVE' });
+        insights: { data: [{ spend: 0, impressions: 0, clicks: 0, reach: 0 }] }
+      };
+
+      if (activeTab === 'campaigns') {
+        setCampaigns([{ ...newEntity, daily_budget: createFormData.daily_budget ? Number(createFormData.daily_budget) * 100 : null }, ...campaigns]);
+      } else if (activeTab === 'adsets') {
+        setAdSets([{ ...newEntity, campaign_id: createFormData.parent_id }, ...adSets]);
+      } else if (activeTab === 'ads') {
+        setAds([{ ...newEntity, adset_id: createFormData.parent_id }, ...ads]);
+      }
+      
+      setCreateFormData({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
     }
+  };
+
+  const openDetails = (entity, type) => {
+    setSelectedEntity({ type, data: entity });
+    setShowDetailsPanel(true);
   };
 
   const selectedCampaignName = campaigns.find(c => c.id === selectedCampaignId)?.name;
@@ -399,10 +415,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                             </div>
                             <span
                               style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer', textDecoration: 'none' }}
-                              onClick={() => {
-                                setSelectedCampaignId(camp.id);
-                                setActiveTab('adsets');
-                              }}
+                              onClick={() => openDetails(camp, 'campaign')}
                               onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
                               onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
                             >
@@ -485,10 +498,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                             </div>
                             <span
                               style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer', textDecoration: 'none' }}
-                              onClick={() => {
-                                setSelectedAdSetId(as.id);
-                                setActiveTab('ads');
-                              }}
+                              onClick={() => openDetails(as, 'adset')}
                               onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
                               onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
                             >
@@ -566,7 +576,10 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                               }} />
                             </div>
                             <div style={{ maxWidth: '200px' }}>
-                              <div style={{ fontWeight: 700 }}>{ad.name}</div>
+                              <div 
+                                style={{ fontWeight: 700, cursor: 'pointer', color: '#0064e0' }}
+                                onClick={() => openDetails(ad, 'ad')}
+                              >{ad.name}</div>
                               <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {ad.creative?.body}
                               </div>
@@ -641,6 +654,36 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
                 </div>
               )}
 
+              {activeTab === 'adsets' && (
+                <div className="form-group">
+                  <label className="form-label">Üst Kampanya Seçin</label>
+                  <select 
+                    className="form-control"
+                    required
+                    value={createFormData.parent_id}
+                    onChange={e => setCreateFormData({...createFormData, parent_id: e.target.value})}
+                  >
+                    <option value="">Kampanya Seçin...</option>
+                    {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              )}
+
+              {activeTab === 'ads' && (
+                <div className="form-group">
+                  <label className="form-label">Üst Reklam Seti Seçin</label>
+                  <select 
+                    className="form-control"
+                    required
+                    value={createFormData.parent_id}
+                    onChange={e => setCreateFormData({...createFormData, parent_id: e.target.value})}
+                  >
+                    <option value="">Reklam Seti Seçin...</option>
+                    {adSets.map(as => <option key={as.id} value={as.id}>{as.name}</option>)}
+                  </select>
+                </div>
+              )}
+
               <div className="form-group">
                 <label className="form-label">Yayın Durumu</label>
                 <select 
@@ -664,66 +707,125 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
         </div>
       )}
 
-      {/* CREATE MODAL */}
-      {showCreateModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
-          zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <div className="card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 className="heading-2" style={{ fontSize: '1.25rem' }}>
-                Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'} Oluştur
-              </h3>
-              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>✕</button>
-            </div>
-            
-            <form onSubmit={handleCreateCampaign} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">İsim</label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  required
-                  placeholder="Kampanya/Reklam Adı"
-                  value={createFormData.name}
-                  onChange={e => setCreateFormData({...createFormData, name: e.target.value})}
-                />
-              </div>
+      )}
 
-              {activeTab === 'campaigns' && (
-                <div className="form-group">
-                  <label className="form-label">Günlük Bütçe (TL)</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    placeholder="Örn: 100"
-                    value={createFormData.daily_budget}
-                    onChange={e => setCreateFormData({...createFormData, daily_budget: e.target.value})}
-                  />
+      {/* DETAILS / EDIT PANEL */}
+      {showDetailsPanel && selectedEntity && (
+        <div 
+          onClick={() => setShowDetailsPanel(false)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.4)', zIndex: 100000,
+            display: 'flex', justifyContent: 'flex-end'
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="animate-slide-in-right"
+            style={{
+              width: '100%', maxWidth: '450px', height: '100%',
+              background: 'var(--card-bg)', borderLeft: '1px solid var(--border-color)',
+              padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <h2 className="heading-2" style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <div style={{ padding: '0.4rem', background: 'rgba(0,100,224,0.1)', borderRadius: '8px', color: '#0064e0' }}>
+                  {selectedEntity.type === 'campaign' ? <BarChart3 size={20} /> : selectedEntity.type === 'adset' ? <Zap size={20} /> : <TrendingUp size={20} />}
                 </div>
+                {selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} Detayı
+              </h2>
+              <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <section>
+                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Temel Bilgiler</h4>
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>İsim</label>
+                    <div style={{ fontWeight: 600 }}>{selectedEntity.data.name}</div>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Durum</label>
+                    <StatusBadge status={selectedEntity.data.status} />
+                  </div>
+                  {selectedEntity.data.objective && (
+                    <div>
+                      <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Hedef</label>
+                      <div style={{ fontSize: '0.85rem' }}>{selectedEntity.data.objective}</div>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <section>
+                <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '1rem', letterSpacing: '0.05em' }}>Performans Özeti</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Harcama</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.2rem' }}>{selectedEntity.data.insights?.data?.[0]?.spend || '0,00'} TL</div>
+                  </div>
+                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Gösterim</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.2rem' }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString('tr-TR')}</div>
+                  </div>
+                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Tıklama</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.2rem' }}>{selectedEntity.data.insights?.data?.[0]?.clicks || selectedEntity.data.insights?.data?.[0]?.inline_link_clicks || 0}</div>
+                  </div>
+                  <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Erişim</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '0.2rem' }}>{Number(selectedEntity.data.insights?.data?.[0]?.reach || 0).toLocaleString('tr-TR')}</div>
+                  </div>
+                </div>
+              </section>
+
+              {selectedEntity.type === 'campaign' && (
+                <button 
+                  onClick={() => {
+                    setSelectedCampaignId(selectedEntity.data.id);
+                    setActiveTab('adsets');
+                    setShowDetailsPanel(false);
+                  }}
+                  className="btn btn-secondary" 
+                  style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}
+                >
+                  Reklam Setlerini Görüntüle <ChevronRight size={16} />
+                </button>
               )}
 
-              <div className="form-group">
-                <label className="form-label">Yayın Durumu</label>
-                <select 
-                  className="form-control"
-                  value={createFormData.status}
-                  onChange={e => setCreateFormData({...createFormData, status: e.target.value})}
+              {selectedEntity.type === 'adset' && (
+                <button 
+                  onClick={() => {
+                    setSelectedAdSetId(selectedEntity.data.id);
+                    setActiveTab('ads');
+                    setShowDetailsPanel(false);
+                  }}
+                  className="btn btn-secondary" 
+                  style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}
                 >
-                  <option value="ACTIVE">Aktif (Yayınla)</option>
-                  <option value="PAUSED">Duraklatıldı (Taslak)</option>
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                <button type="button" onClick={() => setShowCreateModal(false)} className="btn btn-secondary" style={{ flex: 1 }}>İptal</button>
-                <button type="submit" disabled={isCreating} className="btn btn-primary" style={{ flex: 1, background: '#0064e0', borderColor: '#0064e0' }}>
-                  {isCreating ? 'Oluşturuluyor...' : 'Oluştur'}
+                  Reklamları Görüntüle <ChevronRight size={16} />
+                </button>
+              )}
+              
+              <div style={{ marginTop: 'auto', paddingTop: '2rem', display: 'flex', gap: '1rem' }}>
+                <button 
+                  onClick={() => handleToggleStatus(selectedEntity.data.id, selectedEntity.data.status, selectedEntity.type)}
+                  className="btn btn-secondary" 
+                  style={{ flex: 1, justifyContent: 'center' }}
+                >
+                  {selectedEntity.data.status === 'ACTIVE' || selectedEntity.data.status === 'ENABLED' ? 'Durdur' : 'Başlat'}
+                </button>
+                <button 
+                  onClick={() => alert('Düzenleme özelliği yakında eklenecek.')}
+                  className="btn btn-primary" 
+                  style={{ flex: 1, justifyContent: 'center', background: '#0064e0', borderColor: '#0064e0' }}
+                >
+                  Düzenle
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
