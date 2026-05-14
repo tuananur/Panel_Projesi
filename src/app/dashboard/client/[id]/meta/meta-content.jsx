@@ -341,8 +341,8 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
             </button>
           )}
         </div>
-      </div> 
       </div>
+
 
       {/* Summary Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
