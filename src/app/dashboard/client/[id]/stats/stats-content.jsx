@@ -6,7 +6,7 @@ import {
   TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
   ChevronRight, Layout, X, Calendar as CalendarIcon, ExternalLink,
-  BookOpen
+  BookOpen, AlertCircle
 } from 'lucide-react';
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
@@ -26,11 +26,34 @@ function parseClientJsonObject(raw, fallback = '{}') {
   }
 }
 
+function safeFormatDate(date, options = { day: 'numeric', month: 'short' }) {
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('tr-TR', options);
+  } catch {
+    return '';
+  }
+}
+
+function accountUrl(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value === '[object Object]' ? '' : value;
+  if (typeof value === 'object' && value !== null) {
+    const url = value.url === '[object Object]' ? '' : (value.url || '');
+    return String(url);
+  }
+  return String(value || '');
+}
+
 function accountLinkText(value) {
   if (value == null) return '';
   if (typeof value === 'string') return value === '[object Object]' ? '' : value;
-  if (typeof value === 'object') return value.url === '[object Object]' ? '' : (value.url || '');
-  return '';
+  if (typeof value === 'object' && value !== null) {
+    const text = value.text === '[object Object]' ? '' : (value.text || '');
+    return String(text);
+  }
+  return String(value || '');
 }
 
 const PLATFORM_ICONS = {
@@ -140,8 +163,11 @@ export default function StatsContent({ client, metaResult, googleResult }) {
   const yearParam = searchParams.get('year');
   const now = new Date();
   
-  const displayMonth = monthParam !== null ? parseInt(monthParam) : now.getMonth();
-  const displayYear = yearParam !== null ? parseInt(yearParam) : now.getFullYear();
+  let displayMonth = monthParam !== null ? parseInt(monthParam) : now.getMonth();
+  let displayYear = yearParam !== null ? parseInt(yearParam) : now.getFullYear();
+
+  if (isNaN(displayMonth)) displayMonth = now.getMonth();
+  if (isNaN(displayYear)) displayYear = now.getFullYear();
 
   const turkishMonths = [
     'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
@@ -192,14 +218,24 @@ export default function StatsContent({ client, metaResult, googleResult }) {
   try {
     const accounts = parseClientJsonObject(client?.socialAccounts, '{}');
     const settingsPlatforms = Object.keys(accounts).filter(
-      (p) => accountLinkText(accounts[p]).trim() !== ''
+      (p) => {
+        try {
+          return accountLinkText(accounts[p]).trim() !== '';
+        } catch {
+          return false;
+        }
+      }
     );
     
     // Get platforms that have tasks in the current month
     const taskPlatforms = (client?.tasks || []).filter(t => {
-      if (t.type !== 'SOCIAL') return false;
-      const d = new Date(t.date);
-      return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
+      try {
+        if (t.type !== 'SOCIAL') return false;
+        const d = new Date(t.date);
+        return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
+      } catch {
+        return false;
+      }
     }).map(t => t.platform);
     
     // Combine and unique
@@ -363,7 +399,7 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                   {getTaskStatusMessage(task)}
                 </span>
                 <span style={{ opacity: 0.3 }}>•</span>
-                <span>{new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</span>
+                <span>{safeFormatDate(task.date)}</span>
                 {task.note && (
                    <>
                      <span style={{ opacity: 0.3 }}>|</span>
@@ -586,15 +622,22 @@ export default function StatsContent({ client, metaResult, googleResult }) {
             {(() => {
               const today = new Date();
               const upcoming = Object.entries(SPECIAL_DAYS).map(([dateStr, name]) => {
-                const [month, day] = dateStr.split('-').map(Number);
-                let holidayDate = new Date(today.getFullYear(), month - 1, day);
-                if (holidayDate < today && (today.getDate() !== day || today.getMonth() !== month - 1)) {
-                  holidayDate.setFullYear(today.getFullYear() + 1);
+                try {
+                  const [month, day] = dateStr.split('-').map(Number);
+                  if (isNaN(month) || isNaN(day)) return null;
+                  let holidayDate = new Date(today.getFullYear(), month - 1, day);
+                  if (isNaN(holidayDate.getTime())) return null;
+                  if (holidayDate < today && (today.getDate() !== day || today.getMonth() !== month - 1)) {
+                    holidayDate.setFullYear(today.getFullYear() + 1);
+                  }
+                  const diffTime = holidayDate - today;
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  return { name, date: holidayDate, daysLeft: diffDays };
+                } catch {
+                  return null;
                 }
-                const diffTime = holidayDate - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return { name, date: holidayDate, daysLeft: diffDays };
               })
+              .filter(Boolean)
               .sort((a, b) => a.daysLeft - b.daysLeft)
               .slice(0, 5);
 
@@ -627,8 +670,8 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                       color: isVeryClose ? 'white' : 'var(--text-secondary)',
                       flexShrink: 0
                     }}>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{item.date.getDate()}</span>
-                      <span style={{ fontSize: '0.5rem', fontWeight: 700, textTransform: 'uppercase' }}>{item.date.toLocaleDateString('tr-TR', { month: 'short' })}</span>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{item.date?.getDate() || ''}</span>
+                      <span style={{ fontSize: '0.5rem', fontWeight: 700, textTransform: 'uppercase' }}>{safeFormatDate(item.date, { month: 'short' })}</span>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: '0.8rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
@@ -822,7 +865,7 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                         color: task.status ? '#10b981' : 'var(--text-primary)'
                       }}>
                         {PLATFORM_ICONS['Özel']} 
-                        {new Date(task.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })} {task.note || 'Özel Görev'}
+                        {safeFormatDate(task.date)} {task.note || 'Özel Görev'}
                         {task.status && <CheckCircle size={14} />}
                       </span>
                       <button 
@@ -1303,7 +1346,7 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                 <div>
                   <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: '1.2' }}>{selectedBlog.note}</h3>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                    {new Date(selectedBlog.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    {safeFormatDate(selectedBlog.date, { day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
                 </div>
               </div>
@@ -1473,7 +1516,7 @@ export default function StatsContent({ client, metaResult, googleResult }) {
               {currentMonthTasks.filter(t => t.type === 'BLOG').length > 0 ? (
                 currentMonthTasks.filter(t => t.type === 'BLOG').sort((a,b) => new Date(a.date) - new Date(b.date)).map(blog => (
                   <tr key={blog.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '12px', fontSize: '12px', color: '#475569' }}>{new Date(blog.date).toLocaleDateString('tr-TR')}</td>
+                    <td style={{ padding: '12px', fontSize: '12px', color: '#475569' }}>{safeFormatDate(blog.date)}</td>
                     <td style={{ padding: '12px', fontSize: '12px', color: '#1e293b', fontWeight: 600 }}>{blog.note || 'İçerik Girilmemiş'}</td>
                     <td style={{ padding: '12px', textAlign: 'center' }}>
                       <span style={{ fontSize: '10px', fontWeight: 800, padding: '4px 8px', borderRadius: '4px', background: blog.status ? '#dcfce7' : '#fef3c7', color: blog.status ? '#166534' : '#92400e' }}>

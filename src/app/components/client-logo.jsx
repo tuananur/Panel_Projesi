@@ -8,22 +8,27 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
   
   // URL bir resim mi yoksa web sitesi mi kontrol et
   let finalSrc = logoUrl;
+  const isValidUrl = (url) => {
+    if (typeof url !== 'string' || url.trim() === '') return false;
+    return url.startsWith('http') || url.startsWith('/') || url.startsWith('data:');
+  };
+
+  let isFallback = !logoUrl || !isValidUrl(logoUrl) || imgError >= 2;
   
   if (logoUrl && imgError < 2) {
     // URL bir resim mi yoksa web sitesi mi kontrol et
-    let normalizedUrl = logoUrl.trim();
+    let normalizedUrl = String(logoUrl).trim();
     
     // Eğer nokta (.) veya @ içermiyorsa muhtemelen geçerli bir link/alan adı değildir
     if (!normalizedUrl.includes('.') && !normalizedUrl.startsWith('@')) {
-      setImgError(2); // Doğrudan fallback'e düşür
+      isFallback = true;
     }
     else if (normalizedUrl.startsWith('@')) {
       const username = normalizedUrl.substring(1);
       if (imgError === 0) {
         finalSrc = `https://unavatar.io/instagram/${username}`;
       } else {
-        // Instagram username için favicon denemeye gerek yok, doğrudan fallback'e düş
-        setImgError(2);
+        isFallback = true;
       }
     } 
     else {
@@ -56,7 +61,7 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
               ? `https://logo.clearbit.com/${cleanDomain}` 
               : `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`;
           } else {
-            setImgError(2);
+            isFallback = true;
           }
         }
       } else {
@@ -65,7 +70,7 @@ export default function ClientLogo({ logoUrl, companyName, size = '80px', border
     }
   }
 
-  if (!logoUrl || imgError >= 2) {
+  if (isFallback) {
     return (
       <div style={{ 
         width: size, 

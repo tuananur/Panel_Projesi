@@ -213,6 +213,7 @@ export async function saveRolePermissions(permissions) {
 // Pure helper: checks a permission against a permissions map.
 export function can(permissions, role, key) {
   if (!role) return false;
-  if (role === 'ADMIN') return true;
-  return permissions?.[role]?.[key] === true;
+  const upperRole = String(role).toUpperCase();
+  if (upperRole === 'ADMIN') return true;
+  return permissions?.[upperRole]?.[key] === true;
 }

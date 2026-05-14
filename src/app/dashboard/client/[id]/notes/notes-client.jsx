@@ -52,11 +52,17 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
   const filteredNotes = noteList.filter(note => {
     const lowerSearch = search.toLowerCase();
     const createdAt = new Date(note.createdAt);
-    const dateStr = createdAt.toLocaleDateString('tr-TR'); 
-    const monthNames = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
-    const monthName = monthNames[createdAt.getMonth()];
-    const day = createdAt.getDate().toString();
-    const fullDateText = `${day} ${monthName}`;
+    let dateStr = '';
+    let fullDateText = '';
+    try {
+      if (!isNaN(createdAt.getTime())) {
+        dateStr = createdAt.toLocaleDateString('tr-TR'); 
+        const monthNames = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"];
+        const monthName = monthNames[createdAt.getMonth()] || '';
+        const day = createdAt.getDate().toString();
+        fullDateText = `${day} ${monthName}`;
+      }
+    } catch (e) {}
 
     const contentLower = (note.content ?? '').toLowerCase();
     const userLower = (note.user?.username ?? '').toLowerCase();
@@ -314,7 +320,15 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: note.isDone ? 'rgba(16, 185, 129, 0.7)' : 'var(--text-secondary)', fontSize: '0.75rem' }}>
                         <Clock size={12} />
-                        {new Date(note.createdAt).toLocaleDateString('tr-TR')} {new Date(note.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })}
+                        {(() => {
+                          try {
+                            const d = new Date(note.createdAt);
+                            if (isNaN(d.getTime())) return '—';
+                            return `${d.toLocaleDateString('tr-TR')} ${d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' })}`;
+                          } catch {
+                            return '—';
+                          }
+                        })()}
                       </div>
                     </div>
                   </td>

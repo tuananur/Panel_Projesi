@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
 import { Phone, Mail, MessageCircle, ChevronRight } from 'lucide-react';
 import GlobalSearch from '@/app/components/global-search';
 import ClientLogo from '@/app/components/client-logo';
@@ -44,9 +46,11 @@ export default async function DashboardPage() {
           <p style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--accent-secondary)' }}>
             {clients.reduce((acc, c) => {
               try {
-                return acc + JSON.parse(c.services || '[]').length;
+                if (!c.services) return acc;
+                const parsed = JSON.parse(c.services);
+                return acc + (Array.isArray(parsed) ? parsed.length : 0);
               } catch (e) {
-                return acc + (c.services ? c.services.split(',').length : 0);
+                return acc + (typeof c.services === 'string' ? c.services.split(',').filter(Boolean).length : 0);
               }
             }, 0)}
           </p>

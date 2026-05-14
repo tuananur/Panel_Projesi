@@ -13,7 +13,7 @@ export default async function GoogleAdsPage({ params }) {
 
   const permissions = await getRolePermissions();
   if (!can(permissions, session.role, 'client.tab.google')) {
-    redirect(`/dashboard/client/${id}`);
+    redirect('/dashboard');
   }
 
   const result = await getGoogleAdsAction(id);

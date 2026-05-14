@@ -18,8 +18,11 @@ function parseJSONSafe(value, fallback) {
 function accountUrl(value) {
   if (value == null) return '';
   if (typeof value === 'string') return value === '[object Object]' ? '' : value;
-  if (typeof value === 'object') return value.url === '[object Object]' ? '' : (value.url || '');
-  return '';
+  if (typeof value === 'object' && value !== null) {
+    const url = value.url === '[object Object]' ? '' : (value.url || '');
+    return String(url);
+  }
+  return String(value || '');
 }
 
 export default async function SocialPage({ params }) {
@@ -29,7 +32,7 @@ export default async function SocialPage({ params }) {
 
   const permissions = await getRolePermissions();
   if (!can(permissions, session.role, 'client.tab.social')) {
-    redirect(`/dashboard/client/${id}`);
+    redirect('/dashboard');
   }
   
   const client = await prisma.client.findUnique({

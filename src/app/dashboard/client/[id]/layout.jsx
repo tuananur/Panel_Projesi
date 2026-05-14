@@ -46,89 +46,125 @@ const BRAND_ICONS = {
 };
 
 export default async function ClientDetailLayout({ children, params }) {
-  const { id } = await params;
-  const session = await getSession();
-  
-  const client = await prisma.client.findUnique({
-    where: { id: parseInt(id) },
-    select: {
-      id: true,
-      companyName: true,
-      website: true,
-      contactName: true,
-      email: true,
-      phone: true,
-      services: true,
-      socialAccounts: true,
-      socialSchedule: true,
-      logoUrl: true,
-      tasks: {
-        select: {
-          id: true,
-          date: true,
-          type: true,
-          platform: true,
-          note: true,
-          link: true,
-          status: true,
+  try {
+    const { id: rawId } = await params;
+    const id = parseInt(rawId);
+    const session = await getSession();
+    
+    if (!session) redirect('/login');
+
+    if (isNaN(id)) {
+      return (
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>Geçersiz Müşteri Kimliği</h2>
+        </div>
+      );
+    }
+    
+    const client = await prisma.client.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        companyName: true,
+        website: true,
+        contactName: true,
+        email: true,
+        phone: true,
+        services: true,
+        socialAccounts: true,
+        socialSchedule: true,
+        logoUrl: true,
+        tasks: {
+          select: {
+            id: true,
+            date: true,
+            type: true,
+            platform: true,
+            note: true,
+            link: true,
+            status: true,
+          }
         }
       }
+    });
+
+    if (!client) {
+      return (
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>Müşteri Bulunamadı</h2>
+        </div>
+      );
     }
-  });
 
-  if (!client) return null;
+    const allClients = await prisma.client.findMany({
+      select: { id: true, companyName: true, logoUrl: true },
+      orderBy: { companyName: 'asc' }
+    });
 
-  const allClients = await prisma.client.findMany({
-    select: { id: true, companyName: true, logoUrl: true },
-    orderBy: { companyName: 'asc' }
-  });
+    const getSafeArray = (val) => {
+      try {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string') {
+          const parsed = JSON.parse(val);
+          return Array.isArray(parsed) ? parsed : [val];
+        }
+        return [];
+      } catch (e) {
+        if (typeof val === 'string' && val.includes(',')) return val.split(',').map(s => s.trim());
+        return [];
+      }
+    };
 
-  const getSafeJSON = (val, fallback) => {
-    try {
-      if (typeof val === 'string') {
-        return JSON.parse(val || fallback);
+    const getSafeObject = (val) => {
+      try {
+        if (!val) return {};
+        if (typeof val === 'object' && !Array.isArray(val)) return val;
+        if (typeof val === 'string') {
+          const parsed = JSON.parse(val);
+          return (typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+        }
+        return {};
+      } catch (e) {
+        return {};
       }
-      if (val == null) {
-        return JSON.parse(fallback);
+    };
+
+    function toText(value) {
+      if (value == null) return '';
+      if (typeof value === 'string') return value === '[object Object]' ? '' : value;
+      if (typeof value === 'object' && value !== null) {
+        const url = value.url === '[object Object]' ? '' : (value.url || '');
+        return String(url);
       }
-      if (fallback === '[]' && Array.isArray(val)) {
-        return val;
-      }
-      if (fallback === '{}' && typeof val === 'object' && !Array.isArray(val)) {
-        return val;
-      }
-      return JSON.parse(fallback);
-    } catch (e) {
-      if (fallback === '[]' && typeof val === 'string' && val) return val.split(',');
-      return JSON.parse(fallback);
+      return String(value || '');
     }
-  };
 
-  const toText = (value) => {
-    if (typeof value === 'string') return value === '[object Object]' ? '' : value;
-    if (value == null) return '';
-    if (typeof value === 'object') return value.url === '[object Object]' ? '' : (value.url || '');
-    return '';
-  };
-
-  const services = getSafeJSON(client.services, '[]');
-  const socialAccounts = getSafeJSON(client.socialAccounts, '{}');
-  const socialSchedule = getSafeJSON(client.socialSchedule, '{}');
-  const activePlatforms = Object.keys(socialAccounts).filter(p => {
-    const hasAccount = toText(socialAccounts[p]).trim() !== '';
-    const hasSchedule = Array.isArray(socialSchedule[p]) && socialSchedule[p].length > 0;
-    return hasAccount || hasSchedule;
-  });
-  
-  const permissions = await getRolePermissions();
-  const canSeeStats = can(permissions, session.role, 'client.tab.stats');
-  const canSeeNotes = can(permissions, session.role, 'client.tab.notes');
-  const canSeeDev = can(permissions, session.role, 'client.tab.dev');
-  const canSeeSEO = services.includes('SEO') && can(permissions, session.role, 'client.tab.seo');
-  const canSeeSocial = services.includes('Sosyal Medya') && can(permissions, session.role, 'client.tab.social');
-  const canSeeSettings = can(permissions, session.role, 'client.tab.settings');
-  const canSeeMeta = can(permissions, session.role, 'client.tab.meta');
-  const canSeeGoogle = can(permissions, session.role, 'client.tab.google');
+    const services = getSafeArray(client.services);
+    const socialAccounts = getSafeObject(client.socialAccounts);
+    const socialSchedule = getSafeObject(client.socialSchedule);
+    
+    const activePlatforms = Object.keys(socialAccounts).filter(p => {
+      try {
+        const hasAccount = toText(socialAccounts[p]).trim() !== '';
+        const scheduleForPlatform = socialSchedule[p];
+        const hasSchedule = Array.isArray(scheduleForPlatform) && scheduleForPlatform.length > 0;
+        return hasAccount || hasSchedule;
+      } catch (e) {
+        return false;
+      }
+    });
+    
+    const permissions = await getRolePermissions();
+    const role = session.role;
+    const canSeeStats = can(permissions, role, 'client.tab.stats');
+    const canSeeNotes = can(permissions, role, 'client.tab.notes');
+    const canSeeDev = can(permissions, role, 'client.tab.dev');
+    const canSeeSEO = services.includes('SEO') && can(permissions, role, 'client.tab.seo');
+    const canSeeSocial = services.includes('Sosyal Medya') && can(permissions, role, 'client.tab.social');
+    const canSeeSettings = can(permissions, role, 'client.tab.settings');
+    const canSeeMeta = can(permissions, role, 'client.tab.meta');
+    const canSeeGoogle = can(permissions, role, 'client.tab.google');
 
   return (
     <div className="animate-fade-in">
@@ -143,7 +179,7 @@ export default async function ClientDetailLayout({ children, params }) {
                </span>
                {client.phone && (
                  <a 
-                   href={`https://wa.me/${client.phone.replace(/\D/g, '')}`} 
+                   href={`https://wa.me/${(client.phone || '').replace(/\D/g, '')}`} 
                    target="_blank" 
                    rel="noopener noreferrer" 
                    style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'inherit', textDecoration: 'none' }}
@@ -229,5 +265,14 @@ export default async function ClientDetailLayout({ children, params }) {
         {children}
       </div>
     </div>
-  );
+    );
+  } catch (error) {
+    console.error('Client Layout Error:', error);
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+        <h2>Müşteri Taslağı Yüklenemedi</h2>
+        <p style={{ fontSize: '0.8rem', marginTop: '1rem', opacity: 0.7 }}>Hata: {error.message}</p>
+      </div>
+    );
+  }
 }

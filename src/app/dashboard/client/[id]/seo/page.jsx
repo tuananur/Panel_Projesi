@@ -12,7 +12,7 @@ export default async function SEOPage({ params }) {
 
   const permissions = await getRolePermissions();
   if (!can(permissions, session.role, 'client.tab.seo')) {
-    redirect(`/dashboard/client/${id}`);
+    redirect('/dashboard');
   }
   
   const client = await prisma.client.findUnique({

@@ -54,8 +54,11 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   const yearParam = searchParams.get('year');
   const now = new Date();
   
-  const displayMonth = monthParam !== null ? parseInt(monthParam) : now.getMonth();
-  const displayYear = yearParam !== null ? parseInt(yearParam) : now.getFullYear();
+  let displayMonth = monthParam !== null ? parseInt(monthParam) : now.getMonth();
+  let displayYear = yearParam !== null ? parseInt(yearParam) : now.getFullYear();
+
+  if (isNaN(displayMonth)) displayMonth = now.getMonth();
+  if (isNaN(displayYear)) displayYear = now.getFullYear();
 
   const MONTH_NAMES = [
     'OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN', 
@@ -95,9 +98,14 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
 
 
   // --- Aylık hesap ---
-  const socialTasksInMonth = tasks.filter(t => {
-    const d = new Date(t.date);
-    return t.type === 'SOCIAL' && d.getMonth() === displayMonth && d.getFullYear() === displayYear;
+  const socialTasksInMonth = (tasks || []).filter(t => {
+    if (!t || !t.date) return false;
+    try {
+      const d = new Date(t.date);
+      return t.type === 'SOCIAL' && d.getMonth() === displayMonth && d.getFullYear() === displayYear;
+    } catch {
+      return false;
+    }
   });
 
   // Calculate total scheduled slots in this month
@@ -105,7 +113,7 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   
   platforms.forEach(platform => {
-    const platformSchedule = schedule[platform] || [];
+    const platformSchedule = Array.isArray(schedule[platform]) ? schedule[platform] : [];
     platformSchedule.forEach(dayName => {
       const targetDayIndex = daysOfWeek.indexOf(dayName);
       if (targetDayIndex === -1) return;
@@ -132,7 +140,16 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   const percentage = displayTotal > 0 ? Math.round((socialCompleted / displayTotal) * 100) : 0;
 
   // --- Bekleyen görevler ---
-  const allPending = tasks.filter(t => t.type === 'SOCIAL' && !t.status).sort((a, b) => new Date(a.date) - new Date(b.date));
+  // --- Bekleyen görevler ---
+  const allPending = (tasks || []).filter(t => t && t.type === 'SOCIAL' && !t.status).sort((a, b) => {
+    try {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
+    } catch {
+      return 0;
+    }
+  });
 
   const totalBlogs = (tasks || []).filter(t => {
     if (t.type !== 'BLOG') return false;
@@ -170,8 +187,13 @@ export default function WeeklyStats({ clientId, tasks, schedule, platforms }) {
   };
 
   const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    } catch {
+      return '';
+    }
   };
 
   return (

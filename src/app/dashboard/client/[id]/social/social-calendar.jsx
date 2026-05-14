@@ -279,25 +279,35 @@ export default function SocialCalendar({ clientId, initialTasks, platforms, sche
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
     const targetDateStr = new Date(year, month, day).toLocaleDateString('en-CA'); // YYYY-MM-DD
     const dayTasks = initialTasks.filter(t => {
-      const tDate = new Date(t.date);
-      const isCorrectDate = tDate.toLocaleDateString('en-CA') === targetDateStr;
-      if (!isCorrectDate) return false;
-      
-      // If task has a platform, it must be in the active platforms list from settings
-      if (t.platform && !platforms.includes(t.platform)) return false;
+      try {
+        const tDate = new Date(t.date);
+        if (isNaN(tDate.getTime())) return false;
+        const isCorrectDate = tDate.toLocaleDateString('en-CA') === targetDateStr;
+        if (!isCorrectDate) return false;
+        
+        // If task has a platform, it must be in the active platforms list from settings
+        if (t.platform && !platforms.includes(t.platform)) return false;
 
-      // Hide manually deleted tasks
-      if (t.note === '__DELETED__') return false;
-      
-      return true;
+        // Hide manually deleted tasks
+        if (t.note === '__DELETED__') return false;
+        
+        return true;
+      } catch {
+        return false;
+      }
     });
 
     const scheduledOnly = PLATFORMS.filter(p => {
       const isScheduled = (schedule[p] || []).includes(dayName);
       // Check if any task (including __DELETED__ ones) exists for this day and platform
       const hasAnyTask = initialTasks.some(t => {
-        const tDate = new Date(t.date);
-        return tDate.toLocaleDateString('en-CA') === targetDateStr && t.platform === p;
+        try {
+          const tDate = new Date(t.date);
+          if (isNaN(tDate.getTime())) return false;
+          return tDate.toLocaleDateString('en-CA') === targetDateStr && t.platform === p;
+        } catch {
+          return false;
+        }
       });
       return isScheduled && !hasAnyTask;
     });
