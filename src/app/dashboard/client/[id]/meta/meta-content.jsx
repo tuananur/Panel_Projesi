@@ -189,6 +189,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
         if (type === 'ad') setAds(prev => prev.map(ad => ad.id === selectedEntity.data.id ? { ...ad, ...updatedObj } : ad));
         setSelectedEntity({ type, data: updatedObj });
         setIsEditingEntity(false);
+        setMessageModal({ show: true, title: 'Başarılı', message: 'Değişiklikler başarıyla kaydedildi.', type: 'success' });
       }
     });
   };
