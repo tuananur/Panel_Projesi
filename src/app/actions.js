@@ -881,7 +881,7 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
     // Fetch active campaigns with detailed insights and fields
     const campaignsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns?fields=name,status,objective,daily_budget,lifetime_budget,start_time,stop_time,bid_strategy,insights.${nestedParams}{spend,impressions,reach,inline_link_clicks,cost_per_inline_link_click}&access_token=${accessToken}`;
     // Fetch ad sets with campaign_id and insights
-    const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,campaign_id,insights.${nestedParams}{spend,clicks,impressions,reach}&access_token=${accessToken}`;
+    const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,campaign_id,start_time,stop_time,insights.${nestedParams}{spend,clicks,impressions,reach}&access_token=${accessToken}`;
     // Fetch ads with adset_id and insights
     const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
     try {

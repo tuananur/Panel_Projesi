@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction, updateMetaEntityAction, deleteMetaEntityAction } from '@/app/actions';
+import CustomDialog from '@/app/components/custom-dialog';
 import {
   TrendingUp, MousePointer2, Eye, Users as UsersIcon,
   Wallet, Search, Calendar, ChevronRight,
@@ -35,6 +36,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createFormData, setCreateFormData] = useState({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
   const [isCreating, setIsCreating] = useState(false);
+  const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '', details: '' });
 
   const [selectedEntity, setSelectedEntity] = useState(null); // { type: 'campaign'|'adset'|'ad', data: object }
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
@@ -140,8 +142,12 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     setIsCreating(false);
     
     if (res?.error) {
-      const detail = res.details ? `\n\nDetay: ${res.details}` : '';
-      alert('Hata: ' + res.error + detail);
+      setErrorModal({ 
+        show: true, 
+        title: 'Hata: ' + res.error, 
+        message: res.details || 'Bir hata oluştu.',
+        details: res.fb_trace_id ? `Trace ID: ${res.fb_trace_id}` : ''
+      });
     } else {
       alert('Başarıyla oluşturuldu!');
       setShowCreateModal(false);
@@ -555,6 +561,24 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       )}
 
 
+      <CustomDialog
+        isOpen={errorModal.show}
+        title="Hata"
+        onClose={() => setErrorModal({ ...errorModal, show: false })}
+        onConfirm={() => setErrorModal({ ...errorModal, show: false })}
+        confirmText="Tamam"
+        showCancel={false}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ fontWeight: 600, color: '#ff4d4d', fontSize: '1.1rem' }}>{errorModal.title}</div>
+          <div style={{ color: 'rgba(255,255,255,0.8)', lineHeight: '1.5' }}>{errorModal.message}</div>
+          {errorModal.details && (
+            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '4px' }}>
+              {errorModal.details}
+            </div>
+          )}
+        </div>
+      </CustomDialog>
     </div>
   );
 }
