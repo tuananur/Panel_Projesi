@@ -126,9 +126,7 @@ export default function StatsContent({ client, metaResult, googleResult }) {
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
-      // Temporarily show the report template or ensure it's rendered
-      reportElement.style.display = 'block';
-      
+      // No longer need to toggle display as we use fixed positioning off-screen
       const canvas = await html2canvas(reportElement, {
         scale: 2,
         useCORS: true,
@@ -136,8 +134,7 @@ export default function StatsContent({ client, metaResult, googleResult }) {
         logging: false,
         windowWidth: 794, // A4 width at 96 DPI
       });
-      
-      reportElement.style.display = 'none';
+
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
@@ -148,8 +145,23 @@ export default function StatsContent({ client, metaResult, googleResult }) {
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      // Add the first page
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      // Add subsequent pages if content is longer than one page
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+
       pdf.save(`${client.companyName}_${currentMonthName}_Performans_Raporu.pdf`);
     } catch (error) {
       console.error('PDF Error:', error);
@@ -1452,7 +1464,10 @@ export default function StatsContent({ client, metaResult, googleResult }) {
       `}</style>
       {/* GİZLİ RAPOR TASLAĞI (PDF İÇİN) */}
       <div id="report-template" style={{ 
-        display: 'none', 
+        position: 'fixed',
+        left: '-9999px',
+        top: '0',
+        zIndex: '-1',
         width: '794px', // A4 Width
         minHeight: '1123px', // A4 Height
         background: '#ffffff', 
