@@ -301,10 +301,21 @@ export default function StatsContent({ client, metaResult, googleResult }) {
         platformStats[t.platform] = (platformStats[t.platform] || 0) + 1;
       }
     } else if (!t.platform || t.platform === 'Özel') {
-      // Only include actual special tasks, exclude tasks for inactive platforms
       specialTasksStats.push(t);
     }
   });
+
+  // Calculate active ad channels
+  const adChannels = [];
+  if (metaResult?.data && metaResult.data.length > 0) adChannels.push('Meta Ads');
+  if (googleResult?.data && googleResult.data.length > 0) adChannels.push('Google Ads');
+  
+  // Also check if they are in client settings even if no data this month
+  const adsAccounts = parseClientJsonObject(client?.adsAccounts, '{}');
+  if (adsAccounts.meta && !adChannels.includes('Meta Ads')) adChannels.push('Meta Ads');
+  if (adsAccounts.google && !adChannels.includes('Google Ads')) adChannels.push('Google Ads');
+  
+  const activeAdsCount = adChannels.length;
 
   const openEditModal = (task) => {
     setActiveTask(task);
@@ -1106,6 +1117,25 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                   );
                 })()}
               </div>
+
+              {/* Active Ad Channels Section */}
+              <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                   <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)' }}>AKTİF REKLAM KANALLARI</span>
+                   <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--accent-primary)' }}>{activeAdsCount}</span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                   {adChannels.map(channel => (
+                      <div key={channel} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(59, 130, 246, 0.05)', padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: channel.includes('Meta') ? '#0668E1' : '#4285F4' }}></div>
+                         <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-primary)' }}>{channel.toUpperCase()}</span>
+                      </div>
+                   ))}
+                   {adChannels.length === 0 && (
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', opacity: 0.5 }}>Aktif kampanya bulunamadı.</span>
+                   )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1621,17 +1651,20 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                 </div>
 
                 <div style={{ padding: '25px', background: '#ffffff', borderRadius: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-                   <p style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>Aktif Reklam Kanalları</p>
-                   <p style={{ fontSize: '36px', fontWeight: 900, color: '#0f172a', margin: 0 }}>2</p>
-                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                         <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#0668E1' }}></div>
-                      </div>
-                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                         <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#4285F4' }}></div>
-                      </div>
-                   </div>
-                </div>
+                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>Aktif Reklam Kanalları</p>
+                    <p style={{ fontSize: '36px', fontWeight: 900, color: '#0f172a', margin: 0 }}>{activeAdsCount}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
+                       {adChannels.map(channel => (
+                          <div key={channel} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: channel.includes('Meta') ? '#0668E1' : '#4285F4' }}></div>
+                             <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>{channel}</span>
+                          </div>
+                       ))}
+                       {adChannels.length === 0 && (
+                          <span style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>Aktif kanal bulunmuyor.</span>
+                       )}
+                    </div>
+                 </div>
              </div>
           </div>
 
