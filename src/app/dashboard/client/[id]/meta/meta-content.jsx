@@ -128,6 +128,8 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
         if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === entityId ? { ...c, status: currentStatus } : c));
         if (type === 'adset') setAdSets(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
         if (type === 'ad') setAds(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
+      } else {
+        setMessageModal({ show: true, title: 'Başarılı', message: 'Durum başarıyla güncellendi.', type: 'success' });
       }
     });
   };
@@ -196,7 +198,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
         if (type === 'ad') setAds(prev => prev.map(ad => ad.id === selectedEntity.data.id ? { ...ad, ...updatedObj } : ad));
         setSelectedEntity({ type, data: updatedObj });
         setIsEditingEntity(false);
-        setMessageModal({ show: true, title: 'Başarılı', message: 'Değişiklikler başarıyla kaydedildi.', type: 'success' });
+        setMessageModal({ show: true, title: 'Başarılı', message: 'Başarıyla güncellendi.', type: 'success' });
       }
     });
   };
