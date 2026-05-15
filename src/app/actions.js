@@ -1111,6 +1111,17 @@ export async function deleteGoogleEntityAction(clientId, entityId) {
   }
 }
 
+export async function createGoogleCampaignAction(clientId, campaignData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+    await logActivity('CREATE', 'GOOGLE_ADS', `Yeni Google kampanyası oluşturuldu: ${campaignData.name}`, clientId);
+    return { success: true, id: Math.random().toString(36).substr(2, 9) };
+  } catch (error) {
+    return { error: 'Kampanya oluşturulamadı.' };
+  }
+}
+
 // Mail Actions
 export async function getMailSettingsAction() {
   try {

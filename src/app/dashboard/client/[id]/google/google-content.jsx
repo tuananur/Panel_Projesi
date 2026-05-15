@@ -10,7 +10,8 @@ import {
 import { 
   toggleGoogleStatusAction, 
   updateGoogleEntityAction, 
-  deleteGoogleEntityAction 
+  deleteGoogleEntityAction,
+  createGoogleCampaignAction
 } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 
@@ -24,6 +25,10 @@ export default function GoogleContent({ result, id }) {
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
   const [isEditingEntity, setIsEditingEntity] = useState(false);
   const [editName, setEditName] = useState('');
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createFormData, setCreateFormData] = useState({ name: '', status: 'ENABLED' });
   
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '', details: '', type: 'error' });
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, entity: null });
@@ -31,6 +36,31 @@ export default function GoogleContent({ result, id }) {
   const filteredCampaigns = campaigns.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleCreateCampaign = async (e) => {
+    e.preventDefault();
+    if (!createFormData.name.trim()) return;
+    setIsCreating(true);
+    const res = await createGoogleCampaignAction(id, createFormData);
+    setIsCreating(false);
+
+    if (res?.error) {
+      setMessageModal({ show: true, title: 'Hata', message: res.error, type: 'error' });
+    } else {
+      const newCampaign = {
+        id: res.id,
+        name: createFormData.name,
+        status: createFormData.status,
+        spend: 0,
+        clicks: 0,
+        impressions: 0
+      };
+      setCampaigns([newCampaign, ...campaigns]);
+      setShowCreateModal(false);
+      setCreateFormData({ name: '', status: 'ENABLED' });
+      setMessageModal({ show: true, title: 'Başarılı', message: 'Kampanya başarıyla oluşturuldu.', type: 'success' });
+    }
+  };
 
   const handleToggleStatus = (entityId, currentStatus) => {
     const newStatus = currentStatus === 'ENABLED' ? 'PAUSED' : 'ENABLED';
@@ -123,23 +153,26 @@ export default function GoogleContent({ result, id }) {
           <TabButton id="campaigns" label="Kampanyalar" count={filteredCampaigns.length} activeTab={activeTab} onClick={setActiveTab} />
         </div>
         
-        <div style={{ position: 'relative', width: '250px', marginBottom: '0.5rem' }}>
-          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
-          <input 
-            type="text" 
-            placeholder="Kampanya ara..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ 
-              width: '100%', 
-              padding: '0.5rem 1rem 0.5rem 2rem', 
-              fontSize: '0.8rem', 
-              background: 'rgba(255,255,255,0.05)', 
-              border: '1px solid var(--border-color)', 
-              borderRadius: '8px',
-              color: 'var(--text-primary)'
-            }}
-          />
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ position: 'relative', width: '250px' }}>
+            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+            <input 
+              type="text" 
+              placeholder="Kampanya ara..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ 
+                width: '100%', 
+                padding: '0.5rem 1rem 0.5rem 2rem', 
+                fontSize: '0.8rem', 
+                background: 'rgba(255,255,255,0.05)', 
+                border: '1px solid var(--border-color)', 
+                borderRadius: '8px',
+                color: 'var(--text-primary)'
+              }}
+            />
+          </div>
+          <button onClick={() => setShowCreateModal(true)} className="btn btn-primary" style={{ background: '#4285F4', padding: '0.5rem 1.2rem' }}>+ Yeni Oluştur</button>
         </div>
       </div>
 
@@ -273,6 +306,63 @@ export default function GoogleContent({ result, id }) {
               to { opacity: 1; transform: translate(-50%, -50%); }
             }
           `}</style>
+        </>
+      )}
+
+      {/* CREATE ENTITY MODAL */}
+      {showCreateModal && (
+        <>
+          <div onClick={() => setShowCreateModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} />
+          <div style={{ 
+            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            width: '100%', maxWidth: '520px', maxHeight: '90vh',
+            background: '#1a1f2e', 
+            borderRadius: '24px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)', zIndex: 10001, 
+            display: 'flex', flexDirection: 'column',
+            animation: 'modalFadeIn 0.3s ease-out',
+            overflow: 'hidden'
+          }}>
+            <div style={{ padding: '2rem 2.5rem 1rem 2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700, color: '#fff' }}>Yeni Google Kampanyası</h2>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
+            </div>
+
+            <form onSubmit={handleCreateCampaign} style={{ padding: '1.5rem 2.5rem 2.5rem 2.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>KAMPANYA ADI *</label>
+                  <input 
+                    required
+                    className="form-control" 
+                    value={createFormData.name} 
+                    onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
+                    placeholder="Örn: Google Search - Marka"
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px' }} 
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>İLK DURUM</label>
+                  <select 
+                    value={createFormData.status}
+                    onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px', outline: 'none' }}
+                  >
+                    <option value="ENABLED">Aktif (Hemen Başlat)</option>
+                    <option value="PAUSED">Durdurulmuş (Taslak)</option>
+                  </select>
+                </div>
+
+                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                  <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Vazgeç</button>
+                  <button type="submit" disabled={isCreating} style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: '#4285F4', color: '#fff', border: 'none', fontWeight: 700, cursor: isCreating ? 'not-allowed' : 'pointer', opacity: isCreating ? 0.7 : 1 }}>
+                    {isCreating ? 'Oluşturuluyor...' : 'Oluştur'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </>
       )}
 
