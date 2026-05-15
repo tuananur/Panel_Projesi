@@ -111,10 +111,9 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
           Error: {error.message}
         </div>
         <button 
-          onClick={() => window.location.reload()} 
           style={{ marginTop: '1.5rem', padding: '0.75rem 1.5rem', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
         >
-          Sayfayı Yenile
+          Yeniden Dene
         </button>
       </div>
     );
