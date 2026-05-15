@@ -361,22 +361,32 @@ export default function StatsContent({ client, metaResult, googleResult }) {
   };
 
   const TaskList = ({ tasks, title, icon: Icon, color }) => (
-    <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minHeight: '300px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+    <div className="card premium-task-list" style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: '1.25rem', 
+      minHeight: '300px',
+      background: 'var(--bg-secondary)',
+      borderRadius: '24px',
+      padding: '1.5rem',
+      border: '1px solid var(--border-color)',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h3 className="text-muted" style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>{title}</h3>
-          <p style={{ fontSize: '1.75rem', fontWeight: 800 }}>{tasks.length}</p>
+          <h3 className="text-muted" style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.25rem' }}>{title}</h3>
+          <p style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)', margin: 0 }}>{tasks.length}</p>
         </div>
-        <div style={{ background: `${color}15`, padding: '0.75rem', borderRadius: '12px' }}>
-          <Icon size={24} color={color} />
+        <div style={{ background: `${color}15`, padding: '1rem', borderRadius: '16px', border: `1px solid ${color}33` }}>
+          <Icon size={28} color={color} />
         </div>
       </div>
       
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
-        gap: '0.6rem', 
-        maxHeight: '250px', 
+        gap: '0.75rem', 
+        maxHeight: '350px', 
         overflowY: 'auto',
         paddingRight: '0.5rem',
         margin: '0 -0.5rem'
@@ -388,43 +398,66 @@ export default function StatsContent({ client, metaResult, googleResult }) {
             style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '0.75rem', 
-              padding: '0.75rem', 
-              background: 'rgba(255,255,255,0.02)', 
-              borderRadius: '10px',
+              gap: '1rem', 
+              padding: '1rem', 
+              background: 'var(--bg-primary)', 
+              borderRadius: '16px',
               border: '1px solid var(--border-color)',
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              borderLeft: `3px solid ${color}`
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              borderLeft: `4px solid ${color}`,
+              position: 'relative',
+              overflow: 'hidden'
             }}
-            className="task-item-card"
+            className="task-item-card-premium"
           >
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.15rem' }}>
-                {task.type === 'SOCIAL' && PLATFORM_ICONS[task.platform || 'Özel']}
-                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {task.type === 'BLOG' ? 'Blog İçeriği' : (task.platform || (task.note || 'Özel Görev'))}
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+                <span style={{ 
+                  fontSize: '0.85rem', 
+                  fontWeight: 800, 
+                  color: 'var(--text-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  {task.type === 'SOCIAL' && (
+                    <div style={{ padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                      {PLATFORM_ICONS[task.platform || 'Özel']}
+                    </div>
+                  )}
+                  {task.type === 'BLOG' ? 'SEO İçerik Stratejisi' : (task.platform || 'Özel Görev')}
+                </span>
+                <span style={{ 
+                  fontSize: '0.65rem', 
+                  fontWeight: 800, 
+                  padding: '2px 8px', 
+                  borderRadius: '20px',
+                  background: task.status ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                  color: task.status ? '#10b981' : '#f59e0b',
+                  border: `1px solid ${task.status ? '#10b98133' : '#f59e0b33'}`
+                }}>
+                  {getTaskStatusMessage(task).toUpperCase()}
                 </span>
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                <span style={{ fontWeight: 600, color: task.status ? '#10b981' : (getTaskStatusMessage(task).includes('Bekleniyor') ? '#f59e0b' : 'var(--text-secondary)') }}>
-                  {getTaskStatusMessage(task)}
-                </span>
-                <span style={{ opacity: 0.3 }}>•</span>
-                <span>{safeFormatDate(task.date)}</span>
-                {task.note && (
-                   <>
-                     <span style={{ opacity: 0.3 }}>|</span>
-                     <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px' }}>{task.note}</span>
-                   </>
-                )}
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                    <CalendarIcon size={12} />
+                    {safeFormatDate(task.date)}
+                 </div>
+                 {task.note && (
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px', opacity: 0.8 }}>
+                       {task.note}
+                    </div>
+                 )}
               </div>
             </div>
-            <Edit3 size={14} className="text-muted" />
+            <ChevronRight size={18} className="text-muted" style={{ opacity: 0.3 }} />
           </div>
         )) : (
-          <div style={{ textAlign: 'center', padding: '2rem 1rem', opacity: 0.5 }}>
-            <p style={{ fontSize: '0.8rem' }}>Görev bulunamadı.</p>
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', opacity: 0.4 }}>
+            <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>Henüz bir görev bulunmuyor.</p>
           </div>
         )}
       </div>
@@ -551,20 +584,37 @@ export default function StatsContent({ client, metaResult, googleResult }) {
           </div>
         </div>
 
-        {/* BÖLÜM 2: SOSYAL MEDYA TAKİP TABLOSU */}
-        <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px', padding: '0.75rem' }}>
-          <h3 style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.75rem', textAlign: 'center' }}>Sosyal Medya Akışı</h3>
+        {/* BÖLÜM 2: SOSYAL MEDYA TAKİP TABLOSU - PREMIUM DESIGN */}
+        <div className="card" style={{ 
+          background: 'var(--bg-secondary)', 
+          border: '1px solid var(--border-color)', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          height: '100%', 
+          minHeight: '400px', 
+          padding: '1.25rem',
+          borderRadius: '24px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Sosyal Medya Akışı</h3>
+            <div style={{ padding: '0.4rem', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '8px', color: '#8b5cf6' }}>
+               <CalendarIcon size={16} />
+            </div>
+          </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', fontSize: '0.6rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div style={{ flex: 1, overflowY: 'auto', fontSize: '0.65rem', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
+            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)', opacity: 0.7 }}>
-                  <th style={{ padding: '0.5rem 0.2rem', textAlign: 'center', fontSize: '0.55rem', fontWeight: 800 }}>HAFTA</th>
-                  <th style={{ padding: '0.5rem 0.2rem', textAlign: 'left', fontSize: '0.55rem', fontWeight: 800 }}>GÜN</th>
+                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <th style={{ padding: '1rem 0.5rem', textAlign: 'center', fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)' }}>HAFTA</th>
+                  <th style={{ padding: '1rem 0.5rem', textAlign: 'left', fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)' }}>GÜN</th>
                   {activePlatforms.map(p => (
-                    <th key={p} style={{ padding: '0.3rem 0.1rem' }}>
+                    <th key={p} style={{ padding: '0.5rem 0.2rem', borderBottom: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        {PLATFORM_ICONS[p] || p[0]}
+                        <div style={{ padding: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                          {PLATFORM_ICONS[p] || p[0]}
+                        </div>
                       </div>
                     </th>
                   ))}
@@ -576,45 +626,68 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                   if (daysInThisWeek.length === 0) return null;
 
                   return daysInThisWeek.map((day, idx) => (
-                    <tr key={`${week}-${day}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <tr key={`${week}-${day}`} className="premium-table-row">
                       {idx === 0 && (
                         <td 
                           rowSpan={daysInThisWeek.length} 
                           style={{ 
-                            padding: '0.3rem', 
-                            fontWeight: 800, 
+                            padding: '0.75rem', 
+                            fontWeight: 900, 
                             color: 'var(--accent-primary)', 
                             textAlign: 'center', 
                             verticalAlign: 'middle',
-                            borderRight: '1px solid rgba(255,255,255,0.05)',
-                            fontSize: '0.7rem'
+                            borderRight: '1px solid var(--border-color)',
+                            background: 'rgba(59, 130, 246, 0.02)',
+                            fontSize: '0.8rem'
                           }}
                         >
                           {week}
                         </td>
                       )}
-                      <td style={{ padding: '0.4rem 0.2rem', opacity: 0.8, fontWeight: 600 }}>{day}</td>
+                      <td style={{ 
+                        padding: '0.75rem 0.5rem', 
+                        fontWeight: 700, 
+                        color: 'var(--text-primary)',
+                        borderBottom: '1px solid rgba(255,255,255,0.03)',
+                        opacity: 0.9
+                      }}>{day}</td>
                       {activePlatforms.map(p => (
-                        <td key={p} style={{ padding: '0.4rem 0.1rem', textAlign: 'center' }}>
+                        <td key={p} style={{ padding: '0.5rem 0.1rem', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                           {socialGrid[week][day][p] !== undefined ? (
                             socialGrid[week][day][p] ? 
-                              <CheckCircle2 size={12} style={{ color: '#10b981' }} /> : 
-                              <X size={12} style={{ color: '#ef4444' }} />
-                          ) : '-'}
+                              <div 
+                                onClick={() => openEditModal(socialGrid[week][day][p])}
+                                style={{ 
+                                  display: 'inline-flex', 
+                                  cursor: 'pointer',
+                                  padding: '4px',
+                                  borderRadius: '6px',
+                                  background: socialGrid[week][day][p].status ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                                  color: socialGrid[week][day][p].status ? '#10b981' : '#f59e0b',
+                                  border: `1px solid ${socialGrid[week][day][p].status ? '#10b98144' : '#f59e0b44'}`,
+                                  transition: 'all 0.2s'
+                                }}
+                                className="status-indicator-premium"
+                                title={socialGrid[week][day][p].note || 'Görevi Gör'}
+                              >
+                                {socialGrid[week][day][p].status ? <CheckCircle size={14} /> : <Clock size={14} />}
+                              </div>
+                            : (
+                              <div style={{ opacity: 0.1 }}>-</div>
+                            )
+                          ) : (
+                            <div style={{ opacity: 0.1 }}>-</div>
+                          )}
                         </td>
                       ))}
                     </tr>
                   ));
                 })}
-                {Object.keys(socialGrid).length === 0 && (
-                  <tr>
-                    <td colSpan={activePlatforms.length + 2} style={{ textAlign: 'center', padding: '2rem 0', opacity: 0.3 }}>Veri yok</td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
         </div>
+
 
         {/* BÖLÜM 4: YAKLAŞAN ÖZEL GÜNLER */}
         <div className="card" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
@@ -1410,6 +1483,19 @@ export default function StatsContent({ client, metaResult, googleResult }) {
       )}
 
       <style jsx>{`
+        .task-item-card-premium:hover {
+          background: rgba(59, 130, 246, 0.05) !important;
+          border-color: var(--accent-primary) !important;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+        .status-indicator-premium:hover {
+          transform: scale(1.1);
+          filter: brightness(1.2);
+        }
+        .premium-table-row:hover {
+          background: rgba(255,255,255,0.01);
+        }
         .blog-item-compact:hover {
           background: var(--bg-primary) !important;
           border-color: var(--accent-primary) !important;
