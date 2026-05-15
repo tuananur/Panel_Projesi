@@ -36,7 +36,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createFormData, setCreateFormData] = useState({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
   const [isCreating, setIsCreating] = useState(false);
-  const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '', details: '' });
+  const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '', details: '', type: 'error' });
 
   const [selectedEntity, setSelectedEntity] = useState(null); // { type: 'campaign'|'adset'|'ad', data: object }
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
@@ -75,12 +75,12 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     startTransition(async () => {
       const res = await deleteMetaEntityAction(id, entity.id);
       if (res?.error) {
-        alert('Silme hatası: ' + res.error);
+        setMessageModal({ show: true, title: 'Hata', message: 'Silme hatası: ' + res.error, type: 'error' });
       } else {
         if (type === 'campaign') setCampaigns(prev => prev.filter(c => c.id !== entity.id));
         if (type === 'adset') setAdSets(prev => prev.filter(as => as.id !== entity.id));
         if (type === 'ad') setAds(prev => prev.filter(ad => ad.id !== entity.id));
-        alert('Başarıyla silindi.');
+        setMessageModal({ show: true, title: 'Başarılı', message: 'Başarıyla silindi.', type: 'success' });
         if (selectedEntity?.data?.id === entity.id) setShowDetailsPanel(false);
       }
     });
@@ -117,7 +117,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     startTransition(async () => {
       const res = await toggleMetaStatusAction(id, entityId, newStatus);
       if (res?.error) {
-        alert('Durum güncellenirken hata oluştu: ' + res.error);
+        setMessageModal({ show: true, title: 'Hata', message: 'Durum güncellenirken hata oluştu: ' + res.error, type: 'error' });
         if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === entityId ? { ...c, status: currentStatus } : c));
         if (type === 'adset') setAdSets(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
         if (type === 'ad') setAds(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
@@ -142,14 +142,15 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     setIsCreating(false);
     
     if (res?.error) {
-      setErrorModal({ 
+      setMessageModal({ 
         show: true, 
-        title: 'Hata: ' + res.error, 
-        message: res.details || 'Bir hata oluştu.',
-        details: res.fb_trace_id ? `Trace ID: ${res.fb_trace_id}` : ''
+        title: 'Hata', 
+        message: res.error,
+        details: res.details || '',
+        type: 'error'
       });
     } else {
-      alert('Başarıyla oluşturuldu!');
+      setMessageModal({ show: true, title: 'Başarılı', message: 'Başarıyla oluşturuldu!', type: 'success' });
       setShowCreateModal(false);
       const newEntity = { id: res.id, name: createFormData.name, status: createFormData.status, insights: { data: [] } };
       if (activeTab === 'campaigns') setCampaigns([newEntity, ...campaigns]);
@@ -172,8 +173,9 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       const updateData = { name: editName };
       if (editBudget) updateData.daily_budget = parseFloat(editBudget);
       const res = await updateMetaEntityAction(id, selectedEntity.data.id, updateData);
-      if (res?.error) alert('Hata: ' + res.error);
-      else {
+      if (res?.error) {
+        setMessageModal({ show: true, title: 'Hata', message: res.error, type: 'error' });
+      } else {
         const type = selectedEntity.type;
         const updatedObj = { ...selectedEntity.data, name: editName, daily_budget: editBudget };
         if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === selectedEntity.data.id ? { ...c, ...updatedObj } : c));
@@ -562,19 +564,19 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
 
       <CustomDialog
-        isOpen={errorModal.show}
-        title="Hata"
-        onClose={() => setErrorModal({ ...errorModal, show: false })}
-        onConfirm={() => setErrorModal({ ...errorModal, show: false })}
+        isOpen={messageModal.show}
+        title={messageModal.title}
+        onClose={() => setMessageModal({ ...messageModal, show: false })}
+        onConfirm={() => setMessageModal({ ...messageModal, show: false })}
         confirmText="Tamam"
         showCancel={false}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ fontWeight: 600, color: '#ff4d4d', fontSize: '1.1rem' }}>{errorModal.title}</div>
-          <div style={{ color: 'rgba(255,255,255,0.8)', lineHeight: '1.5' }}>{errorModal.message}</div>
-          {errorModal.details && (
+          <div style={{ fontWeight: 600, color: messageModal.type === 'error' ? '#ff4d4d' : '#10b981', fontSize: '1.1rem' }}>{messageModal.title}</div>
+          <div style={{ color: 'rgba(255,255,255,0.8)', lineHeight: '1.5' }}>{messageModal.message}</div>
+          {messageModal.details && (
             <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '4px' }}>
-              {errorModal.details}
+              {messageModal.details}
             </div>
           )}
         </div>
