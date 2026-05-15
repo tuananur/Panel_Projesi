@@ -6,6 +6,23 @@ import { redirect } from 'next/navigation';
 import { deleteMessages, getMailAddressSuggestions, getMailConfig, getMessage, getUnreadInboxCount, listMessages, markMessagesSeen, saveMailConfig, sendMail } from '@/lib/mail';
 import { ASSIGNABLE_ROLE_OPTIONS, can, getRoleAssignableRoles, getRolePermissions, saveRoleAssignableRoles, saveRolePermissions } from '@/lib/permissions';
 import { SPECIAL_DAYS } from '@/lib/holidays';
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 8000 } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(resource, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
 async function logActivity(action, entityType, details, clientId = null) {
   try {
     const session = await getSession();
@@ -869,10 +886,10 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
     const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
     try {
       const [insightsRes, campaignsRes, adSetsRes, adsRes] = await Promise.all([
-        fetch(insightsUrl, { cache: 'no-store' }),
-        fetch(campaignsUrl, { cache: 'no-store' }),
-        fetch(adSetsUrl, { cache: 'no-store' }),
-        fetch(adsUrl, { cache: 'no-store' })
+        fetchWithTimeout(insightsUrl, { cache: 'no-store' }),
+        fetchWithTimeout(campaignsUrl, { cache: 'no-store' }),
+        fetchWithTimeout(adSetsUrl, { cache: 'no-store' }),
+        fetchWithTimeout(adsUrl, { cache: 'no-store' })
       ]);
       const insightsData = await insightsRes.json();
       const campaignsData = await campaignsRes.json();
@@ -892,7 +909,7 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
       }
       return {
         success: true,
-        summary: insightsData.data[0] || null,
+        summary: Array.isArray(insightsData.data) ? (insightsData.data[0] || null) : null,
         activeCampaigns: campaignsData.data || [],
         adSets: adSetsData.data || [],
         ads: adsData.data || []
@@ -1839,7 +1856,7 @@ export async function createMetaCampaignAction(clientId, campaignData) {
       name: campaignData.name,
       objective: campaignData.objective || 'OUTCOME_TRAFFIC',
       status: campaignData.status || 'PAUSED',
-      special_ad_categories: [], 
+      special_ad_categories: ['NONE'], 
       access_token: accessToken
     };
 
@@ -1860,6 +1877,112 @@ export async function createMetaCampaignAction(clientId, campaignData) {
     return { success: true, id: data.id };
   } catch (error) {
     return { error: 'Kampanya oluşturulamadı.' };
+  }
+}
+
+export async function createMetaAdSetAction(clientId, adSetData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+    
+    if (!client || !client.metaAdAccountId || !client.metaAccessToken) {
+      return { error: 'API_MISSING' };
+    }
+
+    const accountId = client.metaAdAccountId.trim();
+    const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
+    const accessToken = client.metaAccessToken.trim();
+    
+    const url = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets`;
+    
+    const payload = {
+      name: adSetData.name,
+      campaign_id: adSetData.parent_id,
+      status: adSetData.status || 'PAUSED',
+      billing_event: 'IMPRESSIONS',
+      optimization_goal: 'REACH',
+      targeting: { geo_locations: { countries: ['TR'] } },
+      access_token: accessToken
+    };
+
+    if (adSetData.daily_budget) {
+      payload.daily_budget = Math.round(parseFloat(adSetData.daily_budget) * 100);
+    } else {
+      payload.bid_amount = 1000; // Default bid if no budget
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    if (data.error) return { error: data.error.message };
+
+    await logActivity('CREATE', 'META_ADS', `Yeni reklam seti oluşturuldu: ${adSetData.name}`, clientId);
+    return { success: true, id: data.id };
+  } catch (error) {
+    return { error: 'Reklam seti oluşturulamadı.' };
+  }
+}
+
+export async function createMetaAdAction(clientId, adData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+
+    const client = await prisma.client.findUnique({
+      where: { id: parseInt(clientId) }
+    });
+    
+    if (!client || !client.metaAdAccountId || !client.metaAccessToken) {
+      return { error: 'API_MISSING' };
+    }
+
+    const accountId = client.metaAdAccountId.trim();
+    const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
+    const accessToken = client.metaAccessToken.trim();
+    
+    const url = `https://graph.facebook.com/v19.0/${finalAccountId}/ads`;
+    
+    // We need a creative ID. We'll try to fetch existing creatives first.
+    const creativeUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adcreatives?limit=1&access_token=${accessToken}`;
+    const creativeRes = await fetch(creativeUrl);
+    const creativeData = await creativeRes.json();
+    
+    let creativeId = null;
+    if (creativeData.data && creativeData.data.length > 0) {
+      creativeId = creativeData.data[0].id;
+    } else {
+      return { error: 'Hesapta mevcut kreatif bulunamadı. Lütfen önce Meta Ads Manager üzerinden bir kreatif oluşturun.' };
+    }
+
+    const payload = {
+      name: adData.name,
+      adset_id: adData.parent_id,
+      status: adData.status || 'PAUSED',
+      creative: { creative_id: creativeId },
+      access_token: accessToken
+    };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    if (data.error) return { error: data.error.message };
+
+    await logActivity('CREATE', 'META_ADS', `Yeni reklam oluşturuldu: ${adData.name}`, clientId);
+    return { success: true, id: data.id };
+  } catch (error) {
+    return { error: 'Reklam oluşturulamadı.' };
   }
 }
 

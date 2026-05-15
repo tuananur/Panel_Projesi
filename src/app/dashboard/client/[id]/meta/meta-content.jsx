@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction, updateMetaEntityAction, deleteMetaEntityAction } from '@/app/actions';
+import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction, updateMetaEntityAction, deleteMetaEntityAction } from '@/app/actions';
 import {
   TrendingUp, MousePointer2, Eye, Users as UsersIcon,
   Wallet, Search, Calendar, ChevronRight,
@@ -123,11 +123,20 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     });
   };
 
-  const handleCreateCampaign = async (e) => {
+  const handleCreateEntity = async (e) => {
     e.preventDefault();
     if (!createFormData.name) return;
     setIsCreating(true);
-    const res = await createMetaCampaignAction(id, createFormData);
+    
+    let res;
+    if (activeTab === 'campaigns') {
+      res = await createMetaCampaignAction(id, createFormData);
+    } else if (activeTab === 'adsets') {
+      res = await createMetaAdSetAction(id, createFormData);
+    } else if (activeTab === 'ads') {
+      res = await createMetaAdAction(id, createFormData);
+    }
+    
     setIsCreating(false);
     
     if (res?.error) {
@@ -365,7 +374,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
               <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleCreateCampaign} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2.5rem 2.5rem 2.5rem' }}>
+            <form onSubmit={handleCreateEntity} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2.5rem 2.5rem 2.5rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div>
                   <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>BAŞLIK *</label>
