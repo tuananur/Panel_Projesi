@@ -15,7 +15,12 @@ export default function EditClientModal({ client }) {
   const { setGlobalLoading } = useTheme();
   const router = useRouter();
 
-  const currentServices = JSON.parse(client.services || '[]');
+  let currentServices = [];
+  try {
+    currentServices = JSON.parse(client.services || '[]');
+  } catch (e) {
+    currentServices = client.services ? client.services.split(',') : [];
+  }
 
   async function handleSubmit(formData) {
     if (loading) return;

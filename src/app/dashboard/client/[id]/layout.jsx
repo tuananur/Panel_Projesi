@@ -155,7 +155,7 @@ export default async function ClientDetailLayout({ children, params }) {
       }
     });
     
-    const permissions = await getRolePermissions();
+    const permissions = await getRolePermissions(session);
     const role = session.role;
     const canSeeStats = can(permissions, role, 'client.tab.stats');
     const canSeeNotes = can(permissions, role, 'client.tab.notes');

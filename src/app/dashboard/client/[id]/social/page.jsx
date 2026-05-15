@@ -30,7 +30,7 @@ export default async function SocialPage({ params }) {
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const permissions = await getRolePermissions();
+  const permissions = await getRolePermissions(session);
   if (!can(permissions, session.role, 'client.tab.social')) {
     redirect('/dashboard');
   }

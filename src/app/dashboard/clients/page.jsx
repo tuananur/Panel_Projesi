@@ -43,7 +43,14 @@ export default async function ClientsPage() {
               </thead>
               <tbody>
                 {clients.map((client) => {
-                  const services = JSON.parse(client.services || '[]');
+                  let services = [];
+                  try {
+                    services = JSON.parse(client.services || '[]');
+                  } catch (e) {
+                    services = client.services ? client.services.split(',') : [];
+                  }
+                  
+                  const safePhone = client.phone || '';
                   
                   return (
                     <tr key={client.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -77,14 +84,16 @@ export default async function ClientsPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.05rem' }}>
                           <div style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-primary)' }}>{client.contactName}</div>
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <a 
-                              href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.6rem', color: '#10b981', textDecoration: 'none' }}
-                            >
-                              <MessageCircle size={9} /> {client.phone.slice(-4)}
-                            </a>
+                            {safePhone && (
+                              <a 
+                                href={`https://wa.me/${safePhone.replace(/\D/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.6rem', color: '#10b981', textDecoration: 'none' }}
+                              >
+                                <MessageCircle size={9} /> {safePhone.slice(-4)}
+                              </a>
+                            )}
                             {client.email && (
                               <a 
                                 href={`mailto:${client.email}`}

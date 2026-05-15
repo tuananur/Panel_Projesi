@@ -41,7 +41,7 @@ export default async function ClientDevPage({ params }) {
     redirect('/dashboard');
   }
 
-  const permissions = await getRolePermissions();
+  const permissions = await getRolePermissions(session);
   if (!can(permissions, session.role, 'client.tab.dev')) {
     redirect(`/dashboard/client/${id}`);
   }

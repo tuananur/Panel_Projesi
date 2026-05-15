@@ -34,7 +34,7 @@ export default async function ClientNotesPage({ params, searchParams }) {
     redirect('/dashboard');
   }
 
-  const permissions = await getRolePermissions();
+  const permissions = await getRolePermissions(session);
   if (!can(permissions, session.role, 'client.tab.notes')) {
     redirect(`/dashboard/client/${id}`);
   }

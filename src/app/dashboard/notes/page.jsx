@@ -15,7 +15,7 @@ export default async function NotesPage() {
     redirect('/login');
   }
 
-  const permissions = await getRolePermissions();
+  const permissions = await getRolePermissions(session);
   if (!can(permissions, session.role, 'page.notes')) {
     redirect('/dashboard');
   }

@@ -9,7 +9,7 @@ export default async function SettingsPage({ params }) {
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const permissions = await getRolePermissions();
+  const permissions = await getRolePermissions(session);
   if (!can(permissions, session.role, 'client.tab.settings')) {
     redirect('/dashboard');
   }

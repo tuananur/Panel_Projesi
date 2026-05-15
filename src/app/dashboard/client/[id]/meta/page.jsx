@@ -11,7 +11,7 @@ export default async function MetaAdsPage({ params, searchParams }) {
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const permissions = await getRolePermissions();
+  const permissions = await getRolePermissions(session);
   if (!can(permissions, session.role, 'client.tab.meta')) {
     console.warn(`[WARN] Permission denied for client.tab.meta. Role: ${session.role}. Redirecting to /dashboard.`);
     redirect('/dashboard');

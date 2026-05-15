@@ -33,7 +33,7 @@ export default async function WorkItemsPage() {
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const permissions = await getRolePermissions();
+  const permissions = await getRolePermissions(session);
   if (!can(permissions, session.role, 'page.work_items')) redirect('/dashboard');
 
   const assignmentMatrix = await getRoleAssignableRoles();

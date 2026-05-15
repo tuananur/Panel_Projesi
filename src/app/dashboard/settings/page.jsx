@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { ASSIGNABLE_ROLE_OPTIONS, CONFIGURABLE_ROLES, PERMISSION_GROUPS, getRoleAssignableRoles, getRolePermissions } from '@/lib/permissions';
+import prisma from '@/lib/prisma';
+import { ASSIGNABLE_ROLE_OPTIONS, CONFIGURABLE_ROLES, PERMISSION_GROUPS, getRoleAssignableRoles, getRolePermissions, getUserPermissionsSettings } from '@/lib/permissions';
 import ThemeSettings from './theme-settings';
 import RolePermissionsEditor from './role-permissions-editor';
 import MailSettings from './mail-settings';
@@ -20,6 +21,8 @@ export default async function SettingsPage() {
   const isAdmin = session.role === 'ADMIN';
   const permissions = isAdmin ? await getRolePermissions() : null;
   const assignableRoles = isAdmin ? await getRoleAssignableRoles() : null;
+  const users = isAdmin ? await prisma.user.findMany({ select: { id: true, username: true, role: true }, orderBy: { username: 'asc' } }) : [];
+  const userPermissions = isAdmin ? await getUserPermissionsSettings() : {};
   const [mailSettings, notificationSettings, googleAdsGlobalSettings] = await Promise.all([
     getMailSettingsAction(),
     getNotificationSettingsAction(),
@@ -60,6 +63,8 @@ export default async function SettingsPage() {
               initialPermissions={permissions}
               initialAssignableRoles={assignableRoles}
               assignableRoleOptions={ASSIGNABLE_ROLE_OPTIONS}
+              users={users}
+              initialUserPermissions={userPermissions}
             />
           </div>
         </>

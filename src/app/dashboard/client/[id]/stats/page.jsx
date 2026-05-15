@@ -14,7 +14,7 @@ export default async function StatsPage({ params }) {
   const session = await getSession();
   if (!session) redirect('/login');
 
-  const permissions = await getRolePermissions();
+  const permissions = await getRolePermissions(session);
   const hasPermission = can(permissions, session.role, 'client.tab.stats');
   
   console.log(`[AUTH_DEBUG] User: ${session.username}, Role: ${session.role}, Permission: ${hasPermission}`);

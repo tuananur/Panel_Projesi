@@ -17,7 +17,7 @@ export default async function DashboardLayout({ children }) {
   }
 
   const [permissions, mailConfig, notificationSettingsResult] = await Promise.all([
-    getRolePermissions(),
+    getRolePermissions(session),
     getMailConfig({ userId: session.userId }),
     getNotificationSettingsAction(),
   ]);

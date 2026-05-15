@@ -30,7 +30,7 @@ export default async function ClientDetailPage({ params }) {
     }
 
     const services = parseJSONSafe(client.services, '[]');
-    const permissions = await getRolePermissions();
+    const permissions = await getRolePermissions(session);
     const role = session.role;
     const hasStatsPermission = can(permissions, role, 'client.tab.stats');
 

@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { createSession, destroySession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { deleteMessages, getMailAddressSuggestions, getMailConfig, getMessage, getUnreadInboxCount, listMessages, markMessagesSeen, saveMailConfig, sendMail } from '@/lib/mail';
-import { ASSIGNABLE_ROLE_OPTIONS, can, getRoleAssignableRoles, getRolePermissions, saveRoleAssignableRoles, saveRolePermissions } from '@/lib/permissions';
+import { ASSIGNABLE_ROLE_OPTIONS, can, getRoleAssignableRoles, getRolePermissions, saveRoleAssignableRoles, saveRolePermissions, saveUserPermissionsSettings } from '@/lib/permissions';
 import { SPECIAL_DAYS } from '@/lib/holidays';
 async function fetchWithTimeout(resource, options = {}) {
   const { timeout = 8000 } = options;
@@ -1363,6 +1363,20 @@ export async function updateRolePermissionsAction(permissions, assignableRoles =
     return { success: true };
   } catch (error) {
     console.error('updateRolePermissionsAction error:', error);
+    return { error: 'İzinler kaydedilemedi.' };
+  }
+}
+export async function updateUserPermissionsAction(userPermissions) {
+  const session = await getSession();
+  if (!session || session.role !== 'ADMIN') {
+    return { error: 'Bu işlemi yapmaya yetkiniz yok.' };
+  }
+  try {
+    await saveUserPermissionsSettings(userPermissions || {});
+    await logActivity('UPDATE', 'SETTINGS', 'Kullanıcı bazlı izinler güncellendi.');
+    return { success: true };
+  } catch (error) {
+    console.error('updateUserPermissionsAction error:', error);
     return { error: 'İzinler kaydedilemedi.' };
   }
 }

@@ -151,14 +151,51 @@ function mergeWithDefaults(stored) {
   return merged;
 }
 
-export async function getRolePermissions() {
+export async function getRolePermissions(session = null) {
   try {
     const setting = await prisma.setting.findUnique({ where: { key: SETTING_KEY } });
-    if (!setting) return mergeWithDefaults(null);
-    const parsed = JSON.parse(setting.value || '{}');
-    return mergeWithDefaults(parsed);
+    const parsed = setting ? JSON.parse(setting.value || '{}') : null;
+    const base = mergeWithDefaults(parsed);
+
+    if (session && session.userId && session.role) {
+      const userSetting = await prisma.setting.findUnique({ where: { key: 'user_permissions' } });
+      if (userSetting) {
+        const userOverrides = JSON.parse(userSetting.value || '{}');
+        const userSpecificPerms = userOverrides[session.userId];
+        const upperRole = String(session.role).toUpperCase();
+
+        if (userSpecificPerms && base[upperRole]) {
+          // Merge user-specific overrides directly into their role's base permissions
+          base[upperRole] = { ...base[upperRole], ...userSpecificPerms };
+        }
+      }
+    }
+    return base;
   } catch (error) {
     return mergeWithDefaults(null);
+  }
+}
+
+export async function getUserPermissionsSettings() {
+  try {
+    const setting = await prisma.setting.findUnique({ where: { key: 'user_permissions' } });
+    return setting ? JSON.parse(setting.value || '{}') : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+export async function saveUserPermissionsSettings(userPermissions) {
+  try {
+    await prisma.setting.upsert({
+      where: { key: 'user_permissions' },
+      update: { value: JSON.stringify(userPermissions) },
+      create: { key: 'user_permissions', value: JSON.stringify(userPermissions) },
+    });
+    return userPermissions;
+  } catch (error) {
+    console.error('Error saving user permissions:', error);
+    return {};
   }
 }
 
