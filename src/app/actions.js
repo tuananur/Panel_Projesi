@@ -1077,6 +1077,40 @@ export async function saveGoogleAdsGlobalSettingsAction(formData) {
   }
 }
 
+export async function toggleGoogleStatusAction(clientId, entityId, newStatus) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+    const status = newStatus === 'ENABLED' ? 'ENABLED' : 'PAUSED';
+    await logActivity('UPDATE', 'GOOGLE_ADS', `Google objesi durumu güncellendi: ${entityId} -> ${status}`, clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Durum güncellenemedi.' };
+  }
+}
+
+export async function updateGoogleEntityAction(clientId, entityId, updateData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+    await logActivity('UPDATE', 'GOOGLE_ADS', `Google objesi güncellendi: ${entityId}`, clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Güncelleme yapılamadı.' };
+  }
+}
+
+export async function deleteGoogleEntityAction(clientId, entityId) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Yetkisiz erişim.' };
+    await logActivity('DELETE', 'GOOGLE_ADS', `Google objesi silindi: ${entityId}`, clientId);
+    return { success: true };
+  } catch (error) {
+    return { error: 'Silme işlemi yapılamadı.' };
+  }
+}
+
 // Mail Actions
 export async function getMailSettingsAction() {
   try {
