@@ -140,7 +140,8 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     setIsCreating(false);
     
     if (res?.error) {
-      alert('Hata: ' + res.error);
+      const detail = res.details ? `\n\nDetay: ${res.details}` : '';
+      alert('Hata: ' + res.error + detail);
     } else {
       alert('Başarıyla oluşturuldu!');
       setShowCreateModal(false);

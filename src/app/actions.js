@@ -1871,7 +1871,14 @@ export async function createMetaCampaignAction(clientId, campaignData) {
     });
 
     const data = await response.json();
-    if (data.error) return { error: data.error.message };
+    if (data.error) {
+      console.error('Meta Campaign Error:', data.error);
+      return { 
+        error: data.error.message, 
+        details: data.error.error_user_msg || data.error.error_user_title || null,
+        fb_trace_id: data.error.fbtrace_id
+      };
+    }
 
     await logActivity('CREATE', 'META_ADS', `Yeni kampanya oluşturuldu: ${campaignData.name}`, clientId);
     return { success: true, id: data.id };
@@ -1904,7 +1911,8 @@ export async function createMetaAdSetAction(clientId, adSetData) {
       campaign_id: adSetData.parent_id,
       status: adSetData.status || 'PAUSED',
       billing_event: 'IMPRESSIONS',
-      optimization_goal: 'REACH',
+      optimization_goal: 'LINK_CLICKS',
+      destination_type: 'WEBSITE',
       targeting: { geo_locations: { countries: ['TR'] } },
       access_token: accessToken
     };
@@ -1922,7 +1930,14 @@ export async function createMetaAdSetAction(clientId, adSetData) {
     });
 
     const data = await response.json();
-    if (data.error) return { error: data.error.message };
+    if (data.error) {
+      console.error('Meta AdSet Error:', data.error);
+      return { 
+        error: data.error.message, 
+        details: data.error.error_user_msg || data.error.error_user_title || null,
+        fb_trace_id: data.error.fbtrace_id
+      };
+    }
 
     await logActivity('CREATE', 'META_ADS', `Yeni reklam seti oluşturuldu: ${adSetData.name}`, clientId);
     return { success: true, id: data.id };
@@ -1977,7 +1992,14 @@ export async function createMetaAdAction(clientId, adData) {
     });
 
     const data = await response.json();
-    if (data.error) return { error: data.error.message };
+    if (data.error) {
+      console.error('Meta Ad Error:', data.error);
+      return { 
+        error: data.error.message, 
+        details: data.error.error_user_msg || data.error.error_user_title || null,
+        fb_trace_id: data.error.fbtrace_id
+      };
+    }
 
     await logActivity('CREATE', 'META_ADS', `Yeni reklam oluşturuldu: ${adData.name}`, clientId);
     return { success: true, id: data.id };
