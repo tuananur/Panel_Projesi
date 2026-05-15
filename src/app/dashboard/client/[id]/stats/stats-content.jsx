@@ -490,6 +490,7 @@ export default function StatsContent({ client, metaResult, googleResult }) {
   );
 
   return (
+    <>
     <div className="animate-fade-in" ref={statsRef} style={{ background: 'var(--bg-primary)', padding: '1rem', borderRadius: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem' }}>
         <h2 className="heading-2" style={{ fontSize: '1.5rem', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -1870,7 +1871,7 @@ export default function StatsContent({ client, metaResult, googleResult }) {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
