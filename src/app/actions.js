@@ -2040,7 +2040,15 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
     });
 
     const data = await response.json();
-    if (data.error) return { error: data.error.message };
+    if (data.error) {
+      console.error('Meta Update Error:', data.error);
+      return { 
+        error: data.error.message, 
+        details: data.error.error_user_msg || data.error.error_user_title || null,
+        fb_trace_id: data.error.fbtrace_id
+      };
+    }
+
 
     await logActivity('UPDATE', 'META_ADS', `Meta objesi güncellendi: ${entityId}`, clientId);
     return { success: true };
@@ -2070,7 +2078,15 @@ export async function deleteMetaEntityAction(clientId, entityId) {
     });
 
     const data = await response.json();
-    if (data.error) return { error: data.error.message };
+    if (data.error) {
+      console.error('Meta Delete Error:', data.error);
+      return { 
+        error: data.error.message, 
+        details: data.error.error_user_msg || data.error.error_user_title || null,
+        fb_trace_id: data.error.fbtrace_id
+      };
+    }
+
 
     await logActivity('DELETE', 'META_ADS', `Meta objesi silindi: ${entityId}`, clientId);
     return { success: true };

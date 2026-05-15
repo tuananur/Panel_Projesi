@@ -174,7 +174,13 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
       if (editBudget) updateData.daily_budget = parseFloat(editBudget);
       const res = await updateMetaEntityAction(id, selectedEntity.data.id, updateData);
       if (res?.error) {
-        setMessageModal({ show: true, title: 'Hata', message: res.error, type: 'error' });
+        setMessageModal({ 
+          show: true, 
+          title: 'Hata', 
+          message: res.error, 
+          details: res.details || '',
+          type: 'error' 
+        });
       } else {
         const type = selectedEntity.type;
         const updatedObj = { ...selectedEntity.data, name: editName, daily_budget: editBudget };
@@ -571,11 +577,10 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
         confirmText="Tamam"
         showCancel={false}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ fontWeight: 600, color: messageModal.type === 'error' ? '#ff4d4d' : '#10b981', fontSize: '1.1rem' }}>{messageModal.title}</div>
-          <div style={{ color: 'rgba(255,255,255,0.8)', lineHeight: '1.5' }}>{messageModal.message}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+          <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1rem', lineHeight: '1.5', fontWeight: 500 }}>{messageModal.message}</div>
           {messageModal.details && (
-            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '4px' }}>
+            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', whiteSpace: 'pre-wrap' }}>
               {messageModal.details}
             </div>
           )}
