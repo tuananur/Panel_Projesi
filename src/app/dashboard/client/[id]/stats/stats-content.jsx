@@ -1125,42 +1125,44 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: PLATFORM_COLORS[p] || '#8b5cf6' }}></div>
                              <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>{p}</span>
                            </div>
-                         ))}
-              {/* Active Ad Channels Section */}
-              <div style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                   <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>AKTİF REKLAM KAMPANYALARI</span>
-                   <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--accent-primary)' }}>{activeAdsCount}</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                   {activeAdCampaigns.length > 0 ? (
-                     activeAdCampaigns.map((camp, idx) => (
-                      <div key={`${camp.name}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: camp.platform === 'Meta' ? '#0668E1' : '#4285F4' }}></div>
-                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '0.55rem', fontWeight: 800, color: 'var(--text-secondary)', opacity: 0.6 }}>{camp.platform.toUpperCase()} ADS</span>
-                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-primary)' }}>{camp.name}</span>
-                         </div>
+                          ))}
                       </div>
-                     ))
-                   ) : (
-                     adChannels.map(channel => (
-                      <div key={channel} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(59, 130, 246, 0.05)', padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: channel.includes('Meta') ? '#0668E1' : '#4285F4' }}></div>
-                         <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-primary)' }}>{channel.toUpperCase()}</span>
+
+                      {/* Active Ad Channels Section */}
+                      <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                           <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>AKTİF REKLAM KAMPANYALARI</span>
+                           <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--accent-primary)' }}>{activeAdsCount}</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                           {activeAdCampaigns.length > 0 ? (
+                             activeAdCampaigns.map((camp, idx) => (
+                              <div key={`${camp.name}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: camp.platform === 'Meta' ? '#0668E1' : '#4285F4' }}></div>
+                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontSize: '0.55rem', fontWeight: 800, color: 'var(--text-secondary)', opacity: 0.6 }}>{camp.platform.toUpperCase()} ADS</span>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-primary)' }}>{camp.name}</span>
+                                 </div>
+                              </div>
+                             ))
+                           ) : (
+                             adChannels.map(channel => (
+                              <div key={channel} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(59, 130, 246, 0.05)', padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+                                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: channel.includes('Meta') ? '#0668E1' : '#4285F4' }}></div>
+                                 <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-primary)' }}>{channel.toUpperCase()}</span>
+                              </div>
+                             ))
+                           )}
+                           {activeAdsCount === 0 && (
+                              <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', opacity: 0.5 }}>Aktif kampanya bulunamadı.</span>
+                           )}
+                        </div>
                       </div>
-                     ))
-                   )}
-                   {activeAdsCount === 0 && (
-                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', opacity: 0.5 }}>Aktif kampanya bulunamadı.</span>
-                   )}
-                </div>
+                    </>
+                  );
+                })()}
               </div>
-            </>
-          )
-        })()}
-      </div>
-    </div>
+            </div>
 
           <div style={{ width: '100%', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
