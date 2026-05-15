@@ -1904,6 +1904,12 @@ export async function createMetaAdSetAction(clientId, adSetData) {
     const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
     const accessToken = client.metaAccessToken.trim();
     
+    // Check campaign bid strategy
+    const campaignUrl = `https://graph.facebook.com/v19.0/${adSetData.parent_id}?fields=bid_strategy&access_token=${accessToken}`;
+    const campaignRes = await fetch(campaignUrl);
+    const campaignInfo = await campaignRes.json();
+    const strategy = campaignInfo.bid_strategy;
+
     const url = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets`;
     
     const payload = {
@@ -1917,10 +1923,13 @@ export async function createMetaAdSetAction(clientId, adSetData) {
       access_token: accessToken
     };
 
+    // If campaign has a bid cap strategy, we MUST provide a bid_amount
+    if (strategy === 'LOWEST_COST_WITH_BID_CAP' || strategy === 'COST_CAP') {
+      payload.bid_amount = 1000; // Default 10 TL bid cap
+    }
+
     if (adSetData.daily_budget) {
       payload.daily_budget = Math.round(parseFloat(adSetData.daily_budget) * 100);
-    } else {
-      payload.bid_amount = 1000; // Default bid if no budget
     }
 
     const response = await fetch(url, {
