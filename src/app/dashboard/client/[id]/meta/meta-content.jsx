@@ -616,8 +616,8 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
 function StatusToggle({ active, onToggle }) {
   return (
-    <div onClick={onToggle} style={{ width: '32px', height: '18px', background: active ? '#10b981' : 'rgba(255,255,255,0.1)', borderRadius: '10px', position: 'relative', cursor: 'pointer' }}>
-      <div style={{ width: '14px', height: '14px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', left: active ? '16px' : '2px', transition: 'left 0.2s' }} />
+    <div onClick={onToggle} style={{ width: '42px', height: '22px', background: active ? '#10b981' : 'rgba(255,255,255,0.1)', borderRadius: '12px', position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
+      <div style={{ width: '16px', height: '16px', background: 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: active ? '22px' : '3px', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
     </div>
   );
 }
