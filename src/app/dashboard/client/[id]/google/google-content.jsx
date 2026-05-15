@@ -31,7 +31,8 @@ export default function GoogleContent({ result, id }) {
   const [createFormData, setCreateFormData] = useState({ name: '', status: 'ENABLED' });
   
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '', details: '', type: 'error' });
-  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, entity: null });
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, entity: null, type: null });
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const filteredCampaigns = campaigns.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -107,22 +108,76 @@ export default function GoogleContent({ result, id }) {
   };
 
   const handleDeleteEntity = (entity) => {
-    setDeleteConfirm({ show: true, entity });
+    setDeleteConfirm({ show: true, entity, type: 'single' });
+  };
+
+  const toggleSelection = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredCampaigns.length && filteredCampaigns.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredCampaigns.map(c => c.id));
+    }
+  };
+
+  const handleBulkStatus = (newStatus) => {
+    if (selectedIds.length === 0) return;
+    startTransition(async () => {
+      let successCount = 0;
+      let errorCount = 0;
+      for (const entityId of selectedIds) {
+        const res = await toggleGoogleStatusAction(id, entityId, newStatus);
+        if (res?.error) errorCount++;
+        else successCount++;
+      }
+      setSelectedIds([]);
+      setMessageModal({ 
+        show: true, 
+        title: 'Toplu İşlem Tamamlandı', 
+        message: `${successCount} öğe güncellendi. ${errorCount > 0 ? errorCount + ' öğede hata oluştu.' : ''}`,
+        type: errorCount > 0 ? 'error' : 'success' 
+      });
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setDeleteConfirm({ show: true, entity: { name: `${selectedIds.length} öğe` }, type: 'bulk' });
   };
 
   const confirmDelete = async () => {
-    const { entity } = deleteConfirm;
+    const { entity, type } = deleteConfirm;
     if (!entity) return;
-    setDeleteConfirm({ show: false, entity: null });
+    setDeleteConfirm({ show: false, entity: null, type: null });
     
     startTransition(async () => {
-      const res = await deleteGoogleEntityAction(id, entity.id);
-      if (res?.error) {
-        setMessageModal({ show: true, title: 'Hata', message: 'Silme hatası: ' + res.error, type: 'error' });
+      if (type === 'bulk') {
+        let successCount = 0;
+        let errorCount = 0;
+        for (const entityId of selectedIds) {
+          const res = await deleteGoogleEntityAction(id, entityId);
+          if (res?.error) errorCount++;
+          else successCount++;
+        }
+        setSelectedIds([]);
+        setMessageModal({ 
+          show: true, 
+          title: 'Toplu Silme Tamamlandı', 
+          message: `${successCount} öğe silindi. ${errorCount > 0 ? errorCount + ' öğede hata oluştu.' : ''}`,
+          type: errorCount > 0 ? 'error' : 'success' 
+        });
       } else {
-        setCampaigns(prev => prev.filter(c => c.id !== entity.id));
-        setMessageModal({ show: true, title: 'Başarılı', message: 'Başarıyla silindi.', type: 'success' });
-        if (selectedEntity?.data?.id === entity.id) setShowDetailsPanel(false);
+        const res = await deleteGoogleEntityAction(id, entity.id);
+        if (res?.error) {
+          setMessageModal({ show: true, title: 'Hata', message: 'Silme hatası: ' + res.error, type: 'error' });
+        } else {
+          setCampaigns(prev => prev.filter(c => c.id !== entity.id));
+          setMessageModal({ show: true, title: 'Başarılı', message: 'Başarıyla silindi.', type: 'success' });
+          if (selectedEntity?.data?.id === entity.id) setShowDetailsPanel(false);
+        }
       }
     });
   };
@@ -176,13 +231,39 @@ export default function GoogleContent({ result, id }) {
         </div>
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.length > 0 && (
+        <div style={{ 
+          display: 'flex', alignItems: 'center', gap: '1.5rem', 
+          padding: '1rem 1.5rem', background: '#4285F4', borderRadius: '12px',
+          animation: 'slideDown 0.3s ease-out', color: '#fff',
+          boxShadow: '0 10px 30px rgba(66, 133, 244, 0.3)'
+        }}>
+          <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{selectedIds.length} öğe seçildi</div>
+          <div style={{ height: '20px', width: '1px', background: 'rgba(255,255,255,0.2)' }} />
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => handleBulkStatus('ENABLED')} style={{ ...smallButtonStyle, background: '#10b981', color: '#fff' }}>Seçilenleri Başlat</button>
+            <button onClick={() => handleBulkStatus('PAUSED')} style={{ ...smallButtonStyle, background: '#f59e0b', color: '#fff' }}>Seçilenleri Durdur</button>
+            <button onClick={handleBulkDelete} style={{ ...smallButtonStyle, background: '#ef4444', color: '#fff' }}>Seçilenleri Sil</button>
+          </div>
+          <button onClick={() => setSelectedIds([])} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', opacity: 0.8 }}>Seçimi Temizle</button>
+        </div>
+      )}
+
       {/* Main Table Content */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                <th style={{ ...thStyle, width: '40px' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.length === filteredCampaigns.length && filteredCampaigns.length > 0} 
+                    onChange={toggleSelectAll} 
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
                 <th style={thStyle}>KAMPANYA</th>
                 <th style={thStyle}>DURUM</th>
                 <th style={thStyle}>HARCAMA</th>
@@ -196,7 +277,14 @@ export default function GoogleContent({ result, id }) {
             <tbody>
               {filteredCampaigns.map(camp => (
                 <tr key={camp.id} style={trStyle}>
-                  <td style={tdStyle}><input type="checkbox" disabled /></td>
+                  <td style={tdStyle}>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedIds.includes(camp.id)} 
+                      onChange={() => toggleSelection(camp.id)} 
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                       <StatusToggle active={camp.status === 'ENABLED'} onToggle={() => handleToggleStatus(camp.id, camp.status)} />
@@ -306,6 +394,10 @@ export default function GoogleContent({ result, id }) {
             @keyframes modalFadeIn {
               from { opacity: 0; transform: translate(-50%, -45%); }
               to { opacity: 1; transform: translate(-50%, -50%); }
+            }
+            @keyframes slideDown {
+              from { opacity: 0; transform: translateY(-10px); }
+              to { opacity: 1; transform: translateY(0); }
             }
           `}</style>
         </>
@@ -467,3 +559,4 @@ function StatusBadge({ status }) {
 const thStyle = { padding: '1rem 1.5rem', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' };
 const tdStyle = { padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' };
 const trStyle = { transition: 'background 0.2s' };
+const smallButtonStyle = { padding: '0.4rem 0.8rem', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' };

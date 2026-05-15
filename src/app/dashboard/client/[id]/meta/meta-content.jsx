@@ -38,6 +38,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const [isCreating, setIsCreating] = useState(false);
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '', details: '', type: 'error' });
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, entity: null, type: null });
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const [selectedEntity, setSelectedEntity] = useState(null); // { type: 'campaign'|'adset'|'ad', data: object }
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
@@ -79,16 +80,35 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     const { entity, type } = deleteConfirm;
     if (!entity) return;
     setDeleteConfirm({ ...deleteConfirm, show: false });
+    
     startTransition(async () => {
-      const res = await deleteMetaEntityAction(id, entity.id);
-      if (res?.error) {
-        setMessageModal({ show: true, title: 'Hata', message: 'Silme hatası: ' + res.error, type: 'error' });
+      if (type === 'bulk') {
+        let successCount = 0;
+        let errorCount = 0;
+        for (const entityId of selectedIds) {
+          const res = await deleteMetaEntityAction(id, entityId);
+          if (res?.error) errorCount++;
+          else successCount++;
+        }
+        setSelectedIds([]);
+        setMessageModal({ 
+          show: true, 
+          title: 'Toplu Silme Tamamlandı', 
+          message: `${successCount} öğe silindi. ${errorCount > 0 ? errorCount + ' öğede hata oluştu.' : ''}`,
+          type: errorCount > 0 ? 'error' : 'success'
+        });
+        router.refresh();
       } else {
-        if (type === 'campaign') setCampaigns(prev => prev.filter(c => c.id !== entity.id));
-        if (type === 'adset') setAdSets(prev => prev.filter(as => as.id !== entity.id));
-        if (type === 'ad') setAds(prev => prev.filter(ad => ad.id !== entity.id));
-        setMessageModal({ show: true, title: 'Başarılı', message: 'Başarıyla silindi.', type: 'success' });
-        if (selectedEntity?.data?.id === entity.id) setShowDetailsPanel(false);
+        const res = await deleteMetaEntityAction(id, entity.id);
+        if (res?.error) {
+          setMessageModal({ show: true, title: 'Hata', message: 'Silme hatası: ' + res.error, type: 'error' });
+        } else {
+          if (type === 'campaign') setCampaigns(prev => prev.filter(c => c.id !== entity.id));
+          if (type === 'adset') setAdSets(prev => prev.filter(as => as.id !== entity.id));
+          if (type === 'ad') setAds(prev => prev.filter(ad => ad.id !== entity.id));
+          setMessageModal({ show: true, title: 'Başarılı', message: 'Başarıyla silindi.', type: 'success' });
+          if (selectedEntity?.data?.id === entity.id) setShowDetailsPanel(false);
+        }
       }
     });
   };
@@ -109,6 +129,48 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     const matchesCampaign = selectedCampaignId ? adSets.find(as => as.id === ad.adset_id)?.campaign_id === selectedCampaignId : true;
     return matchesSearch && matchesAdSet && matchesCampaign;
   });
+
+  const currentTabItems = activeTab === 'campaigns' ? filteredCampaigns : activeTab === 'adsets' ? filteredAdSets : activeTab === 'ads' ? filteredAds : [];
+
+  const toggleSelection = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === currentTabItems.length && currentTabItems.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(currentTabItems.map(item => item.id));
+    }
+  };
+
+  const handleBulkStatus = (newStatus) => {
+    if (selectedIds.length === 0) return;
+    
+    startTransition(async () => {
+      let successCount = 0;
+      let errorCount = 0;
+      for (const entityId of selectedIds) {
+        const res = await toggleMetaStatusAction(id, entityId, newStatus);
+        if (res?.error) errorCount++;
+        else successCount++;
+      }
+      
+      setSelectedIds([]);
+      setMessageModal({ 
+        show: true, 
+        title: 'Toplu İşlem Tamamlandı', 
+        message: `${successCount} öğe başarıyla güncellendi. ${errorCount > 0 ? errorCount + ' öğede hata oluştu.' : ''}`,
+        type: errorCount > 0 ? 'error' : 'success'
+      });
+      router.refresh();
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setDeleteConfirm({ show: true, entity: { name: `${selectedIds.length} öğe` }, type: 'bulk' });
+  };
 
   const handleToggleStatus = async (entityId, currentStatus, type) => {
     const newStatus = currentStatus === 'ACTIVE' || currentStatus === 'ENABLED' ? 'PAUSED' : 'ACTIVE';
@@ -265,6 +327,25 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
         <TabButton id="ads" label="Reklamlar" count={filteredAds.length} activeTab={activeTab} onClick={setActiveTab} />
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.length > 0 && (
+        <div style={{ 
+          display: 'flex', alignItems: 'center', gap: '1.5rem', 
+          padding: '1rem 1.5rem', background: '#0064e0', borderRadius: '12px',
+          animation: 'slideDown 0.3s ease-out', color: '#fff',
+          boxShadow: '0 10px 30px rgba(0, 100, 224, 0.3)'
+        }}>
+          <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{selectedIds.length} öğe seçildi</div>
+          <div style={{ height: '20px', width: '1px', background: 'rgba(255,255,255,0.2)' }} />
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => handleBulkStatus('ACTIVE')} style={{ ...smallButtonStyle, background: '#10b981', color: '#fff' }}>Seçilenleri Başlat</button>
+            <button onClick={() => handleBulkStatus('PAUSED')} style={{ ...smallButtonStyle, background: '#f59e0b', color: '#fff' }}>Seçilenleri Durdur</button>
+            <button onClick={handleBulkDelete} style={{ ...smallButtonStyle, background: '#ef4444', color: '#fff' }}>Seçilenleri Sil</button>
+          </div>
+          <button onClick={() => setSelectedIds([])} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', opacity: 0.8 }}>Seçimi Temizle</button>
+        </div>
+      )}
+
       {/* Tables */}
       <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
         {activeTab === 'army' && <MetaArmyPanel clientId={id} armyResult={armyResult} />}
@@ -273,7 +354,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1100px' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                <th style={{ ...thStyle, width: '40px' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.length === filteredCampaigns.length && filteredCampaigns.length > 0} 
+                    onChange={toggleSelectAll} 
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
                 <th style={thStyle}>KAMPANYA</th>
                 <th style={thStyle}>DURUM</th>
                 <th style={thStyle}>SONUÇLAR</th>
@@ -286,7 +374,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
             <tbody>
               {filteredCampaigns.map(c => (
                 <tr key={c.id} style={trStyle}>
-                  <td style={tdStyle}><input type="checkbox" disabled /></td>
+                  <td style={tdStyle}>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedIds.includes(c.id)} 
+                      onChange={() => toggleSelection(c.id)} 
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                       <StatusToggle active={c.status === 'ACTIVE' || c.status === 'ENABLED'} onToggle={() => handleToggleStatus(c.id, c.status, 'campaign')} />
@@ -314,7 +409,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                <th style={{ ...thStyle, width: '40px' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.length === filteredAdSets.length && filteredAdSets.length > 0} 
+                    onChange={toggleSelectAll} 
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
                 <th style={thStyle}>REKLAM SETİ</th>
                 <th style={thStyle}>DURUM</th>
                 <th style={thStyle}>BÜTÇE</th>
@@ -324,7 +426,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
             </thead>
             <tbody>{filteredAdSets.map(as => (
               <tr key={as.id} style={trStyle}>
-                <td style={tdStyle}><input type="checkbox" disabled /></td>
+                <td style={tdStyle}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.includes(as.id)} 
+                    onChange={() => toggleSelection(as.id)} 
+                    style={{ cursor: 'pointer' }}
+                  />
+                </td>
                 <td style={tdStyle}><div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                   <StatusToggle active={as.status === 'ACTIVE' || as.status === 'ENABLED'} onToggle={() => handleToggleStatus(as.id, as.status, 'adset')} />
                   <span onClick={() => openDetails(as, 'adset')} style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer' }}>{as.name}</span>
@@ -347,7 +456,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
+                <th style={{ ...thStyle, width: '40px' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.length === filteredAds.length && filteredAds.length > 0} 
+                    onChange={toggleSelectAll} 
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
                 <th style={thStyle}>REKLAM</th>
                 <th style={thStyle}>DURUM</th>
                 <th style={thStyle}>HARCAMA</th>
@@ -357,7 +473,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
             </thead>
             <tbody>{filteredAds.map(ad => (
               <tr key={ad.id} style={trStyle}>
-                <td style={tdStyle}><input type="checkbox" disabled /></td>
+                <td style={tdStyle}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.includes(ad.id)} 
+                    onChange={() => toggleSelection(ad.id)} 
+                    style={{ cursor: 'pointer' }}
+                  />
+                </td>
                 <td style={tdStyle}><div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                   <StatusToggle active={ad.status === 'ACTIVE' || ad.status === 'ENABLED'} onToggle={() => handleToggleStatus(ad.id, ad.status, 'ad')} />
                   <span onClick={() => openDetails(ad, 'ad')} style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer' }}>{ad.name}</span>
@@ -573,6 +696,10 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
             @keyframes modalFadeIn {
               from { opacity: 0; transform: translate(-50%, -45%); }
               to { opacity: 1; transform: translate(-50%, -50%); }
+            }
+            @keyframes slideDown {
+              from { opacity: 0; transform: translateY(-10px); }
+              to { opacity: 1; transform: translateY(0); }
             }
           `}</style>
         </>
