@@ -305,17 +305,31 @@ export default function StatsContent({ client, metaResult, googleResult }) {
     }
   });
 
-  // Calculate active ad channels
+  // Calculate active ad channels and specific campaigns
+  const activeAdCampaigns = [];
+  
+  if (metaResult?.activeCampaigns && Array.isArray(metaResult.activeCampaigns)) {
+    metaResult.activeCampaigns.filter(c => c.status === 'ACTIVE').forEach(c => {
+      activeAdCampaigns.push({ platform: 'Meta', name: c.name });
+    });
+  }
+  
+  if (googleResult?.activeCampaigns && Array.isArray(googleResult.activeCampaigns)) {
+    googleResult.activeCampaigns.filter(c => c.status === 'ENABLED' || c.status === 'ACTIVE').forEach(c => {
+      activeAdCampaigns.push({ platform: 'Google', name: c.name });
+    });
+  }
+
   const adChannels = [];
-  if (metaResult?.data && metaResult.data.length > 0) adChannels.push('Meta Ads');
-  if (googleResult?.data && googleResult.data.length > 0) adChannels.push('Google Ads');
+  if (activeAdCampaigns.some(c => c.platform === 'Meta')) adChannels.push('Meta Ads');
+  if (activeAdCampaigns.some(c => c.platform === 'Google')) adChannels.push('Google Ads');
   
-  // Also check if they are in client settings even if no data this month
+  // Fallback to client settings if no active campaigns found but platform is enabled
   const adsAccounts = parseClientJsonObject(client?.adsAccounts, '{}');
-  if (adsAccounts.meta && !adChannels.includes('Meta Ads')) adChannels.push('Meta Ads');
-  if (adsAccounts.google && !adChannels.includes('Google Ads')) adChannels.push('Google Ads');
+  if (adsAccounts.meta && adChannels.length === 0) adChannels.push('Meta Ads');
+  if (adsAccounts.google && adChannels.length === 0) adChannels.push('Google Ads');
   
-  const activeAdsCount = adChannels.length;
+  const activeAdsCount = activeAdCampaigns.length || adChannels.length;
 
   const openEditModal = (task) => {
     setActiveTask(task);
@@ -1112,32 +1126,38 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                              <span style={{ fontSize: '0.5rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>{p}</span>
                            </div>
                          ))}
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-
-              {/* Active Ad Channels Section */}
-              <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                   <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)' }}>AKTİF REKLAM KANALLARI</span>
-                   <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--accent-primary)' }}>{activeAdsCount}</span>
+                               {/* Active Ad Channels Section */}
+              <div style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                   <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>AKTİF REKLAM KAMPANYALARI</span>
+                   <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--accent-primary)' }}>{activeAdsCount}</span>
                 </div>
-                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                   {adChannels.map(channel => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                   {activeAdCampaigns.length > 0 ? activeAdCampaigns.map((camp, idx) => (
+                      <div key={`${camp.name}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: camp.platform === 'Meta' ? '#0668E1' : '#4285F4' }}></div>
+                         <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontSize: '0.55rem', fontWeight: 800, color: 'var(--text-secondary)', opacity: 0.6 }}>{camp.platform.toUpperCase()} ADS</span>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-primary)' }}>{camp.name}</span>
+                         </div>
+                      </div>
+                   )) : adChannels.map(channel => (
                       <div key={channel} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(59, 130, 246, 0.05)', padding: '0.2rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: channel.includes('Meta') ? '#0668E1' : '#4285F4' }}></div>
                          <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-primary)' }}>{channel.toUpperCase()}</span>
                       </div>
                    ))}
-                   {adChannels.length === 0 && (
+                   {activeAdsCount === 0 && (
                       <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', opacity: 0.5 }}>Aktif kampanya bulunamadı.</span>
                    )}
                 </div>
               </div>
-            </div>
-          </div>
+              <div style={{ display: 'none' }}>{/* Placeholder to fix closing tags */}</div>
+            </>
+          );
+        })()}
+      </div>
+    </div>
 
           <div style={{ width: '100%', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -1645,23 +1665,29 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                       <p style={{ fontSize: '36px', fontWeight: 900, color: '#0f172a', margin: 0 }}>{completedThisMonth}</p>
                       <p style={{ fontSize: '16px', fontWeight: 600, color: '#94a3b8' }}>/ {currentMonthTasks.length}</p>
                    </div>
-                   <p style={{ fontSize: '11px', color: '#10b981', fontWeight: 700, marginTop: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                     <CheckCircle2 size={12} /> Hedeflenen plan sadakati korunuyor.
-                   </p>
+                   <p style={{ fontSize: '11px', color: '#10b981', fontWeight: 700, marginTop: '10px' }}>Hedefin %{Math.round((completedThisMonth / (currentMonthTasks.length || 1)) * 100)}'si</p>
                 </div>
-
+                
                 <div style={{ padding: '25px', background: '#ffffff', borderRadius: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>Aktif Reklam Kanalları</p>
+                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>Aktif Reklam Kampanyaları</p>
                     <p style={{ fontSize: '36px', fontWeight: 900, color: '#0f172a', margin: 0 }}>{activeAdsCount}</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
-                       {adChannels.map(channel => (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                       {activeAdCampaigns.length > 0 ? activeAdCampaigns.map((camp, idx) => (
+                          <div key={`${camp.name}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 10px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #f1f5f9' }}>
+                             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: camp.platform === 'Meta' ? '#0668E1' : '#4285F4' }}></div>
+                             <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: '9px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>{camp.platform} Ads</span>
+                                <span style={{ fontSize: '11px', fontWeight: 700, color: '#1e293b' }}>{camp.name}</span>
+                             </div>
+                          </div>
+                       )) : adChannels.map(channel => (
                           <div key={channel} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: channel.includes('Meta') ? '#0668E1' : '#4285F4' }}></div>
                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>{channel}</span>
                           </div>
                        ))}
-                       {adChannels.length === 0 && (
-                          <span style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>Aktif kanal bulunmuyor.</span>
+                       {activeAdsCount === 0 && (
+                          <span style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>Aktif kampanya bulunmuyor.</span>
                        )}
                     </div>
                  </div>
