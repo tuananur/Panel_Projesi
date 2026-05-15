@@ -37,6 +37,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
   const [createFormData, setCreateFormData] = useState({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
   const [isCreating, setIsCreating] = useState(false);
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '', details: '', type: 'error' });
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, entity: null, type: null });
 
   const [selectedEntity, setSelectedEntity] = useState(null); // { type: 'campaign'|'adset'|'ad', data: object }
   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
@@ -70,8 +71,14 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
     });
   };
 
-  const handleDeleteEntity = async (entity, type) => {
-    if (!confirm(`${entity.name} öğesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) return;
+  const handleDeleteEntity = (entity, type) => {
+    setDeleteConfirm({ show: true, entity, type });
+  };
+
+  const confirmDelete = async () => {
+    const { entity, type } = deleteConfirm;
+    if (!entity) return;
+    setDeleteConfirm({ ...deleteConfirm, show: false });
     startTransition(async () => {
       const res = await deleteMetaEntityAction(id, entity.id);
       if (res?.error) {
@@ -585,6 +592,20 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
               {messageModal.details}
             </div>
           )}
+        </div>
+      </CustomDialog>
+
+      <CustomDialog
+        isOpen={deleteConfirm.show}
+        title="Öğeyi Sil"
+        onClose={() => setDeleteConfirm({ show: false, entity: null, type: null })}
+        onConfirm={confirmDelete}
+        confirmText="Sil"
+        cancelText="Vazgeç"
+        showCancel={true}
+      >
+        <div style={{ color: 'rgba(255,255,255,0.8)', lineHeight: '1.5' }}>
+          <strong>{deleteConfirm.entity?.name}</strong> öğesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
         </div>
       </CustomDialog>
     </div>
