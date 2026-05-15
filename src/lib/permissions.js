@@ -30,9 +30,14 @@ export const PERMISSION_GROUPS = [
   {
     section: 'Yan Menü Sayfaları',
     items: [
+      { key: 'page.clients', label: 'Müşteriler' },
+      { key: 'page.users', label: 'Kullanıcılar' },
+      { key: 'page.accounting', label: 'Muhasebe' },
+      { key: 'page.logs', label: 'Sistem Logları' },
       { key: 'page.credentials', label: 'Giriş Bilgileri' },
       { key: 'page.notes', label: 'Kişisel Notlar' },
       { key: 'page.work_items', label: 'İş Takip' },
+      { key: 'page.mail', label: 'Mail' },
     ],
   },
   {

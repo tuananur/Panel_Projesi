@@ -25,6 +25,10 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
   const canCredentials = can(permissions, role, 'page.credentials');
   const canNotes = can(permissions, role, 'page.notes');
   const canWorkItems = can(permissions, role, 'page.work_items');
+  const canClients = can(permissions, role, 'page.clients');
+  const canUsers = can(permissions, role, 'page.users');
+  const canLogs = can(permissions, role, 'page.logs');
+  const canAccounting = can(permissions, role, 'page.accounting');
   const [hasNewLogs, setHasNewLogs] = useState(false);
   const [hasNewNotes, setHasNewNotes] = useState(false);
   const [unreadMailCount, setUnreadMailCount] = useState(0);
@@ -106,10 +110,16 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
 
   const navItems = [
     { href: '/dashboard', label: 'Gösterge Paneli', icon: <LayoutDashboard size={20} /> },
-    ...(isAdmin ? [
+    ...(canClients ? [
       { href: '/dashboard/clients', label: 'Müşteriler', icon: <Users size={20} /> },
+    ] : []),
+    ...(canUsers ? [
       { href: '/dashboard/users', label: 'Kullanıcılar', icon: <UserCircle size={20} /> },
+    ] : []),
+    ...(canLogs ? [
       { href: '/dashboard/logs', label: 'Sistem Logları', icon: <ClipboardList size={20} /> },
+    ] : []),
+    ...(canAccounting ? [
       { href: '/dashboard/accounting', label: 'Muhasebe', icon: <Wallet size={20} /> },
     ] : []),
     ...(canCredentials ? [

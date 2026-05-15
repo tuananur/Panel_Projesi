@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { can, getRolePermissions } from '@/lib/permissions';
 import LogClient from './log-client';
 import LogsTable from './logs-table';
 
@@ -11,7 +12,8 @@ export const metadata = {
 export default async function LogsPage() {
   const session = await getSession();
 
-  if (!session || session.role !== 'ADMIN') {
+  const permissions = await getRolePermissions(session);
+  if (!session || !can(permissions, session.role, 'page.logs')) {
     redirect('/dashboard');
   }
 

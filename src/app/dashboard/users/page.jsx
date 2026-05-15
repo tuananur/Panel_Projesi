@@ -6,6 +6,7 @@ import EditUserModal from './edit-user-modal';
 import { getSession } from '@/lib/auth';
 
 import { redirect } from 'next/navigation';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 export const metadata = {
   title: 'Kullanıcılar | Dashboard',
@@ -14,7 +15,8 @@ export const metadata = {
 export default async function UsersPage() {
   const session = await getSession();
   
-  if (!session || session.role !== 'ADMIN') {
+  const permissions = await getRolePermissions(session);
+  if (!session || !can(permissions, session.role, 'page.users')) {
     redirect('/dashboard');
   }
 

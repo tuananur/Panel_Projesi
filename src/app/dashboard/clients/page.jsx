@@ -5,6 +5,7 @@ import EditClientModal from './edit-client-modal';
 import { getSession } from '@/lib/auth';
 import { Phone, Mail, MessageCircle, Globe } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import { can, getRolePermissions } from '@/lib/permissions';
 
 export const metadata = {
   title: 'Müşteriler | Dashboard',
@@ -13,7 +14,8 @@ export const metadata = {
 export default async function ClientsPage() {
   const session = await getSession();
 
-  if (!session || session.role !== 'ADMIN') {
+  const permissions = await getRolePermissions(session);
+  if (!session || !can(permissions, session.role, 'page.clients')) {
     redirect('/dashboard');
   }
 
