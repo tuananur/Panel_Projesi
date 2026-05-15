@@ -7,8 +7,9 @@ import { getMetaAdsAction, getGoogleAdsAction } from '@/app/actions';
 
 export const dynamic = 'force-dynamic';
 
-export default async function StatsPage({ params }) {
+export default async function StatsPage({ params, searchParams: searchParamsPromise }) {
   const { id: rawId } = await params;
+  const searchParams = await searchParamsPromise;
   const id = parseInt(rawId);
 
   const session = await getSession();
@@ -17,10 +18,7 @@ export default async function StatsPage({ params }) {
   const permissions = await getRolePermissions(session);
   const hasPermission = can(permissions, session.role, 'client.tab.stats');
   
-  console.log(`[AUTH_DEBUG] User: ${session.username}, Role: ${session.role}, Permission: ${hasPermission}`);
-  
   if (!hasPermission) {
-    console.warn(`[AUTH_DENIED] Redirecting to /dashboard. Role ${session.role} lacks client.tab.stats.`);
     redirect('/dashboard');
   }
 
@@ -32,18 +30,24 @@ export default async function StatsPage({ params }) {
       </div>
     );
   }
+
+  const now = new Date();
+  const month = searchParams.month !== undefined ? parseInt(searchParams.month) : now.getMonth();
+  const year = searchParams.year !== undefined ? parseInt(searchParams.year) : now.getFullYear();
+
+  // Calculate start and end of month
+  const since = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const until = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   
   try {
-    // Fetch core client data first
-    // Only fetch tasks for the current year to avoid massive data payloads
-    const currentYear = new Date().getFullYear();
     const client = await prisma.client.findUnique({
       where: { id },
       include: { 
         tasks: {
           where: {
             OR: [
-              { date: { gte: new Date(`${currentYear}-01-01`) } },
+              { date: { gte: new Date(`${year}-01-01`) } }, // Fetch enough tasks for context
               { type: 'SOCIAL' },
               { type: 'BLOG' }
             ]
@@ -61,21 +65,17 @@ export default async function StatsPage({ params }) {
       );
     }
 
-    // Fetch ads data with a fallback to null to prevent blocking the whole page
     let metaResult = { error: 'LOADING_ERROR' };
     let googleResult = { error: 'LOADING_ERROR' };
 
     try {
       const results = await Promise.allSettled([
-        getMetaAdsAction(id, 'last_30d', null, null),
-        getGoogleAdsAction(id)
+        getMetaAdsAction(id, null, since, until),
+        getGoogleAdsAction(id) // Google is mock, but could be extended
       ]);
 
       if (results[0].status === 'fulfilled') metaResult = results[0].value;
-      else console.error('Meta Ads Fetch Error:', results[0].reason);
-
       if (results[1].status === 'fulfilled') googleResult = results[1].value;
-      else console.error('Google Ads Fetch Error:', results[1].reason);
     } catch (adsError) {
       console.error('Ads Data Fetching Failed:', adsError);
     }

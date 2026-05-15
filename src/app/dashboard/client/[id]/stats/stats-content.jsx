@@ -1442,21 +1442,11 @@ export default function StatsContent({ client, metaResult, googleResult }) {
           animation: modalSlideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         @keyframes modalFadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes modalSlideDown {
-          from { transform: translateY(-20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+                    to { transform: translateY(0); opacity: 1; }
         }
         @media (max-width: 1024px) {
           .main-stats-grid {
             grid-template-columns: 1fr 1fr !important;
-          }
-        }
-        @media (max-width: 640px) {
-          .main-stats-grid {
-            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
@@ -1467,119 +1457,196 @@ export default function StatsContent({ client, metaResult, googleResult }) {
         minHeight: '1123px', // A4 Height
         background: '#ffffff', 
         color: '#1a1a1a', 
-        padding: '50px',
+        padding: '60px 50px',
         fontFamily: 'Inter, system-ui, sans-serif'
       }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #f0f0f0', paddingBottom: '30px', marginBottom: '40px' }}>
-          <div>
-            <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#2563eb', marginBottom: '8px', letterSpacing: '-1px' }}>PERFORMANS RAPORU</h1>
-            <p style={{ fontSize: '14px', color: '#64748b', fontWeight: 600 }}>{client.companyName.toUpperCase()}</p>
+        {/* Header with Logos */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', borderBottom: '2px solid #f1f5f9', paddingBottom: '30px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <img src="/logo.png" alt="Beyin Atölyesi" style={{ height: '50px', objectFit: 'contain' }} />
+            <div style={{ width: '2px', height: '40px', background: '#e2e8f0' }}></div>
+            {client.logoUrl ? (
+              <img src={client.logoUrl} alt={client.companyName} style={{ height: '45px', objectFit: 'contain' }} />
+            ) : (
+              <span style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>{client.companyName}</span>
+            )}
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b' }}>{currentMonthName} {displayYear}</p>
-            <p style={{ fontSize: '12px', color: '#94a3b8' }}>Rapor Tarihi: {new Date().toLocaleDateString('tr-TR')}</p>
+            <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#2563eb', margin: 0, letterSpacing: '-1px' }}>PERFORMANS RAPORU</h1>
+            <p style={{ fontSize: '14px', fontWeight: 800, color: '#64748b', marginTop: '5px' }}>{currentMonthName.toUpperCase()} {displayYear}</p>
           </div>
         </div>
 
-        {/* Executive Summary Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '40px' }}>
-          <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <p style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Toplam Başarı</p>
-            <p style={{ fontSize: '24px', fontWeight: 900, color: '#1e293b' }}>%{Math.round((completedThisMonth / (currentMonthTasks.length || 1)) * 100)}</p>
-          </div>
-          <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <p style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Tamamlanan</p>
-            <p style={{ fontSize: '24px', fontWeight: 900, color: '#10b981' }}>{completedThisMonth}</p>
-          </div>
-          <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <p style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Kalan Görev</p>
-            <p style={{ fontSize: '24px', fontWeight: 900, color: '#f59e0b' }}>{currentMonthTasks.length - completedThisMonth}</p>
-          </div>
-        </div>
-
-        {/* Blog Planı Bölümü */}
+        {/* Executive Summary Section */}
         <div style={{ marginBottom: '40px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-             <div style={{ width: '4px', height: '20px', background: '#2563eb', borderRadius: '2px' }}></div>
-             BLOG İÇERİK PLANI
-          </h2>
+          <h2 style={{ fontSize: '14px', fontWeight: 800, color: '#94a3b8', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '1px' }}>GENEL ÖZET</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '15px' }}>
+            <div style={{ padding: '20px', background: '#eff6ff', borderRadius: '16px', border: '1px solid #dbeafe' }}>
+              <p style={{ fontSize: '10px', fontWeight: 800, color: '#3b82f6', marginBottom: '8px' }}>TOPLAM BAŞARI</p>
+              <p style={{ fontSize: '24px', fontWeight: 900, color: '#1e3a8a' }}>%{Math.round((completedThisMonth / (currentMonthTasks.length || 1)) * 100)}</p>
+            </div>
+            <div style={{ padding: '20px', background: '#f0fdf4', borderRadius: '16px', border: '1px solid #dcfce7' }}>
+              <p style={{ fontSize: '10px', fontWeight: 800, color: '#10b981', marginBottom: '8px' }}>TAMAMLANAN</p>
+              <p style={{ fontSize: '24px', fontWeight: 900, color: '#064e3b' }}>{completedThisMonth}</p>
+            </div>
+            <div style={{ padding: '20px', background: '#fffbeb', borderRadius: '16px', border: '1px solid #fef3c7' }}>
+              <p style={{ fontSize: '10px', fontWeight: 800, color: '#f59e0b', marginBottom: '8px' }}>BEKLEYEN</p>
+              <p style={{ fontSize: '24px', fontWeight: 900, color: '#78350f' }}>{currentMonthTasks.length - completedThisMonth}</p>
+            </div>
+            <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+              <p style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', marginBottom: '8px' }}>TOPLAM İŞ</p>
+              <p style={{ fontSize: '24px', fontWeight: 900, color: '#1e293b' }}>{currentMonthTasks.length}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Meta & Google Ads Summary Section */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '40px' }}>
+          {/* Meta Ads */}
+          <div style={{ padding: '25px', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ width: '8px', height: '24px', background: '#0668E1', borderRadius: '4px' }}></div>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b' }}>META REKLAM ÖZETİ</h3>
+            </div>
+            {!metaResult?.error ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div>
+                  <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>HARCAMA</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>{metaResult?.summary?.spend || 0} TL</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>GÖSTERİM</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>{Number(metaResult?.summary?.impressions || 0).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>TIKLANMA</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>{Number(metaResult?.summary?.clicks || 0).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>CTR</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>%{(Number(metaResult?.summary?.ctr || 0) * 100).toFixed(2)}</p>
+                </div>
+              </div>
+            ) : (
+              <p style={{ fontSize: '12px', color: '#94a3b8', textAlign: 'center', padding: '20px' }}>Veri bulunamadı.</p>
+            )}
+          </div>
+
+          {/* Google Ads */}
+          <div style={{ padding: '25px', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ width: '8px', height: '24px', background: '#4285F4', borderRadius: '4px' }}></div>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b' }}>GOOGLE ADS ÖZETİ</h3>
+            </div>
+            {!googleResult?.error ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div>
+                  <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>HARCAMA</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>{googleResult?.summary?.spend || 0} TL</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>GÖSTERİM</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>{Number(googleResult?.summary?.impressions || 0).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>TIKLANMA</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>{Number(googleResult?.summary?.clicks || 0).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>CTR</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e293b' }}>%{(Number(googleResult?.summary?.ctr || 0) * 100).toFixed(2)}</p>
+                </div>
+              </div>
+            ) : (
+              <p style={{ fontSize: '12px', color: '#94a3b8', textAlign: 'center', padding: '20px' }}>Veri bulunamadı.</p>
+            )}
+          </div>
+        </div>
+
+        {/* SEO / Blog Section */}
+        <div style={{ marginBottom: '40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+            <div style={{ width: '8px', height: '24px', background: '#2563eb', borderRadius: '4px' }}></div>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b' }}>SEO & BLOG İÇERİK PLANI</h3>
+          </div>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#f1f5f9' }}>
-                <th style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#475569', borderBottom: '1px solid #e2e8f0' }}>TARİH</th>
-                <th style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#475569', borderBottom: '1px solid #e2e8f0' }}>KONU / BAŞLIK</th>
-                <th style={{ padding: '12px', textAlign: 'center', fontSize: '11px', fontWeight: 800, color: '#475569', borderBottom: '1px solid #e2e8f0' }}>DURUM</th>
+              <tr style={{ background: '#f8fafc' }}>
+                <th style={{ padding: '15px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>TARİH</th>
+                <th style={{ padding: '15px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>KONU / BAŞLIK</th>
+                <th style={{ padding: '15px', textAlign: 'center', fontSize: '11px', fontWeight: 800, color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>DURUM</th>
               </tr>
             </thead>
             <tbody>
               {currentMonthTasks.filter(t => t.type === 'BLOG').length > 0 ? (
                 currentMonthTasks.filter(t => t.type === 'BLOG').sort((a,b) => new Date(a.date) - new Date(b.date)).map(blog => (
                   <tr key={blog.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '12px', fontSize: '12px', color: '#475569' }}>{safeFormatDate(blog.date)}</td>
-                    <td style={{ padding: '12px', fontSize: '12px', color: '#1e293b', fontWeight: 600 }}>{blog.note || 'İçerik Girilmemiş'}</td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
-                      <span style={{ fontSize: '10px', fontWeight: 800, padding: '4px 8px', borderRadius: '4px', background: blog.status ? '#dcfce7' : '#fef3c7', color: blog.status ? '#166534' : '#92400e' }}>
+                    <td style={{ padding: '15px', fontSize: '12px', color: '#475569' }}>{safeFormatDate(blog.date)}</td>
+                    <td style={{ padding: '15px', fontSize: '12px', color: '#1e293b', fontWeight: 600 }}>{blog.note || 'İçerik Girilmemiş'}</td>
+                    <td style={{ padding: '15px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 800, padding: '5px 10px', borderRadius: '6px', background: blog.status ? '#dcfce7' : '#fef3c7', color: blog.status ? '#166534' : '#92400e' }}>
                         {blog.status ? 'TAMAMLANDI' : 'BEKLİYOR'}
                       </span>
                     </td>
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '12px' }}>Bu ay için blog kaydı bulunmamaktadır.</td></tr>
+                <tr><td colSpan="3" style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>Bu ay için blog kaydı bulunmamaktadır.</td></tr>
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Sosyal Medya Bölümü */}
+        {/* Social Media Analysis */}
         <div style={{ marginBottom: '40px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-             <div style={{ width: '4px', height: '20px', background: '#8b5cf6', borderRadius: '2px' }}></div>
-             SOSYAL MEDYA ANALİZİ
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+            <div style={{ width: '8px', height: '24px', background: '#8b5cf6', borderRadius: '4px' }}></div>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b' }}>SOSYAL MEDYA ANALİZİ</h3>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
             <div>
-               <p style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', marginBottom: '15px' }}>PLATFORM DAĞILIMI</p>
-               {(() => {
-                  const socials = currentMonthTasks.filter(t => t.type === 'SOCIAL');
-                  const platforms = {};
-                  socials.forEach(s => platforms[s.platform || 'Diğer'] = (platforms[s.platform || 'Diğer'] || 0) + 1);
-                  return Object.entries(platforms).map(([p, count]) => (
-                    <div key={p} style={{ marginBottom: '12px' }}>
-                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '5px', fontWeight: 700 }}>
-                         <span>{p.toUpperCase()}</span>
-                         <span>{count} Paylaşım</span>
-                       </div>
-                       <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
-                         <div style={{ height: '100%', width: `${(count / (socials.length || 1)) * 100}%`, background: '#8b5cf6' }}></div>
-                       </div>
+              <p style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '15px', letterSpacing: '0.5px' }}>PLATFORM DAĞILIMI</p>
+              {(() => {
+                const socials = currentMonthTasks.filter(t => t.type === 'SOCIAL');
+                const platforms = {};
+                socials.forEach(s => platforms[s.platform || 'Diğer'] = (platforms[s.platform || 'Diğer'] || 0) + 1);
+                return Object.entries(platforms).map(([p, count]) => (
+                  <div key={p} style={{ marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '6px', fontWeight: 700 }}>
+                      <span>{p.toUpperCase()}</span>
+                      <span>{count} Paylaşım</span>
                     </div>
-                  ));
-               })()}
+                    <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${(count / (socials.length || 1)) * 100}%`, background: '#8b5cf6' }}></div>
+                    </div>
+                  </div>
+                ));
+              })()}
             </div>
-            <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-               <p style={{ fontSize: '12px', fontWeight: 800, color: '#64748b', marginBottom: '10px' }}>SOSYAL MEDYA BAŞARI ORANI</p>
-               {(() => {
-                 const socials = currentMonthTasks.filter(t => t.type === 'SOCIAL');
-                 const comp = socials.filter(s => s.status).length;
-                 const pct = socials.length > 0 ? Math.round((comp / socials.length) * 100) : 0;
-                 return (
-                   <>
-                     <p style={{ fontSize: '36px', fontWeight: 900, color: '#8b5cf6' }}>%{pct}</p>
-                     <p style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>{comp} / {socials.length} Tamamlanan</p>
-                   </>
-                 );
-               })()}
+            <div style={{ background: '#f8fafc', padding: '30px', borderRadius: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', border: '1px solid #e2e8f0' }}>
+              <p style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '10px' }}>SOSYAL MEDYA BAŞARI</p>
+              {(() => {
+                const socials = currentMonthTasks.filter(t => t.type === 'SOCIAL');
+                const comp = socials.filter(s => s.status).length;
+                const pct = socials.length > 0 ? Math.round((comp / socials.length) * 100) : 0;
+                return (
+                  <>
+                    <p style={{ fontSize: '48px', fontWeight: 900, color: '#8b5cf6', margin: 0 }}>%{pct}</p>
+                    <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600, marginTop: '5px' }}>{comp} / {socials.length} Tamamlanan</p>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div style={{ marginTop: 'auto', borderTop: '1px solid #f0f0f0', paddingTop: '20px', textAlign: 'center' }}>
-           <p style={{ fontSize: '10px', color: '#94a3b8', letterSpacing: '1px' }}>BU RAPOR BEYİN ATÖLYESİ YÖNETİM PANELİ TARAFINDAN OTOMATİK OLARAK OLUŞTURULMUŞTUR.</p>
+        <div style={{ marginTop: 'auto', borderTop: '2px solid #f1f5f9', paddingTop: '30px', textAlign: 'center' }}>
+          <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, letterSpacing: '2px' }}>BU RAPOR BEYİN ATÖLYESİ TARAFINDAN OTOMATİK OLUŞTURULMUŞTUR.</p>
+          <p style={{ fontSize: '10px', color: '#cbd5e1', marginTop: '5px' }}>© {new Date().getFullYear()} beyinatolyesi.com</p>
         </div>
       </div>
     </div>
   );
 }
+
