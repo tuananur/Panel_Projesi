@@ -182,6 +182,7 @@ export default function GoogleContent({ result, id }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ ...thStyle, width: '40px' }}><input type="checkbox" disabled /></th>
                 <th style={thStyle}>KAMPANYA</th>
                 <th style={thStyle}>DURUM</th>
                 <th style={thStyle}>HARCAMA</th>
@@ -195,6 +196,7 @@ export default function GoogleContent({ result, id }) {
             <tbody>
               {filteredCampaigns.map(camp => (
                 <tr key={camp.id} style={trStyle}>
+                  <td style={tdStyle}><input type="checkbox" disabled /></td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                       <StatusToggle active={camp.status === 'ENABLED'} onToggle={() => handleToggleStatus(camp.id, camp.status)} />
