@@ -6,7 +6,7 @@ import ThemeSettings from './theme-settings';
 import RolePermissionsEditor from './role-permissions-editor';
 import MailSettings from './mail-settings';
 import DatabaseMaintenance from './database-maintenance';
-import { getMailSettingsAction, getNotificationSettingsAction, getGoogleAdsGlobalSettingsAction } from '@/app/actions';
+import { getMailSettingsAction, getNotificationSettingsAction, getGoogleAdsGlobalSettingsAction, getAppearanceSettingsAction } from '@/app/actions';
 import NotificationSettings from './notification-settings';
 import GoogleAdsGlobalSettings from './google-ads-settings';
 
@@ -23,10 +23,11 @@ export default async function SettingsPage() {
   const assignableRoles = isAdmin ? await getRoleAssignableRoles() : null;
   const users = isAdmin ? await prisma.user.findMany({ select: { id: true, username: true, role: true }, orderBy: { username: 'asc' } }) : [];
   const userPermissions = isAdmin ? await getUserPermissionsSettings() : {};
-  const [mailSettings, notificationSettings, googleAdsGlobalSettings] = await Promise.all([
+  const [mailSettings, notificationSettings, googleAdsGlobalSettings, appearanceSettings] = await Promise.all([
     getMailSettingsAction(),
     getNotificationSettingsAction(),
     getGoogleAdsGlobalSettingsAction(),
+    getAppearanceSettingsAction(),
   ]);
 
   return (
@@ -36,7 +37,7 @@ export default async function SettingsPage() {
         <p className="text-muted">Dashboard görünümünü ve tercihlerini buradan kişiselleştirebilirsiniz.</p>
       </div>
 
-      <ThemeSettings />
+      <ThemeSettings initialAppearance={appearanceSettings?.settings} />
 
       <div style={{ marginTop: '2rem' }}>
         <NotificationSettings initialSettings={notificationSettings?.settings} />

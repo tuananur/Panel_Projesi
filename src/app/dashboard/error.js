@@ -17,7 +17,16 @@ export default function Error({ error, reset }) {
 
   const handleHardReset = () => {
     if (typeof window !== 'undefined') {
+      // Kullanıcının kişiselleştirme tercihleri (tema, vurgu, bildirim sesi) DB'de
+      // saklı olsa da; flash önlemek ve anlık önbelleği bozmamak için bu anahtarları koruyoruz.
+      const preserveKeys = ['theme', 'accent', 'custom-accent-color', 'notification-sound', 'sidebar-collapsed'];
+      const preserved = {};
+      preserveKeys.forEach((key) => {
+        const value = localStorage.getItem(key);
+        if (value !== null) preserved[key] = value;
+      });
       localStorage.clear();
+      Object.entries(preserved).forEach(([key, value]) => localStorage.setItem(key, value));
       sessionStorage.clear();
       window.location.href = '/dashboard';
     }

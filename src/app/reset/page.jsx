@@ -10,11 +10,18 @@ export default function ResetPage() {
   useEffect(() => {
     const performReset = async () => {
       try {
-        // Clear all storage
+        // Kullanıcı tercihleri DB'de saklanıyor; localStorage'ı temizlerken bunları koruyoruz
+        // ki yeniden yüklenirken flash yaşanmasın.
+        const preserveKeys = ['theme', 'accent', 'custom-accent-color', 'notification-sound', 'sidebar-collapsed'];
+        const preserved = {};
+        preserveKeys.forEach((key) => {
+          const value = localStorage.getItem(key);
+          if (value !== null) preserved[key] = value;
+        });
         localStorage.clear();
+        Object.entries(preserved).forEach(([key, value]) => localStorage.setItem(key, value));
         sessionStorage.clear();
-        
-        // Clear cookies if possible (client-side cookies only)
+
         const cookies = document.cookie.split(";");
         for (let i = 0; i < cookies.length; i++) {
           const cookie = cookies[i];

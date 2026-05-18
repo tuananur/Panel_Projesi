@@ -3,7 +3,7 @@ import DashboardClientLayout from './dashboard-client-layout';
 import { redirect } from 'next/navigation';
 import { getRolePermissions } from '@/lib/permissions';
 import { getMailConfig } from '@/lib/mail';
-import { getNotificationSettingsAction } from '@/app/actions';
+import { getNotificationSettingsAction, getAppearanceSettingsAction } from '@/app/actions';
 
 export const metadata = {
   title: 'Dashboard | Yönetim Paneli',
@@ -16,10 +16,11 @@ export default async function DashboardLayout({ children }) {
     redirect('/login');
   }
 
-  const [permissions, mailConfig, notificationSettingsResult] = await Promise.all([
+  const [permissions, mailConfig, notificationSettingsResult, appearanceSettingsResult] = await Promise.all([
     getRolePermissions(session),
     getMailConfig({ userId: session.userId }),
     getNotificationSettingsAction(),
+    getAppearanceSettingsAction(),
   ]);
 
   return (
@@ -28,6 +29,7 @@ export default async function DashboardLayout({ children }) {
       permissions={permissions}
       mailEnabled={mailConfig?.enabled === true}
       notificationSettings={notificationSettingsResult?.settings}
+      appearanceSettings={appearanceSettingsResult?.settings}
     >
       {children}
     </DashboardClientLayout>

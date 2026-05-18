@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './sidebar';
 import Header from './header-client';
+import AppearanceHydrator from './appearance-hydrator';
 import { usePathname } from 'next/navigation';
 
-export default function DashboardClientLayout({ children, session, permissions, notificationSettings, mailEnabled }) {
+export default function DashboardClientLayout({ children, session, permissions, notificationSettings, appearanceSettings, mailEnabled }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
@@ -23,6 +24,7 @@ export default function DashboardClientLayout({ children, session, permissions, 
 
   return (
     <div className="dashboard-layout animate-fade-in">
+      <AppearanceHydrator settings={appearanceSettings} />
       <div 
         className={`sidebar-overlay ${isSidebarOpen ? 'visible' : ''}`} 
         onClick={() => setIsSidebarOpen(false)}

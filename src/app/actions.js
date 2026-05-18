@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { deleteMessages, getMailAddressSuggestions, getMailConfig, getMessage, getUnreadInboxCount, listMessages, markMessagesSeen, saveMailConfig, sendMail } from '@/lib/mail';
 import { ASSIGNABLE_ROLE_OPTIONS, can, getRoleAssignableRoles, getRolePermissions, saveRoleAssignableRoles, saveRolePermissions, saveUserPermissionsSettings } from '@/lib/permissions';
 import { SPECIAL_DAYS } from '@/lib/holidays';
+import { ALLOWED_NOTIFICATION_SOUNDS, DEFAULT_APPEARANCE, sanitizeAppearance } from '@/lib/appearance';
 async function fetchWithTimeout(resource, options = {}) {
   const { timeout = 8000 } = options;
   const controller = new AbortController();
@@ -1520,6 +1521,9 @@ async function ensureReminderNotifications(userId) {
 function notificationSettingKey(userId) {
   return `notification_settings_user_${userId}`;
 }
+function appearanceSettingKey(userId) {
+  return `appearance_settings_user_${userId}`;
+}
 const DEFAULT_NOTIFICATION_SETTINGS = { sound: 'soft' };
 export async function getNotificationSettingsAction() {
   const session = await getSession();
@@ -1535,15 +1539,46 @@ export async function getNotificationSettingsAction() {
 export async function saveNotificationSettingsAction(formData) {
   const session = await getSession();
   if (!session) return { error: 'Oturum bulunamadı.' };
-  const allowedSounds = new Set(['soft', 'bell', 'digital', 'none']);
   const sound = formData.get('sound')?.toString() || 'soft';
-  const settings = { sound: allowedSounds.has(sound) ? sound : 'soft' };
+  const settings = { sound: ALLOWED_NOTIFICATION_SOUNDS.has(sound) ? sound : 'soft' };
   await prisma.setting.upsert({
     where: { key: notificationSettingKey(session.userId) },
     update: { value: JSON.stringify(settings) },
     create: { key: notificationSettingKey(session.userId), value: JSON.stringify(settings) },
   });
   return { success: true, settings };
+}
+export async function getAppearanceSettingsAction() {
+  const session = await getSession();
+  if (!session) return { error: 'Oturum bulunamadı.', settings: DEFAULT_APPEARANCE };
+  try {
+    const setting = await prisma.setting.findUnique({ where: { key: appearanceSettingKey(session.userId) } });
+    const parsed = setting?.value ? JSON.parse(setting.value) : {};
+    return { success: true, settings: sanitizeAppearance({ ...DEFAULT_APPEARANCE, ...parsed }) };
+  } catch (error) {
+    return { success: true, settings: DEFAULT_APPEARANCE };
+  }
+}
+export async function saveAppearanceSettingsAction(formData) {
+  const session = await getSession();
+  if (!session) return { error: 'Oturum bulunamadı.' };
+  try {
+    const setting = await prisma.setting.findUnique({ where: { key: appearanceSettingKey(session.userId) } });
+    const current = setting?.value ? JSON.parse(setting.value) : {};
+    const next = sanitizeAppearance({
+      theme: formData.get('theme')?.toString() || current.theme,
+      accent: formData.get('accent')?.toString() || current.accent,
+      customColor: formData.get('customColor')?.toString() || current.customColor,
+    });
+    await prisma.setting.upsert({
+      where: { key: appearanceSettingKey(session.userId) },
+      update: { value: JSON.stringify(next) },
+      create: { key: appearanceSettingKey(session.userId), value: JSON.stringify(next) },
+    });
+    return { success: true, settings: next };
+  } catch (error) {
+    return { error: 'Görünüm ayarları kaydedilemedi.' };
+  }
 }
 export async function getNotificationsAction(limit = 20) {
   const session = await getSession();
