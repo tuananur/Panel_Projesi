@@ -757,7 +757,6 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                 const isVeryClose = item.daysLeft <= 7;
                 
                 return (
-    <>
                   <div key={item.name} style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -1030,7 +1029,6 @@ export default function StatsContent({ client, metaResult, googleResult }) {
               else if (rate >= 50) badge = { text: 'İyi', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' };
               
               return (
-    <>
                 <div style={{ padding: '0.3rem 0.75rem', background: badge.bg, color: badge.color, borderRadius: '20px', fontSize: '0.65rem', fontWeight: 800, border: `1px solid ${badge.color}33` }}>
                   {badge.text}
                 </div>
@@ -1107,7 +1105,6 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                   };
 
                   return (
-    <>
                     <div>
                       <div style={{ height: '10px', width: '100%', background: 'rgba(255,255,255,0.03)', borderRadius: '5px', overflow: 'hidden', display: 'flex' }}>
                         <div style={{ width: `${blogPct}%`, background: 'var(--accent-primary)', height: '100%', transition: 'width 1s' }} title="Blog"></div>
@@ -1180,7 +1177,6 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                       const completed = blogs.filter(t => t.status).length;
                       const pct = blogs.length > 0 ? Math.round((completed / blogs.length) * 100) : 0;
                       return (
-    <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                            <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-primary)' }}>%{pct}</span>
                            <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700, padding: '1px 4px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '4px' }}>{completed}/{blogs.length}</span>
@@ -1200,7 +1196,6 @@ export default function StatsContent({ client, metaResult, googleResult }) {
                       const completed = socials.filter(t => t.status).length;
                       const pct = socials.length > 0 ? Math.round((completed / socials.length) * 100) : 0;
                       return (
-    <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                            <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-primary)' }}>%{pct}</span>
                            <span style={{ fontSize: '0.65rem', color: '#8b5cf6', fontWeight: 700, padding: '1px 4px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '4px' }}>{completed}/{socials.length}</span>
