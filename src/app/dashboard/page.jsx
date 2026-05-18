@@ -14,6 +14,9 @@ export const metadata = {
 
 export default async function DashboardPage() {
   const session = await getSession();
+  if (!session) {
+    return null;
+  }
   const summary = await getDashboardTodaySummary(prisma, session);
   const clients = await prisma.client.findMany({
     orderBy: { createdAt: 'desc' },

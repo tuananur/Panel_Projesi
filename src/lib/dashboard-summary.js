@@ -12,7 +12,20 @@ function workItemVisibilityWhere(session) {
 
 const OPEN_WORK_STATUSES = ['ASSIGNED', 'IN_PROGRESS', 'SUBMITTED', 'REVISION_REQUESTED'];
 
+const EMPTY_SUMMARY = {
+  overdueWorkItems: [],
+  dueTodayWorkItems: [],
+  overdueCount: 0,
+  dueTodayCount: 0,
+  pendingApprovalCount: 0,
+  unreadNotifications: 0,
+  pendingTasks: 0,
+  clientsCount: 0,
+};
+
 export async function getDashboardTodaySummary(prisma, session) {
+  if (!session?.userId) return EMPTY_SUMMARY;
+
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const endOfToday = new Date(startOfToday);
@@ -23,6 +36,7 @@ export async function getDashboardTodaySummary(prisma, session) {
     status: { in: OPEN_WORK_STATUSES },
   };
 
+  try {
   const [
     overdueWorkItems,
     dueTodayWorkItems,
@@ -97,11 +111,21 @@ export async function getDashboardTodaySummary(prisma, session) {
     dueTodayWorkItems: dueTodayWorkItems.map(serializeWorkItem),
     overdueCount,
     dueTodayCount,
-    pendingApprovalCount: pendingApprovalWorkItems,
+    pendingApprovalCount,
     unreadNotifications,
     pendingTasks,
     clientsCount,
   };
+  } catch (error) {
+    console.error('getDashboardTodaySummary error:', error);
+    let clientsCount = 0;
+    try {
+      clientsCount = await prisma.client.count();
+    } catch {
+      clientsCount = 0;
+    }
+    return { ...EMPTY_SUMMARY, clientsCount };
+  }
 }
 
 function serializeWorkItem(item) {
