@@ -1,9 +1,7 @@
 import prisma from '@/lib/prisma';
 import CreateClientForm from './create-client-form';
-import DeleteClientButton from './delete-client-button';
-import EditClientModal from './edit-client-modal';
+import ClientsList from './clients-list';
 import { getSession } from '@/lib/auth';
-import { Phone, Mail, MessageCircle, Globe } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { can, getRolePermissions } from '@/lib/permissions';
 
@@ -20,8 +18,23 @@ export default async function ClientsPage() {
   }
 
   const clients = await prisma.client.findMany({
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      companyName: true,
+      contactName: true,
+      email: true,
+      phone: true,
+      website: true,
+      services: true,
+      createdAt: true,
+    },
   });
+
+  const clientsForClient = clients.map((c) => ({
+    ...c,
+    createdAt: c.createdAt.toISOString(),
+  }));
 
   return (
     <div>
@@ -32,121 +45,7 @@ export default async function ClientsPage() {
       <div className="responsive-flex" style={{ gap: '2rem', alignItems: 'start' }}>
         <div className="card" style={{ flex: 1, minWidth: 0 }}>
           <h2 className="heading-2" style={{ fontSize: '1.25rem' }}>Mevcut Müşteriler</h2>
-          
-          <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <th style={{ padding: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Firma Adı</th>
-                  <th style={{ padding: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>İletişim</th>
-                  <th style={{ padding: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Hizmetler</th>
-                  <th style={{ padding: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>İşlem</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map((client) => {
-                  let services = [];
-                  try {
-                    services = JSON.parse(client.services || '[]');
-                  } catch (e) {
-                    services = client.services ? client.services.split(',') : [];
-                  }
-                  
-                  const safePhone = client.phone || '';
-                  
-                  return (
-                    <tr key={client.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '0.4rem 0.3rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.8rem' }}>{client.companyName}</div>
-                          {client.website && (
-                            <a 
-                              href={client.website.startsWith('http') ? client.website : `https://${client.website}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ 
-                                fontSize: '0.55rem', 
-                                color: 'var(--accent-primary)', 
-                                textDecoration: 'none',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.1rem',
-                                background: 'rgba(59, 130, 246, 0.1)',
-                                padding: '1px 4px',
-                                borderRadius: '3px',
-                                fontWeight: 700
-                              }}
-                            >
-                              <Globe size={9} /> Link
-                            </a>
-                          )}
-                        </div>
-                      </td>
-                      <td style={{ padding: '0.4rem 0.3rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.05rem' }}>
-                          <div style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-primary)' }}>{client.contactName}</div>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            {safePhone && (
-                              <a 
-                                href={`https://wa.me/${safePhone.replace(/\D/g, '')}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.6rem', color: '#10b981', textDecoration: 'none' }}
-                              >
-                                <MessageCircle size={9} /> {safePhone.slice(-4)}
-                              </a>
-                            )}
-                            {client.email && (
-                              <a 
-                                href={`mailto:${client.email}`}
-                                style={{ 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
-                                  gap: '0.2rem', 
-                                  fontSize: '0.6rem', 
-                                  color: 'var(--text-secondary)', 
-                                  textDecoration: 'none',
-                                  maxWidth: '80px',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap'
-                                }}
-                                title={client.email}
-                              >
-                                <Mail size={9} /> {client.email.split('@')[0]}
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '0.4rem 0.3rem' }}>
-                        <div style={{ display: 'flex', gap: '0.2rem' }}>
-                          {services.length > 0 ? services.map(s => (
-                            <span key={s} style={{ padding: '1px 3px', background: 'rgba(59, 130, 246, 0.2)', color: 'var(--accent-primary)', borderRadius: '2px', fontSize: '0.55rem', fontWeight: 800 }}>
-                              {s === 'Sosyal Medya' ? 'SM' : s}
-                            </span>
-                          )) : (
-                            <span style={{ fontSize: '0.55rem' }}>-</span>
-                          )}
-                        </div>
-                      </td>
-                      <td style={{ padding: '0.4rem 0.3rem' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                          <EditClientModal client={client} />
-                          <DeleteClientButton clientId={client.id} />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {clients.length === 0 && (
-                  <tr>
-                    <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Henüz müşteri eklenmemiş.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <ClientsList clients={clientsForClient} />
         </div>
 
         <div className="card" style={{ width: '100%', maxWidth: '350px', flexShrink: 0 }}>

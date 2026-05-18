@@ -72,6 +72,7 @@ export async function loginAction(formData) {
     return { error: 'Geçersiz kullanıcı adı veya şifre.' };
   }
   await createSession(user.id, user.username, user.role, false);
+  await logActivity('LOGIN', 'AUTH', `${user.username} panele giriş yaptı.`);
   redirect('/dashboard');
 }
 export async function setPasswordAction(userId, formData) {
@@ -89,9 +90,14 @@ export async function setPasswordAction(userId, formData) {
     data: { password: hashedPassword },
   });
   await createSession(updatedUser.id, updatedUser.username, updatedUser.role, false);
+  await logActivity('LOGIN', 'AUTH', `${updatedUser.username} ilk şifresini belirledi ve giriş yaptı.`);
   redirect('/dashboard');
 }
 export async function logoutAction() {
+  const session = await getSession();
+  if (session) {
+    await logActivity('LOGOUT', 'AUTH', `${session.username} panelden çıkış yaptı.`);
+  }
   await destroySession();
   return { success: true };
 }
@@ -490,6 +496,8 @@ export async function bulkDeleteDayAction(formData) {
         }
       });
     }
+    const client = await prisma.client.findUnique({ where: { id: clientId }, select: { companyName: true } });
+    await logActivity('DELETE', 'TASK', `${client?.companyName || clientId} için ${targetDate.toLocaleDateString('tr-TR')} günü toplu görev silme/gizleme yapıldı.`, clientId);
     return { success: true };
   } catch (error) {
     console.error('Bulk delete error:', error);
@@ -556,6 +564,116 @@ export async function searchTasksAction(query) {
   } catch (error) {
     console.error('Global search error:', error);
     return { error: 'Arama sırasında bir hata oluştu.' };
+  }
+}
+export async function globalSearchAction(query) {
+  const session = await getSession();
+  if (!session) return { error: 'Yetkisiz erişim.' };
+  const q = (query || '').toString().trim();
+  if (q.length < 2) return { results: [] };
+
+  const workWhere = (() => {
+    if (session.role === 'ADMIN') return {};
+    const or = [{ assigneeId: session.userId }, { createdById: session.userId }];
+    if (['DESIGNER_MANAGER', 'ADVERTISER_MANAGER'].includes(session.role)) {
+      or.push({ assignee: { managerId: session.userId } });
+    }
+    return { OR: or };
+  })();
+
+  try {
+    const [tasks, clients, notes, workItems] = await Promise.all([
+      prisma.task.findMany({
+        where: {
+          OR: [
+            { note: { contains: q, mode: 'insensitive' } },
+            { content: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        include: { client: { select: { id: true, companyName: true } } },
+        take: 8,
+        orderBy: { date: 'desc' },
+      }),
+      prisma.client.findMany({
+        where: {
+          OR: [
+            { companyName: { contains: q, mode: 'insensitive' } },
+            { contactName: { contains: q, mode: 'insensitive' } },
+            { email: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        select: { id: true, companyName: true, contactName: true },
+        take: 8,
+        orderBy: { companyName: 'asc' },
+      }),
+      prisma.note.findMany({
+        where: {
+          OR: [
+            { title: { contains: q, mode: 'insensitive' } },
+            { content: { contains: q, mode: 'insensitive' } },
+          ],
+        },
+        include: { client: { select: { id: true, companyName: true } } },
+        take: 8,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.workItem.findMany({
+        where: {
+          AND: [
+            workWhere,
+            {
+              OR: [
+                { title: { contains: q, mode: 'insensitive' } },
+                { description: { contains: q, mode: 'insensitive' } },
+              ],
+            },
+          ],
+        },
+        include: { client: { select: { id: true, companyName: true } } },
+        take: 8,
+        orderBy: { updatedAt: 'desc' },
+      }),
+    ]);
+
+    return {
+      results: [
+        ...clients.map((c) => ({
+          type: 'client',
+          id: c.id,
+          title: c.companyName,
+          subtitle: c.contactName,
+          href: `/dashboard/client/${c.id}/stats`,
+        })),
+        ...workItems.map((w) => ({
+          type: 'work_item',
+          id: w.id,
+          title: w.title,
+          subtitle: w.client?.companyName || 'Genel iş',
+          href: `/dashboard/work-items?notificationWorkItem=${w.id}`,
+        })),
+        ...notes.map((n) => ({
+          type: 'note',
+          id: n.id,
+          title: n.title || 'Not',
+          subtitle: n.client?.companyName || 'Genel not',
+          href: n.clientId ? `/dashboard/client/${n.clientId}/notes` : '/dashboard/notes',
+        })),
+        ...tasks.map((t) => {
+          const taskDate = new Date(t.date);
+          const targetPage = t.type === 'BLOG' ? 'seo' : 'social';
+          return {
+            type: 'task',
+            id: t.id,
+            title: t.note || t.content || 'Görev',
+            subtitle: t.client?.companyName || 'Müşteri',
+            href: `/dashboard/client/${t.client.id}/${targetPage}?month=${taskDate.getMonth()}&year=${taskDate.getFullYear()}&highlight=${taskDate.getDate()}`,
+          };
+        }),
+      ],
+    };
+  } catch (error) {
+    console.error('globalSearchAction error:', error);
+    return { error: 'Arama sırasında bir hata oluştu.', results: [] };
   }
 }
 export async function addNoteAction(formData) {
@@ -1334,6 +1452,7 @@ export async function updateSocialCredentialsAction(clientId, platform, type, va
         socialAccounts: JSON.stringify(socialAccounts)
       }
     });
+    await logActivity('UPDATE', 'CREDENTIALS', `${client.companyName} — ${platform} giriş bilgisi (${type}) güncellendi.`, parseInt(clientId));
     return { success: true };
   } catch (error) {
     console.error('Update credentials error:', error);
@@ -1546,7 +1665,20 @@ export async function saveNotificationSettingsAction(formData) {
     update: { value: JSON.stringify(settings) },
     create: { key: notificationSettingKey(session.userId), value: JSON.stringify(settings) },
   });
+  await logActivity('UPDATE', 'SETTINGS', `Bildirim sesi güncellendi: ${settings.sound}`);
   return { success: true, settings };
+}
+export async function markAllNotificationsReadAction() {
+  const session = await getSession();
+  if (!session) return { error: 'Oturum bulunamadı.' };
+  const result = await prisma.notification.updateMany({
+    where: { userId: session.userId, readAt: null },
+    data: { readAt: new Date() },
+  });
+  if (result.count > 0) {
+    await logActivity('UPDATE', 'NOTIFICATION', `${result.count} bildirim okundu olarak işaretlendi.`);
+  }
+  return { success: true, count: result.count };
 }
 export async function getAppearanceSettingsAction() {
   const session = await getSession();
@@ -1575,10 +1707,39 @@ export async function saveAppearanceSettingsAction(formData) {
       update: { value: JSON.stringify(next) },
       create: { key: appearanceSettingKey(session.userId), value: JSON.stringify(next) },
     });
+    const parts = [];
+    if (formData.get('theme')) parts.push(`tema: ${next.theme}`);
+    if (formData.get('accent')) parts.push(`vurgu: ${next.accent}${next.customColor ? ` (${next.customColor})` : ''}`);
+    await logActivity('UPDATE', 'SETTINGS', `Görünüm ayarları kaydedildi (${parts.join(', ') || 'güncelleme'}).`);
     return { success: true, settings: next };
   } catch (error) {
     return { error: 'Görünüm ayarları kaydedilemedi.' };
   }
+}
+export async function resetAppearanceSettingsAction() {
+  const session = await getSession();
+  if (!session) return { error: 'Oturum bulunamadı.' };
+  const { DEFAULT_APPEARANCE, sanitizeAppearance } = await import('@/lib/appearance');
+  const next = sanitizeAppearance(DEFAULT_APPEARANCE);
+  await prisma.setting.upsert({
+    where: { key: appearanceSettingKey(session.userId) },
+    update: { value: JSON.stringify(next) },
+    create: { key: appearanceSettingKey(session.userId), value: JSON.stringify(next) },
+  });
+  await logActivity('UPDATE', 'SETTINGS', 'Görünüm ayarları varsayılana döndürüldü.');
+  return { success: true, settings: next };
+}
+export async function resetNotificationSettingsAction() {
+  const session = await getSession();
+  if (!session) return { error: 'Oturum bulunamadı.' };
+  const settings = { sound: 'soft' };
+  await prisma.setting.upsert({
+    where: { key: notificationSettingKey(session.userId) },
+    update: { value: JSON.stringify(settings) },
+    create: { key: notificationSettingKey(session.userId), value: JSON.stringify(settings) },
+  });
+  await logActivity('UPDATE', 'SETTINGS', 'Bildirim sesi varsayılana döndürüldü.');
+  return { success: true, settings };
 }
 export async function getNotificationsAction(limit = 20) {
   const session = await getSession();
@@ -1699,6 +1860,7 @@ export async function startWorkItemAction(workItemId) {
       events: { create: { userId: session.userId, type: 'STARTED' } }
     }
   });
+  await logActivity('UPDATE', 'WORK_ITEM', `"${item.title}" işi başlatıldı.`, item.clientId);
   return { success: true };
 }
 export async function submitWorkItemAction(formData) {
@@ -1720,6 +1882,7 @@ export async function submitWorkItemAction(formData) {
     }
   });
   await notifyUsers([item.createdById], { title: 'İş onaya gönderildi', message: `${item.title} işi onayınıza gönderildi.`, url: `/dashboard/work-items?notificationWorkItem=${item.id}`, type: 'WORK_SUBMITTED' }, session.userId);
+  await logActivity('UPDATE', 'WORK_ITEM', `"${item.title}" işi onaya gönderildi.`, item.clientId);
   return { success: true };
 }
 export async function approveWorkItemAction(workItemId) {
@@ -1740,6 +1903,7 @@ export async function approveWorkItemAction(workItemId) {
     }
   });
   await notifyUsers([item.assigneeId], { title: 'İş onaylandı', message: `${item.title} işi onaylandı.`, url: `/dashboard/work-items?notificationWorkItem=${item.id}`, type: 'WORK_APPROVED' }, session.userId);
+  await logActivity('UPDATE', 'WORK_ITEM', `"${item.title}" işi onaylandı.`, item.clientId);
   return { success: true };
 }
 export async function requestWorkItemRevisionAction(formData) {
@@ -1761,6 +1925,7 @@ export async function requestWorkItemRevisionAction(formData) {
     }
   });
   await notifyUsers([item.assigneeId], { title: 'Revize istendi', message: `${item.title} işi için revize istendi.`, url: `/dashboard/work-items?notificationWorkItem=${item.id}`, type: 'WORK_REVISION' }, session.userId);
+  await logActivity('UPDATE', 'WORK_ITEM', `"${item.title}" işi için revize istendi.`, item.clientId);
   return { success: true };
 }
 export async function cancelWorkItemAction(workItemId) {
@@ -1777,6 +1942,7 @@ export async function cancelWorkItemAction(workItemId) {
       events: { create: { userId: session.userId, type: 'CANCELLED' } }
     }
   });
+  await logActivity('UPDATE', 'WORK_ITEM', `"${item.title}" işi iptal edildi.`, item.clientId);
   return { success: true };
 }
 export async function runDatabaseMaintenanceAction() {

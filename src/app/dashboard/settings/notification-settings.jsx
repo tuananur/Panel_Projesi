@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { BellRing, Play, Save, CheckCircle2, AlertCircle, VolumeX, Volume2, Music, Zap, Sparkles, Bell, AlarmClock, Disc } from 'lucide-react';
-import { saveNotificationSettingsAction } from '@/app/actions';
+import { BellRing, Play, Save, CheckCircle2, AlertCircle, VolumeX, Volume2, Music, Zap, Sparkles, Bell, AlarmClock, Disc, RotateCcw } from 'lucide-react';
+import { saveNotificationSettingsAction, resetNotificationSettingsAction } from '@/app/actions';
 import { playNotificationSound, storeNotificationSound } from '../notification-sound';
 import { NOTIFICATION_SOUND_OPTIONS } from '@/lib/appearance';
 
@@ -27,6 +27,22 @@ export default function NotificationSettings({ initialSettings }) {
   const [isPending, startTransition] = useTransition();
 
   const dirty = sound !== savedSound;
+
+  const handleReset = () => {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await resetNotificationSettingsAction();
+      if (result?.error) {
+        setMessage({ type: 'error', text: result.error });
+        return;
+      }
+      const next = result?.settings?.sound || 'soft';
+      setSavedSound(next);
+      setSound(next);
+      storeNotificationSound(next);
+      setMessage({ type: 'success', text: 'Bildirim sesi varsayılana döndürüldü.' });
+    });
+  };
 
   const handleSave = () => {
     setMessage(null);
@@ -140,15 +156,20 @@ export default function NotificationSettings({ initialSettings }) {
             <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 600 }}>Kaydedilmemiş değişiklik</span>
           )}
         </div>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleSave}
-          disabled={isPending || !dirty}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-        >
-          <Save size={16} /> {isPending ? 'Kaydediliyor...' : 'Bildirim Sesini Kaydet'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button type="button" className="btn" onClick={handleReset} disabled={isPending} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <RotateCcw size={16} /> Varsayılana Dön
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={isPending || !dirty}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <Save size={16} /> {isPending ? 'Kaydediliyor...' : 'Bildirim Sesini Kaydet'}
+          </button>
+        </div>
       </div>
     </div>
   );

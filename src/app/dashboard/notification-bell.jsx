@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, CheckCircle2 } from 'lucide-react';
-import { getNotificationsAction, markNotificationReadAction } from '@/app/actions';
+import { getNotificationsAction, markNotificationReadAction, markAllNotificationsReadAction } from '@/app/actions';
 import { getStoredNotificationSound, playNotificationSound, storeNotificationSound } from './notification-sound';
 
 export default function NotificationBell({ initialSound = 'soft' }) {
@@ -12,6 +12,7 @@ export default function NotificationBell({ initialSound = 'soft' }) {
   const [notifications, setNotifications] = useState([]);
   const [count, setCount] = useState(0);
   const [sound, setSound] = useState(() => initialSound || 'soft');
+  const [filter, setFilter] = useState('all');
   const [isPending, startTransition] = useTransition();
   const previousCount = useRef(null);
   const originalTitle = useRef('');
@@ -27,7 +28,7 @@ export default function NotificationBell({ initialSound = 'soft' }) {
     if (typeof document !== 'undefined') originalTitle.current = document.title;
 
     const load = async () => {
-      const result = await getNotificationsAction(20);
+      const result = await getNotificationsAction(50);
       if (!result?.success) return;
       setNotifications(result.notifications || []);
       setCount(result.count || 0);
@@ -77,6 +78,22 @@ export default function NotificationBell({ initialSound = 'soft' }) {
       if (originalTitle.current) document.title = originalTitle.current;
     };
   }, [count]);
+
+  const visibleNotifications = notifications.filter((item) => {
+    if (filter === 'unread') return !item.readAt;
+    if (filter !== 'all' && item.type !== filter) return false;
+    return true;
+  });
+
+  const handleMarkAllRead = () => {
+    startTransition(async () => {
+      const result = await markAllNotificationsReadAction();
+      if (result?.success) {
+        setNotifications((items) => items.map((item) => ({ ...item, readAt: item.readAt || new Date().toISOString() })));
+        setCount(0);
+      }
+    });
+  };
 
   const handleClick = (notification) => {
     startTransition(async () => {
@@ -147,13 +164,44 @@ export default function NotificationBell({ initialSound = 'soft' }) {
           zIndex: 1000,
           padding: '0.5rem',
         }}>
-          <div style={{ padding: '0.75rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '0.75rem 0.75rem 0.5rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
             <span>Bildirimler</span>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{count} okunmamış</span>
           </div>
-          {notifications.length === 0 ? (
+          <div style={{ padding: '0 0.75rem 0.5rem', display: 'flex', gap: '0.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            {[
+              { id: 'all', label: 'Tümü' },
+              { id: 'unread', label: 'Okunmamış' },
+              { id: 'WORK_ASSIGNED', label: 'İş' },
+              { id: 'REMINDER', label: 'Hatırlatma' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setFilter(tab.id)}
+                style={{
+                  padding: '0.25rem 0.55rem',
+                  borderRadius: '999px',
+                  border: '1px solid var(--border-color)',
+                  background: filter === tab.id ? 'var(--accent-primary)' : 'transparent',
+                  color: filter === tab.id ? 'white' : 'var(--text-secondary)',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+            {count > 0 && (
+              <button type="button" onClick={handleMarkAllRead} disabled={isPending} className="btn" style={{ marginLeft: 'auto', fontSize: '0.68rem', padding: '0.25rem 0.5rem' }}>
+                Tümünü okundu işaretle
+              </button>
+            )}
+          </div>
+          {visibleNotifications.length === 0 ? (
             <div style={{ padding: '1.25rem', color: 'var(--text-secondary)', textAlign: 'center' }}>Bildirim yok.</div>
-          ) : notifications.map((item) => (
+          ) : visibleNotifications.map((item) => (
             <button
               key={item.id}
               type="button"

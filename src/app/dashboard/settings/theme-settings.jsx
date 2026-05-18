@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useTheme } from '@/app/components/theme-provider';
-import { Sun, Moon, Palette, CheckCircle2, Save, AlertCircle, Sparkles } from 'lucide-react';
-import { saveAppearanceSettingsAction } from '@/app/actions';
+import { Sun, Moon, Palette, CheckCircle2, Save, AlertCircle, Sparkles, RotateCcw } from 'lucide-react';
+import { saveAppearanceSettingsAction, resetAppearanceSettingsAction } from '@/app/actions';
 import {
   ACCENT_CATEGORIES,
   ACCENT_PRESETS,
@@ -70,6 +70,25 @@ export default function ThemeSettings({ initialAppearance }) {
   const previewGradient = accent === 'custom'
     ? `linear-gradient(135deg, ${previewColor} 0%, ${previewColor} 100%)`
     : (activePreset?.gradient || 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)');
+
+  const handleResetAll = () => {
+    setThemeMessage(null);
+    setAccentMessage(null);
+    startThemeTransition(async () => {
+      const result = await resetAppearanceSettingsAction();
+      if (result?.error) {
+        setThemeMessage({ type: 'error', text: result.error });
+        return;
+      }
+      if (result?.settings) {
+        hydrateAppearance(result.settings);
+        commitTheme(result.settings.theme);
+        commitAccent(result.settings.accent, result.settings.customColor);
+        if (result.settings.customColor) setCustomDraft(result.settings.customColor);
+      }
+      setThemeMessage({ type: 'success', text: 'Görünüm ayarları varsayılana döndürüldü.' });
+    });
+  };
 
   const handleSaveTheme = () => {
     setThemeMessage(null);
@@ -181,15 +200,20 @@ export default function ThemeSettings({ initialAppearance }) {
               <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 600 }}>Kaydedilmemiş değişiklik</span>
             )}
           </div>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleSaveTheme}
-            disabled={themePending || !themeDirty}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-          >
-            <Save size={16} /> {themePending ? 'Kaydediliyor...' : 'Görünüm Modunu Kaydet'}
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button type="button" className="btn" onClick={handleResetAll} disabled={themePending} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <RotateCcw size={16} /> Varsayılana Dön
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleSaveTheme}
+              disabled={themePending || !themeDirty}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Save size={16} /> {themePending ? 'Kaydediliyor...' : 'Görünüm Modunu Kaydet'}
+            </button>
+          </div>
         </div>
       </div>
 

@@ -1,11 +1,12 @@
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import Link from 'next/link';
+import { getDashboardTodaySummary } from '@/lib/dashboard-summary';
+import { MessageCircle, Mail, ChevronRight } from 'lucide-react';
+import ClientLogo from '@/app/components/client-logo';
+import DashboardToday from './dashboard-today';
 
 export const dynamic = 'force-dynamic';
-import { Phone, Mail, MessageCircle, ChevronRight } from 'lucide-react';
-import GlobalSearch from '@/app/components/global-search';
-import ClientLogo from '@/app/components/client-logo';
 
 export const metadata = {
   title: 'Gösterge Paneli | Agency Dashboard',
@@ -13,6 +14,7 @@ export const metadata = {
 
 export default async function DashboardPage() {
   const session = await getSession();
+  const summary = await getDashboardTodaySummary(prisma, session);
   const clients = await prisma.client.findMany({
     orderBy: { createdAt: 'desc' },
     select: {
@@ -34,7 +36,7 @@ export default async function DashboardPage() {
         <p className="text-muted">Ajansınızın genel durumunu ve müşterilerinizi buradan takip edebilirsiniz.</p>
       </header>
 
-      <GlobalSearch />
+      <DashboardToday summary={summary} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         <div className="glass-panel" style={{ padding: '1.5rem' }}>

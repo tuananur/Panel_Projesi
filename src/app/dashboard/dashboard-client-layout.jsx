@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from './sidebar';
 import Header from './header-client';
 import AppearanceHydrator from './appearance-hydrator';
+import GlobalSearch from '@/app/components/global-search';
 import { usePathname } from 'next/navigation';
 
 export default function DashboardClientLayout({ children, session, permissions, notificationSettings, appearanceSettings, mailEnabled }) {
@@ -25,6 +26,7 @@ export default function DashboardClientLayout({ children, session, permissions, 
   return (
     <div className="dashboard-layout animate-fade-in">
       <AppearanceHydrator settings={appearanceSettings} />
+      <GlobalSearch />
       <div 
         className={`sidebar-overlay ${isSidebarOpen ? 'visible' : ''}`} 
         onClick={() => setIsSidebarOpen(false)}
