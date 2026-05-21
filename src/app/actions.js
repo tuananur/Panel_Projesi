@@ -2424,3 +2424,51 @@ export async function sendBulkNotificationAction(formData) {
   }
 }
 
+export async function deleteNotificationAction(notificationId) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    const id = parseInt(notificationId);
+    const notification = await prisma.notification.findFirst({ where: { id, userId: session.userId } });
+    if (!notification) return { error: 'Bildirim bulunamadı.' };
+    
+    await prisma.notification.delete({ where: { id } });
+    return { success: true };
+  } catch (error) {
+    return { error: 'Bildirim silinemedi.' };
+  }
+}
+
+export async function toggleNotificationReadAction(notificationId) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    const id = parseInt(notificationId);
+    const notification = await prisma.notification.findFirst({ where: { id, userId: session.userId } });
+    if (!notification) return { error: 'Bildirim bulunamadı.' };
+
+    const newReadAt = notification.readAt ? null : new Date();
+    await prisma.notification.update({
+      where: { id },
+      data: { readAt: newReadAt }
+    });
+    return { success: true, readAt: newReadAt };
+  } catch (error) {
+    return { error: 'Bildirim durumu güncellenemedi.' };
+  }
+}
+
+export async function deleteAllNotificationsAction() {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    
+    await prisma.notification.deleteMany({
+      where: { userId: session.userId }
+    });
+    return { success: true };
+  } catch (error) {
+    return { error: 'Bildirimler silinemedi.' };
+  }
+}
+

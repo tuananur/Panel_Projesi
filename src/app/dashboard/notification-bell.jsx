@@ -228,6 +228,33 @@ export default function NotificationBell({ initialSound = 'soft' }) {
               <span style={{ color: 'var(--text-secondary)', fontSize: '0.68rem' }}>{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
             </button>
           ))}
+
+          <div style={{ 
+            borderTop: '1px solid var(--border-color)', 
+            marginTop: '0.6rem', 
+            paddingTop: '0.6rem', 
+            paddingLeft: '0.2rem',
+            paddingRight: '0.2rem',
+            display: 'flex', 
+            justifyContent: 'center' 
+          }}>
+            <button 
+              type="button" 
+              onClick={() => { setOpen(false); router.push('/dashboard/notifications'); }}
+              className="btn btn-secondary" 
+              style={{ 
+                width: '100%', 
+                fontSize: '0.78rem', 
+                padding: '0.45rem', 
+                borderRadius: '8px',
+                cursor: 'pointer',
+                textAlign: 'center',
+                fontWeight: 700
+              }}
+            >
+              Tüm Bildirimleri Gör
+            </button>
+          </div>
         </div>
       )}
     </div>

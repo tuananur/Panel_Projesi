@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare, Bell } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare, Bell, Megaphone } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction, getWorkItemBadgeCountAction } from '@/app/actions';
+import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction, getWorkItemBadgeCountAction, getNotificationUnreadCountAction } from '@/app/actions';
 import { can } from '@/lib/permissions';
 
 export default function Sidebar({ role, permissions, isMobileOpen, onClose, mailEnabled = false }) {
@@ -34,6 +34,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
   const [hasNewNotes, setHasNewNotes] = useState(false);
   const [unreadMailCount, setUnreadMailCount] = useState(0);
   const [workItemCount, setWorkItemCount] = useState(0);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     if (isAdmin) {
@@ -109,6 +110,17 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
     return () => clearInterval(interval);
   }, [pathname, mailEnabled]);
 
+  useEffect(() => {
+    const checkNotifications = async () => {
+      const result = await getNotificationUnreadCountAction();
+      setNotificationCount(result?.count || 0);
+    };
+    checkNotifications();
+
+    const interval = setInterval(checkNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [pathname]);
+
   const navItems = [
     { href: '/dashboard', label: 'Gösterge Paneli', icon: <LayoutDashboard size={20} /> },
     ...(canClients ? [
@@ -135,8 +147,9 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
     ...(mailEnabled ? [
       { href: '/dashboard/mail', label: 'Mail', icon: <Mail size={20} /> },
     ] : []),
+    { href: '/dashboard/notifications', label: 'Bildirimlerim', icon: <Bell size={20} /> },
     ...(canSendNotifications ? [
-      { href: '/dashboard/send-notification', label: 'Bildirim Gönder', icon: <Bell size={20} /> },
+      { href: '/dashboard/send-notification', label: 'Bildirim Gönder', icon: <Megaphone size={20} /> },
     ] : []),
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
@@ -321,6 +334,27 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
                     fontWeight: 900,
                     lineHeight: 1
                   }}>{unreadMailCount > 99 ? '99+' : unreadMailCount}</span>
+                )}
+                {item.label === 'Bildirimlerim' && notificationCount > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-9px',
+                    right: '-12px',
+                    minWidth: '18px',
+                    height: '18px',
+                    padding: '0 5px',
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    borderRadius: '999px',
+                    border: '2px solid var(--bg-secondary)',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.45)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.62rem',
+                    fontWeight: 900,
+                    lineHeight: 1
+                  }}>{notificationCount > 99 ? '99+' : notificationCount}</span>
                 )}
               </div>
               {(!isCollapsed || isMobileOpen) && <span>{item.label}</span>}
