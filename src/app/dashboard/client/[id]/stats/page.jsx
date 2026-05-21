@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import StatsContent from './stats-content';
 import { can, getRolePermissions } from '@/lib/permissions';
-import { getMetaAdsAction, getGoogleAdsAction } from '@/app/actions';
+import { getMetaAdsAction, getGoogleAdsAction, getGoogleAnalyticsAction } from '@/app/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,21 +67,29 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
 
     let metaResult = { error: 'LOADING_ERROR' };
     let googleResult = { error: 'LOADING_ERROR' };
+    let analyticsResult = { error: 'LOADING_ERROR' };
 
     try {
       const results = await Promise.allSettled([
         getMetaAdsAction(id, null, since, until),
-        getGoogleAdsAction(id) // Google is mock, but could be extended
+        getGoogleAdsAction(id),
+        getGoogleAnalyticsAction(id)
       ]);
 
       if (results[0].status === 'fulfilled') metaResult = results[0].value;
       if (results[1].status === 'fulfilled') googleResult = results[1].value;
+      if (results[2].status === 'fulfilled') analyticsResult = results[2].value;
     } catch (adsError) {
-      console.error('Ads Data Fetching Failed:', adsError);
+      console.error('Ads & Analytics Data Fetching Failed:', adsError);
     }
 
     return (
-      <StatsContent client={client} metaResult={metaResult} googleResult={googleResult} />
+      <StatsContent 
+        client={client} 
+        metaResult={metaResult} 
+        googleResult={googleResult} 
+        analyticsResult={analyticsResult} 
+      />
     );
   } catch (error) {
     if (error.digest?.startsWith('NEXT_REDIRECT') || error.message === 'NEXT_REDIRECT') throw error;
