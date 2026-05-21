@@ -2364,3 +2364,63 @@ export async function deleteMetaEntityAction(clientId, entityId) {
   }
 }
 
+export async function sendBulkNotificationAction(formData) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+
+    const isAdmin = session.role === 'ADMIN';
+    const isManager = ['DESIGNER_MANAGER', 'ADVERTISER_MANAGER'].includes(session.role);
+    if (!isAdmin && !isManager) {
+      return { error: 'Bu işlemi yapmaya yetkiniz yok.' };
+    }
+
+    const title = formData.get('title')?.toString().trim();
+    const message = formData.get('message')?.toString().trim();
+    const url = formData.get('url')?.toString().trim() || null;
+    const type = formData.get('type')?.toString().trim() || 'GENERAL';
+    const targetType = formData.get('targetType')?.toString(); // 'EVERYONE' or 'SPECIFIC'
+    const selectedUsersRaw = formData.get('selectedUsers')?.toString();
+
+    if (!title || !message) {
+      return { error: 'Başlık ve mesaj alanları zorunludur.' };
+    }
+
+    let recipientIds = [];
+
+    if (targetType === 'EVERYONE') {
+      const allUsers = await prisma.user.findMany({
+        select: { id: true }
+      });
+      recipientIds = allUsers.map(u => u.id);
+    } else {
+      if (!selectedUsersRaw) {
+        return { error: 'En az bir alıcı seçmelisiniz.' };
+      }
+      recipientIds = selectedUsersRaw.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+    }
+
+    if (recipientIds.length === 0) {
+      return { error: 'Gönderilecek alıcı bulunamadı.' };
+    }
+
+    await Promise.all(recipientIds.map(userId => 
+      prisma.notification.create({
+        data: {
+          userId,
+          title,
+          message,
+          url,
+          type
+        }
+      })
+    ));
+
+    await logActivity('CREATE', 'NOTIFICATION', `Toplu bildirim gönderildi: "${title}" (${recipientIds.length} alıcı)`);
+    return { success: true, count: recipientIds.length };
+  } catch (error) {
+    console.error('sendBulkNotificationAction error:', error);
+    return { error: 'Bildirim gönderilirken bir hata oluştu.' };
+  }
+}
+
