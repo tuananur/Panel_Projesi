@@ -2356,7 +2356,7 @@ return (
           }
         }
       `}</style>
-            <div id="report-template" style={{ display: 'none' }}>
+            <div id="report-template" style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '1123px' }}>
         {renderSlides(null, true)}
       </div>
     </div>
