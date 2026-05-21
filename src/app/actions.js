@@ -1412,10 +1412,10 @@ export async function getGoogleAnalyticsAction(clientId) {
       return res.json();
     };
 
-    let mainReport, realtimeReport, deviceReport, trafficReport, pagesReport;
+    let mainReport, realtimeReport, deviceReport, trafficReport, pagesReport, countryReport;
 
     try {
-      [mainReport, realtimeReport, deviceReport, trafficReport, pagesReport] = await Promise.all([
+      [mainReport, realtimeReport, deviceReport, trafficReport, pagesReport, countryReport] = await Promise.all([
         // Main Summary & Daily Active Users (last 10 days)
         runReport('runReport', {
           dateRanges: [{ startDate: '9daysAgo', endDate: 'today' }],
@@ -1457,7 +1457,14 @@ export async function getGoogleAnalyticsAction(clientId) {
             { name: 'averageSessionDuration' }
           ],
           limit: 5
-        })
+        }),
+        // Country breakdown
+        runReport('runReport', {
+          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dimensions: [{ name: 'country' }],
+          metrics: [{ name: 'activeUsers' }],
+          limit: 10
+        }).catch(() => ({ rows: [] }))
       ]);
     } catch (apiError) {
       console.error('GA4 API Query failed:', apiError);
@@ -1646,6 +1653,46 @@ export async function getGoogleAnalyticsAction(clientId) {
       topPages.push({ path: '/', title: 'Ana Sayfa', views: 0, users: 0, time: '0dk 0sn' });
     }
 
+    // G. Parse Country Breakdown
+    let countryTotalUsers = 0;
+    const rawCountryRows = countryReport ? (countryReport.rows || []) : [];
+    rawCountryRows.forEach(row => {
+      countryTotalUsers += parseNumber(row.metricValues?.[0]?.value);
+    });
+
+    const countryBreakdown = rawCountryRows.map((row, index) => {
+      const rawName = row.dimensionValues?.[0]?.value || 'Bilinmeyen';
+      const countryNamesMap = {
+        'turkey': 'Türkiye',
+        'china': 'Çin',
+        'united states': 'ABD',
+        'germany': 'Almanya',
+        'netherlands': 'Hollanda',
+        'united kingdom': 'İngiltere',
+        'france': 'Fransa',
+        'italy': 'İtalya',
+        'russia': 'Rusya',
+        'spain': 'İspanya',
+        'singapore': 'Singapur',
+        'ireland': 'İrlanda'
+      };
+      const name = countryNamesMap[rawName.toLowerCase()] || rawName;
+      const count = parseNumber(row.metricValues?.[0]?.value);
+      const percentage = countryTotalUsers > 0 ? Math.round((count / countryTotalUsers) * 100) : 0;
+      return {
+        name,
+        percentage,
+        count
+      };
+    });
+
+    if (countryBreakdown.length === 0) {
+      countryBreakdown.push(
+        { name: 'Türkiye', percentage: 0, count: 0 },
+        { name: 'Diğer', percentage: 0, count: 0 }
+      );
+    }
+
     return {
       success: true,
       isLive: true,
@@ -1660,7 +1707,8 @@ export async function getGoogleAnalyticsAction(clientId) {
       dailyActiveUsers,
       deviceBreakdown,
       trafficSources,
-      topPages
+      topPages,
+      countryBreakdown
     };
   } catch (error) {
     console.error('Google Analytics fetch failed:', error);

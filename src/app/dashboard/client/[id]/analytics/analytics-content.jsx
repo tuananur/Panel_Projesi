@@ -3,12 +3,17 @@
 import { useState } from 'react';
 import { 
   TrendingUp, Users, Eye, Clock, BarChart3, 
-  Tv, Smartphone, Laptop, Sparkles, RefreshCw
+  Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe
 } from 'lucide-react';
 
 export default function AnalyticsContent({ result, id }) {
   const [loading, setLoading] = useState(false);
-  const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages } = result;
+  const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown } = result;
+
+  const countryData = countryBreakdown || [
+    { name: 'Türkiye', percentage: 0, count: 0 },
+    { name: 'Diğer', percentage: 0, count: 0 }
+  ];
 
   const maxUsers = Math.max(...dailyActiveUsers.map(d => d.users));
 
@@ -222,6 +227,31 @@ export default function AnalyticsContent({ result, id }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.85rem' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>{Number(source.count).toLocaleString()} Oturum</span>
                   <span style={{ color: 'var(--text-primary)', fontWeight: 700, width: '40px', textAlign: 'right' }}>%{source.percentage}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Coğrafi Dağılım (Ülkeler) */}
+        <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+          <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Globe size={16} style={{ color: '#8B5CF6' }} />
+            Coğrafi Dağılım (Ülkeler)
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem' }}>
+            {countryData.map((country, idx) => (
+              <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                    {country.name}
+                  </span>
+                  <span style={{ color: 'var(--text-secondary)' }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>{country.percentage}%</strong> ({Number(country.count).toLocaleString()})
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${country.percentage}%`, height: '100%', background: '#8B5CF6', borderRadius: '4px' }}></div>
                 </div>
               </div>
             ))}
