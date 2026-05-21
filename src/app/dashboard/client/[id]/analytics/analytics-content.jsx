@@ -75,6 +75,7 @@ function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }
 
 export default function AnalyticsContent({ result, id }) {
   const [loading, setLoading] = useState(false);
+  const [visiblePagesCount, setVisiblePagesCount] = useState(5);
   const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown } = result;
 
   const countryColors = ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#6366F1'];
@@ -357,9 +358,9 @@ export default function AnalyticsContent({ result, id }) {
             </tr>
           </thead>
           <tbody>
-            {topPages.map((page, idx) => (
+            {topPages.slice(0, visiblePagesCount).map((page, idx, arr) => (
               <tr key={idx} style={{ 
-                borderBottom: idx === topPages.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.03)', 
+                borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.03)', 
                 fontSize: '0.85rem',
                 color: 'var(--text-primary)',
                 transition: 'background 0.2s ease'
@@ -373,6 +374,39 @@ export default function AnalyticsContent({ result, id }) {
             ))}
           </tbody>
         </table>
+
+        {topPages.length > visiblePagesCount && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.03)', paddingTop: '1.25rem' }}>
+            <button 
+              onClick={() => setVisiblePagesCount(prev => prev === 5 ? 10 : 20)}
+              className="btn"
+              style={{
+                background: 'rgba(255, 255, 255, 0.015)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-primary)',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                padding: '0.5rem 1.5rem',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.015)';
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+              }}
+            >
+              {visiblePagesCount === 5 ? 'Daha Fazla Görüntüle (10)' : 'Daha Fazla Görüntüle (20)'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Styled animation overrides */}

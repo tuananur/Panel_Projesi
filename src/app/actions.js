@@ -1456,7 +1456,7 @@ export async function getGoogleAnalyticsAction(clientId) {
             { name: 'activeUsers' },
             { name: 'averageSessionDuration' }
           ],
-          limit: 5
+          limit: 20
         }),
         // Country breakdown
         runReport('runReport', {
