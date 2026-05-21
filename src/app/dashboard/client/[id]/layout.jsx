@@ -165,6 +165,7 @@ export default async function ClientDetailLayout({ children, params }) {
     const canSeeSettings = can(permissions, role, 'client.tab.settings');
     const canSeeMeta = can(permissions, role, 'client.tab.meta');
     const canSeeGoogle = can(permissions, role, 'client.tab.google');
+    const canSeeAnalytics = can(permissions, role, 'client.tab.analytics');
 
   return (
     <div className="animate-fade-in">
@@ -258,6 +259,7 @@ export default async function ClientDetailLayout({ children, params }) {
           canSeeSettings={canSeeSettings} 
           canSeeMeta={canSeeMeta}
           canSeeGoogle={canSeeGoogle}
+          canSeeAnalytics={canSeeAnalytics}
         />
       </div>
 

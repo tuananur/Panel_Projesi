@@ -6,9 +6,10 @@ import ThemeSettings from './theme-settings';
 import RolePermissionsEditor from './role-permissions-editor';
 import MailSettings from './mail-settings';
 import DatabaseMaintenance from './database-maintenance';
-import { getMailSettingsAction, getNotificationSettingsAction, getGoogleAdsGlobalSettingsAction, getAppearanceSettingsAction } from '@/app/actions';
+import { getMailSettingsAction, getNotificationSettingsAction, getGoogleAdsGlobalSettingsAction, getAppearanceSettingsAction, getGoogleAnalyticsGlobalSettingsAction } from '@/app/actions';
 import NotificationSettings from './notification-settings';
 import GoogleAdsGlobalSettings from './google-ads-settings';
+import GoogleAnalyticsGlobalSettings from './google-analytics-settings';
 
 export const metadata = {
   title: 'Ayarlar | Dashboard',
@@ -23,11 +24,12 @@ export default async function SettingsPage() {
   const assignableRoles = isAdmin ? await getRoleAssignableRoles() : null;
   const users = isAdmin ? await prisma.user.findMany({ select: { id: true, username: true, role: true }, orderBy: { username: 'asc' } }) : [];
   const userPermissions = isAdmin ? await getUserPermissionsSettings() : {};
-  const [mailSettings, notificationSettings, googleAdsGlobalSettings, appearanceSettings] = await Promise.all([
+  const [mailSettings, notificationSettings, googleAdsGlobalSettings, appearanceSettings, googleAnalyticsGlobalSettings] = await Promise.all([
     getMailSettingsAction(),
     getNotificationSettingsAction(),
     getGoogleAdsGlobalSettingsAction(),
     getAppearanceSettingsAction(),
+    getGoogleAnalyticsGlobalSettingsAction(),
   ]);
 
   return (
@@ -55,6 +57,10 @@ export default async function SettingsPage() {
 
           <div style={{ marginTop: '2rem' }}>
             <GoogleAdsGlobalSettings initialConfig={googleAdsGlobalSettings?.config} />
+          </div>
+
+          <div style={{ marginTop: '2rem' }}>
+            <GoogleAnalyticsGlobalSettings initialConfig={googleAnalyticsGlobalSettings?.config} />
           </div>
 
           <div style={{ marginTop: '2rem' }}>

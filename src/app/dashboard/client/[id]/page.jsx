@@ -58,6 +58,10 @@ export default async function ClientDetailPage({ params }) {
       redirect(`/dashboard/client/${id}/google`);
     }
 
+    if (can(permissions, role, 'client.tab.analytics')) {
+      redirect(`/dashboard/client/${id}/analytics`);
+    }
+
     if (can(permissions, role, 'client.tab.notes')) {
       redirect(`/dashboard/client/${id}/notes`);
     }

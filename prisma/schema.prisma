@@ -68,6 +68,11 @@ model Client {
   googleCustomerId   String? @db.Text
   googleRefreshToken String? @db.Text
 
+  // Google Analytics Integration
+  analyticsEnabled      Boolean @default(false)
+  analyticsPropertyId   String? @db.Text
+  analyticsRefreshToken String? @db.Text
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
