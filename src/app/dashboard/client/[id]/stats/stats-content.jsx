@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useRef } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   TrendingUp, CheckCircle2, Clock, Play, 
@@ -99,9 +99,55 @@ const PLATFORM_ICONS = {
   )
 };
 
+function SlideWrapper({ children }) {
+  const containerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current) return;
+      const width = containerRef.current.offsetWidth;
+      const newScale = Math.min(1, width / 1123);
+      setScale(newScale);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return (
+    <div 
+      ref={containerRef} 
+      style={{ 
+        width: '100%', 
+        overflow: 'hidden', 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'flex-start',
+        height: `${794 * scale}px`,
+        transition: 'height 0.2s ease-out'
+      }}
+    >
+      <div 
+        style={{ 
+          transform: `scale(${scale})`, 
+          transformOrigin: 'top center',
+          width: '1123px',
+          height: '794px',
+          flexShrink: 0
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function StatsContent({ client, metaResult, googleResult, analyticsResult }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [activeSlide, setActiveSlide] = useState(0);
   const [isPending, startTransition] = useTransition();
   const statsRef = useRef(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
