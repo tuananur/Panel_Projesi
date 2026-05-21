@@ -99,7 +99,7 @@ const PLATFORM_ICONS = {
   )
 };
 
-export default function StatsContent({ client, metaResult, googleResult }) {
+export default function StatsContent({ client, metaResult, googleResult, analyticsResult }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
