@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { 
   TrendingUp, Users, Eye, Clock, BarChart3, 
-  Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe
+  Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe, HelpCircle
 } from 'lucide-react';
 
 function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }) {
@@ -152,6 +152,7 @@ export default function AnalyticsContent({ result, id }) {
           isPositive={true}
           icon={<Eye size={18} style={{ color: '#F59E0B' }} />}
           sparklineColors={['rgba(245, 158, 11, 0.2)', '#F59E0B']}
+          description="Web sitenizdeki sayfaların toplam görüntülenme sayısıdır. Aynı kullanıcının bir sayfayı birden fazla kez ziyaret etmesi de bu sayıya dahildir."
         />
         <MetricCard 
           label="Oturumlar (Sessions)" 
@@ -160,6 +161,7 @@ export default function AnalyticsContent({ result, id }) {
           isPositive={true}
           icon={<Users size={18} style={{ color: '#3B82F6' }} />}
           sparklineColors={['rgba(59, 130, 246, 0.2)', '#3B82F6']}
+          description="Ziyaretçilerin web sitenizde başlattığı aktif oturum sayısıdır. Bir oturum, kullanıcının sitede gerçekleştirdiği tüm etkileşimleri kapsar ve 30 dakika hareketsizlikten sonra sonlanır."
         />
         <MetricCard 
           label="Hemen Çıkma Oranı" 
@@ -168,6 +170,7 @@ export default function AnalyticsContent({ result, id }) {
           isPositive={true} // bounce rate decreasing is positive
           icon={<TrendingUp size={18} style={{ color: '#10B981' }} />}
           sparklineColors={['rgba(16, 185, 129, 0.2)', '#10B981']}
+          description="Web sitenize gelen kullanıcıların yalnızca tek bir sayfayı görüntüleyip, hiçbir etkileşimde bulunmadan (tıklama, form doldurma vb.) siteden ayrılma yüzdesidir."
         />
         <MetricCard 
           label="Ort. Etkileşim Süresi" 
@@ -176,6 +179,7 @@ export default function AnalyticsContent({ result, id }) {
           isPositive={true}
           icon={<Clock size={18} style={{ color: '#8B5CF6' }} />}
           sparklineColors={['rgba(139, 92, 246, 0.2)', '#8B5CF6']}
+          description="Kullanıcıların web sitenizi aktif olarak tarayıcısında açık tutarak etkileşimde bulunduğu (gezinme, tıklama vb.) ortalama süredir."
         />
       </div>
 
@@ -433,12 +437,24 @@ export default function AnalyticsContent({ result, id }) {
         .table-row-hover:hover {
           background: rgba(255, 255, 255, 0.015);
         }
+        .tooltip-container {
+          position: relative;
+        }
+        .tooltip-container:hover .tooltip-content {
+          opacity: 1 !important;
+          visibility: visible !important;
+          transform: translateX(-50%) translateY(-4px) !important;
+        }
+        .tooltip-container:hover .tooltip-trigger {
+          color: var(--accent-primary) !important;
+          opacity: 1 !important;
+        }
       `}</style>
     </div>
   );
 }
 
-function MetricCard({ label, value, change, isPositive, icon, sparklineColors }) {
+function MetricCard({ label, value, change, isPositive, icon, sparklineColors, description }) {
   return (
     <div className="card" style={{ 
       padding: '1.25rem', 
@@ -448,10 +464,10 @@ function MetricCard({ label, value, change, isPositive, icon, sparklineColors })
       flexDirection: 'column',
       justifyContent: 'space-between',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'visible'
     }}>
       {/* Background Sparkline effect */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '35px', opacity: 0.15 }}>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '35px', opacity: 0.15, overflow: 'hidden', borderRadius: '0 0 12px 12px' }}>
         <svg viewBox="0 0 100 20" width="100%" height="100%" preserveAspectRatio="none">
           <path d="M0 20 Q 20 5, 40 15 T 80 5 T 100 10 L 100 20 Z" fill={sparklineColors[1]} />
           <path d="M0 20 Q 20 5, 40 15 T 80 5 T 100 10" fill="none" stroke={sparklineColors[1]} strokeWidth="1.5" />
@@ -459,7 +475,56 @@ function MetricCard({ label, value, change, isPositive, icon, sparklineColors })
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</span>
+          {description && (
+            <div className="tooltip-container" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'help' }}>
+              <span className="tooltip-trigger" style={{ color: 'var(--text-secondary)', opacity: 0.7, display: 'flex', alignItems: 'center', transition: 'all 0.2s ease' }}>
+                <HelpCircle size={13} style={{ verticalAlign: 'middle' }} />
+              </span>
+              
+              {/* Premium Glassmorphic Tooltip */}
+              <div className="tooltip-content" style={{
+                position: 'absolute',
+                bottom: '100%',
+                left: '50%',
+                transform: 'translateX(-50%) translateY(-8px)',
+                width: '230px',
+                background: 'rgba(15, 23, 42, 0.95)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                color: 'var(--text-primary)',
+                padding: '0.75rem',
+                borderRadius: '8px',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                lineHeight: '1.4',
+                whiteSpace: 'normal',
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.05)',
+                opacity: 0,
+                visibility: 'hidden',
+                transition: 'opacity 0.2s ease, transform 0.2s ease, visibility 0.2s',
+                zIndex: 100,
+                pointerEvents: 'none'
+              }}>
+                {description}
+                {/* Arrow */}
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 0,
+                  height: 0,
+                  borderLeft: '6px solid transparent',
+                  borderRight: '6px solid transparent',
+                  borderTop: '6px solid rgba(15, 23, 42, 0.95)'
+                }} />
+              </div>
+            </div>
+          )}
+        </div>
         <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.4rem', borderRadius: '6px' }}>
           {icon}
         </div>
