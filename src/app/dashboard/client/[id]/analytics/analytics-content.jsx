@@ -6,14 +6,85 @@ import {
   Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe
 } from 'lucide-react';
 
+function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }) {
+  const total = data.reduce((sum, item) => sum + Number(item.count || 0), 0);
+  const radius = 35;
+  const circumference = 2 * Math.PI * radius; // ~219.91
+
+  let currentOffset = 0;
+
+  return (
+    <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, margin: '0 auto' }}>
+      <svg width={size} height={size} viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)', overflow: 'visible' }}>
+        {/* Background track */}
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="transparent"
+          stroke="rgba(255, 255, 255, 0.03)"
+          strokeWidth={strokeWidth}
+        />
+        {total > 0 && data.map((item, idx) => {
+          const value = Number(item.count || 0);
+          const percentage = (value / total) * 100;
+          if (percentage <= 0) return null;
+
+          const strokeLength = (percentage / 100) * circumference;
+          const strokeOffset = currentOffset;
+          currentOffset += strokeLength;
+
+          return (
+            <circle
+              key={idx}
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="transparent"
+              stroke={item.color || '#6366F1'}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${strokeLength} ${circumference}`}
+              strokeDashoffset={-strokeOffset}
+              strokeLinecap="round"
+              style={{
+                transition: 'stroke-dashoffset 0.5s ease, stroke-dasharray 0.5s ease',
+                filter: `drop-shadow(0 0 4px ${item.color || '#6366F1'}60)`
+              }}
+            />
+          );
+        })}
+      </svg>
+      {/* Central label */}
+      <div style={{
+        position: 'absolute',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        zIndex: 2
+      }}>
+        <span style={{ fontSize: '0.62rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{totalLabel}</span>
+        <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '-0.1rem' }}>
+          {total >= 1000 ? `${(total / 1000).toFixed(1)}k` : total}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function AnalyticsContent({ result, id }) {
   const [loading, setLoading] = useState(false);
   const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown } = result;
 
-  const countryData = countryBreakdown || [
+  const countryColors = ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#6366F1'];
+  const enrichedCountryData = (countryBreakdown || [
     { name: 'Türkiye', percentage: 0, count: 0 },
     { name: 'Diğer', percentage: 0, count: 0 }
-  ];
+  ]).map((country, idx) => ({
+    ...country,
+    color: country.color || countryColors[idx % countryColors.length]
+  }));
 
   const maxUsers = Math.max(...dailyActiveUsers.map(d => d.users));
 
@@ -190,71 +261,80 @@ export default function AnalyticsContent({ result, id }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
         
         {/* Device Breakdown */}
-        <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+        <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
           <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             Cihaz Dağılımı
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {deviceBreakdown.map((dev, idx) => (
-              <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-                    {dev.name === 'Mobil' ? <Smartphone size={14} style={{ color: dev.color }} /> : dev.name === 'Masaüstü' ? <Laptop size={14} style={{ color: dev.color }} /> : <Tv size={14} style={{ color: dev.color }} />}
-                    {dev.name}
-                  </span>
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    <strong style={{ color: 'var(--text-primary)' }}>{dev.percentage}%</strong> ({Number(dev.count).toLocaleString()})
-                  </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1, flexWrap: 'wrap' }}>
+            <DonutChart data={deviceBreakdown} totalLabel="Cihaz" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1, minWidth: '180px' }}>
+              {deviceBreakdown.map((dev, idx) => (
+                <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+                      {dev.name === 'Mobil' ? <Smartphone size={14} style={{ color: dev.color }} /> : dev.name === 'Masaüstü' ? <Laptop size={14} style={{ color: dev.color }} /> : <Tv size={14} style={{ color: dev.color }} />}
+                      {dev.name}
+                    </span>
+                    <span style={{ color: 'var(--text-secondary)' }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>{dev.percentage}%</strong> ({Number(dev.count).toLocaleString()})
+                    </span>
+                  </div>
+                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${dev.percentage}%`, height: '100%', background: dev.color, borderRadius: '4px' }}></div>
+                  </div>
                 </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${dev.percentage}%`, height: '100%', background: dev.color, borderRadius: '4px' }}></div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Traffic Sources Breakdown */}
-        <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+        <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
           <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem' }}>Erişim Kanalları</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem' }}>
-            {trafficSources.map((source, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <span style={{ width: '8px', height: '8px', background: source.color, borderRadius: '50%' }}></span>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600 }}>{source.name}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1, flexWrap: 'wrap' }}>
+            <DonutChart data={trafficSources} totalLabel="Oturum" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem', flex: 1, minWidth: '180px' }}>
+              {trafficSources.map((source, idx) => (
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <span style={{ width: '8px', height: '8px', background: source.color, borderRadius: '50%' }}></span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600 }}>{source.name}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.85rem' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>{Number(source.count).toLocaleString()} Oturum</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 700, width: '40px', textAlign: 'right' }}>%{source.percentage}</span>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.85rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>{Number(source.count).toLocaleString()} Oturum</span>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 700, width: '40px', textAlign: 'right' }}>%{source.percentage}</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Coğrafi Dağılım (Ülkeler) */}
-        <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+        <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
           <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Globe size={16} style={{ color: '#8B5CF6' }} />
             Coğrafi Dağılım (Ülkeler)
           </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem' }}>
-            {countryData.map((country, idx) => (
-              <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                    {country.name}
-                  </span>
-                  <span style={{ color: 'var(--text-secondary)' }}>
-                    <strong style={{ color: 'var(--text-primary)' }}>{country.percentage}%</strong> ({Number(country.count).toLocaleString()})
-                  </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1, flexWrap: 'wrap' }}>
+            <DonutChart data={enrichedCountryData} totalLabel="Ziyaret" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem', flex: 1, minWidth: '180px' }}>
+              {enrichedCountryData.map((country, idx) => (
+                <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                      {country.name}
+                    </span>
+                    <span style={{ color: 'var(--text-secondary)' }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>{country.percentage}%</strong> ({Number(country.count).toLocaleString()})
+                    </span>
+                  </div>
+                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${country.percentage}%`, height: '100%', background: country.color, borderRadius: '4px' }}></div>
+                  </div>
                 </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${country.percentage}%`, height: '100%', background: '#8B5CF6', borderRadius: '4px' }}></div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
