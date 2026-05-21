@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getNotificationsAction } from '@/app/actions';
+import { can, getRolePermissions } from '@/lib/permissions';
 import NotificationsInbox from './notifications-inbox';
 
 export const metadata = {
@@ -14,6 +15,12 @@ function serialize(value) {
 export default async function NotificationsPage() {
   const session = await getSession();
   if (!session) redirect('/login');
+
+  // Verify permission
+  const permissions = await getRolePermissions(session);
+  if (!can(permissions, session.role, 'page.notifications')) {
+    redirect('/dashboard');
+  }
 
   // Fetch notifications for the logged-in user (up to 200 items)
   const result = await getNotificationsAction(200);

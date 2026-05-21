@@ -30,6 +30,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
   const canLogs = can(permissions, role, 'page.logs');
   const canAccounting = can(permissions, role, 'page.accounting');
   const canSendNotifications = can(permissions, role, 'page.send_notifications');
+  const canNotifications = can(permissions, role, 'page.notifications');
   const [hasNewLogs, setHasNewLogs] = useState(false);
   const [hasNewNotes, setHasNewNotes] = useState(false);
   const [unreadMailCount, setUnreadMailCount] = useState(0);
@@ -111,6 +112,10 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
   }, [pathname, mailEnabled]);
 
   useEffect(() => {
+    if (!canNotifications) {
+      setNotificationCount(0);
+      return;
+    }
     const checkNotifications = async () => {
       const result = await getNotificationUnreadCountAction();
       setNotificationCount(result?.count || 0);
@@ -119,7 +124,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
 
     const interval = setInterval(checkNotifications, 30000);
     return () => clearInterval(interval);
-  }, [pathname]);
+  }, [pathname, canNotifications]);
 
   const navItems = [
     { href: '/dashboard', label: 'Gösterge Paneli', icon: <LayoutDashboard size={20} /> },
@@ -147,7 +152,9 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
     ...(mailEnabled ? [
       { href: '/dashboard/mail', label: 'Mail', icon: <Mail size={20} /> },
     ] : []),
-    { href: '/dashboard/notifications', label: 'Bildirimlerim', icon: <Bell size={20} /> },
+    ...(canNotifications ? [
+      { href: '/dashboard/notifications', label: 'Bildirimlerim', icon: <Bell size={20} /> },
+    ] : []),
     ...(canSendNotifications ? [
       { href: '/dashboard/send-notification', label: 'Bildirim Gönder', icon: <Megaphone size={20} /> },
     ] : []),
