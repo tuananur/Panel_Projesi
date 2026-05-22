@@ -341,7 +341,8 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        compress: true
       });
       
       const pdfWidth = 297;
@@ -350,18 +351,21 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
       for (let i = 0; i < slides.length; i++) {
         const slideEl = slides[i];
         
-        // Capture each slide with scale: 1.0 to drastically reduce file size while maintaining excellent A4 resolution
+        // scale: 1.5 → daha yüksek piksel yoğunluğu = keskin metin/kenarlık
+        // quality: 0.72 → artan piksel sayısı JPEG'i daha verimli sıkıştırır, MB çok artmaz
         const canvas = await html2canvas(slideEl, {
-          scale: 1.0,
+          scale: 1.5,
           useCORS: true,
+          allowTaint: true,
           backgroundColor: '#0f172a',
           logging: false,
           width: 1123,
-          height: 794
+          height: 794,
+          imageTimeout: 0,
+          removeContainer: true
         });
 
-        // Compress using JPEG format with 0.65 compression ratio for super lightweight PDF output
-        const imgData = canvas.toDataURL('image/jpeg', 0.65);
+        const imgData = canvas.toDataURL('image/jpeg', 0.72);
 
         if (i > 0) {
           pdf.addPage();
@@ -378,6 +382,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
       setIsGeneratingPDF(false);
     }
   };
+
 
   const monthParam = searchParams.get('month');
   const yearParam = searchParams.get('year');
