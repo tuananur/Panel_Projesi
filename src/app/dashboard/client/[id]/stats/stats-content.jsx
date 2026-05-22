@@ -126,7 +126,8 @@ function SlideWrapper({ children }) {
         justifyContent: 'center', 
         alignItems: 'flex-start',
         height: `${794 * scale}px`,
-        transition: 'height 0.2s ease-out'
+        transition: 'height 0.2s ease-out',
+        position: 'relative'
       }}
     >
       <div 
@@ -135,7 +136,10 @@ function SlideWrapper({ children }) {
           transformOrigin: 'top center',
           width: '1123px',
           height: '794px',
-          flexShrink: 0
+          flexShrink: 0,
+          position: 'absolute',
+          left: '50%',
+          marginLeft: '-561.5px'
         }}
       >
         {children}
@@ -667,7 +671,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>DİJİTAL İŞ ORTAĞI</span>
             <span style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff' }}>{client.companyName}</span>
           </div>
-          <div style={{ textAlignment: 'right' }}>
+          <div style={{ textAlign: 'right' }}>
             <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>RAPOR TARİHİ</span>
             <span style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff' }}>{currentMonthName} {displayYear}</span>
           </div>
