@@ -218,7 +218,8 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   const tabContainerRef = useRef(null);
 
   // 1. Resolve analytics data (with premium fallbacks)
-  const analytics = (analyticsResult && !analyticsResult.error) ? analyticsResult : {
+  const analyticsIsValid = analyticsResult && !analyticsResult.error && analyticsResult.summary;
+  const analytics = analyticsIsValid ? analyticsResult : {
     summary: {
       activeUsers: 0,
       pageViews: 0,
