@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   TrendingUp, CheckCircle2, Clock, Play, 
   Link as LinkIcon, Edit3, Trash2, CheckCircle, Circle, 
-  ChevronRight, Layout, X, Calendar as CalendarIcon, ExternalLink,
+  ChevronLeft, ChevronRight, Layout, X, Calendar as CalendarIcon, ExternalLink,
   BookOpen, AlertCircle
 } from 'lucide-react';
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction, updateClientTabNamesAction } from '@/app/actions';
@@ -167,6 +167,18 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   const [isTabSaving, setIsTabSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
   const statsRef = useRef(null);
+  const tabContainerRef = useRef(null);
+
+  const scrollTabs = (direction) => {
+    if (tabContainerRef.current) {
+      const scrollAmount = 200;
+      tabContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [activeTask, setActiveTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1931,35 +1943,97 @@ return (
           {/* Quick-Jump Slides Tabs */}
           <div style={{ 
             display: 'flex', 
-            gap: '0.4rem', 
-            overflowX: 'auto', 
-            paddingBottom: '0.5rem', 
-            scrollbarWidth: 'none', 
-            msOverflowStyle: 'none',
+            alignItems: 'center', 
+            width: '100%', 
             borderBottom: '1px solid var(--border-color)',
+            paddingBottom: '0.5rem',
+            gap: '0.5rem',
             zIndex: 1
           }}>
-            {tabNames.map((slideTitle, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveSlide(index)}
-                style={{
-                  flexShrink: 0,
-                  padding: '0.4rem 0.75rem',
-                  borderRadius: '8px',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  transition: 'all 0.2s',
-                  backgroundColor: activeSlide === index ? 'rgba(0, 133, 255, 0.15)' : 'rgba(255, 255, 255, 0.02)',
-                  borderColor: activeSlide === index ? '#0085FF' : 'var(--border-color)',
-                  color: activeSlide === index ? '#0085FF' : 'var(--text-secondary)'
-                }}
-              >
-                {slideTitle}
-              </button>
-            ))}
+            {/* Left Scroll Button */}
+            <button
+              onClick={() => scrollTabs('left')}
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)',
+                borderRadius: '50%',
+                width: '28px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'all 0.2s',
+                padding: 0
+              }}
+              className="hover-glow"
+              title="Geri Git"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            {/* Scrollable Container */}
+            <div 
+              ref={tabContainerRef}
+              style={{ 
+                display: 'flex', 
+                gap: '0.4rem', 
+                overflowX: 'auto', 
+                scrollbarWidth: 'none', 
+                msOverflowStyle: 'none',
+                flex: 1,
+                scrollBehavior: 'smooth',
+                padding: '2px 0'
+              }}
+            >
+              {tabNames.map((slideTitle, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveSlide(index)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '0.4rem 0.75rem',
+                    borderRadius: '8px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: '1px solid',
+                    transition: 'all 0.2s',
+                    backgroundColor: activeSlide === index ? 'rgba(0, 133, 255, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+                    borderColor: activeSlide === index ? '#0085FF' : 'var(--border-color)',
+                    color: activeSlide === index ? '#0085FF' : 'var(--text-secondary)'
+                  }}
+                >
+                  {slideTitle}
+                </button>
+              ))}
+            </div>
+
+            {/* Right Scroll Button */}
+            <button
+              onClick={() => scrollTabs('right')}
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-secondary)',
+                borderRadius: '50%',
+                width: '28px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'all 0.2s',
+                padding: 0
+              }}
+              className="hover-glow"
+              title="İleri Git"
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
 
           {/* Slide Viewer Area */}
