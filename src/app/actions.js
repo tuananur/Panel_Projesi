@@ -2982,3 +2982,28 @@ export async function deleteAllNotificationsAction() {
   }
 }
 
+export async function updateClientTabNamesAction(clientId, tabNames) {
+  try {
+    const session = await getSession();
+    if (!session) return { error: 'Oturum bulunamadı.' };
+    const id = parseInt(clientId);
+    if (isNaN(id)) return { error: 'Geçersiz müşteri kimliği.' };
+
+    const key = `client_${id}_tab_names`;
+    const value = JSON.stringify(tabNames);
+
+    await prisma.setting.upsert({
+      where: { key },
+      update: { value, updatedAt: new Date() },
+      create: { key, value }
+    });
+
+    await logActivity('UPDATE', 'CLIENT', `Müşteri rapor slayt başlıkları güncellendi.`, id);
+    return { success: true };
+  } catch (error) {
+    console.error('updateClientTabNamesAction error:', error);
+    return { error: 'Slayt başlıkları güncellenemedi.' };
+  }
+}
+
+

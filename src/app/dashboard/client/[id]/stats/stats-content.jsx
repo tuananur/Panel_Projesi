@@ -8,7 +8,7 @@ import {
   ChevronRight, Layout, X, Calendar as CalendarIcon, ExternalLink,
   BookOpen, AlertCircle
 } from 'lucide-react';
-import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction } from '@/app/actions';
+import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction, updateClientTabNamesAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
 
@@ -148,10 +148,23 @@ function SlideWrapper({ children }) {
   );
 }
 
-export default function StatsContent({ client, metaResult, googleResult, analyticsResult }) {
+export default function StatsContent({ client, metaResult, googleResult, analyticsResult, customTabNames }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const DEFAULT_TAB_NAMES = [
+    'Kapak', 'Kullanıcı 1', 'Kullanıcı 2', 'Arama/SEO', 'Lokasyon', 
+    'Kanallar', 'Görünürlük', 'Sorgular', 'Blog', 'Cihazlar', 'Tarayıcılar'
+  ];
+
+  const tabNames = customTabNames && Array.isArray(customTabNames) && customTabNames.length === 11 
+    ? customTabNames 
+    : DEFAULT_TAB_NAMES;
+
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isTabModalOpen, setIsTabModalOpen] = useState(false);
+  const [editTabNames, setEditTabNames] = useState([...tabNames]);
+  const [isTabSaving, setIsTabSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
   const statsRef = useRef(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -393,6 +406,25 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
       router.refresh();
     });
   };
+
+  const handleSaveTabNames = async () => {
+    setIsTabSaving(true);
+    try {
+      const res = await updateClientTabNamesAction(client.id, editTabNames);
+      if (res.error) {
+        alert(res.error);
+      } else {
+        setIsTabModalOpen(false);
+        router.refresh();
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Sekme başlıkları kaydedilirken bir hata oluştu.');
+    } finally {
+      setIsTabSaving(false);
+    }
+  };
+
 
   const handleToggleStatus = async (task) => {
     startTransition(async () => {
@@ -1845,6 +1877,30 @@ return (
               {currentMonthName} Ayı Dijital Performans Raporu
             </h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={() => {
+                  setEditTabNames([...tabNames]);
+                  setIsTabModalOpen(true);
+                }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  borderRadius: '12px',
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  transition: 'all 0.2s'
+                }}
+                className="hover-glow"
+              >
+                <Edit3 size={14} />
+                Sekmeleri Düzenle
+              </button>
               <button 
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPDF}
@@ -1883,10 +1939,7 @@ return (
             borderBottom: '1px solid var(--border-color)',
             zIndex: 1
           }}>
-            {[
-              'Kapak', 'Kullanıcı 1', 'Kullanıcı 2', 'Arama/SEO', 'Lokasyon', 
-              'Kanallar', 'Görünürlük', 'Sorgular', 'Blog', 'Cihazlar', 'Tarayıcılar'
-            ].map((slideTitle, index) => (
+            {tabNames.map((slideTitle, index) => (
               <button
                 key={index}
                 onClick={() => setActiveSlide(index)}
@@ -1992,6 +2045,67 @@ return (
           </div>
         </div>
       </div>
+
+      {/* Sekme Başlıklarını Düzenleme Modalı */}
+      <CustomDialog 
+        isOpen={isTabModalOpen} 
+        title="Sekme Başlıklarını Düzenle" 
+        onClose={() => setIsTabModalOpen(false)} 
+        onConfirm={handleSaveTabNames}
+        loading={isTabSaving}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+            Rapor slaytlarının sekme başlıklarını özelleştirebilirsiniz. Boş bırakılan alanlarda varsayılan başlıklar kullanılacaktır.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            {DEFAULT_TAB_NAMES.map((defaultName, idx) => (
+              <div key={idx} className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <label className="input-label" style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, marginBottom: 0 }}>
+                  Slayt {idx + 1} ({defaultName})
+                </label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder={defaultName} 
+                  value={editTabNames[idx] || ''}
+                  onChange={(e) => {
+                    const newNames = [...editTabNames];
+                    newNames[idx] = e.target.value;
+                    setEditTabNames(newNames);
+                  }}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.8rem',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-primary)'
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+            <button 
+              type="button"
+              onClick={() => setEditTabNames([...DEFAULT_TAB_NAMES])}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#f43f5e',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'opacity 0.2s'
+              }}
+              className="hover-opacity"
+            >
+              Varsayılana Sıfırla
+            </button>
+          </div>
+        </div>
+      </CustomDialog>
 
       {/* Görev Düzenleme Modalı */}
       <CustomDialog 

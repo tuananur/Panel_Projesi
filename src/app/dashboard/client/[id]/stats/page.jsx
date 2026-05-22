@@ -83,12 +83,26 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
       console.error('Ads & Analytics Data Fetching Failed:', adsError);
     }
 
+    // Fetch custom tab names
+    let customTabNames = null;
+    try {
+      const tabNamesSetting = await prisma.setting.findUnique({
+        where: { key: `client_${id}_tab_names` }
+      });
+      if (tabNamesSetting) {
+        customTabNames = JSON.parse(tabNamesSetting.value);
+      }
+    } catch (dbError) {
+      console.error('Error fetching custom tab names:', dbError);
+    }
+
     return (
       <StatsContent 
         client={client} 
         metaResult={metaResult} 
         googleResult={googleResult} 
         analyticsResult={analyticsResult} 
+        customTabNames={customTabNames}
       />
     );
   } catch (error) {
