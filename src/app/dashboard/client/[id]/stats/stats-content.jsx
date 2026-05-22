@@ -279,19 +279,19 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   // 3. Define the list of all possible slides
   const allPossibleSlides = [
     { id: 'kapak', defaultTitle: 'Kapak', condition: true },
-    { id: 'kullanici_1', defaultTitle: 'Kullanıcı 1', condition: client?.analyticsEnabled === true },
-    { id: 'kullanici_2', defaultTitle: 'Kullanıcı 2', condition: client?.analyticsEnabled === true },
-    { id: 'seo_performans', defaultTitle: 'Arama/SEO', condition: activeServices.includes('SEO') },
-    { id: 'lokasyon', defaultTitle: 'Lokasyon', condition: client?.analyticsEnabled === true },
-    { id: 'kanallar', defaultTitle: 'Kanallar', condition: client?.analyticsEnabled === true },
-    { id: 'arama_gorunurluk', defaultTitle: 'Görünürlük', condition: activeServices.includes('SEO') },
-    { id: 'sorgular', defaultTitle: 'Sorgular', condition: activeServices.includes('SEO') },
+    { id: 'kullanici_1', defaultTitle: 'Kullanıcı 1', condition: client?.analyticsEnabled === true && !analytics.isMissing },
+    { id: 'kullanici_2', defaultTitle: 'Kullanıcı 2', condition: client?.analyticsEnabled === true && !analytics.isMissing },
+    { id: 'seo_performans', defaultTitle: 'Arama/SEO', condition: activeServices.includes('SEO') && !analytics.isMissing },
+    { id: 'lokasyon', defaultTitle: 'Lokasyon', condition: client?.analyticsEnabled === true && !analytics.isMissing },
+    { id: 'kanallar', defaultTitle: 'Kanallar', condition: client?.analyticsEnabled === true && !analytics.isMissing },
+    { id: 'arama_gorunurluk', defaultTitle: 'Görünürlük', condition: activeServices.includes('SEO') && !analytics.isMissing },
+    { id: 'sorgular', defaultTitle: 'Sorgular', condition: activeServices.includes('SEO') && !analytics.isMissing },
     { id: 'blog_performans', defaultTitle: 'Blog', condition: activeServices.includes('SEO') },
     { id: 'sosyal_medya', defaultTitle: 'Sosyal Medya', condition: activeServices.includes('Sosyal Medya') },
-    { id: 'meta_reklam', defaultTitle: 'Meta Reklamı', condition: client?.metaEnabled === true },
-    { id: 'google_reklam', defaultTitle: 'Google Reklamı', condition: client?.googleEnabled === true },
-    { id: 'cihazlar', defaultTitle: 'Cihazlar', condition: client?.analyticsEnabled === true },
-    { id: 'tarayicilar', defaultTitle: 'Tarayıcılar', condition: client?.analyticsEnabled === true }
+    { id: 'meta_reklam', defaultTitle: 'Meta Reklamı', condition: client?.metaEnabled === true && !metaResult?.error },
+    { id: 'google_reklam', defaultTitle: 'Google Reklamı', condition: client?.googleEnabled === true && !googleResult?.error },
+    { id: 'cihazlar', defaultTitle: 'Cihazlar', condition: client?.analyticsEnabled === true && !analytics.isMissing },
+    { id: 'tarayicilar', defaultTitle: 'Tarayıcılar', condition: client?.analyticsEnabled === true && !analytics.isMissing }
   ];
 
   const activeSlides = allPossibleSlides.filter(s => s.condition);
