@@ -350,7 +350,8 @@ export async function updateClientSettingsAction(clientId, formData) {
         googleRefreshToken: formData.get('googleRefreshToken'),
         analyticsEnabled: formData.get('analyticsEnabled') === 'on',
         analyticsPropertyId: formData.get('analyticsPropertyId'),
-        analyticsRefreshToken: formData.get('analyticsRefreshToken')
+        analyticsRefreshToken: formData.get('analyticsRefreshToken'),
+        searchConsoleSiteUrl: formData.get('searchConsoleSiteUrl') || null,
       }
     });
     await logActivity('UPDATE', 'SETTINGS', `Müşteri ayarları güncellendi.`, clientId);
@@ -1347,50 +1348,62 @@ export async function testAnalyticsConnectionAction(formData) {
 
 export async function getGoogleAnalyticsAction(clientId) {
   try {
-    const [client, globalSetting] = await Promise.all([
-      prisma.client.findUnique({ where: { id: parseInt(clientId) } }),
-      prisma.setting.findUnique({ where: { key: 'google_analytics_global_config' } })
-    ]);
-
+    const client = await prisma.client.findUnique({ where: { id: parseInt(clientId) } });
     if (!client) return { error: 'CLIENT_NOT_FOUND' };
-    
-    const globalConfig = globalSetting ? JSON.parse(globalSetting.value) : {};
-    const oauthClientId = globalConfig.clientId;
-    const oauthClientSecret = globalConfig.clientSecret;
-    const refreshToken = client.analyticsRefreshToken || globalConfig.refreshToken;
-    const propertyId = client.analyticsPropertyId;
+
+    const { getGoogleOAuthConfig, refreshGoogleAccessToken } = await import('@/lib/google-oauth');
+    const { resolveSearchConsoleSiteUrl, fetchSearchConsoleKeywords } = await import('@/lib/search-console');
+
+    const oauth = await getGoogleOAuthConfig(client);
+    const { clientId: oauthClientId, clientSecret: oauthClientSecret, refreshToken, propertyId } = oauth;
 
     if (!propertyId || !refreshToken || !oauthClientId || !oauthClientSecret) {
-      return { 
-        error: 'API_MISSING', 
-        debug: { 
-          hasId: !!propertyId, 
+      return {
+        error: 'API_MISSING',
+        debug: {
+          hasId: !!propertyId,
           hasToken: !!refreshToken,
-          analyticsEnabled: client.analyticsEnabled
-        } 
+          analyticsEnabled: client.analyticsEnabled,
+        },
       };
     }
 
-    // 1. Refresh Access Token
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id: oauthClientId,
-        client_secret: oauthClientSecret,
-        refresh_token: refreshToken,
-        grant_type: 'refresh_token'
-      })
+    const tokenResult = await refreshGoogleAccessToken({
+      clientId: oauthClientId,
+      clientSecret: oauthClientSecret,
+      refreshToken,
     });
 
-    if (!tokenResponse.ok) {
-      const errText = await tokenResponse.text();
-      console.error('Failed to refresh GA4 access token:', errText);
-      return { error: 'TOKEN_REFRESH_FAILED', details: errText };
+    if (tokenResult.error) {
+      console.error('Failed to refresh Google access token:', tokenResult.details);
+      return { error: 'TOKEN_REFRESH_FAILED', details: tokenResult.details };
     }
 
-    const tokenData = await tokenResponse.json();
-    const accessToken = tokenData.access_token;
+    const accessToken = tokenResult.accessToken;
+
+    let searchConsole = null;
+    try {
+      const siteUrl = await resolveSearchConsoleSiteUrl(accessToken, client);
+      if (siteUrl) {
+        searchConsole = await fetchSearchConsoleKeywords(accessToken, siteUrl);
+      } else {
+        searchConsole = {
+          error: 'SITE_NOT_FOUND',
+          details: 'Search Console mülkü bulunamadı. Hizmet Ayarlarından site URL girin veya müşteri web sitesini kontrol edin.',
+          keywords: [],
+        };
+      }
+    } catch (gscError) {
+      console.error('Search Console fetch failed:', gscError);
+      const msg = gscError.message || '';
+      searchConsole = {
+        error: 'GSC_FETCH_FAILED',
+        details: msg.includes('API has not been used') || msg.includes('disabled')
+          ? 'Google Search Console API Cloud Console\'da etkinleştirilmeli. OAuth token\'a webmasters.readonly yetkisi eklenmeli.'
+          : msg,
+        keywords: [],
+      };
+    }
 
     // 2. Fetch GA4 Data in parallel
     const headers = {
@@ -1708,7 +1721,8 @@ export async function getGoogleAnalyticsAction(clientId) {
       deviceBreakdown,
       trafficSources,
       topPages,
-      countryBreakdown
+      countryBreakdown,
+      searchConsole,
     };
   } catch (error) {
     console.error('Google Analytics fetch failed:', error);

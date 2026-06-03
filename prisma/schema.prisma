@@ -72,6 +72,7 @@ model Client {
   analyticsEnabled      Boolean @default(false)
   analyticsPropertyId   String? @db.Text
   analyticsRefreshToken String? @db.Text
+  searchConsoleSiteUrl  String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

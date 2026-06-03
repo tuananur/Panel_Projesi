@@ -518,11 +518,29 @@ export default function SettingsForm({ client, role }) {
               <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Google Analytics 4 mülk kimlik numaranız.</p>
             </div>
 
+            <div className="input-group">
+              <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                Search Console Site URL (isteğe bağlı)
+                <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.65rem', color: '#4285F4', textDecoration: 'underline' }}>GSC Aç</a>
+              </label>
+              <input
+                type="text"
+                name="searchConsoleSiteUrl"
+                className="input-field"
+                defaultValue={client.searchConsoleSiteUrl || ''}
+                placeholder="Örn: https://terapiyle.com/ veya sc-domain:terapiyle.com"
+              />
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                Boş bırakılırsa müşteri web sitesinden otomatik eşleştirilir. Keyword sıralama tablosu Analytics sekmesinde görünür.
+              </p>
+            </div>
+
             <div style={{ background: 'rgba(245, 158, 11, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
               <p style={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 600 }}>Bilgi:</p>
               <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                Google Analytics OAuth bağlantı anahtarı sistem genelinde <strong>Genel Ayarlar</strong> sekmesinden alınır.
-                Buraya sadece ilgili müşterinin GA4 Mülk Kimliğini girmelisiniz.
+                Google OAuth anahtarı <strong>Genel Ayarlar</strong> sekmesinden alınır (GA4 + Search Console için{' '}
+                <code style={{ fontSize: '0.65rem' }}>webmasters.readonly</code> yetkisi gerekir).
+                Buraya GA4 Mülk Kimliği ve isteğe bağlı Search Console site URL girin.
               </p>
             </div>
 

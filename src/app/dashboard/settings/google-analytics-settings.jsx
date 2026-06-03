@@ -80,13 +80,24 @@ export default function GoogleAnalyticsGlobalSettings({ initialConfig }) {
             placeholder="1//..."
             style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}
           />
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Google API Console üzerinden Google Analytics API yetkileri verilmiş ana yenileme jetonu.</p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+            OAuth Playground&apos;da hem Analytics hem Search Console için refresh token üretin. Gerekli scope:{' '}
+            <code style={{ fontSize: '0.65rem' }}>https://www.googleapis.com/auth/webmasters.readonly</code>
+          </p>
+        </div>
+
+        <div style={{ background: 'rgba(66,133,244,0.06)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(66,133,244,0.2)' }}>
+          <p style={{ fontSize: '0.75rem', color: '#4285F4', fontWeight: 600, marginBottom: '0.35rem' }}>Google Cloud — etkinleştirilmesi gereken API&apos;ler</p>
+          <ul style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', margin: 0, paddingLeft: '1.1rem', lineHeight: 1.5 }}>
+            <li>Google Analytics Data API</li>
+            <li>Google Search Console API</li>
+          </ul>
         </div>
 
         <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <ShieldCheck size={14} style={{ color: '#10b981' }} /> 
-            Bu bilgiler güvenli bir şekilde saklanır ve sadece sistem tarafından Google Analytics 4 API çağrıları için kullanılır.
+            Bu bilgiler GA4 trafik verisi ve Search Console anahtar kelime sıralaması için kullanılır.
           </p>
         </div>
 

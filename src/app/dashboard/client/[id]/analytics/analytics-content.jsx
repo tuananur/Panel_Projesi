@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { 
   TrendingUp, Users, Eye, Clock, BarChart3, 
-  Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe, HelpCircle
+  Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe, HelpCircle,
+  Search, Monitor, ArrowUp, ArrowDown, Minus, AlertCircle
 } from 'lucide-react';
 
 function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }) {
@@ -76,7 +77,8 @@ function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }
 export default function AnalyticsContent({ result, id }) {
   const [loading, setLoading] = useState(false);
   const [visiblePagesCount, setVisiblePagesCount] = useState(5);
-  const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown } = result;
+  const [keywordFilter, setKeywordFilter] = useState('');
+  const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown, searchConsole } = result;
 
   const countryColors = ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#6366F1'];
   const enrichedCountryData = (countryBreakdown || [
@@ -96,8 +98,21 @@ export default function AnalyticsContent({ result, id }) {
     }, 1000);
   };
 
+  const filteredKeywords = (searchConsole?.keywords || []).filter((row) => {
+    if (!keywordFilter.trim()) return true;
+    return row.keyword.toLowerCase().includes(keywordFilter.toLowerCase());
+  });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+      <SearchConsoleKeywordsSection
+        searchConsole={searchConsole}
+        clientId={id}
+        keywordFilter={keywordFilter}
+        onKeywordFilterChange={setKeywordFilter}
+        filteredKeywords={filteredKeywords}
+      />
       
       {/* Realtime & Refresh Header */}
       <div style={{ 
@@ -451,6 +466,147 @@ export default function AnalyticsContent({ result, id }) {
         }
       `}</style>
     </div>
+  );
+}
+
+function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, onKeywordFilterChange, filteredKeywords }) {
+  const sc = searchConsole;
+
+  return (
+    <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid #4285F4' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+        <div>
+          <h2 className="heading-2" style={{ marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Search size={22} style={{ color: '#4285F4' }} />
+            Takip Edilen Anahtar Kelimeler
+          </h2>
+          <p className="text-muted" style={{ fontSize: '0.85rem', maxWidth: '640px' }}>
+            Google Search Console verisi — {sc?.device || 'Masaüstü'} · {sc?.country || 'Türkiye'}
+            {sc?.periodLabel ? ` · ${sc.periodLabel}` : ''}
+          </p>
+        </div>
+        {sc?.totalKeywords > 0 && (
+          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', background: 'rgba(66,133,244,0.1)', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(66,133,244,0.25)' }}>
+            {sc.totalKeywords} sorgu
+          </div>
+        )}
+      </div>
+
+      {sc?.error ? (
+        <div style={{ padding: '1.25rem', borderRadius: '10px', background: 'rgba(245,158,11,0.08)', border: '1px dashed rgba(245,158,11,0.35)', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+          <AlertCircle size={20} style={{ color: '#F59E0B', flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <p style={{ fontWeight: 700, marginBottom: '0.35rem', color: '#F59E0B' }}>Search Console verisi alınamadı</p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{sc.details}</p>
+            <a href={`/dashboard/client/${clientId}/settings`} style={{ fontSize: '0.8rem', color: '#4285F4', fontWeight: 600, marginTop: '0.5rem', display: 'inline-block' }}>
+              Hizmet Ayarlarına git →
+            </a>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div style={{ marginBottom: '1rem' }}>
+            <input
+              type="text"
+              className="input-field"
+              placeholder="Anahtar kelime ara..."
+              value={keywordFilter}
+              onChange={(e) => onKeywordFilterChange(e.target.value)}
+              style={{ maxWidth: '320px' }}
+            />
+          </div>
+
+          {filteredKeywords.length === 0 ? (
+            <p className="text-muted" style={{ textAlign: 'center', padding: '2rem 0' }}>
+              Bu dönem için organik sorgu verisi yok veya filtre eşleşmedi.
+            </p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '720px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>
+                    <th style={{ padding: '0.75rem 0.5rem', width: 72 }}>Sıra</th>
+                    <th style={{ padding: '0.75rem 0.5rem' }}>Anahtar Kelime</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: 160 }}>Değişim</th>
+                    <th style={{ padding: '0.75rem 0.5rem' }}>URL</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: 40 }} />
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredKeywords.map((row) => (
+                    <KeywordRankRow key={`${row.keyword}-${row.url}`} row={row} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '1rem', lineHeight: 1.45 }}>
+            {sc?.compareLabel || 'Önceki döneme göre'} · Ortalama pozisyon (Google). Hacim ve SEO zorluğu Search Console&apos;da yoktur.
+            {sc?.siteUrl ? ` · Mülk: ${sc.siteUrl}` : ''}
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+function KeywordRankRow({ row }) {
+  const changeColor = row.improved ? '#10b981' : row.positionChange < 0 ? '#ef4444' : 'var(--text-secondary)';
+  const ChangeIcon = row.positionChange > 0 ? ArrowUp : row.positionChange < 0 ? ArrowDown : Minus;
+  const changeLabel = row.positionChange > 0 ? `+${row.positionChange}` : String(row.positionChange);
+
+  let urlDisplay = row.url || '—';
+  try {
+    if (row.url) {
+      const u = new URL(row.url.startsWith('http') ? row.url : `https://${row.url}`);
+      urlDisplay = u.pathname.length > 1 ? u.pathname : u.hostname;
+    }
+  } catch {
+    urlDisplay = row.url;
+  }
+
+  return (
+    <tr className="table-row-hover" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <td style={{ padding: '0.9rem 0.5rem', fontWeight: 900, fontSize: '1.35rem', color: 'var(--text-primary)', verticalAlign: 'middle' }}>
+        {row.position}
+      </td>
+      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle' }}>
+        <div style={{ fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.35 }}>{row.keyword}</div>
+        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+          Türkçe / Türkiye
+          {row.impressions > 0 && (
+            <span style={{ marginLeft: '0.5rem' }}>· {row.impressions.toLocaleString('tr-TR')} gösterim</span>
+          )}
+        </div>
+      </td>
+      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', fontWeight: 700 }}>
+          <span style={{ color: 'var(--text-secondary)' }}>{row.previousPosition}</span>
+          <span style={{ color: 'var(--text-secondary)' }}>→</span>
+          <span style={{ color: 'var(--text-primary)' }}>{row.position}</span>
+          <ChangeIcon size={14} style={{ color: changeColor }} />
+          <span style={{ color: changeColor }}>{changeLabel}</span>
+        </div>
+      </td>
+      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle', maxWidth: 280 }}>
+        {row.url ? (
+          <a
+            href={row.url.startsWith('http') ? row.url : `https://${row.url}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: '0.78rem', color: '#4285F4', wordBreak: 'break-all', lineHeight: 1.35 }}
+          >
+            {urlDisplay}
+          </a>
+        ) : (
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>—</span>
+        )}
+      </td>
+      <td style={{ padding: '0.9rem 0.5rem', textAlign: 'center', verticalAlign: 'middle' }}>
+        <Monitor size={16} style={{ color: 'var(--text-secondary)', opacity: 0.6 }} title="Masaüstü" />
+      </td>
+    </tr>
   );
 }
 

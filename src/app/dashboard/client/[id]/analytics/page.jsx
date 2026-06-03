@@ -22,8 +22,8 @@ export default async function GoogleAnalyticsPage({ params }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <h1 className="heading-1" style={{ marginBottom: '0.5rem' }}>Google Analytics (GA4)</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Müşterinin web sitesi trafik performansını ve kullanıcı davranışlarını canlı takip edin.</p>
+          <h1 className="heading-1" style={{ marginBottom: '0.5rem' }}>Google Analytics & Search Console</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Organik anahtar kelime sıralamaları (GSC) ve site trafik performansı (GA4).</p>
         </div>
         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
           Canlı İzleme Aktif
