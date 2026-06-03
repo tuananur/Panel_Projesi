@@ -273,6 +273,17 @@ model AccountingDebt {
   updatedAt   DateTime @updatedAt
 }
 
+model MealOrder {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @db.Date
+  personCount Int
+  cost        Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([date])
+}
+
 model Setting {
   key       String   @id
   value     String   @db.Text

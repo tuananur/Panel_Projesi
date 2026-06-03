@@ -18,6 +18,7 @@ export const LOG_ENTITY_OPTIONS = [
   { value: 'SETTINGS', label: 'Ayarlar' },
   { value: 'MAIL', label: 'Mail' },
   { value: 'ACCOUNTING', label: 'Muhasebe' },
+  { value: 'MEAL', label: 'Yemek' },
   { value: 'META_ADS', label: 'Meta Ads' },
   { value: 'GOOGLE_ADS', label: 'Google Ads' },
   { value: 'META_ARMY', label: 'Meta Army' },

@@ -33,6 +33,7 @@ export const PERMISSION_GROUPS = [
       { key: 'page.clients', label: 'Müşteriler' },
       { key: 'page.users', label: 'Kullanıcılar' },
       { key: 'page.accounting', label: 'Muhasebe' },
+      { key: 'page.meals', label: 'Yemek' },
       { key: 'page.logs', label: 'Sistem Logları' },
       { key: 'page.credentials', label: 'Giriş Bilgileri' },
       { key: 'page.notes', label: 'Kişisel Notlar' },
@@ -64,6 +65,7 @@ export const ALL_PERMISSION_KEYS = PERMISSION_GROUPS.flatMap((g) => g.items.map(
 // keep the same access until an admin changes the configuration.
 export const DEFAULT_PERMISSIONS = {
   DESIGNER: {
+    'page.meals': true,
     'page.credentials': true,
     'page.notes': true,
     'page.work_items': true,
@@ -80,6 +82,7 @@ export const DEFAULT_PERMISSIONS = {
     'client.tab.settings': true,
   },
   DESIGNER_MANAGER: {
+    'page.meals': true,
     'page.credentials': true,
     'page.notes': true,
     'page.work_items': true,
@@ -96,6 +99,7 @@ export const DEFAULT_PERMISSIONS = {
     'client.tab.settings': true,
   },
   ADVERTISER: {
+    'page.meals': true,
     'page.credentials': true,
     'page.notes': true,
     'page.work_items': true,
@@ -112,6 +116,7 @@ export const DEFAULT_PERMISSIONS = {
     'client.tab.settings': true,
   },
   ADVERTISER_MANAGER: {
+    'page.meals': true,
     'page.credentials': true,
     'page.notes': true,
     'page.work_items': true,
@@ -128,6 +133,7 @@ export const DEFAULT_PERMISSIONS = {
     'client.tab.settings': true,
   },
   DEVELOPER: {
+    'page.meals': true,
     'page.credentials': false,
     'page.notes': true,
     'page.work_items': true,

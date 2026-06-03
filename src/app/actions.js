@@ -2005,6 +2005,64 @@ export async function deleteAccountingDebtAction(formData) {
   }
 }
 
+function parseMealOrderDate(value) {
+  if (!value) {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+}
+
+export async function addMealOrderAction(formData) {
+  const personCount = parseInt(formData.get('personCount'), 10);
+  const cost = parseFloat(formData.get('cost'));
+  const date = parseMealOrderDate(formData.get('date'));
+
+  if (!date) return { error: 'Geçersiz tarih.' };
+  if (!personCount || personCount < 1 || personCount > 10) {
+    return { error: 'Kişi sayısı 1 ile 10 arasında olmalı.' };
+  }
+  if (Number.isNaN(cost) || cost < 0) {
+    return { error: 'Geçerli bir yemek ücreti girin.' };
+  }
+
+  try {
+    await prisma.mealOrder.create({
+      data: { date, personCount, cost },
+    });
+    const dateLabel = date.toLocaleDateString('tr-TR');
+    await logActivity(
+      'CREATE',
+      'MEAL',
+      `Yemek kaydı: ${dateLabel} — ${personCount} kişi, ${cost} TL`
+    );
+    return { success: true };
+  } catch (error) {
+    console.error('Meal order create error:', error);
+    return { error: 'Yemek kaydı eklenemedi.' };
+  }
+}
+
+export async function deleteMealOrderAction(formData) {
+  const id = parseInt(formData.get('id'), 10);
+  if (!id) return { error: 'Geçersiz ID' };
+
+  try {
+    const order = await prisma.mealOrder.findUnique({ where: { id } });
+    await prisma.mealOrder.delete({ where: { id } });
+    if (order) {
+      const dateLabel = new Date(order.date).toLocaleDateString('tr-TR');
+      await logActivity('DELETE', 'MEAL', `Yemek kaydı silindi: ${dateLabel} — ${order.personCount} kişi`);
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Meal order delete error:', error);
+    return { error: 'Kayıt silinemedi.' };
+  }
+}
+
 export async function updateSocialCredentialsAction(clientId, platform, type, value) {
   try {
     const client = await prisma.client.findUnique({
