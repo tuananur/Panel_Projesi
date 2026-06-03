@@ -4,11 +4,17 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Plus, Trash2, Calendar, Wallet, 
-  TrendingUp, TrendingDown, Info, 
-  ArrowRightCircle, ChevronRight, BarChart3,
-  DollarSign, PieChart
+  TrendingUp, TrendingDown, 
+  BarChart3,
+  PieChart, Scale, Check
 } from 'lucide-react';
-import { addAccountingEntryAction, deleteAccountingEntryAction } from '@/app/actions';
+import {
+  addAccountingEntryAction,
+  deleteAccountingEntryAction,
+  addAccountingDebtAction,
+  toggleAccountingDebtPaidAction,
+  deleteAccountingDebtAction,
+} from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
 
@@ -134,14 +140,16 @@ function expandLedgerEventsUpTo(entries, cutoffEnd) {
   return out;
 }
 
-export default function AccountingClient({ initialEntries, userRole }) {
+export default function AccountingClient({ initialEntries, initialDebts = [], userRole }) {
   const router = useRouter();
   const { setGlobalLoading } = useTheme();
   const [loading, setLoading] = useState(false);
+  const [debtLoading, setDebtLoading] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [entryType, setEntryType] = useState('INCOME'); // INCOME or EXPENSE
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [showPaidDebts, setShowPaidDebts] = useState(false);
 
   // Generate helper for months
   const months = MONTH_NAMES_TR;
@@ -237,6 +245,65 @@ export default function AccountingClient({ initialEntries, userRole }) {
   const totalIncome = incomes.reduce((sum, e) => sum + e.displayAmount, 0);
   const totalExpense = expenses.reduce((sum, e) => sum + e.displayAmount, 0);
   const netProfit = totalIncome - totalExpense;
+
+  const openDebts = useMemo(
+    () => initialDebts.filter((d) => !d.isPaid),
+    [initialDebts]
+  );
+  const paidDebts = useMemo(
+    () => initialDebts.filter((d) => d.isPaid),
+    [initialDebts]
+  );
+  const totalOpenDebt = useMemo(
+    () => openDebts.reduce((sum, d) => sum + (d.amount ?? 0), 0),
+    [openDebts]
+  );
+  const visibleDebts = showPaidDebts ? initialDebts : openDebts;
+
+  const handleAddDebt = async (e) => {
+    e.preventDefault();
+    if (debtLoading) return;
+    setDebtLoading(true);
+    setGlobalLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const result = await addAccountingDebtAction(formData);
+    if (result.success) {
+      e.currentTarget.reset();
+      router.refresh();
+    } else {
+      alert(result.error);
+    }
+    setDebtLoading(false);
+    setGlobalLoading(false);
+  };
+
+  const handleToggleDebtPaid = async (id, isPaid) => {
+    if (debtLoading) return;
+    setDebtLoading(true);
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('isPaid', isPaid ? 'true' : 'false');
+    const result = await toggleAccountingDebtPaidAction(formData);
+    if (!result.success) alert(result.error);
+    router.refresh();
+    setDebtLoading(false);
+    setGlobalLoading(false);
+  };
+
+  const handleDeleteDebt = async (id) => {
+    if (debtLoading) return;
+    if (!confirm('Bu borç kaydını silmek istediğinize emin misiniz?')) return;
+    setDebtLoading(true);
+    setGlobalLoading(true);
+    const formData = new FormData();
+    formData.append('id', id);
+    const result = await deleteAccountingDebtAction(formData);
+    if (!result.success) alert(result.error);
+    router.refresh();
+    setDebtLoading(false);
+    setGlobalLoading(false);
+  };
 
   const handleAddEntry = async (formData) => {
     if (loading) return;
@@ -359,6 +426,100 @@ export default function AccountingClient({ initialEntries, userRole }) {
           <p style={{ fontSize: '0.75rem', marginTop: '0.5rem', fontWeight: 600 }}>
             {netProfit >= 0 ? 'Bu ay kârdayız! 📈' : 'Bu ay içerideyiz. 📉'}
           </p>
+        </div>
+      </div>
+
+      {/* Borçlar */}
+      <div className="glass-panel" style={{ padding: '1.75rem', borderLeft: '4px solid #a855f7' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Scale size={24} style={{ color: '#a855f7' }} />
+            <div>
+              <h2 className="heading-2" style={{ marginBottom: '0.15rem' }}>Borçlar</h2>
+              <p className="text-muted" style={{ fontSize: '0.85rem', maxWidth: '520px' }}>
+                Kredi, tedarikçi, vergi vb. borçlarınızı buraya yazın. Aylık tekrar etmez; sadece borç listesi.
+              </p>
+            </div>
+          </div>
+          <div style={{
+            padding: '0.6rem 1.2rem',
+            borderRadius: '10px',
+            background: 'rgba(168,85,247,0.1)',
+            border: '1px solid #a855f7',
+            textAlign: 'right',
+          }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Açık borç toplamı</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#a855f7' }}>
+              {totalOpenDebt.toLocaleString('tr-TR')} TL
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+              {openDebts.length} açık · {paidDebts.length} ödendi
+            </div>
+          </div>
+        </div>
+
+        <form
+          onSubmit={handleAddDebt}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '0.75rem',
+            alignItems: 'end',
+            marginBottom: '1.25rem',
+            padding: '1rem',
+            borderRadius: '12px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid var(--border-color)',
+          }}
+        >
+          <div className="input-group" style={{ margin: 0 }}>
+            <label className="input-label">Borç / kime</label>
+            <input
+              type="text"
+              name="description"
+              className="input-field"
+              placeholder="Örn. X Bankası kredi..."
+              required
+            />
+          </div>
+          <div className="input-group" style={{ margin: 0 }}>
+            <label className="input-label">Tutar (TL)</label>
+            <input type="number" step="0.01" min="0" name="amount" className="input-field" placeholder="İsteğe bağlı" />
+          </div>
+          <div className="input-group" style={{ margin: 0 }}>
+            <label className="input-label">Not</label>
+            <input type="text" name="note" className="input-field" placeholder="Vade, IBAN..." />
+          </div>
+          <button type="submit" className="btn btn-primary" disabled={debtLoading} style={{ height: '42px', whiteSpace: 'nowrap' }}>
+            <Plus size={16} /> Ekle
+          </button>
+        </form>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+            <input
+              type="checkbox"
+              checked={showPaidDebts}
+              onChange={(e) => setShowPaidDebts(e.target.checked)}
+            />
+            Ödenenleri de göster
+          </label>
+        </div>
+
+        <div className="card" style={{ padding: 0 }}>
+          {visibleDebts.length > 0 ? (
+            visibleDebts.map((debt) => (
+              <DebtItem
+                key={debt.id}
+                debt={debt}
+                onTogglePaid={handleToggleDebtPaid}
+                onDelete={handleDeleteDebt}
+                disabled={debtLoading}
+              />
+            ))
+          ) : (
+            <EmptyList message={showPaidDebts ? 'Henüz borç kaydı yok.' : 'Açık borç yok. Yukarıdan ekleyebilirsiniz.'} />
+          )}
         </div>
       </div>
 
@@ -642,6 +803,89 @@ function EntryItem({ item, onDelete, color }) {
           style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', padding: '0.25rem' }}
           onMouseEnter={(e) => e.target.style.color = '#ef4444'}
           onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.2)'}
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DebtItem({ debt, onTogglePaid, onDelete, disabled }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '0.75rem',
+        padding: '1rem 1.1rem',
+        borderBottom: '1px solid rgba(255,255,255,0.03)',
+        opacity: debt.isPaid ? 0.55 : 1,
+      }}
+    >
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onTogglePaid(debt.id, !debt.isPaid)}
+        title={debt.isPaid ? 'Tekrar açık işaretle' : 'Ödendi işaretle'}
+        style={{
+          flexShrink: 0,
+          width: 28,
+          height: 28,
+          borderRadius: '8px',
+          border: `2px solid ${debt.isPaid ? '#10b981' : 'rgba(255,255,255,0.2)'}`,
+          background: debt.isPaid ? 'rgba(16,185,129,0.2)' : 'transparent',
+          color: debt.isPaid ? '#10b981' : 'var(--text-secondary)',
+          cursor: disabled ? 'wait' : 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: '0.15rem',
+        }}
+      >
+        {debt.isPaid && <Check size={14} strokeWidth={3} />}
+      </button>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            textDecoration: debt.isPaid ? 'line-through' : 'none',
+          }}
+        >
+          {debt.description}
+        </div>
+        {debt.note && (
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+            {debt.note}
+          </div>
+        )}
+        {debt.isPaid && (
+          <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700, marginTop: '0.2rem', display: 'inline-block' }}>
+            Ödendi
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+        {debt.amount != null && (
+          <div
+            style={{
+              fontWeight: 800,
+              fontSize: '1rem',
+              color: '#a855f7',
+              textDecoration: debt.isPaid ? 'line-through' : 'none',
+            }}
+          >
+            {debt.amount.toLocaleString('tr-TR')} TL
+          </div>
+        )}
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onDelete(debt.id)}
+          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: disabled ? 'wait' : 'pointer', padding: '0.25rem' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#ef4444'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)'; }}
         >
           <Trash2 size={14} />
         </button>

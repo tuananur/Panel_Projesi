@@ -1937,6 +1937,74 @@ export async function getAccountingEntriesAction() {
     return { error: 'Kayıtlar getirilemedi.' };
   }
 }
+
+export async function addAccountingDebtAction(formData) {
+  const description = String(formData.get('description') || '').trim();
+  const note = String(formData.get('note') || '').trim();
+  const amountRaw = formData.get('amount');
+  const amount = amountRaw === '' || amountRaw == null ? null : parseFloat(amountRaw);
+
+  if (!description) {
+    return { error: 'Borç açıklaması gerekli.' };
+  }
+  if (amount != null && (Number.isNaN(amount) || amount < 0)) {
+    return { error: 'Geçerli bir tutar girin.' };
+  }
+
+  try {
+    await prisma.accountingDebt.create({
+      data: {
+        description,
+        note: note || null,
+        amount,
+      },
+    });
+    const amountLabel = amount != null ? ` (${amount} TL)` : '';
+    await logActivity('CREATE', 'ACCOUNTING', `Borç eklendi: ${description}${amountLabel}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Accounting debt create error:', error);
+    return { error: 'Borç kaydedilemedi.' };
+  }
+}
+
+export async function toggleAccountingDebtPaidAction(formData) {
+  const id = parseInt(formData.get('id'), 10);
+  const isPaid = formData.get('isPaid') === 'true';
+  if (!id) return { error: 'Geçersiz ID' };
+
+  try {
+    const debt = await prisma.accountingDebt.update({
+      where: { id },
+      data: { isPaid },
+    });
+    await logActivity(
+      'UPDATE',
+      'ACCOUNTING',
+      `Borç ${isPaid ? 'ödendi işaretlendi' : 'açık işaretlendi'}: ${debt.description}`
+    );
+    return { success: true };
+  } catch (error) {
+    console.error('Accounting debt toggle error:', error);
+    return { error: 'Borç güncellenemedi.' };
+  }
+}
+
+export async function deleteAccountingDebtAction(formData) {
+  const id = parseInt(formData.get('id'), 10);
+  if (!id) return { error: 'Geçersiz ID' };
+
+  try {
+    const debt = await prisma.accountingDebt.findUnique({ where: { id } });
+    await prisma.accountingDebt.delete({ where: { id } });
+    await logActivity('DELETE', 'ACCOUNTING', `Borç silindi: ${debt?.description}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Accounting debt delete error:', error);
+    return { error: 'Borç silinemedi.' };
+  }
+}
+
 export async function updateSocialCredentialsAction(clientId, platform, type, value) {
   try {
     const client = await prisma.client.findUnique({

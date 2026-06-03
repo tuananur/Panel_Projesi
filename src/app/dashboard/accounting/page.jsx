@@ -15,12 +15,22 @@ export default async function AccountingPage() {
   if (!can(permissions, session.role, 'page.accounting')) redirect('/dashboard');
 
   const entries = await prisma.accountingEntry.findMany({
-    orderBy: { date: 'desc' }
+    orderBy: { date: 'desc' },
   });
 
+  let debts = [];
+  try {
+    debts = await prisma.accountingDebt.findMany({
+      orderBy: [{ isPaid: 'asc' }, { createdAt: 'desc' }],
+    });
+  } catch (error) {
+    console.error('AccountingDebt fetch error (migration pending?):', error);
+  }
+
   return (
-    <AccountingClient 
-      initialEntries={entries} 
+    <AccountingClient
+      initialEntries={entries}
+      initialDebts={debts}
       userRole={session.role}
     />
   );
