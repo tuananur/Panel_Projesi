@@ -1415,6 +1415,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
             width: '98%', 
             maxWidth: '1380px', 
+            height: '92vh',
             maxHeight: '92vh',
             background: '#1a1f2e', 
             borderRadius: '24px',
@@ -1423,15 +1424,15 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             animation: 'modalFadeIn 0.3s ease-out',
             overflow: 'hidden'
           }}>
-            <div style={{ padding: '1.5rem 2rem 0.8rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
               <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>
                 Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'}
               </h2>
               <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleCreateEntity} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', height: '100%', maxHeight: '68vh' }}>
+            <form onSubmit={handleCreateEntity} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', flex: 1, overflow: 'hidden', minHeight: 0, padding: '1.5rem 2rem 0.5rem 2rem' }}>
                 {/* Sol Sütun - Hiyerarşik Ağaç Görünümü */}
                 <div style={{ background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
                   <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
@@ -1624,7 +1625,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                 </div>
 
                 {/* Sağ Sütun - Önizleme Mockup / Audience Summary */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', overflowY: 'auto', paddingRight: '0.5rem' }}>
                   {activeTab === 'ads' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
@@ -1680,7 +1681,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                 </div>
               </div>
 
-              <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+              <div style={{ padding: '0.8rem 2rem 1.5rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
                 <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>Vazgeç</button>
                 <button type="submit" disabled={isCreating} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #0064e0 0%, #00d4ff 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: isCreating ? 'not-allowed' : 'pointer', fontSize: '0.95rem', opacity: isCreating ? 0.7 : 1 }}>
                   {isCreating ? 'Oluşturuluyor...' : 'Oluştur'}
@@ -1699,6 +1700,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
             width: '98%',
             maxWidth: '1380px', 
+            height: '92vh',
             maxHeight: '92vh',
             background: '#1a1f2e', 
             borderRadius: '24px',
@@ -1708,7 +1710,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             overflow: 'hidden'
           }}>
             {/* Header */}
-            <div style={{ padding: '1.5rem 2rem 0.8rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
               <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>
                 {selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} Detayı
               </h2>
@@ -1716,8 +1718,8 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             </div>
 
             {/* Content Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', height: '100%', maxHeight: '68vh' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', flex: 1, overflow: 'hidden', minHeight: 0, padding: '1.5rem 2rem 0.5rem 2rem' }}>
                 {/* Sol Sütun - Hiyerarşik Ağaç Görünümü */}
                 <div style={{ background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
                   <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
@@ -1920,7 +1922,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                 </div>
 
                 {/* Sağ Sütun - Önizleme Mockup / Audience Summary */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', overflowY: 'auto', paddingRight: '0.5rem' }}>
                   {selectedEntity.type === 'ad' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
@@ -1978,7 +1980,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             </div>
 
             {/* Footer Buttons */}
-            <div style={{ padding: '1.2rem 2rem 2rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ padding: '0.8rem 2rem 1.5rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
               {isEditingEntity ? (
                 <>
                   <button onClick={() => setIsEditingEntity(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>İptal</button>
