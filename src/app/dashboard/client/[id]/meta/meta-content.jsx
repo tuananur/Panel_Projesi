@@ -1492,18 +1492,16 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
       {/* CREATE ENTITY MODAL */}
       {showCreateModal && (
         <>
-          <div onClick={() => setShowCreateModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} />
+          <div onClick={() => setShowCreateModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10000 }} />
           <div style={{ 
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-            width: '98%', 
-            maxWidth: '1380px', 
-            height: '92vh',
-            maxHeight: '92vh',
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            width: '100vw', 
+            height: '100vh',
             background: '#f0f2f5', 
-            borderRadius: '24px',
-            boxShadow: '0 12px 28px 0 rgba(0,0,0,0.2), 0 2px 4px 0 rgba(0,0,0,0.1)', zIndex: 10001, 
+            borderRadius: 0,
+            boxShadow: 'none', zIndex: 10001, 
             display: 'flex', flexDirection: 'column',
-            animation: 'modalFadeIn 0.3s ease-out',
+            animation: 'modalFadeIn 0.2s ease-out',
             overflow: 'hidden'
           }}>
             <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #dddfe2', background: '#ffffff', flexShrink: 0 }}>
@@ -1784,18 +1782,16 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
       {/* PREMIUM CENTERED MODAL */}
       {showDetailsPanel && selectedEntity && (
         <>
-          <div onClick={() => setShowDetailsPanel(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} />
+          <div onClick={() => setShowDetailsPanel(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10000 }} />
           <div style={{ 
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-            width: '98%',
-            maxWidth: '1380px', 
-            height: '92vh',
-            maxHeight: '92vh',
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            width: '100vw', 
+            height: '100vh',
             background: '#f0f2f5', 
-            borderRadius: '24px',
-            boxShadow: '0 12px 28px 0 rgba(0,0,0,0.2), 0 2px 4px 0 rgba(0,0,0,0.1)', zIndex: 10001, 
+            borderRadius: 0,
+            boxShadow: 'none', zIndex: 10001, 
             display: 'flex', flexDirection: 'column',
-            animation: 'modalFadeIn 0.3s ease-out',
+            animation: 'modalFadeIn 0.2s ease-out',
             overflow: 'hidden'
           }}>
             {/* Header */}
