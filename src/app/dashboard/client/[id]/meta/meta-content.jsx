@@ -387,40 +387,67 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
     if (placement === 'fb_feed') {
       return (
-        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '12px', border: '1px solid #dddfe2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid #e5e7eb', gap: '8px' }}>
-            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#1877f2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.8rem', fontWeight: 800 }}>
+        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '8px', border: '1px solid #dddfe2', fontFamily: 'Segoe UI, Helvetica, Arial, sans-serif', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', padding: '12px 12px 8px 12px', gap: '8px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#e7f3ff', border: '1px solid rgba(24,119,242,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1877f2', fontSize: '14px', fontWeight: 'bold', flexShrink: 0 }}>
               {pageName.charAt(0).toUpperCase()}
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21' }}>{pageName}</div>
-              <div style={{ fontSize: '0.65rem', color: '#606770', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 500 }}>
-                Sponsorlu • 🌐
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: '#050505', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pageName}</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" style={{ fill: '#1877f2', flexShrink: 0 }}><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              </div>
+              <div style={{ fontSize: '11px', color: '#65676b', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '1px' }}>
+                Sponsorlu • <svg viewBox="0 0 16 16" width="10" height="10" style={{ fill: '#65676b' }}><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14.5a6.5 6.5 0 01-4.25-1.57c.21-.4.49-.75.83-1.03.41-.33.91-.5 1.42-.5h.67c.36 0 .69-.19.87-.5l.48-.82a1 1 0 00-.09-1.09l-.4-.49a1 1 0 00-.78-.36H5.2c-.37 0-.7-.2-.86-.53l-.22-.44a1 1 0 010-.89l.3-.61c.14-.28.42-.46.73-.49l1.1-.11a1 1 0 00.74-.45l.4-.6a1 1 0 01.83-.45h.71c.38 0 .73-.21.9-.55l.2-.4a1 1 0 00.1-.45V3c.27.05.54.12.8.2v.94c0 .35.19.67.5.85l.8.48c.31.18.5.52.5.88v.25c0 .32.15.62.4.82l.8.64a1 1 0 00.7.27H13c.24 0 .47.09.64.25l.48.48a6.5 6.5 0 01-6.12 7.71z"/></svg>
               </div>
             </div>
-            <div style={{ color: '#606770', fontSize: '0.9rem' }}>•••</div>
+            <div style={{ color: '#65676b', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', padding: '0 4px' }}>•••</div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#1c1e21', padding: '8px 12px', whiteSpace: 'pre-wrap', lineHeight: '1.4', maxHeight: '100px', overflowY: 'auto' }}>
+          <div style={{ fontSize: '13px', color: '#050505', padding: '0 12px 10px 12px', whiteSpace: 'pre-wrap', lineHeight: '1.4', wordBreak: 'break-word' }}>
             {primaryText || 'Açıklama girilmedi.'}
           </div>
           <div style={{ width: '100%', height: '180px', background: '#f0f2f5', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', background: '#f0f2f5', padding: '10px 12px', gap: '8px', borderBottomRightRadius: '12px', borderBottomLeftRadius: '12px', borderTop: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifycontent: 'space-between', background: '#f0f2f5', padding: '10px 12px', gap: '8px', borderTop: '1px solid #e5e7eb' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.65rem', color: '#606770', textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: '11px', color: '#65676b', textTransform: 'uppercase', letterSpacing: '0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {displayLink}
               </div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#050505', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                 {headline || 'Başlık girilmedi.'}
               </div>
-              <div style={{ fontSize: '0.65rem', color: '#606770', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
-                {description || 'Açıklama girilmedi.'}
-              </div>
+              {description && (
+                <div style={{ fontSize: '11.5px', color: '#65676b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
+                  {description}
+                </div>
+              )}
             </div>
-            <div style={{ background: '#e4e6eb', color: '#1c1e21', padding: '6px 12px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', border: '1px solid #ccd0d5' }}>
+            <div style={{ background: '#ffffff', color: '#050505', border: '1px solid #ccd0d5', padding: '5px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap', cursor: 'pointer' }}>
               {ctaLabel}
             </div>
+          </div>
+          {/* Facebook Feed Likes & Interaction Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', borderBottom: '1px solid #e5e7eb', fontSize: '11.5px', color: '#65676b' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '15px', height: '15px', borderRadius: '50%', background: '#1877f2', color: '#ffffff', fontSize: '9px' }}>👍</span>
+              <span>184 Beğeni</span>
+            </div>
+            <div>
+              <span>24 Yorum • 11 Paylaşım</span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', padding: '2px 4px', fontSize: '12px', color: '#65676b', fontWeight: '600' }}>
+            <button type="button" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'none', border: 'none', padding: '6px 0', color: '#65676b', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
+              <span>👍</span> Beğen
+            </button>
+            <button type="button" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'none', border: 'none', padding: '6px 0', color: '#65676b', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
+              <span>💬</span> Yorum Yap
+            </button>
+            <button type="button" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'none', border: 'none', padding: '6px 0', color: '#65676b', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
+              <span>↩️</span> Paylaş
+            </button>
           </div>
         </div>
       );
@@ -428,34 +455,52 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
     if (placement === 'ig_feed') {
       return (
-        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '12px', border: '1px solid #dddfe2' }}>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid #e5e7eb', gap: '8px' }}>
-            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', padding: '2px' }}>
-              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '0.7rem', fontWeight: 800 }}>
+        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '8px', border: '1px solid #dddfe2', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', gap: '8px' }}>
+            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', padding: '1.5px', boxSizing: 'border-box', flexShrink: 0 }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '10px', fontWeight: 'bold' }}>
                 {igHandle.charAt(0).toUpperCase()}
               </div>
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21' }}>{igHandle}</div>
-              <div style={{ fontSize: '0.65rem', color: '#606770', fontWeight: 500 }}>Sponsorlu</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '12px', fontWeight: '600', color: '#262626', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{igHandle}</div>
+              <div style={{ fontSize: '11px', color: '#262626', marginTop: '1px' }}>Sponsorlu</div>
             </div>
-            <div style={{ color: '#606770', fontSize: '0.9rem' }}>•••</div>
+            <div style={{ color: '#262626', fontSize: '14px', cursor: 'pointer', padding: '0 4px' }}>•••</div>
           </div>
+          {/* Image */}
           <div style={{ width: '100%', height: '180px', background: '#f0f2f5', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px 6px 10px', color: '#1c1e21', fontSize: '0.9rem' }}>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <span>♡</span> <span>💬</span> <span>✈️</span>
+          {/* Instagram Blue CTA Banner directly below image */}
+          <div style={{ background: '#0095f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', cursor: 'pointer' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: '600', color: '#ffffff', letterSpacing: '0.03em' }}>{ctaLabel.toUpperCase()}</span>
+            <span style={{ fontSize: '11px', color: '#ffffff' }}>➔</span>
+          </div>
+          {/* Instagram Action Icons */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px 4px 10px', color: '#262626', fontSize: '20px', lineHeight: '1' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ cursor: 'pointer', fontSize: '18px' }}>❤️</span>
+              <span style={{ cursor: 'pointer', fontSize: '18px' }}>💬</span>
+              <span style={{ cursor: 'pointer', fontSize: '18px' }}>✈️</span>
             </div>
-            <span>💾</span>
+            <span style={{ cursor: 'pointer', fontSize: '18px' }}>📥</span>
           </div>
-          <div style={{ background: '#1877f2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', cursor: 'pointer' }}>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{ctaLabel}</span>
-            <span style={{ fontSize: '0.7rem', color: '#fff' }}>➔</span>
-          </div>
-          <div style={{ fontSize: '0.75rem', color: '#1c1e21', padding: '8px 10px 12px 10px', lineHeight: '1.4', maxHeight: '80px', overflowY: 'auto' }}>
-            <strong>{igHandle}</strong> {primaryText}
+          {/* Likes count & caption */}
+          <div style={{ padding: '0 10px 10px 10px' }}>
+            <div style={{ fontSize: '12.5px', fontWeight: '600', color: '#262626', marginBottom: '4px' }}>
+              1.482 beğenme
+            </div>
+            <div style={{ fontSize: '12.5px', color: '#262626', lineHeight: '1.4', maxHeight: '60px', overflowY: 'auto' }}>
+              <span style={{ fontWeight: '600', marginRight: '6px' }}>{igHandle}</span>
+              {primaryText || 'Açıklama girilmedi.'}
+            </div>
+            <div style={{ fontSize: '10px', color: '#8e8e8e', marginTop: '6px', textTransform: 'uppercase', display: 'flex', gap: '6px' }}>
+              <span>1 gün önce</span>
+              <span>•</span>
+              <span style={{ fontWeight: '600', color: '#262626', cursor: 'pointer' }}>Çeviriyi Gör</span>
+            </div>
           </div>
         </div>
       );
@@ -464,24 +509,39 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
     if (placement === 'ig_stories' || placement === 'fb_stories' || placement === 'messenger_stories') {
       const platformLabel = placement === 'ig_stories' ? 'Instagram' : placement === 'fb_stories' ? 'Facebook' : 'Messenger';
       return (
-        <div style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', borderRadius: '12px', boxSizing: 'border-box', border: '1px solid #dddfe2' }}>
-          <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)', padding: '10px 10px 20px 10px', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 2 }}>
-            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #bc1888 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.65rem', fontWeight: 800 }}>
+        <div style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', borderRadius: '8px', boxSizing: 'border-box', border: '1px solid #dddfe2', background: '#000000', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+          <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, opacity: 0.95 }} />
+          {/* Gradients */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)', zIndex: 1 }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', zIndex: 1 }} />
+          
+          {/* Progress bar */}
+          <div style={{ position: 'absolute', top: '8px', left: '8px', right: '8px', display: 'flex', gap: '3px', zIndex: 2 }}>
+            <div style={{ flex: 1, height: '2px', background: '#ffffff', borderRadius: '1px' }} />
+          </div>
+
+          {/* Header */}
+          <div style={{ position: 'absolute', top: '14px', left: '10px', right: '10px', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 2 }}>
+            <div style={{ width: '26px', height: '26px', borderRadius: '50%', border: '1px solid #ffffff', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '9px', fontWeight: 'bold', flexShrink: 0 }}>
               {igHandle.charAt(0).toUpperCase()}
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{igHandle}</div>
-              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.6)' }}>Sponsorlu ({platformLabel})</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '11px', fontWeight: '600', color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{igHandle}</div>
+              <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.7)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>Sponsorlu ({platformLabel})</div>
             </div>
+            <div style={{ color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.5)', fontSize: '12px' }}>•••</div>
           </div>
-          <div style={{ position: 'absolute', bottom: '50px', left: '8px', right: '8px', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)', padding: '8px', borderRadius: '8px', color: '#1c1e21', fontSize: '0.7rem', lineHeight: '1.3', zIndex: 2, border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-            <div style={{ fontWeight: 700, marginBottom: '2px', color: '#1c1e21' }}>{headline || 'Başlık girilmedi.'}</div>
-            <div style={{ opacity: 0.9, maxHeight: '55px', overflowY: 'auto' }}>{primaryText}</div>
+
+          {/* Text Overlay */}
+          <div style={{ position: 'absolute', bottom: '55px', left: '10px', right: '10px', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffffff', textShadow: '0 1px 3px rgba(0,0,0,0.8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{headline || 'Başlık girilmedi.'}</div>
+            <div style={{ fontSize: '10.5px', color: '#ffffff', textShadow: '0 1px 3px rgba(0,0,0,0.8)', maxHeight: '42px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', lineHeight: '1.3' }}>{primaryText}</div>
           </div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', padding: '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
-            <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.8)' }}>▲</div>
-            <div style={{ background: '#1877f2', color: '#fff', padding: '4px 12px', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 700 }}>
+
+          {/* CTA Swipe Up at the bottom */}
+          <div style={{ position: 'absolute', bottom: '10px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', zIndex: 2 }}>
+            <span style={{ fontSize: '8px', color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>▲</span>
+            <div style={{ background: '#ffffff', color: '#000000', padding: '5px 14px', borderRadius: '14px', fontSize: '11px', fontWeight: '600', boxShadow: '0 2px 6px rgba(0,0,0,0.2)', cursor: 'pointer', textAlign: 'center' }}>
               {ctaLabel}
             </div>
           </div>
@@ -492,23 +552,42 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
     if (placement === 'ig_reels' || placement === 'fb_reels') {
       const platformLabel = placement === 'ig_reels' ? 'Instagram' : 'Facebook';
       return (
-        <div style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', borderRadius: '12px', boxSizing: 'border-box', border: '1px solid #dddfe2' }}>
+        <div style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', borderRadius: '8px', boxSizing: 'border-box', border: '1px solid #dddfe2', background: '#000000', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
           <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)', height: '40px', zIndex: 2 }} />
-          <div style={{ position: 'absolute', right: '8px', bottom: '60px', display: 'flex', flexDirection: 'column', gap: '12px', color: '#fff', fontSize: '0.8rem', zIndex: 2, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span>♡</span><span style={{ fontSize: '0.5rem' }}>Beğen</span></div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span>💬</span><span style={{ fontSize: '0.5rem' }}>Yorum</span></div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}><span>✈️</span><span style={{ fontSize: '0.5rem' }}>Paylaş</span></div>
+          {/* Gradients */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)', zIndex: 1 }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', zIndex: 1 }} />
+          
+          <div style={{ position: 'absolute', top: '10px', left: '10px', color: '#ffffff', fontSize: '12px', fontWeight: 'bold', zIndex: 2, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
+            {platformLabel} Reels
           </div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px', zIndex: 2 }}>
+
+          <div style={{ position: 'absolute', right: '8px', bottom: '50px', display: 'flex', flexDirection: 'column', gap: '10px', color: '#fff', fontSize: '18px', zIndex: 2, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px', cursor: 'pointer' }}>
+              <span style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>❤️</span>
+              <span style={{ fontSize: '8px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>Beğen</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px', cursor: 'pointer' }}>
+              <span style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>💬</span>
+              <span style={{ fontSize: '8px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>Yorum</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px', cursor: 'pointer' }}>
+              <span style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>✈️</span>
+              <span style={{ fontSize: '8px', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>Paylaş</span>
+            </div>
+          </div>
+
+          <div style={{ position: 'absolute', bottom: '10px', left: '10px', right: '35px', display: 'flex', flexDirection: 'column', gap: '6px', zIndex: 2 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#fff', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800 }}>
+              <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#ffffff', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 'bold' }}>
                 {igHandle.charAt(0).toUpperCase()}
               </div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{igHandle} • Sponsorlu ({platformLabel})</div>
+              <div style={{ fontSize: '11px', fontWeight: '600', color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {igHandle} • Sponsorlu
+              </div>
             </div>
-            <div style={{ fontSize: '0.65rem', color: '#fff', opacity: 0.9, maxHeight: '40px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{primaryText}</div>
-            <div style={{ background: '#1877f2', color: '#fff', padding: '6px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, textAlign: 'center', marginTop: '4px' }}>
+            <div style={{ fontSize: '10px', color: '#ffffff', textShadow: '0 1px 2px rgba(0,0,0,0.5)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.3' }}>{primaryText}</div>
+            <div style={{ background: '#0095f6', color: '#ffffff', padding: '6px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', textAlign: 'center', marginTop: '4px', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
               {ctaLabel} ➔
             </div>
           </div>
@@ -518,26 +597,31 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
     if (placement === 'threads') {
       return (
-        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '12px', padding: '12px', border: '1px solid #dddfe2' }}>
+        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '8px', padding: '12px', border: '1px solid #dddfe2', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#000000', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', flexShrink: 0 }}>
               {igHandle.charAt(0).toUpperCase()}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21' }}>{igHandle}</span>
-                <span style={{ fontSize: '0.6rem', color: '#606770' }}>Sponsorlu (Threads)</span>
+                <span style={{ fontSize: '12.5px', fontWeight: '600', color: '#000000' }}>{igHandle}</span>
+                <span style={{ fontSize: '11px', color: '#999999' }}>Sponsorlu (Threads)</span>
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#1c1e21', marginTop: '4px', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>
+              <div style={{ fontSize: '12.5px', color: '#000000', marginTop: '4px', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>
                 {primaryText}
               </div>
-              <div style={{ marginTop: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', background: '#f0f2f5' }}>
+              <div style={{ marginTop: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', background: '#ffffff' }}>
                 <div style={{ height: '120px', overflow: 'hidden' }}>
                   <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
-                <div style={{ padding: '8px 10px' }}>
-                  <div style={{ fontSize: '0.6rem', color: '#606770' }}>{displayLink}</div>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#1c1e21', marginTop: '2px' }}>{headline}</div>
+                <div style={{ padding: '8px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9f9f9', borderTop: '1px solid #e5e7eb' }}>
+                  <div style={{ flex: 1, minWidth: 0, marginRight: '8px' }}>
+                    <div style={{ fontSize: '10px', color: '#999999', textTransform: 'lowercase' }}>{displayLink}</div>
+                    <div style={{ fontSize: '12.5px', fontWeight: '600', color: '#000000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>{headline}</div>
+                  </div>
+                  <div style={{ background: '#000000', color: '#ffffff', padding: '5px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                    {ctaLabel}
+                  </div>
                 </div>
               </div>
             </div>
@@ -548,21 +632,21 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
     if (placement === 'search_results') {
       return (
-        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '12px', padding: '10px', border: '1px solid #dddfe2' }}>
+        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '8px', padding: '10px', border: '1px solid #dddfe2', fontFamily: 'Segoe UI, Helvetica, Arial, sans-serif', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.6rem', color: '#606770', textTransform: 'uppercase', fontWeight: 600 }}>Arama Sonucu • Sponsorlu</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1877f2', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: '11px', color: '#65676b', fontWeight: '600' }}>Arama Sonucu • Sponsorlu</div>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#1877f2', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {headline || 'Başlık'}
               </div>
-              <div style={{ fontSize: '0.65rem', color: '#1c1e21', marginTop: '2px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <div style={{ fontSize: '12px', color: '#050505', marginTop: '2px', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {primaryText}
               </div>
-              <div style={{ fontSize: '0.6rem', color: '#606770', marginTop: '4px' }}>
+              <div style={{ fontSize: '11px', color: '#65676b', marginTop: '4px', textTransform: 'lowercase' }}>
                 {displayLink}
               </div>
             </div>
-            <div style={{ width: '60px', height: '60px', background: '#f0f2f5', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid #e5e7eb' }}>
+            <div style={{ width: '60px', height: '60px', background: '#f0f2f5', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, border: '1px solid #e5e7eb' }}>
               <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
