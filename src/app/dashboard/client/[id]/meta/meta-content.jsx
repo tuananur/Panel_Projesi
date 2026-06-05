@@ -387,38 +387,38 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
     if (placement === 'fb_feed') {
       return (
-        <div style={{ width: '100%', boxSizing: 'border-box', background: '#0a0e17', borderRadius: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', gap: '8px' }}>
-            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#3b5998', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.8rem', fontWeight: 800 }}>
+        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '12px', border: '1px solid #dddfe2' }}>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid #e5e7eb', gap: '8px' }}>
+            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#1877f2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.8rem', fontWeight: 800 }}>
               {pageName.charAt(0).toUpperCase()}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>{pageName}</div>
-              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '2px' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21' }}>{pageName}</div>
+              <div style={{ fontSize: '0.65rem', color: '#606770', display: 'flex', alignItems: 'center', gap: '2px', fontWeight: 500 }}>
                 Sponsorlu • 🌐
               </div>
             </div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>•••</div>
+            <div style={{ color: '#606770', fontSize: '0.9rem' }}>•••</div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#fff', padding: '8px 12px', whiteSpace: 'pre-wrap', lineHeight: '1.4', maxHeight: '100px', overflowY: 'auto' }}>
+          <div style={{ fontSize: '0.75rem', color: '#1c1e21', padding: '8px 12px', whiteSpace: 'pre-wrap', lineHeight: '1.4', maxHeight: '100px', overflowY: 'auto' }}>
             {primaryText || 'Açıklama girilmedi.'}
           </div>
-          <div style={{ width: '100%', height: '180px', background: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '100%', height: '180px', background: '#f0f2f5', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', padding: '10px 12px', gap: '8px', borderBottomRightRadius: '12px', borderBottomLeftRadius: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', background: '#f0f2f5', padding: '10px 12px', gap: '8px', borderBottomRightRadius: '12px', borderBottomLeftRadius: '12px', borderTop: '1px solid #e5e7eb' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: '0.65rem', color: '#606770', textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {displayLink}
               </div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                 {headline || 'Başlık girilmedi.'}
               </div>
-              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.65rem', color: '#606770', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                 {description || 'Açıklama girilmedi.'}
               </div>
             </div>
-            <div style={{ background: '#0064e0', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+            <div style={{ background: '#e4e6eb', color: '#1c1e21', padding: '6px 12px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', border: '1px solid #ccd0d5' }}>
               {ctaLabel}
             </div>
           </div>
@@ -428,33 +428,33 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
     if (placement === 'ig_feed') {
       return (
-        <div style={{ width: '100%', boxSizing: 'border-box', background: '#0a0e17', borderRadius: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.05)', gap: '8px' }}>
+        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '12px', border: '1px solid #dddfe2' }}>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid #e5e7eb', gap: '8px' }}>
             <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', padding: '2px' }}>
-              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0a0e17', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.7rem', fontWeight: 800 }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '0.7rem', fontWeight: 800 }}>
                 {igHandle.charAt(0).toUpperCase()}
               </div>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>{igHandle}</div>
-              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>Sponsorlu</div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21' }}>{igHandle}</div>
+              <div style={{ fontSize: '0.65rem', color: '#606770', fontWeight: 500 }}>Sponsorlu</div>
             </div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>•••</div>
+            <div style={{ color: '#606770', fontSize: '0.9rem' }}>•••</div>
           </div>
-          <div style={{ width: '100%', height: '180px', background: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '100%', height: '180px', background: '#f0f2f5', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px 6px 10px', color: '#fff', fontSize: '0.9rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px 6px 10px', color: '#1c1e21', fontSize: '0.9rem' }}>
             <div style={{ display: 'flex', gap: '10px' }}>
               <span>♡</span> <span>💬</span> <span>✈️</span>
             </div>
             <span>💾</span>
           </div>
-          <div style={{ background: '#0064e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', cursor: 'pointer' }}>
+          <div style={{ background: '#1877f2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', cursor: 'pointer' }}>
             <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{ctaLabel}</span>
             <span style={{ fontSize: '0.7rem', color: '#fff' }}>➔</span>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#fff', padding: '8px 10px 12px 10px', lineHeight: '1.4', maxHeight: '80px', overflowY: 'auto' }}>
+          <div style={{ fontSize: '0.75rem', color: '#1c1e21', padding: '8px 10px 12px 10px', lineHeight: '1.4', maxHeight: '80px', overflowY: 'auto' }}>
             <strong>{igHandle}</strong> {primaryText}
           </div>
         </div>
@@ -464,7 +464,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
     if (placement === 'ig_stories' || placement === 'fb_stories' || placement === 'messenger_stories') {
       const platformLabel = placement === 'ig_stories' ? 'Instagram' : placement === 'fb_stories' ? 'Facebook' : 'Messenger';
       return (
-        <div style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', borderRadius: '12px', boxSizing: 'border-box' }}>
+        <div style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', borderRadius: '12px', boxSizing: 'border-box', border: '1px solid #dddfe2' }}>
           <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)', padding: '10px 10px 20px 10px', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 2 }}>
             <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #bc1888 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.65rem', fontWeight: 800 }}>
@@ -475,13 +475,13 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
               <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.6)' }}>Sponsorlu ({platformLabel})</div>
             </div>
           </div>
-          <div style={{ position: 'absolute', bottom: '50px', left: '8px', right: '8px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', padding: '8px', borderRadius: '8px', color: '#fff', fontSize: '0.7rem', lineHeight: '1.3', zIndex: 2 }}>
-            <div style={{ fontWeight: 700, marginBottom: '2px' }}>{headline || 'Başlık girilmedi.'}</div>
-            <div style={{ opacity: 0.85, maxHeight: '55px', overflowY: 'auto' }}>{primaryText}</div>
+          <div style={{ position: 'absolute', bottom: '50px', left: '8px', right: '8px', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)', padding: '8px', borderRadius: '8px', color: '#1c1e21', fontSize: '0.7rem', lineHeight: '1.3', zIndex: 2, border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <div style={{ fontWeight: 700, marginBottom: '2px', color: '#1c1e21' }}>{headline || 'Başlık girilmedi.'}</div>
+            <div style={{ opacity: 0.9, maxHeight: '55px', overflowY: 'auto' }}>{primaryText}</div>
           </div>
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', padding: '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
             <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.8)' }}>▲</div>
-            <div style={{ background: '#0064e0', color: '#fff', padding: '4px 12px', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 700 }}>
+            <div style={{ background: '#1877f2', color: '#fff', padding: '4px 12px', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 700 }}>
               {ctaLabel}
             </div>
           </div>
@@ -492,7 +492,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
     if (placement === 'ig_reels' || placement === 'fb_reels') {
       const platformLabel = placement === 'ig_reels' ? 'Instagram' : 'Facebook';
       return (
-        <div style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', borderRadius: '12px', boxSizing: 'border-box' }}>
+        <div style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', borderRadius: '12px', boxSizing: 'border-box', border: '1px solid #dddfe2' }}>
           <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), transparent)', height: '40px', zIndex: 2 }} />
           <div style={{ position: 'absolute', right: '8px', bottom: '60px', display: 'flex', flexDirection: 'column', gap: '12px', color: '#fff', fontSize: '0.8rem', zIndex: 2, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
@@ -508,7 +508,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
               <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{igHandle} • Sponsorlu ({platformLabel})</div>
             </div>
             <div style={{ fontSize: '0.65rem', color: '#fff', opacity: 0.9, maxHeight: '40px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{primaryText}</div>
-            <div style={{ background: '#0064e0', color: '#fff', padding: '6px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, textAlign: 'center', marginTop: '4px' }}>
+            <div style={{ background: '#1877f2', color: '#fff', padding: '6px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, textAlign: 'center', marginTop: '4px' }}>
               {ctaLabel} ➔
             </div>
           </div>
@@ -518,26 +518,26 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
     if (placement === 'threads') {
       return (
-        <div style={{ width: '100%', boxSizing: 'border-box', background: '#0a0e17', borderRadius: '12px', padding: '12px' }}>
+        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '12px', padding: '12px', border: '1px solid #dddfe2' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#fff', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>
               {igHandle.charAt(0).toUpperCase()}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>{igHandle}</span>
-                <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>Sponsorlu (Threads)</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21' }}>{igHandle}</span>
+                <span style={{ fontSize: '0.6rem', color: '#606770' }}>Sponsorlu (Threads)</span>
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#fff', marginTop: '4px', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>
+              <div style={{ fontSize: '0.7rem', color: '#1c1e21', marginTop: '4px', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>
                 {primaryText}
               </div>
-              <div style={{ marginTop: '8px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', overflow: 'hidden', background: '#1e293b' }}>
+              <div style={{ marginTop: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', background: '#f0f2f5' }}>
                 <div style={{ height: '120px', overflow: 'hidden' }}>
                   <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ padding: '8px 10px' }}>
-                  <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>{displayLink}</div>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff', marginTop: '2px' }}>{headline}</div>
+                  <div style={{ fontSize: '0.6rem', color: '#606770' }}>{displayLink}</div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#1c1e21', marginTop: '2px' }}>{headline}</div>
                 </div>
               </div>
             </div>
@@ -548,29 +548,27 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
     if (placement === 'search_results') {
       return (
-        <div style={{ width: '100%', boxSizing: 'border-box', background: '#0a0e17', borderRadius: '12px', padding: '10px' }}>
+        <div style={{ width: '100%', boxSizing: 'border-box', background: '#ffffff', borderRadius: '12px', padding: '10px', border: '1px solid #dddfe2' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Arama Sonucu • Sponsorlu</div>
+              <div style={{ fontSize: '0.6rem', color: '#606770', textTransform: 'uppercase', fontWeight: 600 }}>Arama Sonucu • Sponsorlu</div>
               <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1877f2', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {headline || 'Başlık'}
               </div>
-              <div style={{ fontSize: '0.65rem', color: '#fff', marginTop: '2px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <div style={{ fontSize: '0.65rem', color: '#1c1e21', marginTop: '2px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {primaryText}
               </div>
-              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+              <div style={{ fontSize: '0.6rem', color: '#606770', marginTop: '4px' }}>
                 {displayLink}
               </div>
             </div>
-            <div style={{ width: '60px', height: '60px', background: '#1e293b', borderRadius: '6px', overflow: 'hidden', flexShrink: 0 }}>
+            <div style={{ width: '60px', height: '60px', background: '#f0f2f5', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid #e5e7eb' }}>
               <img src={imageUrl} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
         </div>
       );
     }
-
-    return null;
   };
 
   const renderAdFormFields = (data, setData, isCreate, isEditing) => {
@@ -580,10 +578,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
         {/* Card 1: Reklam Adı */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
             <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM ADI *</label>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM ADI *</label>
               {isEditing ? (
                 <input 
                   required
@@ -591,22 +589,22 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   value={isCreate ? data.name : editName} 
                   onChange={e => isCreate ? setData({ ...data, name: e.target.value }) : setEditName(e.target.value)} 
                   placeholder="Örn: Yeni Etkileşim Reklamı"
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                  style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                 />
               ) : (
-                <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{selectedEntity?.data?.name}</div>
+                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2' }}>{selectedEntity?.data?.name}</div>
               )}
             </div>
-            <button type="button" style={{ padding: '0.65rem 1rem', background: '#374151', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>Şablon Oluştur</button>
+            <button type="button" style={{ padding: '0.65rem 1rem', background: '#e4e6eb', color: '#1c1e21', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>Şablon Oluştur</button>
           </div>
           {isCreate && (
             <div>
-              <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ SEÇİN *</label>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ SEÇİN *</label>
               <select 
                 required
                 value={data.parent_id || ''}
                 onChange={e => setData({ ...data, parent_id: e.target.value })}
-                style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
               >
                 <option value="">Seçiniz...</option>
                 {adSets.map(item => (
@@ -618,95 +616,95 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
         </div>
 
         {/* Card 2: Ortaklık Reklamı */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Ortaklık Reklamı</h3>
+            <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Ortaklık Reklamı</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.7rem', color: data.partnership_ad ? '#10b981' : 'rgba(255,255,255,0.4)', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.7rem', color: data.partnership_ad ? '#1877f2' : '#606770', fontWeight: 700 }}>
                 {data.partnership_ad ? 'AÇIK' : 'KAPALI'}
               </span>
               <StatusToggle active={!!data.partnership_ad} onToggle={() => isEditing && setData({ ...data, partnership_ad: !data.partnership_ad })} />
             </div>
           </div>
-          <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', lineHeight: '1.4' }}>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#606770', lineHeight: '1.4' }}>
             İçerik üreticileri, markalar ve diğer işletmelerle birlikte reklamlar yayınlayın. Bu reklamlar, kampanya performansını artırmak için her iki profilden gelen sinyallerden yararlanır.
           </p>
         </div>
 
         {/* Card 3: Kimlik */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Kimlik</h3>
-            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>Reklamınızda kullanılacak profiller</p>
+            <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Kimlik</h3>
+            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: '#606770' }}>Reklamınızda kullanılacak profiller</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Facebook Sayfası *</label>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Facebook Sayfası *</label>
               {isEditing ? (
                 <select 
                   value={data.page_id || 'Terapimle'} 
                   onChange={e => setData({ ...data, page_id: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                  style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
                 >
                   <option value="Terapimle">Terapimle</option>
                   <option value="Diğer Sayfa">Diğer Sayfa</option>
                 </select>
               ) : (
-                <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{data.page_id || 'Terapimle'}</div>
+                <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21' }}>{data.page_id || 'Terapimle'}</div>
               )}
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Instagram Profili *</label>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Instagram Profili *</label>
               {isEditing ? (
                 <select 
                   value={data.instagram_actor_id || 'terapiylecom'} 
                   onChange={e => setData({ ...data, instagram_actor_id: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                  style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
                 >
                   <option value="terapiylecom">terapiylecom</option>
                   <option value="diğer_profil">diğer_profil</option>
                 </select>
               ) : (
-                <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{data.instagram_actor_id || 'terapiylecom'}</div>
+                <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21' }}>{data.instagram_actor_id || 'terapiylecom'}</div>
               )}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifycontent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e5e7eb', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input 
                 type="checkbox" 
                 disabled={!isEditing}
                 checked={data.threads_enabled !== false} 
                 onChange={e => setData({ ...data, threads_enabled: e.target.checked })} 
-                style={{ width: '14px', height: '14px', accentColor: '#0064e0', cursor: isEditing ? 'pointer' : 'default' }}
+                style={{ width: '14px', height: '14px', accentColor: '#1877f2', cursor: isEditing ? 'pointer' : 'default' }}
               />
-              <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>Instagram hesabını kullan (Threads profili)</span>
+              <span style={{ fontSize: '0.75rem', color: '#1c1e21', fontWeight: 600 }}>Instagram hesabını kullan (Threads profili)</span>
             </div>
-            <button type="button" style={{ padding: '0.3rem 0.6rem', background: '#374151', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Profil oluştur</button>
+            <button type="button" style={{ padding: '0.3rem 0.6rem', background: '#e4e6eb', color: '#1c1e21', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Profil oluştur</button>
           </div>
         </div>
 
         {/* Card 4: Reklam Kurulumu */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Reklam Kurulumu</h3>
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Reklam Kurulumu</h3>
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Reklam Kurulumu</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Reklam Kurulumu</label>
             {isEditing ? (
               <select 
                 value={data.setup_type || 'Reklam Oluştur'}
                 onChange={e => setData({ ...data, setup_type: e.target.value })}
-                style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
               >
                 <option value="Reklam Oluştur">Reklam Oluştur</option>
                 <option value="Mevcut Gönderiyi Kullan">Mevcut Gönderiyi Kullan</option>
               </select>
             ) : (
-              <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{data.setup_type || 'Reklam Oluştur'}</div>
+              <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21' }}>{data.setup_type || 'Reklam Oluştur'}</div>
             )}
           </div>
           
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Medya Kurulumu</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Medya Kurulumu</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.2rem' }}>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
                 <input 
@@ -715,11 +713,11 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   disabled={!isEditing}
                   checked={data.media_setup !== 'catalog'} 
                   onChange={() => setData({ ...data, media_setup: 'manuel' })}
-                  style={{ marginTop: '3px', accentColor: '#0064e0' }}
+                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
                 />
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>Manuel yükleme</div>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>Medyayı ve metinleri kendiniz seçin.</div>
+                  <div style={{ fontSize: '0.75rem', color: '#1c1e21', fontWeight: 600 }}>Manuel yükleme</div>
+                  <div style={{ fontSize: '0.7rem', color: '#606770' }}>Medyayı ve metinleri kendiniz seçin.</div>
                 </div>
               </label>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
@@ -729,18 +727,18 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   disabled={!isEditing}
                   checked={data.media_setup === 'catalog'} 
                   onChange={() => setData({ ...data, media_setup: 'catalog' })}
-                  style={{ marginTop: '3px', accentColor: '#0064e0' }}
+                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
                 />
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>Advantage+ katalog reklamları</div>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>Kataloğunuzdaki ürün görsellerini ve videolarını otomatik olarak gösterin.</div>
+                  <div style={{ fontSize: '0.75rem', color: '#1c1e21', fontWeight: 600 }}>Advantage+ katalog reklamları</div>
+                  <div style={{ fontSize: '0.7rem', color: '#606770' }}>Kataloğunuzdaki ürün görsellerini ve videolarını otomatik olarak gösterin.</div>
                 </div>
               </label>
             </div>
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Format</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Format</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.2rem' }}>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
                 <input 
@@ -749,11 +747,11 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   disabled={!isEditing}
                   checked={data.format !== 'carousel' && data.format !== 'collection'} 
                   onChange={() => setData({ ...data, format: 'single_image' })}
-                  style={{ marginTop: '3px', accentColor: '#0064e0' }}
+                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
                 />
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>Tek Görsel veya Video</div>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>Bir görsel ya da video veya birden fazla görsel içeren slayt gösterisi.</div>
+                  <div style={{ fontSize: '0.75rem', color: '#1c1e21', fontWeight: 600 }}>Tek Görsel veya Video</div>
+                  <div style={{ fontSize: '0.7rem', color: '#606770' }}>Bir görsel ya da video veya birden fazla görsel içeren slayt gösterisi.</div>
                 </div>
               </label>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
@@ -763,11 +761,11 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   disabled={!isEditing}
                   checked={data.format === 'carousel'} 
                   onChange={() => setData({ ...data, format: 'carousel' })}
-                  style={{ marginTop: '3px', accentColor: '#0064e0' }}
+                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
                 />
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>Döngü</div>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>Kaydırılabilen iki veya daha fazla görsel ya da video.</div>
+                  <div style={{ fontSize: '0.75rem', color: '#1c1e21', fontWeight: 600 }}>Döngü</div>
+                  <div style={{ fontSize: '0.7rem', color: '#606770' }}>Kaydırılabilen iki veya daha fazla görsel ya da video.</div>
                 </div>
               </label>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
@@ -777,11 +775,11 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   disabled={!isEditing}
                   checked={data.format === 'collection'} 
                   onChange={() => setData({ ...data, format: 'collection' })}
-                  style={{ marginTop: '3px', accentColor: '#0064e0' }}
+                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
                 />
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>Koleksiyon</div>
-                  <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>Tam ekran mobil deneyimle açılan öğe grubu.</div>
+                  <div style={{ fontSize: '0.75rem', color: '#1c1e21', fontWeight: 600 }}>Koleksiyon</div>
+                  <div style={{ fontSize: '0.7rem', color: '#606770' }}>Tam ekran mobil deneyimle açılan öğe grubu.</div>
                 </div>
               </label>
             </div>
@@ -789,19 +787,19 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
         </div>
 
         {/* Card 5: Yönlendirme Hedefi */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Yönlendirme Hedefi</h3>
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Yönlendirme Hedefi</h3>
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'default' }}>
-            <input type="radio" checked readOnly style={{ marginTop: '3px', accentColor: '#0064e0' }} />
+            <input type="radio" checked readOnly style={{ marginTop: '3px', accentColor: '#1877f2' }} />
             <div>
-              <div style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>İnternet Sitesi</div>
-              <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>İnsanları internet sitenize yönlendirin.</div>
+              <div style={{ fontSize: '0.75rem', color: '#1c1e21', fontWeight: 600 }}>İnternet Sitesi</div>
+              <div style={{ fontSize: '0.7rem', color: '#606770' }}>İnsanları internet sitenize yönlendirin.</div>
             </div>
           </label>
 
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', marginTop: '0.2rem' }}>
             <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İnternet Sitesi Adresi (URL) *</label>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İnternet Sitesi Adresi (URL) *</label>
               {isEditing ? (
                 <input 
                   required
@@ -810,96 +808,96 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   value={data.website_url || ''} 
                   onChange={e => setData({ ...data, website_url: e.target.value })} 
                   placeholder="https://terapiyle.com/"
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                  style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                 />
               ) : (
-                <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.website_url}</div>
+                <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.website_url}</div>
               )}
             </div>
             <button 
               type="button" 
               onClick={() => { if (data.website_url) window.open(data.website_url, '_blank'); }}
-              style={{ padding: '0.65rem 1rem', background: '#374151', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+              style={{ padding: '0.65rem 1rem', background: '#e4e6eb', color: '#1c1e21', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
             >
               URL Önizlemesini Gör
             </button>
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Görünen Bağlantı</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Görünen Bağlantı</label>
             {isEditing ? (
               <input 
                 className="form-control" 
                 value={data.display_link || ''} 
                 onChange={e => setData({ ...data, display_link: e.target.value })} 
                 placeholder="https://terapiyle.com/"
-                style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
               />
             ) : (
-              <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.display_link || '-'}</div>
+              <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.display_link || '-'}</div>
             )}
-            <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.4rem', display: 'flex', gap: '4px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#606770', marginTop: '0.4rem', display: 'flex', gap: '4px' }}>
               <span>ℹ️ URL parametreleri tek bir yerden yönetebilmeniz için Takip bölümüne taşındı.</span>
             </div>
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Tarayıcı eklentileri</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Tarayıcı eklentileri</label>
             <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.2rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: '#1c1e21' }}>
                 <input 
                   type="radio" 
                   name={`browser_add_on_${isCreate ? 'c' : 'e'}`}
                   disabled={!isEditing}
                   checked={data.browser_add_on !== 'call' && data.browser_add_on !== 'whatsapp'} 
                   onChange={() => setData({ ...data, browser_add_on: 'none' })}
-                  style={{ accentColor: '#0064e0' }}
+                  style={{ accentColor: '#1877f2' }}
                 />
                 Yok
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: '#1c1e21' }}>
                 <input 
                   type="radio" 
                   name={`browser_add_on_${isCreate ? 'c' : 'e'}`}
                   disabled={!isEditing}
                   checked={data.browser_add_on === 'call'} 
                   onChange={() => setData({ ...data, browser_add_on: 'call' })}
-                  style={{ accentColor: '#0064e0' }}
+                  style={{ accentColor: '#1877f2' }}
                 />
                 Ara
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: '#1c1e21' }}>
                 <input 
                   type="radio" 
                   name={`browser_add_on_${isCreate ? 'c' : 'e'}`}
                   disabled={!isEditing}
                   checked={data.browser_add_on === 'whatsapp'} 
                   onChange={() => setData({ ...data, browser_add_on: 'whatsapp' })}
-                  style={{ accentColor: '#0064e0' }}
+                  style={{ accentColor: '#1877f2' }}
                 />
                 WhatsApp
               </label>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '1px solid #e5e7eb', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: '#1c1e21' }}>
               <input 
                 type="checkbox" 
                 disabled={!isEditing}
                 checked={data.instant_experience === true} 
                 onChange={e => setData({ ...data, instant_experience: e.target.checked })} 
-                style={{ accentColor: '#0064e0' }}
+                style={{ accentColor: '#1877f2' }}
               />
               Hızlı Deneyim (Instant Experience)
             </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: '#1c1e21' }}>
               <input 
                 type="checkbox" 
                 disabled={!isEditing}
                 checked={data.facebook_event === true} 
                 onChange={e => setData({ ...data, facebook_event: e.target.checked })} 
-                style={{ accentColor: '#0064e0' }}
+                style={{ accentColor: '#1877f2' }}
               />
               Facebook Etkinliği
             </label>
@@ -907,18 +905,18 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
         </div>
 
         {/* Card 6: Reklam Kreatifi */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Reklam Kreatifi</h3>
-            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>Reklam metninizi, medyanızı ve iyileştirmelerinizi seçin ve optimize edin.</p>
+            <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Reklam Kreatifi</h3>
+            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: '#606770' }}>Reklam metninizi, medyanızı ve iyileştirmelerinizi seçin ve optimize edin.</p>
           </div>
           
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-              <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Medya (Görsel URL) *</label>
+              <label style={{ fontSize: '0.75rem', color: '#606770', fontWeight: 600 }}>Medya (Görsel URL) *</label>
               {isEditing && (
                 <div style={{ display: 'flex', gap: '6px' }}>
-                  <button type="button" style={{ padding: '0.25rem 0.5rem', background: '#374151', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 600, cursor: 'pointer' }}>Medyayı Düzenle</button>
+                  <button type="button" style={{ padding: '0.25rem 0.5rem', background: '#e4e6eb', color: '#1c1e21', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 600, cursor: 'pointer' }}>Medyayı Düzenle</button>
                   <button type="button" onClick={() => setData({ ...data, image_url: '' })} style={{ padding: '0.25rem 0.5rem', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 600, cursor: 'pointer' }}>🗑️</button>
                 </div>
               )}
@@ -931,7 +929,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   value={data.image_url || ''} 
                   onChange={e => setData({ ...data, image_url: e.target.value })} 
                   placeholder="Görsel adresi girin veya şablonlardan seçin..."
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '0.5rem' }} 
+                  style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '0.5rem', outline: 'none' }} 
                 />
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   {[
@@ -946,9 +944,9 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                       style={{
                         padding: '0.3rem 0.6rem',
                         borderRadius: '6px',
-                        background: data.image_url === img.url ? '#0064e0' : '#1e293b',
-                        color: '#fff',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        background: data.image_url === img.url ? '#1877f2' : '#e4e6eb',
+                        color: data.image_url === img.url ? '#fff' : '#1c1e21',
+                        border: data.image_url === img.url ? '1px solid #1877f2' : '1px solid #ccd0d5',
                         fontSize: '0.7rem',
                         fontWeight: 600,
                         cursor: 'pointer'
@@ -960,12 +958,12 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                 </div>
               </>
             ) : (
-              <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', wordBreak: 'break-all' }}>{data.image_url}</div>
+              <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21', wordBreak: 'break-all' }}>{data.image_url}</div>
             )}
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Ana Metin *</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Ana Metin *</label>
             {isEditing ? (
               <textarea 
                 required
@@ -974,15 +972,15 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                 onChange={e => setData({ ...data, primary_text: e.target.value })} 
                 placeholder="Bazen sadece doğru uzmanla konuşmak..."
                 rows={4}
-                style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.85rem', lineHeight: '1.4' }} 
+                style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.85rem', lineHeight: '1.4', outline: 'none' }} 
               />
             ) : (
-              <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{data.primary_text}</div>
+              <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{data.primary_text}</div>
             )}
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Başlık *</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Başlık *</label>
             {isEditing ? (
               <input 
                 required
@@ -990,32 +988,32 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                 value={data.headline || ''} 
                 onChange={e => setData({ ...data, headline: e.target.value })} 
                 placeholder="Terapiyle Sana En Uygun Terapisti Bul"
-                style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
               />
             ) : (
-              <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{data.headline}</div>
+              <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21' }}>{data.headline}</div>
             )}
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Açıklama</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Açıklama</label>
             {isEditing ? (
               <input 
                 className="form-control" 
                 value={data.description || ''} 
                 onChange={e => setData({ ...data, description: e.target.value })} 
                 placeholder="Terapiyle. Online, güvenli ve kolay!..."
-                style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
               />
             ) : (
-              <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{data.description || '-'}</div>
+              <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21' }}>{data.description || '-'}</div>
             )}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.8rem' }}>
-            <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 600 }}>Metni kişiye göre optimize et</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e5e7eb', paddingTop: '0.8rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#1c1e21', fontWeight: 600 }}>Metni kişiye göre optimize et</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.65rem', color: data.optimize_text !== false ? '#10b981' : 'rgba(255,255,255,0.4)', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.65rem', color: data.optimize_text !== false ? '#45bd62' : '#606770', fontWeight: 700 }}>
                 {data.optimize_text !== false ? 'ETKİN' : 'DEVRE DIŞI'}
               </span>
               <StatusToggle active={data.optimize_text !== false} onToggle={() => isEditing && setData({ ...data, optimize_text: data.optimize_text === false })} />
@@ -1024,12 +1022,12 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Eylem Çağrısı *</label>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Eylem Çağrısı *</label>
               {isEditing ? (
                 <select 
                   value={data.call_to_action || 'LEARN_MORE'}
                   onChange={e => setData({ ...data, call_to_action: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                  style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
                 >
                   <option value="LEARN_MORE">Daha Fazla Bilgi Al</option>
                   <option value="SIGN_UP">Kaydol</option>
@@ -1038,26 +1036,26 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <option value="APPLY_NOW">Başvur</option>
                 </select>
               ) : (
-                <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{CTA_LABELS[data.call_to_action || 'LEARN_MORE']}</div>
+                <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21' }}>{CTA_LABELS[data.call_to_action || 'LEARN_MORE']}</div>
               )}
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Advantage+ kreatif</label>
-              <div style={{ padding: '0.65rem 0.85rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem' }}>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Advantage+ kreatif</label>
+              <div style={{ padding: '0.65rem 0.85rem', background: '#f5f6f7', border: '1px solid #dddfe2', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#1c1e21' }}>
                 <span>Kreatif iyileştirmeleri (2/7)</span>
-                <button type="button" style={{ background: 'none', border: 'none', color: '#38bdf8', fontWeight: 700, cursor: 'pointer', fontSize: '0.75rem' }}>Düzenle</button>
+                <button type="button" style={{ background: 'none', border: 'none', color: '#1877f2', fontWeight: 700, cursor: 'pointer', fontSize: '0.75rem' }}>Düzenle</button>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.8rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid #e5e7eb', paddingTop: '0.8rem' }}>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kreatif testi</label>
-              <button type="button" style={{ width: '100%', padding: '0.6rem', background: '#374151', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>Test oluştur</button>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kreatif testi</label>
+              <button type="button" style={{ width: '100%', padding: '0.6rem', background: '#e4e6eb', color: '#1c1e21', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>Test oluştur</button>
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Diller</label>
-              <div style={{ padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem' }}>
+              <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Diller</label>
+              <div style={{ padding: '0.4rem 0.8rem', background: '#f5f6f7', border: '1px solid #dddfe2', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#1c1e21' }}>
                 <span>Otomatik çeviriler</span>
                 <StatusToggle active={false} onToggle={() => {}} />
               </div>
@@ -1066,21 +1064,21 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
         </div>
 
         {/* Card 7: Takip */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Takip</h3>
-            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>Takip edilecek dönüşüm olaylarını seçin.</p>
+            <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Takip</h3>
+            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: '#606770' }}>Takip edilecek dönüşüm olaylarını seçin.</p>
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem' }}>
-              <input type="checkbox" checked readOnly style={{ accentColor: '#0064e0' }} />
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem', color: '#1c1e21' }}>
+              <input type="checkbox" checked readOnly style={{ accentColor: '#1877f2' }} />
               İnternet sitesi olayları
             </label>
-            <div style={{ marginLeft: '22px', padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ marginLeft: '22px', padding: '0.6rem 0.8rem', background: '#f5f6f7', border: '1px solid #dddfe2', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>TERAPİYLE - Piksel</span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#45bd62', display: 'inline-block' }}></span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1c1e21' }}>TERAPİYLE - Piksel</span>
               </div>
               {isEditing ? (
                 <input 
@@ -1088,44 +1086,44 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   className="form-control" 
                   value={data.pixel_id || '1850906787926541'} 
                   onChange={e => setData({ ...data, pixel_id: e.target.value })} 
-                  style={{ width: '160px', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.4rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', textAlign: 'right' }} 
+                  style={{ width: '160px', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.4rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', textAlign: 'right', outline: 'none' }} 
                 />
               ) : (
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#fff' }}>{data.pixel_id || '1850906787926541'}</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1c1e21' }}>{data.pixel_id || '1850906787926541'}</div>
               )}
             </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem', opacity: 0.5 }}>
-              <input type="checkbox" disabled style={{ accentColor: '#0064e0' }} />
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem', opacity: 0.5, color: '#1c1e21' }}>
+              <input type="checkbox" disabled style={{ accentColor: '#1877f2' }} />
               Uygulama Olayları
             </label>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem' }}>
-                <input type="checkbox" checked readOnly style={{ accentColor: '#0064e0' }} />
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem', color: '#1c1e21' }}>
+                <input type="checkbox" checked readOnly style={{ accentColor: '#1877f2' }} />
                 Çevrimdışı olaylar
               </label>
-              <button type="button" style={{ padding: '0.3rem 0.6rem', background: '#374151', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Ayarla</button>
+              <button type="button" style={{ padding: '0.3rem 0.6rem', background: '#e4e6eb', color: '#1c1e21', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Ayarla</button>
             </div>
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>URL Parametreleri</label>
+            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>URL Parametreleri</label>
             {isEditing ? (
               <input 
                 className="form-control" 
                 value={data.url_params || ''} 
                 onChange={e => setData({ ...data, url_params: e.target.value })} 
                 placeholder="anahtar1=deger1&anahtar2=deger2"
-                style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '0.4rem' }} 
+                style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '0.4rem', outline: 'none' }} 
               />
             ) : (
-              <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{data.url_params || '-'}</div>
+              <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#1c1e21' }}>{data.url_params || '-'}</div>
             )}
-            <button type="button" style={{ background: 'none', border: 'none', color: '#38bdf8', fontWeight: 700, cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}>Bir URL parametresi oluşturun</button>
+            <button type="button" style={{ background: 'none', border: 'none', color: '#1877f2', fontWeight: 700, cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}>Bir URL parametresi oluşturun</button>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
-            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>Üçüncü taraf raporlama araçları</span>
-            <button type="button" style={{ padding: '0.3rem 0.6rem', background: '#374151', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Bağla</button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e5e7eb', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#606770' }}>Üçüncü taraf raporlama araçları</span>
+            <button type="button" style={{ padding: '0.3rem 0.6rem', background: '#e4e6eb', color: '#1c1e21', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Bağla</button>
           </div>
         </div>
       </div>
@@ -1136,41 +1134,41 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%' }}>
         {/* Hedef Kitle Tanımı */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-          <h3 style={{ margin: 0, fontSize: '0.8rem', color: '#fff', fontWeight: 700 }}>Hedef Kitle Tanımı</h3>
-          <div style={{ position: 'relative', height: '12px', background: 'linear-gradient(to right, #f59e0b 0%, #10b981 40%, #10b981 60%, #3b82f6 100%)', borderRadius: '6px', marginTop: '0.5rem' }}>
-            <div style={{ position: 'absolute', top: '-4px', left: '50%', transform: 'translateX(-50%)', width: '20px', height: '20px', borderRadius: '50%', background: '#fff', border: '3px solid #10b981', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+          <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Hedef Kitle Tanımı</h3>
+          <div style={{ position: 'relative', height: '12px', background: 'linear-gradient(to right, #f59e0b 0%, #45bd62 40%, #45bd62 60%, #3b82f6 100%)', borderRadius: '6px', marginTop: '0.5rem' }}>
+            <div style={{ position: 'absolute', top: '-4px', left: '50%', transform: 'translateX(-50%)', width: '20px', height: '20px', borderRadius: '50%', background: '#fff', border: '3px solid #45bd62', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#606770', fontWeight: 600 }}>
             <span>Özel</span>
-            <span style={{ color: '#10b981' }}>Tanımlı</span>
+            <span style={{ color: '#45bd62' }}>Tanımlı</span>
             <span>Geniş</span>
           </div>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', lineHeight: '1.35' }}>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#1c1e21', lineHeight: '1.35' }}>
             Hedef kitleniz tanımlı. Potansiyel erişim genişliği dengeli ve dönüşüm olasılığı yüksektir.
           </p>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.6rem', marginTop: '0.2rem' }}>
-            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>POTANSİYEL ERİŞİM</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginTop: '0.2rem' }}>32.400.000 - 38.100.000 kişi</div>
+          <div style={{ borderTop: '1px solid #dddfe2', paddingTop: '0.6rem', marginTop: '0.2rem' }}>
+            <div style={{ fontSize: '0.7rem', color: '#606770', fontWeight: 600 }}>POTANSİYEL ERİŞİM</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1c1e21', marginTop: '0.2rem' }}>32.400.000 - 38.100.000 kişi</div>
           </div>
         </div>
 
         {/* Tahmini Günlük Sonuçlar */}
-        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-          <h3 style={{ margin: 0, fontSize: '0.8rem', color: '#fff', fontWeight: 700 }}>Tahmini Günlük Sonuçlar</h3>
-          <p style={{ margin: 0, fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', lineHeight: '1.3' }}>
+        <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+          <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Tahmini Günlük Sonuçlar</h3>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#606770', lineHeight: '1.3' }}>
             Tahminler, ortalama bütçenize ve hedef kitle verilerinize dayanır.
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.8rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: '1px solid #dddfe2', paddingTop: '0.8rem' }}>
             <div>
-              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>ERİŞİM</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginTop: '0.2rem' }}>4.5B - 13B</div>
+              <div style={{ fontSize: '0.7rem', color: '#606770', fontWeight: 600 }}>ERİŞİM</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1c1e21', marginTop: '0.2rem' }}>4.5B - 13B</div>
               <div style={{ height: '4px', background: '#3b82f6', borderRadius: '2px', width: '60%', marginTop: '0.4rem' }} />
             </div>
             <div>
-              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>BAĞLANTI TIKLAMALARI</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginTop: '0.2rem' }}>120 - 350</div>
-              <div style={{ height: '4px', background: '#10b981', borderRadius: '2px', width: '45%', marginTop: '0.4rem' }} />
+              <div style={{ fontSize: '0.7rem', color: '#606770', fontWeight: 600 }}>BAĞLANTI TIKLAMALARI</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1c1e21', marginTop: '0.2rem' }}>120 - 350</div>
+              <div style={{ height: '4px', background: '#45bd62', borderRadius: '2px', width: '45%', marginTop: '0.4rem' }} />
             </div>
           </div>
         </div>
@@ -1417,33 +1415,33 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             maxWidth: '1380px', 
             height: '92vh',
             maxHeight: '92vh',
-            background: '#1a1f2e', 
+            background: '#f0f2f5', 
             borderRadius: '24px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6)', zIndex: 10001, 
+            boxShadow: '0 12px 28px 0 rgba(0,0,0,0.2), 0 2px 4px 0 rgba(0,0,0,0.1)', zIndex: 10001, 
             display: 'flex', flexDirection: 'column',
             animation: 'modalFadeIn 0.3s ease-out',
             overflow: 'hidden'
           }}>
-            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-              <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>
+            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #dddfe2', background: '#ffffff', flexShrink: 0 }}>
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#1c1e21' }}>
                 Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'}
               </h2>
-              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#606770', cursor: 'pointer', padding: '0.5rem' }}><X size={20} /></button>
             </div>
 
             <form onSubmit={handleCreateEntity} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', flex: 1, overflow: 'hidden', minHeight: 0, padding: '1.5rem 2rem 0.5rem 2rem' }}>
                 {/* Sol Sütun - Hiyerarşik Ağaç Görünümü */}
-                <div style={{ background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
+                <div style={{ background: '#ffffff', borderRight: '1px solid #dddfe2', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#606770', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                     {/* Kampanya Düğümü */}
                     <div style={{ 
                       display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
-                      background: activeTab === 'campaigns' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      background: activeTab === 'campaigns' ? '#e7f3ff' : 'transparent', 
                       fontSize: '0.75rem', 
-                      color: activeTab === 'campaigns' ? '#fff' : 'rgba(255,255,255,0.7)', 
-                      border: activeTab === 'campaigns' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      color: activeTab === 'campaigns' ? '#1877f2' : '#1c1e21', 
+                      border: activeTab === 'campaigns' ? '1px solid rgba(24,119,242,0.2)' : '1px solid transparent',
                       fontWeight: activeTab === 'campaigns' ? 700 : 500
                     }}>
                       <span style={{ fontSize: '0.9rem' }}>📁</span>
@@ -1456,10 +1454,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                     {/* Reklam Seti Düğümü */}
                     <div style={{ 
                       display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
-                      background: activeTab === 'adsets' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      background: activeTab === 'adsets' ? '#e7f3ff' : 'transparent', 
                       fontSize: '0.75rem', 
-                      color: activeTab === 'adsets' ? '#fff' : 'rgba(255,255,255,0.7)', 
-                      border: activeTab === 'adsets' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      color: activeTab === 'adsets' ? '#1877f2' : '#1c1e21', 
+                      border: activeTab === 'adsets' ? '1px solid rgba(24,119,242,0.2)' : '1px solid transparent',
                       marginLeft: '12px',
                       fontWeight: activeTab === 'adsets' ? 700 : 500
                     }}>
@@ -1475,10 +1473,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                     {/* Reklam Düğümü */}
                     <div style={{ 
                       display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
-                      background: activeTab === 'ads' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      background: activeTab === 'ads' ? '#e7f3ff' : 'transparent', 
                       fontSize: '0.75rem', 
-                      color: activeTab === 'ads' ? '#fff' : 'rgba(255,255,255,0.7)', 
-                      border: activeTab === 'ads' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      color: activeTab === 'ads' ? '#1877f2' : '#1c1e21', 
+                      border: activeTab === 'ads' ? '1px solid rgba(24,119,242,0.2)' : '1px solid transparent',
                       marginLeft: '24px',
                       fontWeight: activeTab === 'ads' ? 700 : 500
                     }}>
@@ -1495,46 +1493,46 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   {activeTab === 'campaigns' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                       {/* Kampanya Adı */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div>
-                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>KAMPANYA ADI *</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>KAMPANYA ADI *</label>
                           <input 
                             required
                             className="form-control" 
                             value={createFormData.name || ''} 
                             onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
                             placeholder="Örn: Terapiyle Kayıt Reklamı 11.02"
-                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                            style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                           />
                         </div>
                       </div>
                       
                       {/* Kampanya Detayları */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Kampanya Detayları</h3>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Kampanya Detayları</h3>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Özel Reklam Kategorileri</label>
-                          <select disabled style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Özel Reklam Kategorileri</label>
+                          <select disabled style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#606770', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem' }}>
                             <option>Hiçbir Kategori Seçilmedi</option>
                           </select>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                           <div>
-                            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Satın Alma Türü</label>
-                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Açık Artırma</div>
+                            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Satın Alma Türü</label>
+                            <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#606770' }}>Açık Artırma</div>
                           </div>
                           <div>
-                            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Amacı</label>
-                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Trafik / Üye Kaydı</div>
+                            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Amacı</label>
+                            <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#606770' }}>Trafik / Üye Kaydı</div>
                           </div>
                         </div>
                       </div>
 
                       {/* Kampanya Bütçesi */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Kampanya Bütçesi</h3>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Kampanya Bütçesi</h3>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL) *</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL) *</label>
                           <input 
                             type="number" 
                             required
@@ -1542,15 +1540,15 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                             value={createFormData.daily_budget || ''} 
                             onChange={e => setCreateFormData({ ...createFormData, daily_budget: e.target.value })} 
                             placeholder="Örn: 500"
-                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                            style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                           />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Durumu</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Durumu</label>
                           <select 
                             value={createFormData.status || 'ACTIVE'}
                             onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
-                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                            style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
                           >
                             <option value="ACTIVE">Aktif (Hemen Başlat)</option>
                             <option value="PAUSED">Durdurulmuş (Taslak)</option>
@@ -1563,25 +1561,25 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   {activeTab === 'adsets' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                       {/* Reklam Seti Adı */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div>
-                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ ADI *</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ ADI *</label>
                           <input 
                             required
                             className="form-control" 
                             value={createFormData.name || ''} 
                             onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
                             placeholder="Örn: Terapiyle Reklam Seti 1"
-                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                            style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                           />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>ÜST KAMPANYA SEÇİN *</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>ÜST KAMPANYA SEÇİN *</label>
                           <select 
                             required
                             value={createFormData.parent_id || ''}
                             onChange={e => setCreateFormData({ ...createFormData, parent_id: e.target.value })}
-                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                            style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
                           >
                             <option value="">Seçiniz...</option>
                             {campaigns.map(item => (
@@ -1592,10 +1590,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                       </div>
 
                       {/* Bütçe ve Durum */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Bütçe ve Durum</h3>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Bütçe ve Durum</h3>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL) *</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL) *</label>
                           <input 
                             type="number" 
                             required
@@ -1603,15 +1601,15 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                             value={createFormData.daily_budget || ''} 
                             onChange={e => setCreateFormData({ ...createFormData, daily_budget: e.target.value })} 
                             placeholder="Örn: 500"
-                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                            style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                           />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İlk Durum</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İlk Durum</label>
                           <select 
                             value={createFormData.status || 'ACTIVE'}
                             onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
-                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                            style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
                           >
                             <option value="ACTIVE">Aktif (Hemen Başlat)</option>
                             <option value="PAUSED">Durdurulmuş (Taslak)</option>
@@ -1629,17 +1627,17 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   {activeTab === 'ads' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>Reklam Önizlemesi</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c1e21' }}>Reklam Önizlemesi</span>
                         <button
                           type="button"
                           onClick={() => setShowAdvancedPreviewModal(true)}
                           style={{
-                            background: 'rgba(0,100,224,0.15)',
-                            color: '#38bdf8',
-                            border: '1px solid rgba(0,100,224,0.3)',
-                            padding: '4px 8px',
+                            background: '#e7f3ff',
+                            color: '#1877f2',
+                            border: '1px solid rgba(24,119,242,0.2)',
+                            padding: '6px 12px',
                             borderRadius: '6px',
-                            fontSize: '0.7rem',
+                            fontSize: '0.75rem',
                             fontWeight: 700,
                             cursor: 'pointer',
                             display: 'flex',
@@ -1651,26 +1649,26 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                         </button>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%' }}>
-                        <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
-                        <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
-                        <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
+                      <div style={{ display: 'flex', gap: '0.25rem', background: '#e4e6eb', padding: '3px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%' }}>
+                        <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#ffffff' : 'transparent', color: previewPlacement === 'fb_feed' ? '#1c1e21' : '#606770', boxShadow: previewPlacement === 'fb_feed' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
+                        <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#ffffff' : 'transparent', color: previewPlacement === 'ig_feed' ? '#1c1e21' : '#606770', boxShadow: previewPlacement === 'ig_feed' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
+                        <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#ffffff' : 'transparent', color: previewPlacement === 'ig_stories' ? '#1c1e21' : '#606770', boxShadow: previewPlacement === 'ig_stories' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
                       </div>
 
                       <div style={{ 
                         width: '100%',
                         maxWidth: '310px', 
-                        background: '#0a0e17', 
+                        background: '#e4e6eb', 
                         borderRadius: '32px', 
                         padding: '8px',
-                        border: '4px solid #334155',
-                        boxShadow: '0 15px 35px rgba(0,0,0,0.7)',
+                        border: '4px solid #ccd0d5',
+                        boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
                         fontFamily: 'system-ui, -apple-system, sans-serif',
                         boxSizing: 'border-box',
                         overflow: 'hidden'
                       }}>
-                        <div style={{ width: '80px', height: '14px', background: '#334155', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                          <div style={{ width: '30px', height: '3px', background: '#0a0e17', borderRadius: '1.5px' }}></div>
+                        <div style={{ width: '80px', height: '14px', background: '#ccd0d5', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <div style={{ width: '30px', height: '3px', background: '#ffffff', borderRadius: '1.5px' }}></div>
                         </div>
                         {renderAdPreview(previewPlacement, createFormData)}
                       </div>
@@ -1681,10 +1679,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                 </div>
               </div>
 
-              <div style={{ padding: '0.8rem 2rem 1.5rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-                <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>Vazgeç</button>
-                <button type="submit" disabled={isCreating} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #0064e0 0%, #00d4ff 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: isCreating ? 'not-allowed' : 'pointer', fontSize: '0.95rem', opacity: isCreating ? 0.7 : 1 }}>
-                  {isCreating ? 'Oluşturuluyor...' : 'Oluştur'}
+              <div style={{ padding: '1rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid #dddfe2', background: '#ffffff', flexShrink: 0 }}>
+                <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: '#ffffff', color: '#4b5563', border: '1px solid #ccd0d5', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>Kapat</button>
+                <button type="submit" disabled={isCreating} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: isCreating ? '#e2f0d9' : '#42b72a', color: isCreating ? '#a6cda6' : '#ffffff', border: 'none', fontWeight: 700, cursor: isCreating ? 'not-allowed' : 'pointer', fontSize: '0.9rem' }}>
+                  {isCreating ? 'Oluşturuluyor...' : 'Yayınla'}
                 </button>
               </div>
             </form>
@@ -1702,35 +1700,35 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             maxWidth: '1380px', 
             height: '92vh',
             maxHeight: '92vh',
-            background: '#1a1f2e', 
+            background: '#f0f2f5', 
             borderRadius: '24px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6)', zIndex: 10001, 
+            boxShadow: '0 12px 28px 0 rgba(0,0,0,0.2), 0 2px 4px 0 rgba(0,0,0,0.1)', zIndex: 10001, 
             display: 'flex', flexDirection: 'column',
             animation: 'modalFadeIn 0.3s ease-out',
             overflow: 'hidden'
           }}>
             {/* Header */}
-            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-              <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>
+            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #dddfe2', background: '#ffffff', flexShrink: 0 }}>
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#1c1e21' }}>
                 {selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} Detayı
               </h2>
-              <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
+              <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'none', border: 'none', color: '#606770', cursor: 'pointer', padding: '0.5rem' }}><X size={20} /></button>
             </div>
 
             {/* Content Area */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', flex: 1, overflow: 'hidden', minHeight: 0, padding: '1.5rem 2rem 0.5rem 2rem' }}>
                 {/* Sol Sütun - Hiyerarşik Ağaç Görünümü */}
-                <div style={{ background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
+                <div style={{ background: '#ffffff', borderRight: '1px solid #dddfe2', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#606770', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                     {/* Kampanya Düğümü */}
                     <div style={{ 
                       display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
-                      background: selectedEntity.type === 'campaign' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      background: selectedEntity.type === 'campaign' ? '#e7f3ff' : 'transparent', 
                       fontSize: '0.75rem', 
-                      color: selectedEntity.type === 'campaign' ? '#fff' : 'rgba(255,255,255,0.7)', 
-                      border: selectedEntity.type === 'campaign' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      color: selectedEntity.type === 'campaign' ? '#1877f2' : '#1c1e21', 
+                      border: selectedEntity.type === 'campaign' ? '1px solid rgba(24,119,242,0.2)' : '1px solid transparent',
                       fontWeight: selectedEntity.type === 'campaign' ? 700 : 500
                     }}>
                       <span style={{ fontSize: '0.9rem' }}>📁</span>
@@ -1743,10 +1741,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                     {/* Reklam Seti Düğümü */}
                     <div style={{ 
                       display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
-                      background: selectedEntity.type === 'adset' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      background: selectedEntity.type === 'adset' ? '#e7f3ff' : 'transparent', 
                       fontSize: '0.75rem', 
-                      color: selectedEntity.type === 'adset' ? '#fff' : 'rgba(255,255,255,0.7)', 
-                      border: selectedEntity.type === 'adset' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      color: selectedEntity.type === 'adset' ? '#1877f2' : '#1c1e21', 
+                      border: selectedEntity.type === 'adset' ? '1px solid rgba(24,119,242,0.2)' : '1px solid transparent',
                       marginLeft: '12px',
                       fontWeight: selectedEntity.type === 'adset' ? 700 : 500
                     }}>
@@ -1762,10 +1760,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                     {/* Reklam Düğümü */}
                     <div style={{ 
                       display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
-                      background: selectedEntity.type === 'ad' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      background: selectedEntity.type === 'ad' ? '#e7f3ff' : 'transparent', 
                       fontSize: '0.75rem', 
-                      color: selectedEntity.type === 'ad' ? '#fff' : 'rgba(255,255,255,0.7)', 
-                      border: selectedEntity.type === 'ad' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      color: selectedEntity.type === 'ad' ? '#1877f2' : '#1c1e21', 
+                      border: selectedEntity.type === 'ad' ? '1px solid rgba(24,119,242,0.2)' : '1px solid transparent',
                       marginLeft: '24px',
                       fontWeight: selectedEntity.type === 'ad' ? 700 : 500
                     }}>
@@ -1782,74 +1780,74 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   {selectedEntity.type === 'campaign' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                       {/* Kampanya Adı */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div>
-                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>KAMPANYA ADI *</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>KAMPANYA ADI *</label>
                           {isEditingEntity ? (
                             <input 
                               required
                               className="form-control" 
                               value={editName} 
                               onChange={e => setEditName(e.target.value)} 
-                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                              style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                             />
                           ) : (
-                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{selectedEntity.data.name}</div>
+                            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2' }}>{selectedEntity.data.name}</div>
                           )}
                         </div>
                       </div>
 
                       {/* Kampanya Detayları */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Kampanya Detayları</h3>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Kampanya Detayları</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                           <div>
-                            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Satın Alma Türü</label>
-                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Açık Artırma</div>
+                            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Satın Alma Türü</label>
+                            <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#606770' }}>Açık Artırma</div>
                           </div>
                           <div>
-                            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Amacı</label>
-                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Trafik</div>
+                            <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Amacı</label>
+                            <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', fontSize: '0.85rem', color: '#606770' }}>Trafik</div>
                           </div>
                         </div>
                       </div>
 
                       {/* Bütçe ve Durum */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Bütçe ve Durum</h3>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Bütçe ve Durum</h3>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL)</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL)</label>
                           {isEditingEntity ? (
                             <input 
                               type="number" 
                               className="form-control" 
                               value={editBudget} 
                               onChange={e => setEditBudget(e.target.value)} 
-                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                              style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                             />
                           ) : (
-                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>
+                            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>
                           )}
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Durum</label>
-                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center' }}>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Durum</label>
+                          <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', display: 'flex', alignItems: 'center' }}>
                             <StatusBadge status={selectedEntity.data.status} />
                           </div>
                         </div>
                       </div>
 
                       {/* Performance Section */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Performans Özeti</h3>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Performans Özeti</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.3rem' }}>Harcama</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
+                          <div style={{ background: '#f5f6f7', padding: '1rem', borderRadius: '8px', border: '1px solid #dddfe2' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#606770', marginBottom: '0.3rem' }}>Harcama</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1c1e21' }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
                           </div>
-                          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.3rem' }}>Gösterim</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
+                          <div style={{ background: '#f5f6f7', padding: '1rem', borderRadius: '8px', border: '1px solid #dddfe2' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#606770', marginBottom: '0.3rem' }}>Gösterim</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1c1e21' }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
                           </div>
                         </div>
                       </div>
@@ -1859,59 +1857,59 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   {selectedEntity.type === 'adset' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                       {/* Reklam Seti Adı */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div>
-                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ ADI *</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ ADI *</label>
                           {isEditingEntity ? (
                             <input 
                               required
                               className="form-control" 
                               value={editName} 
                               onChange={e => setEditName(e.target.value)} 
-                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                              style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                             />
                           ) : (
-                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{selectedEntity.data.name}</div>
+                            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2' }}>{selectedEntity.data.name}</div>
                           )}
                         </div>
                       </div>
 
                       {/* Bütçe ve Durum */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Bütçe ve Durum</h3>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Bütçe ve Durum</h3>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL)</label>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL)</label>
                           {isEditingEntity ? (
                             <input 
                               type="number" 
                               className="form-control" 
                               value={editBudget} 
                               onChange={e => setEditBudget(e.target.value)} 
-                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                              style={{ width: '100%', background: '#ffffff', border: '1px solid #ccd0d5', color: '#1c1e21', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
                             />
                           ) : (
-                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>
+                            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>
                           )}
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Durum</label>
-                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center' }}>
+                          <label style={{ fontSize: '0.75rem', color: '#606770', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Durum</label>
+                          <div style={{ background: '#f5f6f7', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #dddfe2', display: 'flex', alignItems: 'center' }}>
                             <StatusBadge status={selectedEntity.data.status} />
                           </div>
                         </div>
                       </div>
 
                       {/* Performance Section */}
-                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Performans Özeti</h3>
+                      <div style={{ padding: '1.2rem', background: '#ffffff', border: '1px solid #dddfe2', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#1c1e21', fontWeight: 700 }}>Performans Özeti</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.3rem' }}>Harcama</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
+                          <div style={{ background: '#f5f6f7', padding: '1rem', borderRadius: '8px', border: '1px solid #dddfe2' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#606770', marginBottom: '0.3rem' }}>Harcama</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1c1e21' }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
                           </div>
-                          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.3rem' }}>Gösterim</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
+                          <div style={{ background: '#f5f6f7', padding: '1rem', borderRadius: '8px', border: '1px solid #dddfe2' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#606770', marginBottom: '0.3rem' }}>Gösterim</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1c1e21' }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
                           </div>
                         </div>
                       </div>
@@ -1926,17 +1924,17 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   {selectedEntity.type === 'ad' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>Reklam Önizlemesi</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c1e21' }}>Reklam Önizlemesi</span>
                         <button
                           type="button"
                           onClick={() => setShowAdvancedPreviewModal(true)}
                           style={{
-                            background: 'rgba(0,100,224,0.15)',
-                            color: '#38bdf8',
-                            border: '1px solid rgba(0,100,224,0.3)',
-                            padding: '4px 8px',
+                            background: '#e7f3ff',
+                            color: '#1877f2',
+                            border: '1px solid rgba(24,119,242,0.2)',
+                            padding: '6px 12px',
                             borderRadius: '6px',
-                            fontSize: '0.7rem',
+                            fontSize: '0.75rem',
                             fontWeight: 700,
                             cursor: 'pointer',
                             display: 'flex',
@@ -1948,26 +1946,26 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                         </button>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%', boxSizing: 'border-box' }}>
-                        <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
-                        <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
-                        <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
+                      <div style={{ display: 'flex', gap: '0.25rem', background: '#e4e6eb', padding: '3px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%', boxSizing: 'border-box' }}>
+                        <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#ffffff' : 'transparent', color: previewPlacement === 'fb_feed' ? '#1c1e21' : '#606770', boxShadow: previewPlacement === 'fb_feed' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
+                        <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#ffffff' : 'transparent', color: previewPlacement === 'ig_feed' ? '#1c1e21' : '#606770', boxShadow: previewPlacement === 'ig_feed' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
+                        <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#ffffff' : 'transparent', color: previewPlacement === 'ig_stories' ? '#1c1e21' : '#606770', boxShadow: previewPlacement === 'ig_stories' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
                       </div>
 
                       <div style={{ 
                         width: '100%',
                         maxWidth: '310px', 
-                        background: '#0a0e17', 
+                        background: '#e4e6eb', 
                         borderRadius: '32px', 
                         padding: '8px',
-                        border: '4px solid #334155',
-                        boxShadow: '0 15px 35px rgba(0,0,0,0.7)',
+                        border: '4px solid #ccd0d5',
+                        boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
                         fontFamily: 'system-ui, -apple-system, sans-serif',
                         boxSizing: 'border-box',
                         overflow: 'hidden'
                       }}>
-                        <div style={{ width: '80px', height: '14px', background: '#334155', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                          <div style={{ width: '30px', height: '3px', background: '#0a0e17', borderRadius: '1.5px' }}></div>
+                        <div style={{ width: '80px', height: '14px', background: '#ccd0d5', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <div style={{ width: '30px', height: '3px', background: '#ffffff', borderRadius: '1.5px' }}></div>
                         </div>
                         {renderAdPreview(previewPlacement, editCreativeData)}
                       </div>
@@ -1980,23 +1978,32 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             </div>
 
             {/* Footer Buttons */}
-            <div style={{ padding: '0.8rem 2rem 1.5rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+            <div style={{ padding: '1rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid #dddfe2', background: '#ffffff', flexShrink: 0 }}>
               {isEditingEntity ? (
                 <>
-                  <button onClick={() => setIsEditingEntity(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>İptal</button>
-                  <button onClick={handleUpdateName} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #c026d3 0%, #db2777 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>Kaydet</button>
+                  <button type="button" onClick={() => setIsEditingEntity(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: '#ffffff', color: '#4b5563', border: '1px solid #ccd0d5', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>İptal</button>
+                  <button type="button" onClick={handleUpdateName} style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: '#1877f2', color: '#ffffff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>Kaydet</button>
                 </>
               ) : (
                 <>
                   <button 
+                    type="button" 
+                    onClick={() => setShowDetailsPanel(false)} 
+                    style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: '#ffffff', color: '#4b5563', border: '1px solid #ccd0d5', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}
+                  >
+                    Kapat
+                  </button>
+                  <button 
+                    type="button" 
                     onClick={() => handleToggleStatus(selectedEntity.data.id, selectedEntity.data.status, selectedEntity.type)} 
-                    style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#4b5563', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}
+                    style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: '#e4e6eb', color: '#1c1e21', border: '1px solid #ccd0d5', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}
                   >
                     {selectedEntity.data.status === 'ACTIVE' || selectedEntity.data.status === 'ENABLED' ? 'Durdur' : 'Başlat'}
                   </button>
                   <button 
+                    type="button" 
                     onClick={() => setIsEditingEntity(true)} 
-                    style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #c026d3 0%, #db2777 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}
+                    style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: '#1877f2', color: '#ffffff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}
                   >
                     Düzenle
                   </button>
@@ -2053,37 +2060,39 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
       {/* ADVANCED PREVIEW MODAL */}
       {showAdvancedPreviewModal && (
         <>
-          <div onClick={() => setShowAdvancedPreviewModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 11000 }} />
+          <div onClick={() => setShowAdvancedPreviewModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 11000 }} />
           <div style={{ 
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
             width: '95%', maxWidth: '1400px', height: '90vh',
-            background: '#1a1f2e', 
+            background: '#f0f2f5', 
             borderRadius: '24px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.7)', zIndex: 11001, 
+            boxShadow: '0 12px 28px 0 rgba(0,0,0,0.2), 0 2px 4px 0 rgba(0,0,0,0.1)', zIndex: 11001, 
             display: 'flex', flexDirection: 'column',
             animation: 'modalFadeIn 0.3s ease-out',
             overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.05)'
+            border: '1px solid #ccd0d5'
           }}>
             {/* Header */}
-            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #dddfe2', background: '#ffffff' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>Gelişmiş Önizleme</h2>
-                <div style={{ background: '#0064e0', color: '#fff', fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>9 Yerleşim</div>
+                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#1c1e21' }}>Gelişmiş Önizleme</h2>
+                <div style={{ background: '#e7f3ff', color: '#1877f2', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '10px', fontWeight: 700 }}>9 Yerleşim</div>
               </div>
-              <button onClick={() => setShowAdvancedPreviewModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem', display: 'flex', alignItems: 'center' }}><X size={24} /></button>
+              <button onClick={() => setShowAdvancedPreviewModal(false)} style={{ background: 'none', border: 'none', color: '#606770', cursor: 'pointer', padding: '0.5rem', display: 'flex', alignItems: 'center' }}><X size={20} /></button>
             </div>
 
             {/* Filter / Subheader Bar */}
-            <div style={{ padding: '0.8rem 2rem', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ padding: '0.8rem 2rem', background: '#ffffff', borderBottom: '1px solid #dddfe2', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
               {/* TABS */}
-              <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', gap: '0.25rem', background: '#e4e6eb', padding: '3px', borderRadius: '8px' }}>
                 <button 
                   onClick={() => setAdvancedPreviewTab('placements')} 
                   style={{ 
                     padding: '0.4rem 1rem', fontSize: '0.75rem', borderRadius: '6px', border: 'none', 
-                    background: advancedPreviewTab === 'placements' ? '#0064e0' : 'transparent', 
-                    color: '#fff', cursor: 'pointer', fontWeight: 600 
+                    background: advancedPreviewTab === 'placements' ? '#ffffff' : 'transparent', 
+                    color: advancedPreviewTab === 'placements' ? '#1c1e21' : '#606770',
+                    boxShadow: advancedPreviewTab === 'placements' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                    cursor: 'pointer', fontWeight: 600 
                   }}
                 >
                   Reklam Alanları (Placements)
@@ -2092,8 +2101,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   onClick={() => setAdvancedPreviewTab('creative')} 
                   style={{ 
                     padding: '0.4rem 1rem', fontSize: '0.75rem', borderRadius: '6px', border: 'none', 
-                    background: advancedPreviewTab === 'creative' ? '#0064e0' : 'transparent', 
-                    color: '#fff', cursor: 'pointer', fontWeight: 600 
+                    background: advancedPreviewTab === 'creative' ? '#ffffff' : 'transparent', 
+                    color: advancedPreviewTab === 'creative' ? '#1c1e21' : '#606770',
+                    boxShadow: advancedPreviewTab === 'creative' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                    cursor: 'pointer', fontWeight: 600 
                   }}
                 >
                   Advantage+ kreatif
@@ -2102,31 +2113,31 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
               {/* FILTERS */}
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>FİLTRELE:</span>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#fff', cursor: 'pointer' }}>
+                <span style={{ fontSize: '0.75rem', color: '#606770', fontWeight: 600 }}>FİLTRELE:</span>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#1c1e21', cursor: 'pointer' }}>
                   <input 
                     type="checkbox" 
                     checked={advancedFilters.feeds} 
                     onChange={e => setAdvancedFilters({ ...advancedFilters, feeds: e.target.checked })}
-                    style={{ accentColor: '#0064e0' }}
+                    style={{ accentColor: '#1877f2' }}
                   />
                   Akışlar (Feeds)
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#fff', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#1c1e21', cursor: 'pointer' }}>
                   <input 
                     type="checkbox" 
                     checked={advancedFilters.stories} 
                     onChange={e => setAdvancedFilters({ ...advancedFilters, stories: e.target.checked })}
-                    style={{ accentColor: '#0064e0' }}
+                    style={{ accentColor: '#1877f2' }}
                   />
                   Hikayeler & Reels
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#fff', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#1c1e21', cursor: 'pointer' }}>
                   <input 
                     type="checkbox" 
                     checked={advancedFilters.search} 
                     onChange={e => setAdvancedFilters({ ...advancedFilters, search: e.target.checked })}
-                    style={{ accentColor: '#0064e0' }}
+                    style={{ accentColor: '#1877f2' }}
                   />
                   Arama & Mesajlar
                 </label>
@@ -2233,10 +2244,11 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             </div>
             
             {/* Footer */}
-            <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.1)' }}>
+            <div style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #dddfe2', background: '#ffffff' }}>
               <button 
+                type="button"
                 onClick={() => setShowAdvancedPreviewModal(false)} 
-                style={{ padding: '0.65rem 1.5rem', background: '#0064e0', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+                style={{ padding: '0.65rem 1.5rem', background: '#ffffff', color: '#4b5563', border: '1px solid #ccd0d5', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
               >
                 Kapat
               </button>
@@ -2250,7 +2262,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
 function StatusToggle({ active, onToggle }) {
   return (
-    <div onClick={onToggle} style={{ width: '42px', height: '22px', background: active ? '#10b981' : 'rgba(255,255,255,0.1)', borderRadius: '12px', position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
+    <div onClick={onToggle} style={{ width: '42px', height: '22px', background: active ? '#1877f2' : '#bcc0c4', borderRadius: '12px', position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
       <div style={{ width: '16px', height: '16px', background: 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: active ? '22px' : '3px', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
     </div>
   );
@@ -2295,23 +2307,24 @@ const dateInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px soli
 const smallButtonStyle = { padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, border: 'none', cursor: 'pointer' };
 
 const previewCardStyle = {
-  background: 'rgba(255,255,255,0.01)',
-  border: '1px solid rgba(255,255,255,0.05)',
+  background: '#ffffff',
+  border: '1px solid #dddfe2',
   borderRadius: '16px',
   padding: '1rem',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '0.8rem'
+  gap: '0.8rem',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
 };
 
 const previewCardHeaderStyle = {
   fontSize: '0.8rem',
   fontWeight: 700,
-  color: 'rgba(255,255,255,0.7)',
+  color: '#1c1e21',
   textAlign: 'center',
   width: '100%',
-  borderBottom: '1px solid rgba(255,255,255,0.05)',
+  borderBottom: '1px solid #e5e7eb',
   paddingBottom: '0.4rem',
   marginBottom: '0.2rem'
 };
@@ -2319,11 +2332,11 @@ const previewCardHeaderStyle = {
 const phoneWrapperStyle = {
   width: '100%',
   maxWidth: '280px', 
-  background: '#0a0e17', 
+  background: '#e4e6eb', 
   borderRadius: '24px', 
   padding: '6px',
-  border: '3px solid #334155',
-  boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+  border: '3px solid #ccd0d5',
+  boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
   fontFamily: 'system-ui, -apple-system, sans-serif',
   boxSizing: 'border-box',
   overflow: 'hidden'
