@@ -1,0 +1,1167 @@
+﻿STEP 235 [PLANNER_RESPONSE]: I will view the UTF-8 encoded git diff file to inspect the changes.
+STEP 236 [VIEW_FILE]: Created At: 2026-06-05T10:01:54Z
+Completed At: 2026-06-05T10:01:54Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/scratch/diff_utf8.txt`
+Total Lines: 724
+Total Bytes: 54428
+Showing lines 1 to 724
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: diff --git a/src/app/actions.js b/src/app/actions.js
+2: index ca00152..c41f82a 100644
+3: --- a/src/app/actions.js
+4: +++ b/src/app/actions.js
+5: @@ -1006,7 +1006,7 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since
+6:      // Fetch ad sets with campaign_id and insights
+7:      const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,campaign_id,start_time,stop_time,insights.${nestedParams}{spend,clicks,impressions,reach}&access_token=${accessToken}`;
+8:      // Fetch ads with adset_id and insights
+9: -    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
+10: +    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url,title,object_story_spec,link_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
+11:      try {
+12:        const [insightsRes, campaignsRes, adSetsRes, adsRes] = await Promise.all([
+13:          fetchWithTimeout(insightsUrl, { cache: 'no-store' }),
+14: @@ -3003,15 +3003,68 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
+15:      }
+16:  
+17:      const accessToken = client.metaAccessToken.trim();
+18: -    const url = `https://graph.facebook.com/v19.0/${entityI
+<truncated 45282 bytes>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>{CTA_LABELS[editCreativeData.call_to_action || 'LEARN_MORE']}</span>
+612: +                            <span style={{ fontSize: '0.65rem', color: '#fff' }}>Ã”ÅÃ¶</span>
+613: +                          </div>
+614: +
+615: +                          <div style={{ fontSize: '0.7rem', color: '#fff', padding: '4px 6px 10px 6px', lineHeight: '1.3', maxHeight: '60px', overflowY: 'auto' }}>
+616: +                            <strong>{editCreativeData.instagram_actor_id || 'terapiylecom'}</strong> {editCreativeData.primary_text || 'Aâ”œÄŸâ”€â–’klama...'}
+617: +                          </div>
+618: +                        </div>
+619: +                      )}
+620: +
+621: +                      {/* Instagram Stories */}
+622: +                      {previewPlacement === 'ig_stories' && (
+623: +                        <div style={{ width: '100%', height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '16px', boxSizing: 'border-box' }}>
+624: +                          {editCreativeData.image_url ? (
+625: +                            <img src={editCreativeData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+626: +                          ) : (
+627: +                            <div style={{ width: '100%', height: '100%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem', position: 'absolute', inset: 0 }}>Gâ”œÃ‚rsel Seâ”œÄŸilmedi</div>
+628: +                          )}
+629: +                          
+630: +                          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)', padding: '8px 8px 
+<truncated 9244 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.
+STEP 237 [PLANNER_RESPONSE]: I will view the first image to see the user's design requirements.
+STEP 238 [VIEW_FILE]: Created At: 2026-06-05T10:01:56Z
+Completed At: 2026-06-05T10:01:56Z
+The following is the entire, complete content of the requested file.
+STEP 239 [PLANNER_RESPONSE]: I will view the second design image to understand the next section of the Ads Manager.
+STEP 240 [VIEW_FILE]: Created At: 2026-06-05T10:01:59Z
+Completed At: 2026-06-05T10:01:59Z
+The following is the entire, complete content of the requested file.
+STEP 241 [PLANNER_RESPONSE]: I will view the third design image to inspect the next part of the Ad Creative section.
+STEP 242 [VIEW_FILE]: Created At: 2026-06-05T10:02:01Z
+Completed At: 2026-06-05T10:02:01Z
+The following is the entire, complete content of the requested file.
+STEP 243 [PLANNER_RESPONSE]: I will view the fourth design image to inspect the tracking and optimization section.
+STEP 244 [VIEW_FILE]: Created At: 2026-06-05T10:02:05Z
+Completed At: 2026-06-05T10:02:05Z
+The following is the entire, complete content of the requested file.
+STEP 245 [PLANNER_RESPONSE]: I will view the fifth design image to understand the full set of requirements.
+STEP 246 [VIEW_FILE]: Created At: 2026-06-05T10:02:08Z
+Completed At: 2026-06-05T10:02:08Z
+The following is the entire, complete content of the requested file.
+STEP 247 [PLANNER_RESPONSE]: I will view `src/app/dashboard/client/[id]/meta/page.jsx` to see the entry point for this page.
+STEP 248 [VIEW_FILE]: Created At: 2026-06-05T10:02:12Z
+Completed At: 2026-06-05T10:02:12Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/page.jsx`
+Total Lines: 73
+Total Bytes: 3868
+Showing lines 1 to 73
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import { getMetaAdsAction } from '@/app/actions';
+2: import { AlertCircle } from 'lucide-react';
+3: import Link from 'next/link';
+4: import { redirect } from 'next/navigation';
+5: import MetaContent from './meta-content';
+6: import { getSession } from '@/lib/auth';
+7: import { can, getRolePermissions } from '@/lib/permissions';
+8: 
+9: export default async function MetaAdsPage({ params, searchParams }) {
+10:   const { id } = await params;
+11:   const session = await getSession();
+12:   if (!session) redirect('/login');
+13: 
+14:   const permissions = await getRolePermissions(session);
+15:   if (!can(permissions, session.role, 'client.tab.meta')) {
+16:     console.warn(`[WARN] Permission denied for client.tab.meta. Role: ${session.role}. Redirecting to /dashboard.`);
+17:     redirect('/dashboard');
+18:   }
+19: 
+20:   const sParams = await searchParams;
+21:   const datePreset = sParams.datePreset || 'last_30d';
+22:   const since = sParams.since || null;
+23:   const until = sParams.until || null;
+24:   
+25:   const result = await getMetaAdsAction(id, datePreset, since, until);
+26: 
+27:   return (
+28:     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+29:       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+30:         <div>
+31:           <h1 className="heading-1" style={{ marginBottom: '0.5rem' }}>Meta Reklam YÃ¶netimi</h1>
+32:           <p style={{ color: 'var(--text-secondary)' }}>Bu mÃ¼ÅŸterinin Meta (Instagram & Facebook) reklam performansÄ±nÄ± canlÄ± olarak
+<truncated 602 bytes>
+', 
+44:           justifyContent: 'center', 
+45:           padding: '4rem 2rem', 
+46:           textAlign: 'center',
+47:           background: 'rgba(239, 68, 68, 0.05)',
+48:           border: '1px dashed rgba(239, 68, 68, 0.3)'
+49:         }}>
+50:           <AlertCircle size={48} style={{ color: '#ef4444', marginBottom: '1.5rem' }} />
+51:           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Meta API Bilgileri Eksik</h2>
+52:           <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', marginBottom: '1rem' }}>
+53:             Reklam verilerini Ã§ekebilmemiz iÃ§in Hizmet AyarlarÄ± bÃ¶lÃ¼mÃ¼nden Meta Access Token ve Reklam HesabÄ± ID bilgilerini doldurmanÄ±z gerekmektedir.
+54:           </p>
+55:           <Link href={`/dashboard/client/${id}/settings`} className="btn btn-primary" style={{ gap: '0.5rem' }}>
+56:             Ayarlara Git ve YapÄ±landÄ±r
+57:           </Link>
+58:         </div>
+59:       ) : result.error ? (
+60:         <div className="card animate-fade-in" style={{ padding: '2rem', textAlign: 'center', background: 'rgba(239, 68, 68, 0.05)' }}>
+61:           <AlertCircle size={32} style={{ color: '#ef4444', marginBottom: '1rem' }} />
+62:           <h3 style={{ color: '#ef4444' }}>Meta API HatasÄ±</h3>
+63:           <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 600 }}>{result.details || 'Veriler Ã§ekilirken bir hata oluÅŸtu.'}</p>
+64:           {result.code && <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Hata Kodu: {result.code}</p>}
+65:           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>Token sÃ¼resi dolmuÅŸ, izinleri eksik veya ID hatalÄ± olabilir.</p>
+66:         </div>
+67:       ) : (
+68:         <MetaContent result={result} id={id} datePreset={datePreset} since={since} until={until} />
+69:       )}
+70:     </div>
+71:   );
+72: }
+73: 
+The above content shows the entire, complete file contents of the requested file.
+
+STEP 249 [PLANNER_RESPONSE]: I will perform a grep search for `showCreateModal` in `meta-content.jsx` files in the workspace.
+STEP 250 [GREP_SEARCH]: Created At: 2026-06-05T10:02:15Z
+Completed At: 2026-06-05T10:02:15Z
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":44,"LineContent":"  const [showCreateModal, setShowCreateModal] = useState(false);"}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":235,"LineContent":"      setShowCreateModal(false);"}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":270,"LineContent":"    setShowCreateModal(true);"}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":593,"LineContent":"      {showCreateModal \u0026\u0026 ("}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":595,"LineContent":"          \u003cdiv onClick={() =\u003e setShowCreateModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} /\u003e"}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":612,"LineContent":"              \u003cbutton onClick={() =\u003e setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}\u003e\u003cX size={24} /\u003e\u003c/button\u003e"}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":1107,"LineContent":"                \u003cbutton type=\"button\" onClick={() =\u003e setShowCreateModal(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}\u003eVazgeÃ§\u003c/button\u003e"}
+STEP 251 [PLANNER_RESPONSE]: I will view `meta-content.jsx` from line 590 to 800 to see the current implementation of the creation modal.
+STEP 252 [VIEW_FILE]: Created At: 2026-06-05T10:02:17Z
+Completed At: 2026-06-05T10:02:17Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 590 to 800
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+590: 
+591:       {/* PREMIUM CENTERED MODAL */}
+592:       {/* CREATE ENTITY MODAL */}
+593:       {showCreateModal && (
+594:         <>
+595:           <div onClick={() => setShowCreateModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} />
+596:           <div style={{ 
+597:             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+598:             width: '95%', 
+599:             maxWidth: activeTab === 'ads' ? '1000px' : '520px', 
+600:             maxHeight: '90vh',
+601:             background: '#1a1f2e', 
+602:             borderRadius: '24px',
+603:             boxShadow: '0 20px 50px rgba(0,0,0,0.6)', zIndex: 10001, 
+604:             display: 'flex', flexDirection: 'column',
+605:             animation: 'modalFadeIn 0.3s ease-out',
+606:             overflow: 'hidden'
+607:           }}>
+608:             <div style={{ padding: '1.5rem 2rem 0.8rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+609:               <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>
+610:                 Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'}
+611:               </h2>
+612:               <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
+613:       
+<truncated 13293 bytes>
+,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+778:                         />
+779:                       </div>
+780: 
+781:                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+782:                         <div>
+783:                           <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Ä°nternet Sitesi Adresi (URL) *</label>
+784:                           <input 
+785:                             required
+786:                             type="url"
+787:                             className="form-control" 
+788:                             value={createFormData.website_url || ''} 
+789:                             onChange={e => setCreateFormData({ ...createFormData, website_url: e.target.value })} 
+790:                             placeholder="https://terapiyle.com/"
+791:                             style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+792:                           />
+793:                         </div>
+794:                         <div>
+795:                           <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>GÃ¶rÃ¼nen BaÄŸlantÄ±</label>
+796:                           <input 
+797:                             className="form-control" 
+798:                             value={createFormData.display_link || ''} 
+799:                             onChange={e => setCreateFormData({ ...createFormData, display_link: e.target.value })} 
+800:                             placeholder="https://terapiyle.com/"
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 253 [PLANNER_RESPONSE]: I will view `meta-content.jsx` from line 1150 to 1350 to understand how the main tables and tabs are rendered on the page.
+STEP 254 [VIEW_FILE]: Created At: 2026-06-05T10:02:21Z
+Completed At: 2026-06-05T10:02:21Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 1150 to 1350
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1150:                       <div>
+1151:                         <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM ADI *</label>
+1152:                         {isEditingEntity ? (
+1153:                           <input 
+1154:                             required
+1155:                             className="form-control" 
+1156:                             value={editName} 
+1157:                             onChange={e => setEditName(e.target.value)} 
+1158:                             style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+1159:                           />
+1160:                         ) : (
+1161:                           <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{selectedEntity.data.name}</div>
+1162:                         )}
+1163:                       </div>
+1164:                     </div>
+1165: 
+1166:                     {/* Section 1: Kimlik */}
+1167:                     <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+1168:                       <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeig
+<truncated 14068 bytes>
+1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+1331:                             />
+1332:                           ) : (
+1333:                             <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{editCreativeData.display_link || '-'}</div>
+1334:                           )}
+1335:                         </div>
+1336:                       </div>
+1337: 
+1338:                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+1339:                         <div>
+1340:                           <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Eylem Ã‡aÄŸrÄ±sÄ± *</label>
+1341:                           {isEditingEntity ? (
+1342:                             <select 
+1343:                               value={editCreativeData.call_to_action || 'LEARN_MORE'}
+1344:                               onChange={e => setEditCreativeData({ ...editCreativeData, call_to_action: e.target.value })}
+1345:                               style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+1346:                             >
+1347:                               <option value="LEARN_MORE">Daha Fazla Bilgi Al</option>
+1348:                               <option value="SIGN_UP">Kaydol</option>
+1349:                               <option value="BOOK_TRAVEL">Rezervasyon Yap</option>
+1350:                               <option value="CONTACT_US">Bize UlaÅŸÄ±n</option>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 255 [PLANNER_RESPONSE]: I will view lines 1350 to 1550 of `meta-content.jsx` to check the rest of the details panel.
+STEP 256 [VIEW_FILE]: Created At: 2026-06-05T10:02:24Z
+Completed At: 2026-06-05T10:02:24Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 1350 to 1550
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1350:                               <option value="CONTACT_US">Bize UlaÅŸÄ±n</option>
+1351:                               <option value="APPLY_NOW">BaÅŸvur</option>
+1352:                             </select>
+1353:                           ) : (
+1354:                             <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{CTA_LABELS[editCreativeData.call_to_action || 'LEARN_MORE']}</div>
+1355:                           )}
+1356:                         </div>
+1357:                         <div>
+1358:                           <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Durum</label>
+1359:                           <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center' }}>
+1360:                             <StatusBadge status={selectedEntity.data.status} />
+1361:                           </div>
+1362:                         </div>
+1363:                       </div>
+1364:                     </div>
+1365: 
+1366:                     {/* Section 4: Takip */}
+1367:                     <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+1368:                       <h3 style={{ margin: 0
+<truncated 13734 bytes>
+                    )}
+1527:                           </div>
+1528: 
+1529:                           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px 4px 8px', color: '#fff', fontSize: '0.8rem' }}>
+1530:                             <div style={{ display: 'flex', gap: '8px' }}>
+1531:                               <span>â™¡</span> <span>ğŸ’¬</span> <span>âœˆï¸</span>
+1532:                             </div>
+1533:                             <span>ï£¿</span>
+1534:                           </div>
+1535: 
+1536:                           <div style={{ background: '#0064e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', cursor: 'pointer' }}>
+1537:                             <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>{CTA_LABELS[editCreativeData.call_to_action || 'LEARN_MORE']}</span>
+1538:                             <span style={{ fontSize: '0.65rem', color: '#fff' }}>â”</span>
+1539:                           </div>
+1540: 
+1541:                           <div style={{ fontSize: '0.7rem', color: '#fff', padding: '4px 6px 10px 6px', lineHeight: '1.3', maxHeight: '60px', overflowY: 'auto' }}>
+1542:                             <strong>{editCreativeData.instagram_actor_id || 'terapiylecom'}</strong> {editCreativeData.primary_text || 'AÃ§Ä±klama...'}
+1543:                           </div>
+1544:                         </div>
+1545:                       )}
+1546: 
+1547:                       {/* Instagram Stories */}
+1548:                       {previewPlacement === 'ig_stories' && (
+1549:                         <div style={{ width: '100%', height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '16px', boxSizing: 'border-box' }}>
+1550:                           {editCreativeData.image_url ? (
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 257 [PLANNER_RESPONSE]: I will view the final lines of `meta-content.jsx` to see the end of the file.
+STEP 258 [VIEW_FILE]: Created At: 2026-06-05T10:02:26Z
+Completed At: 2026-06-05T10:02:26Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 1550 to 1750
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1550:                           {editCreativeData.image_url ? (
+1551:                             <img src={editCreativeData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+1552:                           ) : (
+1553:                             <div style={{ width: '100%', height: '100%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem', position: 'absolute', inset: 0 }}>GÃ¶rsel SeÃ§ilmedi</div>
+1554:                           )}
+1555:                           
+1556:                           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)', padding: '8px 8px 16px 8px', display: 'flex', alignItems: 'center', gap: '6px', zIndex: 2 }}>
+1557:                             <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #bc1888 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.6rem', fontWeight: 800 }}>
+1558:                               {editCreativeData.instagram_actor_id ? editCreativeData.instagram_actor_id.charAt(0).toUpperCase() : 'I'}
+1559:                             </div>
+1560:                             <div style={{ flex: 1 }}>
+1561:                               <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>{editCreativeData.instagram_ac
+<truncated 12037 bytes>
+kground: active ? '#0064e0' : 'rgba(255,255,255,0.1)', color: active ? '#fff' : 'var(--text-secondary)', padding: '0.1rem 0.4rem', borderRadius: '10px', fontSize: '0.7rem' }}>{count}</span>
+1727:     </button>
+1728:   );
+1729: }
+1730: 
+1731: function StatusBadge({ status }) {
+1732:   const active = status === 'ACTIVE' || status === 'ENABLED';
+1733:   return (
+1734:     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.75rem', borderRadius: '20px', background: active ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: active ? '#10b981' : '#ef4444', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>
+1735:       <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: active ? '#10b981' : '#ef4444' }} />
+1736:       {active ? 'AKTÄ°F' : 'DURDURULDU'}
+1737:     </div>
+1738:   );
+1739: }
+1740: 
+1741: function EmptyRow({ colSpan }) {
+1742:   return (<tr><td colSpan={colSpan} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Veri bulunamadÄ±.</td></tr>);
+1743: }
+1744: 
+1745: const thStyle = { padding: '1rem 1.5rem', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' };
+1746: const tdStyle = { padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' };
+1747: const trStyle = { transition: 'background 0.2s' };
+1748: const dateInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', padding: '0.3rem 0.5rem', fontSize: '0.75rem', outline: 'none' };
+1749: const smallButtonStyle = { padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, border: 'none', cursor: 'pointer' };
+1750: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 259 [PLANNER_RESPONSE]: I will search for `createMetaAdAction` in `actions.js` to see its current signature and implementation.
+STEP 260 [GREP_SEARCH]: Created At: 2026-06-05T10:02:35Z
+Completed At: 2026-06-05T10:02:35Z
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\actions.js","LineNumber":2868,"LineContent":"export async function createMetaAdAction(clientId, adData) {"}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\actions.js","LineNumber":2987,"LineContent":"    console.error('createMetaAdAction error:', error);"}
+STEP 261 [PLANNER_RESPONSE]: I will view the definition and implementation of `createMetaAdAction` in `actions.js`.
+STEP 262 [VIEW_FILE]: Created At: 2026-06-05T10:02:38Z
+Completed At: 2026-06-05T10:02:38Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/actions.js`
+Total Lines: 3265
+Total Bytes: 130104
+Showing lines 2860 to 2995
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+2860: 
+2861:     await logActivity('CREATE', 'META_ADS', `Yeni reklam seti oluÅŸturuldu: ${adSetData.name}`, clientId);
+2862:     return { success: true, id: data.id };
+2863:   } catch (error) {
+2864:     return { error: 'Reklam seti oluÅŸturulamadÄ±.' };
+2865:   }
+2866: }
+2867: 
+2868: export async function createMetaAdAction(clientId, adData) {
+2869:   try {
+2870:     const session = await getSession();
+2871:     if (!session) return { error: 'Yetkisiz eriÅŸim.' };
+2872: 
+2873:     const client = await prisma.client.findUnique({
+2874:       where: { id: parseInt(clientId) }
+2875:     });
+2876:     
+2877:     if (!client || !client.metaAdAccountId || !client.metaAccessToken) {
+2878:       return { error: 'API_MISSING' };
+2879:     }
+2880: 
+2881:     const accountId = client.metaAdAccountId.trim();
+2882:     const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
+2883:     const accessToken = client.metaAccessToken.trim();
+2884:     
+2885:     let creativeId = adData.creative_id || null;
+2886: 
+2887:     // If creative details are provided, create a new Ad Creative first
+2888:     if (!creativeId && adData.primary_text) {
+2889:       const creativePayload = {
+2890:         name: `${adData.name} - Kreatif`,
+2891:         object_story_spec: {
+2892:           page_id: adData.page_id || '100000000000000',
+2893:           instagram_actor_id: adData.instagram_actor_id || undefined,
+2894:           link_data: {
+2895:             link: adData.website_url || 'https://terapiyle.com/',
+2896:             message: adData.prima
+<truncated 2590 bytes>
+948:     const url = `https://graph.facebook.com/v19.0/${finalAccountId}/ads`;
+2949:     const payload = {
+2950:       name: adData.name,
+2951:       adset_id: adData.parent_id,
+2952:       status: adData.status || 'PAUSED',
+2953:       creative: { creative_id: creativeId },
+2954:       url_tags: adData.url_params || undefined,
+2955:       access_token: accessToken
+2956:     };
+2957: 
+2958:     // Add website tracking pixel if provided
+2959:     if (adData.pixel_id && adData.pixel_id.trim() !== '') {
+2960:       payload.tracking_specs = [
+2961:         {
+2962:           'action.type': ['offsite_conversion'],
+2963:           'fb_pixel': [adData.pixel_id.trim()]
+2964:         }
+2965:       ];
+2966:     }
+2967: 
+2968:     const response = await fetch(url, {
+2969:       method: 'POST',
+2970:       headers: { 'Content-Type': 'application/json' },
+2971:       body: JSON.stringify(payload)
+2972:     });
+2973: 
+2974:     const data = await response.json();
+2975:     if (data.error) {
+2976:       console.error('Meta Ad Error:', data.error);
+2977:       return { 
+2978:         error: data.error.message, 
+2979:         details: data.error.error_user_msg || data.error.error_user_title || null,
+2980:         fb_trace_id: data.error.fbtrace_id
+2981:       };
+2982:     }
+2983: 
+2984:     await logActivity('CREATE', 'META_ADS', `Yeni reklam oluÅŸturuldu: ${adData.name}`, clientId);
+2985:     return { success: true, id: data.id };
+2986:   } catch (error) {
+2987:     console.error('createMetaAdAction error:', error);
+2988:     return { error: 'Reklam oluÅŸturulamadÄ±.' };
+2989:   }
+2990: }
+2991: 
+2992: export async function updateMetaEntityAction(clientId, entityId, updateData) {
+2993:   try {
+2994:     const session = await getSession();
+2995:     if (!session) return { error: 'Yetkisiz eriÅŸim.' };
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 263 [PLANNER_RESPONSE]: I will view `updateMetaEntityAction` in `actions.js` to ensure the update flow is fully aligned with our requirements.
+STEP 264 [VIEW_FILE]: Created At: 2026-06-05T10:02:41Z
+Completed At: 2026-06-05T10:02:41Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/actions.js`
+Total Lines: 3265
+Total Bytes: 130104
+Showing lines 2992 to 3100
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+2992: export async function updateMetaEntityAction(clientId, entityId, updateData) {
+2993:   try {
+2994:     const session = await getSession();
+2995:     if (!session) return { error: 'Yetkisiz eriÅŸim.' };
+2996: 
+2997:     const client = await prisma.client.findUnique({
+2998:       where: { id: parseInt(clientId) }
+2999:     });
+3000:     
+3001:     if (!client || !client.metaAccessToken) {
+3002:       return { error: 'API_MISSING' };
+3003:     }
+3004: 
+3005:     const accessToken = client.metaAccessToken.trim();
+3006:     const finalAccountId = client.metaAdAccountId?.startsWith('act_') ? client.metaAdAccountId : `act_${client.metaAdAccountId}`;
+3007:     
+3008:     // If it's an ad and creative fields are updated
+3009:     let creativeId = updateData.creative_id || null;
+3010:     if (updateData.primary_text && !creativeId) {
+3011:       // Create new Ad Creative
+3012:       const creativePayload = {
+3013:         name: `${updateData.name || 'Guncellenmis Reklam'} - Kreatif`,
+3014:         object_story_spec: {
+3015:           page_id: updateData.page_id || '100000000000000',
+3016:           instagram_actor_id: updateData.instagram_actor_id || undefined,
+3017:           link_data: {
+3018:             link: updateData.website_url || 'https://terapiyle.com/',
+3019:             message: updateData.primary_text,
+3020:             name: updateData.headline || '',
+3021:             description: updateData.description || '',
+3022:             display_link: updateData.display_link || undefined,
+3023:             call_to_action: {
+3024:               t
+<truncated 1382 bytes>
+3053:     const url = `https://graph.facebook.com/v19.0/${entityId}`;
+3054:     const payload = {
+3055:       access_token: accessToken
+3056:     };
+3057: 
+3058:     if (updateData.name) payload.name = updateData.name;
+3059:     if (updateData.status) payload.status = updateData.status;
+3060:     if (updateData.daily_budget) payload.daily_budget = Math.round(updateData.daily_budget * 100);
+3061:     
+3062:     if (creativeId) {
+3063:       payload.creative = { creative_id: creativeId };
+3064:     }
+3065:     
+3066:     if (updateData.url_params) {
+3067:       payload.url_tags = updateData.url_params;
+3068:     }
+3069: 
+3070:     const response = await fetch(url, {
+3071:       method: 'POST',
+3072:       headers: { 'Content-Type': 'application/json' },
+3073:       body: JSON.stringify(payload)
+3074:     });
+3075: 
+3076:     const data = await response.json();
+3077:     if (data.error) {
+3078:       console.error('Meta Update Error:', data.error);
+3079:       return { 
+3080:         error: data.error.message, 
+3081:         details: data.error.error_user_msg || data.error.error_user_title || null,
+3082:         fb_trace_id: data.error.fbtrace_id
+3083:       };
+3084:     }
+3085: 
+3086:     await logActivity('UPDATE', 'META_ADS', `Meta objesi gÃ¼ncellendi: ${entityId}`, clientId);
+3087:     return { success: true };
+3088:   } catch (error) {
+3089:     console.error('updateMetaEntityAction error:', error);
+3090:     return { error: 'GÃ¼ncelleme yapÄ±lamadÄ±.' };
+3091:   }
+3092: }
+3093: 
+3094: export async function deleteMetaEntityAction(clientId, entityId) {
+3095:   try {
+3096:     const session = await getSession();
+3097:     if (!session) return { error: 'Yetkisiz eriÅŸim.' };
+3098: 
+3099:     const client = await prisma.client.findUnique({
+3100:       where: { id: parseInt(clientId) }
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 265 [PLANNER_RESPONSE]: I will view `meta-content.jsx` around line 230 to 280 to see how the creation form state is initialized when the creation modal is opened.
+STEP 266 [VIEW_FILE]: Created At: 2026-06-05T10:02:49Z
+Completed At: 2026-06-05T10:02:49Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 230 to 280
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+230:         details: res.details || '',
+231:         type: 'error'
+232:       });
+233:     } else {
+234:       setMessageModal({ show: true, title: 'BaÅŸarÄ±lÄ±', message: 'BaÅŸarÄ±yla oluÅŸturuldu!', type: 'success' });
+235:       setShowCreateModal(false);
+236:       const newEntity = { id: res.id, name: createFormData.name, status: createFormData.status, insights: { data: [] } };
+237:       if (activeTab === 'campaigns') setCampaigns([newEntity, ...campaigns]);
+238:       else if (activeTab === 'adsets') setAdSets([newEntity, ...adSets]);
+239:       else if (activeTab === 'ads') setAds([newEntity, ...ads]);
+240:       setCreateFormData({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
+241:     }
+242:   };
+243: 
+244:   const handleOpenCreateModal = () => {
+245:     if (activeTab === 'ads') {
+246:       setCreateFormData({
+247:         name: 'Yeni EtkileÅŸim ReklamÄ±',
+248:         parent_id: selectedAdSetId || '',
+249:         status: 'ACTIVE',
+250:         website_url: 'https://terapiyle.com/',
+251:         display_link: 'https://terapiyle.com/',
+252:         primary_text: 'Bazen sadece doÄŸru uzmanla konuÅŸmak her ÅŸeyi deÄŸiÅŸtirir. Terapiyle, seni anlayan terapistle hÄ±zlÄ± ve gÃ¼venli ÅŸekilde eÅŸleÅŸmeni saÄŸlar. Kendin iÃ§in bir adÄ±m at.',
+253:         headline: 'Terapiyle Sana En Uygun Terapisti Bul',
+254:         description: 'Terapiyle. Online, gÃ¼venli ve kolay! DilediÄŸin anda dilediÄŸin uzman...',
+255:         call_to_action: 'LEARN_MORE',
+256:         page_id: 'Terapimle',
+257:         instagram_actor_id: 'terapiylecom',
+258:         pixel_id: '1850906787926541',
+259:         url_params: 'anahtar1=deger1&anahtar2=deger2',
+260:         image_url: 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80',
+261:       });
+262:     } else {
+263:       setCreateFormData({
+264:         name: '',
+265:         daily_budget: '',
+266:         status: 'ACTIVE',
+267:         parent_id: activeTab === 'adsets' ? (selectedCampaignId || '') : '',
+268:       });
+269:     }
+270:     setShowCreateModal(true);
+271:   };
+272: 
+273:   const openDetails = (entity, type) => {
+274:     setSelectedEntity({ type, data: entity });
+275:     setEditName(entity.name);
+276:     setEditBudget(entity.daily_budget || entity.lifetime_budget || '0');
+277:     setIsEditingEntity(false);
+278: 
+279:     if (type === 'ad') {
+280:       const creative = entity.creative || {};
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 267 [PLANNER_RESPONSE]: I will grep search for the `handleCreateEntity` function implementation in `meta-content.jsx`.
+STEP 268 [GREP_SEARCH]: Created At: 2026-06-05T10:02:52Z
+Completed At: 2026-06-05T10:02:52Z
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":209,"LineContent":"  const handleCreateEntity = async (e) =\u003e {"}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":615,"LineContent":"            \u003cform onSubmit={handleCreateEntity} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}\u003e"}
+STEP 269 [PLANNER_RESPONSE]: I will view lines 200 to 245 in `meta-content.jsx` to see the logic of the creation action call.
+STEP 270 [VIEW_FILE]: Created At: 2026-06-05T10:02:55Z
+Completed At: 2026-06-05T10:02:55Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 200 to 245
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+200:         if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === entityId ? { ...c, status: currentStatus } : c));
+201:         if (type === 'adset') setAdSets(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
+202:         if (type === 'ad') setAds(prev => prev.map(a => a.id === entityId ? { ...a, status: currentStatus } : a));
+203:       } else {
+204:         setMessageModal({ show: true, title: 'BaÅŸarÄ±lÄ±', message: 'Durum baÅŸarÄ±yla gÃ¼ncellendi.', type: 'success' });
+205:       }
+206:     });
+207:   };
+208: 
+209:   const handleCreateEntity = async (e) => {
+210:     e.preventDefault();
+211:     if (!createFormData.name) return;
+212:     setIsCreating(true);
+213:     
+214:     let res;
+215:     if (activeTab === 'campaigns') {
+216:       res = await createMetaCampaignAction(id, createFormData);
+217:     } else if (activeTab === 'adsets') {
+218:       res = await createMetaAdSetAction(id, createFormData);
+219:     } else if (activeTab === 'ads') {
+220:       res = await createMetaAdAction(id, createFormData);
+221:     }
+222:     
+223:     setIsCreating(false);
+224:     
+225:     if (res?.error) {
+226:       setMessageModal({ 
+227:         show: true, 
+228:         title: 'Hata', 
+229:         message: res.error,
+230:         details: res.details || '',
+231:         type: 'error'
+232:       });
+233:     } else {
+234:       setMessageModal({ show: true, title: 'BaÅŸarÄ±lÄ±', message: 'BaÅŸarÄ±yla oluÅŸturuldu!', type: 'success' });
+235:       setShowCreateModal(false);
+236:       const newEntity = { id: res.id, name: createFormData.name, status: createFormData.status, insights: { data: [] } };
+237:       if (activeTab === 'campaigns') setCampaigns([newEntity, ...campaigns]);
+238:       else if (activeTab === 'adsets') setAdSets([newEntity, ...adSets]);
+239:       else if (activeTab === 'ads') setAds([newEntity, ...ads]);
+240:       setCreateFormData({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
+241:     }
+242:   };
+243: 
+244:   const handleOpenCreateModal = () => {
+245:     if (activeTab === 'ads') {
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 271 [PLANNER_RESPONSE]: I will create a comprehensive implementation plan to redesign the Meta Ads interface into a 3-column Ads Manager layout and integrate the "GeliÅŸmiÅŸ Ã–nizleme" (Advanced Preview) placement grid modal as shown in the 5 screenshots.
+STEP 272 [CODE_ACTION]: Created At: 2026-06-05T10:03:04Z
+Completed At: 2026-06-05T10:03:04Z
+Created file file:///C:/Users/Casper/.gemini/antigravity-ide/brain/30c3af44-67ca-450e-bf41-f7e4fcc57ef1/implementation_plan.md with requested content.
+If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+STEP 273 [PLANNER_RESPONSE]: Meta ReklamlarÄ± sayfasÄ±nÄ± paylaÅŸtÄ±ÄŸÄ±nÄ±z 5 ekran gÃ¶rÃ¼ntÃ¼sÃ¼yle tam olarak eÅŸleÅŸecek ÅŸekilde tasarlamak iÃ§in detaylÄ± bir plan hazÄ±rladÄ±m. 
+
+[implementation_plan.md](file:///C:/Users/Casper/.gemini/antigravity-ide/brain/30c3af44-67ca-450e-bf41-f7e4fcc57ef1/implementation_plan.md) dosyasÄ±nÄ± inceleyip onaylayabilir misiniz? OnayÄ±nÄ±zÄ±n ardÄ±ndan kodlama ve entegrasyon aÅŸamasÄ±na geÃ§eceÄŸim.
+STEP 274 [USER_INPUT]: <USER_REQUEST>
+tamam
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-06-05T13:05:18+03:00.
+
+The user's current state is as follows:
+Other open documents:
+- c:\Users\Casper\Desktop\TEST\src\app\dashboard\client\[id]\stats\stats-content.jsx (LANGUAGE_JAVASCRIPT)
+- c:\Users\Casper\Desktop\TEST\scratch\parse_check.js (LANGUAGE_JAVASCRIPT)
+- c:\Users\Casper\Desktop\TEST\scratch\apply_refactor.js (LANGUAGE_JAVASCRIPT)
+- c:\Users\Casper\Desktop\TEST\src\app\dashboard\notification-bell.jsx (LANGUAGE_JAVASCRIPT)
+- c:\Users\Casper\Desktop\TEST\src\app\dashboard\notifications\page.jsx (LANGUAGE_JAVASCRIPT)
+</ADDITIONAL_METADATA>
+STEP 275 [PLANNER_RESPONSE]: I will view the `task.md` file to see the tasks and structure currently defined.
+STEP 276 [VIEW_FILE]: Created At: 2026-06-05T10:05:22Z
+Completed At: 2026-06-05T10:05:22Z
+File Path: `file:///C:/Users/Casper/.gemini/antigravity-ide/brain/30c3af44-67ca-450e-bf41-f7e4fcc57ef1/task.md`
+Total Lines: 10
+Total Bytes: 623
+Showing lines 1 to 10
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: # Task: Meta Ad Creative Integration & Live Preview
+2: 
+3: - [x] Modify `src/app/actions.js` to support full ad creative creation in `createMetaAdAction`
+4: - [x] Modify `src/app/dashboard/client/[id]/meta/meta-content.jsx` to build the new two-column ad creation modal with a live smartphone preview
+5: - [x] Verify local execution
+6: - [x] Push changes to GitHub
+7: - [x] Refactor modal fields to match Facebook Ads Manager sections (Kimlik, Reklam Kurulumu, Reklam Kreatifi, Takip)
+8: - [x] Add Display Link, URL Parameters, and Multiple Placement previews (Facebook Feed, Instagram Feed, Stories)
+9: - [x] Re-verify and push changes to GitHub
+10: 
+The above content shows the entire, complete file contents of the requested file.
+
+STEP 277 [PLANNER_RESPONSE]: I will update `task.md` to track our progress for the new tasks we are starting.
+STEP 278 [CODE_ACTION]: Created At: 2026-06-05T10:05:26Z
+Completed At: 2026-06-05T10:05:26Z
+Created file file:///C:/Users/Casper/.gemini/antigravity-ide/brain/30c3af44-67ca-450e-bf41-f7e4fcc57ef1/task.md with requested content.
+If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+STEP 279 [PLANNER_RESPONSE]: I will update `updateMetaEntityAction` in `src/app/actions.js` to include the `tracking_specs` pixel update when a pixel ID is provided, aligning the update flow with the creation flow.
+STEP 280 [CODE_ACTION]: Created At: 2026-06-05T10:05:30Z
+Completed At: 2026-06-05T10:05:42Z
+The following changes were made by the replace_file_content tool to: c:\Users\Casper\Desktop\TEST\src\app\actions.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.
+
+We did our best to apply changes despite some inaccuracies. Double check if the edit applied is what you intended.
+STEP 281 [PLANNER_RESPONSE]: I will run `git diff` on `actions.js` to verify the edit was applied correctly.
+STEP 282 [RUN_COMMAND]: Created At: 2026-06-05T10:05:46Z
+Completed At: 2026-06-05T10:05:46Z
+
+				The command completed successfully.
+				Output:
+				diff --git a/src/app/actions.js b/src/app/actions.js
+index ca00152..c41f82a 100644
+--- a/src/app/actions.js
++++ b/src/app/actions.js
+@@ -1006,7 +1006,7 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since
+     // Fetch ad sets with campaign_id and insights
+     const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,campaign_id,start_time,stop_time,insights.${nestedParams}{spend,clicks,impressions,reach}&access_token=${accessToken}`;
+     // Fetch ads with adset_id and insights
+-    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
++    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url,title,object_story_spec,link_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
+     try {
+       const [insightsRes, campaignsRes, adSetsRes, adsRes] = await Promise.all([
+         fetchWithTimeout(insightsUrl, { cache: 'no-store' }),
+@@ -3003,15 +3003,68 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
+     }
+ 
+     const accessToken = client.metaAccessToken.trim();
+-    const url = `https://graph.facebook.com/v19.0/${entityId}`;
++    const finalAccountId = client.metaAdAccountId?.startsWith('act_') ? client.metaAdAccountId : `act_${client.metaAdAccountId}`;
+     
++    // If it's an ad and creative fields are updated
++    let creativeId = updateData.creative_id || null;
++    if (updateData.primary_text && !creativeId) {
++      // Create new Ad Creative
++      const creativePayload = {
++        name: `${updateData.
+<truncated 838 bytes>
+-3a821dbccc34?auto=format&fit=crop&w=800&q=80'
++          }
++        },
++        access_token: accessToken
++      };
++
++      if (!updateData.instagram_actor_id || updateData.instagram_actor_id.trim() === '') {
++        delete creativePayload.object_story_spec.instagram_actor_id;
++      }
++
++      const creativeCreateUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adcreatives`;
++      const creativeCreateRes = await fetch(creativeCreateUrl, {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify(creativePayload)
++      });
++      const creativeCreateData = await creativeCreateRes.json();
++      if (creativeCreateData.error) {
++        console.error('Meta Update AdCreative Error:', creativeCreateData.error);
++        return { error: `Kreatif guncelleme hatasi: ${creativeCreateData.error.message}` };
++      }
++      creativeId = creativeCreateData.id;
++    }
++
++    const url = `https://graph.facebook.com/v19.0/${entityId}`;
+     const payload = {
+-      ...updateData,
+       access_token: accessToken
+     };
+ 
+-    if (updateData.daily_budget) {
+-      payload.daily_budget = Math.round(updateData.daily_budget * 100);
++    if (updateData.name) payload.name = updateData.name;
++    if (updateData.status) payload.status = updateData.status;
++    if (updateData.daily_budget) payload.daily_budget = Math.round(updateData.daily_budget * 100);
++    
++    if (creativeId) {
++      payload.creative = { creative_id: creativeId };
++    }
++    
++    if (updateData.url_params) {
++      payload.url_tags = updateData.url_params;
+     }
+ 
+     const response = await fetch(url, {
+@@ -3030,10 +3083,10 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
+       };
+     }
+ 
+-
+     await logActivity('UPDATE', 'META_ADS', `Meta objesi gÃ¼ncellendi: ${entityId}`, clientId);
+     return { success: true };
+   } catch (error) {
++    console.error('updateMetaEntityAction error:', error);
+     return { error: 'GÃ¼ncelleme yapÄ±lamadÄ±.' };
+   }
+ }
+
+
+STEP 283 [PLANNER_RESPONSE]: I will view `actions.js` around line 3045 to 3080 to locate the exact content.
+STEP 284 [VIEW_FILE]: Created At: 2026-06-05T10:05:49Z
+Completed At: 2026-06-05T10:05:49Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/actions.js`
+Total Lines: 3265
+Total Bytes: 130104
+Showing lines 3045 to 3080
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+3045:       const creativeCreateData = await creativeCreateRes.json();
+3046:       if (creativeCreateData.error) {
+3047:         console.error('Meta Update AdCreative Error:', creativeCreateData.error);
+3048:         return { error: `Kreatif guncelleme hatasi: ${creativeCreateData.error.message}` };
+3049:       }
+3050:       creativeId = creativeCreateData.id;
+3051:     }
+3052: 
+3053:     const url = `https://graph.facebook.com/v19.0/${entityId}`;
+3054:     const payload = {
+3055:       access_token: accessToken
+3056:     };
+3057: 
+3058:     if (updateData.name) payload.name = updateData.name;
+3059:     if (updateData.status) payload.status = updateData.status;
+3060:     if (updateData.daily_budget) payload.daily_budget = Math.round(updateData.daily_budget * 100);
+3061:     
+3062:     if (creativeId) {
+3063:       payload.creative = { creative_id: creativeId };
+3064:     }
+3065:     
+3066:     if (updateData.url_params) {
+3067:       payload.url_tags = updateData.url_params;
+3068:     }
+3069: 
+3070:     const response = await fetch(url, {
+3071:       method: 'POST',
+3072:       headers: { 'Content-Type': 'application/json' },
+3073:       body: JSON.stringify(payload)
+3074:     });
+3075: 
+3076:     const data = await response.json();
+3077:     if (data.error) {
+3078:       console.error('Meta Update Error:', data.error);
+3079:       return { 
+3080:         error: data.error.message, 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 285 [PLANNER_RESPONSE]: I will replace the payload section in `actions.js` to correctly incorporate the `tracking_specs` property.
+STEP 286 [CODE_ACTION]: Created At: 2026-06-05T10:05:52Z
+Completed At: 2026-06-05T10:05:54Z
+The following changes were made by the replace_file_content tool to: c:\Users\Casper\Desktop\TEST\src\app\actions.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -3067,6 +3067,15 @@
+       payload.url_tags = updateData.url_params;
+     }
+ 
++    if (updateData.pixel_id && updateData.pixel_id.trim() !== '') {
++      payload.tracking_specs = [
++        {
++          'action.type': ['offsite_conversion'],
++          'fb_pixel': [updateData.pixel_id.trim()]
++        }
++      ];
++    }
++
+     const response = await fetch(url, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.
+STEP 287 [PLANNER_RESPONSE]: I will view lines 1100 to 1145 in `meta-content.jsx` to see where the Details Panel begins and how it is structured.
+STEP 288 [VIEW_FILE]: Created At: 2026-06-05T10:05:57Z
+Completed At: 2026-06-05T10:05:57Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 1100 to 1145
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1100:                       <option value="PAUSED">DurdurulmuÅŸ (Taslak)</option>
+1101:                     </select>
+1102:                   </div>
+1103:                 </div>
+1104:               )}
+1105: 
+1106:               <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+1107:                 <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>VazgeÃ§</button>
+1108:                 <button type="submit" disabled={isCreating} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #0064e0 0%, #00d4ff 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: isCreating ? 'not-allowed' : 'pointer', fontSize: '0.95rem', opacity: isCreating ? 0.7 : 1 }}>
+1109:                   {isCreating ? 'OluÅŸturuluyor...' : 'OluÅŸtur'}
+1110:                 </button>
+1111:               </div>
+1112:             </form>
+1113:           </div>
+1114:         </>
+1115:       )}
+1116: 
+1117:       {/* PREMIUM CENTERED MODAL */}
+1118:       {showDetailsPanel && selectedEntity && (
+1119:         <>
+1120:           <div onClick={() => setShowDetailsPanel(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} />
+1121:           <div style={{ 
+1122:             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+1123:             width: '95%',
+1124:             maxWidth: selectedEntity.type === 'ad' ? '1000px' : '520px', 
+1125:             maxHeight: '90vh',
+1126:             background: '#1a1f2e', 
+1127:             borderRadius: '24px',
+1128:             boxShadow: '0 20px 50px rgba(0,0,0,0.6)', zIndex: 10001, 
+1129:             display: 'flex', flexDirection: 'column',
+1130:             animation: 'modalFadeIn 0.3s ease-out',
+1131:             overflow: 'hidden'
+1132:           }}>
+1133:             {/* Header */}
+1134:             <div style={{ padding: '1.5rem 2rem 0.8rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+1135:               <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>
+1136:                 {selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} DetayÄ±
+1137:               </h2>
+1138:               <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
+1139:             </div>
+1140: 
+1141:             {/* Content Area */}
+1142:             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
+1143:               {selectedEntity.type === 'ad' ? (
+1144:                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem', height: '100%', maxHeight: '65vh' }}>
+1145:                   {/* Left Column - View/Edit fields */}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 289 [PLANNER_RESPONSE]: I will view `meta-content.jsx` from line 610 to 670 to locate the beginning of the creation modal's form layout.
+STEP 290 [VIEW_FILE]: Created At: 2026-06-05T10:06:00Z
+Completed At: 2026-06-05T10:06:00Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 610 to 670
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+610:                 Yeni {activeTab === 'campaigns' ? 'Kampanya' : activeTab === 'adsets' ? 'Reklam Seti' : 'Reklam'}
+611:               </h2>
+612:               <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
+613:             </div>
+614: 
+615:             <form onSubmit={handleCreateEntity} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
+616:               {activeTab === 'ads' ? (
+617:                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem', height: '100%', maxHeight: '65vh' }}>
+618:                   {/* Left Column - Form Inputs styled like Facebook Ads Manager */}
+619:                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
+620:                     {/* General Ad Details */}
+621:                     <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+622:                       <div>
+623:                         <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM ADI *</label>
+624:                         <input 
+625:                           required
+626:                           className="form-control" 
+627:                           value={
+<truncated 1684 bytes>
+             <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+652:                       <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Kimlik</h3>
+653:                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+654:                         <div>
+655:                           <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Facebook SayfasÄ± *</label>
+656:                           <input 
+657:                             required
+658:                             className="form-control" 
+659:                             value={createFormData.page_id || ''} 
+660:                             onChange={e => setCreateFormData({ ...createFormData, page_id: e.target.value })} 
+661:                             placeholder="Terapimle"
+662:                             style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+663:                           />
+664:                         </div>
+665:                         <div>
+666:                           <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Instagram Profili *</label>
+667:                           <input 
+668:                             required
+669:                             className="form-control" 
+670:                             value={createFormData.instagram_actor_id || ''} 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 291 [PLANNER_RESPONSE]: I will view lines 40 to 65 in `meta-content.jsx` to locate the state hooks and see where to add the new states.
+STEP 292 [VIEW_FILE]: Created At: 2026-06-05T10:06:50Z
+Completed At: 2026-06-05T10:06:50Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 40 to 65
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+40:   const [campaigns, setCampaigns] = useState(result.activeCampaigns || []);
+41:   const [adSets, setAdSets] = useState(result.adSets || []);
+42:   const [ads, setAds] = useState(result.ads || []);
+43:   
+44:   const [showCreateModal, setShowCreateModal] = useState(false);
+45:   const [createFormData, setCreateFormData] = useState({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
+46:   const [isCreating, setIsCreating] = useState(false);
+47:   const [previewPlacement, setPreviewPlacement] = useState('fb_feed');
+48:   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '', details: '', type: 'error' });
+49:   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, entity: null, type: null });
+50:   const [selectedIds, setSelectedIds] = useState([]);
+51: 
+52:   const [selectedEntity, setSelectedEntity] = useState(null); // { type: 'campaign'|'adset'|'ad', data: object }
+53:   const [showDetailsPanel, setShowDetailsPanel] = useState(false);
+54:   const [isEditingEntity, setIsEditingEntity] = useState(false);
+55:   const [editName, setEditName] = useState('');
+56:   const [editBudget, setEditBudget] = useState('');
+57:   const [editCreativeData, setEditCreativeData] = useState({});
+58: 
+59:   const [since, setSince] = useState(initSince || '');
+60:   const [until, setUntil] = useState(initUntil || '');
+61: 
+62:   const handleDateChange = (preset) => {
+63:     setSince('');
+64:     setUntil('');
+65:     startTransition(() => {
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 293 [PLANNER_RESPONSE]: I will view lines 1660 to 1675 in `meta-content.jsx` to find the exact end of the details panel.
+STEP 294 [VIEW_FILE]: Created At: 2026-06-05T10:07:10Z
+Completed At: 2026-06-05T10:07:10Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 1660 to 1675
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1660:             }
+1661:             @keyframes slideDown {
+1662:               from { opacity: 0; transform: translateY(-10px); }
+1663:               to { opacity: 1; transform: translateY(0); }
+1664:             }
+1665:           `}</style>
+1666:         </>
+1667:       )}
+1668: 
+1669: 
+1670:       <CustomDialog
+1671:         isOpen={messageModal.show}
+1672:         title={messageModal.title}
+1673:         onClose={() => setMessageModal({ ...messageModal, show: false })}
+1674:         onConfirm={() => setMessageModal({ ...messageModal, show: false })}
+1675:         confirmText="Tamam"
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 295 [PLANNER_RESPONSE]: I will view lines 550 to 592 in `meta-content.jsx` to find where the return block starts and see where we can declare the helper functions.
+STEP 296 [VIEW_FILE]: Created At: 2026-06-05T10:07:17Z
+Completed At: 2026-06-05T10:07:17Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 550 to 592
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+550:                     checked={selectedIds.length === filteredAds.length && filteredAds.length > 0} 
+551:                     onChange={toggleSelectAll} 
+552:                     style={{ cursor: 'pointer' }}
+553:                   />
+554:                 </th>
+555:                 <th style={thStyle}>REKLAM</th>
+556:                 <th style={thStyle}>DURUM</th>
+557:                 <th style={thStyle}>HARCAMA</th>
+558:                 <th style={thStyle}>CTR</th>
+559:                 <th style={{ ...thStyle, textAlign: 'right' }}>AKSÄ°YONLAR</th>
+560:               </tr>
+561:             </thead>
+562:             <tbody>{filteredAds.map(ad => (
+563:               <tr key={ad.id} style={trStyle}>
+564:                 <td style={tdStyle}>
+565:                   <input 
+566:                     type="checkbox" 
+567:                     checked={selectedIds.includes(ad.id)} 
+568:                     onChange={() => toggleSelection(ad.id)} 
+569:                     style={{ cursor: 'pointer' }}
+570:                   />
+571:                 </td>
+572:                 <td style={tdStyle}><div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+573:                   <StatusToggle active={ad.status === 'ACTIVE' || ad.status === 'ENABLED'} onToggle={() => handleToggleStatus(ad.id, ad.status, 'ad')} />
+574:                   <span onClick={() => openDetails(ad, 'ad')} style={{ fontWeight: 700, color: '#0064e0', cursor: 'pointer' }}>{ad.name}</span>
+575:                 </div></td>
+576:                 <td style={tdStyle}><StatusBadge status={ad.status} /></td>
+577:                 <td style={tdStyle}>{ad.insights?.data?.[0]?.spend || 0} TL</td>
+578:                 <td style={tdStyle}>%{(Number(ad.insights?.data?.[0]?.ctr || 0) * 100).toFixed(2)}</td>
+579:                 <td style={{ ...tdStyle, textAlign: 'right' }}>
+580:                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+581:                     <button onClick={() => openDetails(ad, 'ad')} className="btn-icon"><Edit size={16} /></button>
+582:                     <button onClick={() => handleDeleteEntity(ad, 'ad')} className="btn-icon danger"><Trash2 size={16} /></button>
+583:                   </div>
+584:                 </td>
+585:               </tr>
+586:             ))}</tbody>
+587:           </table>
+588:         )}
+589:       </div>
+590: 
+591:       {/* PREMIUM CENTERED MODAL */}
+592:       {/* CREATE ENTITY MODAL */}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+STEP 297 [PLANNER_RESPONSE]: I will search for the main return statement of `MetaContent` to see where the JSX rendering block begins.
+STEP 298 [GREP_SEARCH]: Created At: 2026-06-05T10:07:21Z
+Completed At: 2026-06-05T10:07:21Z
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":363,"LineContent":"  return ("}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":1706,"LineContent":"  return ("}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":1714,"LineContent":"  return ("}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":1724,"LineContent":"  return ("}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":1733,"LineContent":"  return ("}
+{"File":"c:\\Users\\Casper\\Desktop\\TEST\\src\\app\\dashboard\\client\\[id]\\meta\\meta-content.jsx","LineNumber":1742,"LineContent":"  return (\u003ctr\u003e\u003ctd colSpan={colSpan} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}\u003eVeri bulunamadÄ±.\u003c/td\u003e\u003c/tr\u003e);"}
+STEP 299 [PLANNER_RESPONSE]: I will view `meta-content.jsx` from line 340 to 365 to verify the area right before the main return statement.
+STEP 300 [VIEW_FILE]: Created At: 2026-06-05T10:07:25Z
+Completed At: 2026-06-05T10:07:25Z
+File Path: `file:///c:/Users/Casper/Desktop/TEST/src/app/dashboard/client/%5Bid%5D/meta/meta-content.jsx`
+Total Lines: 1750
+Total Bytes: 119070
+Showing lines 340 to 365
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+340:                 display_link: editCreativeData.display_link,
+341:                 message: editCreativeData.primary_text,
+342:                 name: editCreativeData.headline,
+343:                 description: editCreativeData.description,
+344:                 call_to_action: { type: editCreativeData.call_to_action }
+345:               }
+346:             }
+347:           } : undefined
+348:         };
+349:         if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === selectedEntity.data.id ? { ...c, ...updatedObj } : c));
+350:         if (type === 'adset') setAdSets(prev => prev.map(as => as.id === selectedEntity.data.id ? { ...as, ...updatedObj } : as));
+351:         if (type === 'ad') setAds(prev => prev.map(ad => ad.id === selectedEntity.data.id ? { ...ad, ...updatedObj } : ad));
+352:         setSelectedEntity({ type, data: updatedObj });
+353:         setIsEditingEntity(false);
+354:         setMessageModal({ show: true, title: 'BaÅŸarÄ±lÄ±', message: 'BaÅŸarÄ±yla gÃ¼ncellendi.', type: 'success' });
+355:       }
+356:     });
+357:   };
+358: 
+359:   const selectedCampaignName = campaigns.find(c => c.id === selectedCampaignId)?.name;
+360:   const selectedAdSetName = adSets.find(as => as.id === selectedAdSetId)?.name;
+361:   const isCustom = !!(initSince && initUntil);
+362: 
+363:   return (
+364:     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative' }}>
+365:       {/* Loading Overlay */}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+

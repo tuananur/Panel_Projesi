@@ -1,0 +1,723 @@
+﻿diff --git a/src/app/actions.js b/src/app/actions.js
+index ca00152..c41f82a 100644
+--- a/src/app/actions.js
++++ b/src/app/actions.js
+@@ -1006,7 +1006,7 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since
+     // Fetch ad sets with campaign_id and insights
+     const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,campaign_id,start_time,stop_time,insights.${nestedParams}{spend,clicks,impressions,reach}&access_token=${accessToken}`;
+     // Fetch ads with adset_id and insights
+-    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
++    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url,title,object_story_spec,link_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
+     try {
+       const [insightsRes, campaignsRes, adSetsRes, adsRes] = await Promise.all([
+         fetchWithTimeout(insightsUrl, { cache: 'no-store' }),
+@@ -3003,15 +3003,68 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
+     }
+ 
+     const accessToken = client.metaAccessToken.trim();
+-    const url = `https://graph.facebook.com/v19.0/${entityId}`;
++    const finalAccountId = client.metaAdAccountId?.startsWith('act_') ? client.metaAdAccountId : `act_${client.metaAdAccountId}`;
+     
++    // If it's an ad and creative fields are updated
++    let creativeId = updateData.creative_id || null;
++    if (updateData.primary_text && !creativeId) {
++      // Create new Ad Creative
++      const creativePayload = {
++        name: `${updateData.name || 'Guncellenmis Reklam'} - Kreatif`,
++        object_story_spec: {
++          page_id: updateData.page_id || '100000000000000',
++          instagram_actor_id: updateData.instagram_actor_id || undefined,
++          link_data: {
++            link: updateData.website_url || 'https://terapiyle.com/',
++            message: updateData.primary_text,
++            name: updateData.headline || '',
++            description: updateData.description || '',
++            display_link: updateData.display_link || undefined,
++            call_to_action: {
++              type: updateData.call_to_action || 'LEARN_MORE',
++              value: {
++                link: updateData.website_url || 'https://terapiyle.com/'
++              }
++            },
++            picture: updateData.image_url || 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80'
++          }
++        },
++        access_token: accessToken
++      };
++
++      if (!updateData.instagram_actor_id || updateData.instagram_actor_id.trim() === '') {
++        delete creativePayload.object_story_spec.instagram_actor_id;
++      }
++
++      const creativeCreateUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adcreatives`;
++      const creativeCreateRes = await fetch(creativeCreateUrl, {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify(creativePayload)
++      });
++      const creativeCreateData = await creativeCreateRes.json();
++      if (creativeCreateData.error) {
++        console.error('Meta Update AdCreative Error:', creativeCreateData.error);
++        return { error: `Kreatif guncelleme hatasi: ${creativeCreateData.error.message}` };
++      }
++      creativeId = creativeCreateData.id;
++    }
++
++    const url = `https://graph.facebook.com/v19.0/${entityId}`;
+     const payload = {
+-      ...updateData,
+       access_token: accessToken
+     };
+ 
+-    if (updateData.daily_budget) {
+-      payload.daily_budget = Math.round(updateData.daily_budget * 100);
++    if (updateData.name) payload.name = updateData.name;
++    if (updateData.status) payload.status = updateData.status;
++    if (updateData.daily_budget) payload.daily_budget = Math.round(updateData.daily_budget * 100);
++    
++    if (creativeId) {
++      payload.creative = { creative_id: creativeId };
++    }
++    
++    if (updateData.url_params) {
++      payload.url_tags = updateData.url_params;
+     }
+ 
+     const response = await fetch(url, {
+@@ -3030,10 +3083,10 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
+       };
+     }
+ 
+-
+     await logActivity('UPDATE', 'META_ADS', `Meta objesi g├╝ncellendi: ${entityId}`, clientId);
+     return { success: true };
+   } catch (error) {
++    console.error('updateMetaEntityAction error:', error);
+     return { error: 'G├╝ncelleme yap─▒lamad─▒.' };
+   }
+ }
+diff --git a/src/app/dashboard/client/[id]/meta/meta-content.jsx b/src/app/dashboard/client/[id]/meta/meta-content.jsx
+index 54c1c28..95013ba 100644
+--- a/src/app/dashboard/client/[id]/meta/meta-content.jsx
++++ b/src/app/dashboard/client/[id]/meta/meta-content.jsx
+@@ -54,6 +54,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince,
+   const [isEditingEntity, setIsEditingEntity] = useState(false);
+   const [editName, setEditName] = useState('');
+   const [editBudget, setEditBudget] = useState('');
++  const [editCreativeData, setEditCreativeData] = useState({});
+ 
+   const [since, setSince] = useState(initSince || '');
+   const [until, setUntil] = useState(initUntil || '');
+@@ -274,13 +275,43 @@ export default function MetaContent({ result, id, datePreset, since: initSince,
+     setEditName(entity.name);
+     setEditBudget(entity.daily_budget || entity.lifetime_budget || '0');
+     setIsEditingEntity(false);
++
++    if (type === 'ad') {
++      const creative = entity.creative || {};
++      const objectStorySpec = creative.object_story_spec || {};
++      const linkData = objectStorySpec.link_data || {};
++      
++      setEditCreativeData({
++        page_id: objectStorySpec.page_id || 'Terapimle',
++        instagram_actor_id: objectStorySpec.instagram_actor_id || 'terapiylecom',
++        website_url: linkData.link || entity.link_url || 'https://terapiyle.com/',
++        display_link: linkData.display_link || 'https://terapiyle.com/',
++        primary_text: linkData.message || creative.body || 'Bazen sadece do─şru uzmanla konu┼şmak...',
++        headline: linkData.name || creative.title || creative.name || 'Terapiyle Sana En Uygun Terapisti Bul',
++        description: linkData.description || '',
++        call_to_action: linkData.call_to_action?.type || 'LEARN_MORE',
++        pixel_id: '1850906787926541',
++        url_params: entity.url_tags || 'anahtar1=deger1&anahtar2=deger2',
++        image_url: creative.image_url || creative.thumbnail_url || 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80',
++      });
++      setPreviewPlacement('fb_feed');
++    }
++
+     setShowDetailsPanel(true);
+   };
+ 
+   const handleUpdateName = async () => {
+     startTransition(async () => {
+-      const updateData = { name: editName };
++      let updateData = { name: editName };
+       if (editBudget) updateData.daily_budget = parseFloat(editBudget);
++      
++      if (selectedEntity.type === 'ad') {
++        updateData = {
++          name: editName,
++          ...editCreativeData
++        };
++      }
++      
+       const res = await updateMetaEntityAction(id, selectedEntity.data.id, updateData);
+       if (res?.error) {
+         setMessageModal({ 
+@@ -292,7 +323,29 @@ export default function MetaContent({ result, id, datePreset, since: initSince,
+         });
+       } else {
+         const type = selectedEntity.type;
+-        const updatedObj = { ...selectedEntity.data, name: editName, daily_budget: editBudget };
++        const updatedObj = { 
++          ...selectedEntity.data, 
++          name: editName, 
++          daily_budget: editBudget,
++          creative: type === 'ad' ? {
++            ...selectedEntity.data.creative,
++            body: editCreativeData.primary_text,
++            image_url: editCreativeData.image_url,
++            title: editCreativeData.headline,
++            object_story_spec: {
++              page_id: editCreativeData.page_id,
++              instagram_actor_id: editCreativeData.instagram_actor_id,
++              link_data: {
++                link: editCreativeData.website_url,
++                display_link: editCreativeData.display_link,
++                message: editCreativeData.primary_text,
++                name: editCreativeData.headline,
++                description: editCreativeData.description,
++                call_to_action: { type: editCreativeData.call_to_action }
++              }
++            }
++          } : undefined
++        };
+         if (type === 'campaign') setCampaigns(prev => prev.map(c => c.id === selectedEntity.data.id ? { ...c, ...updatedObj } : c));
+         if (type === 'adset') setAdSets(prev => prev.map(as => as.id === selectedEntity.data.id ? { ...as, ...updatedObj } : as));
+         if (type === 'ad') setAds(prev => prev.map(ad => ad.id === selectedEntity.data.id ? { ...ad, ...updatedObj } : ad));
+@@ -1067,7 +1120,9 @@ export default function MetaContent({ result, id, datePreset, since: initSince,
+           <div onClick={() => setShowDetailsPanel(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 10000 }} />
+           <div style={{ 
+             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+-            width: '100%', maxWidth: '520px', maxHeight: '90vh',
++            width: '95%',
++            maxWidth: selectedEntity.type === 'ad' ? '1000px' : '520px', 
++            maxHeight: '90vh',
+             background: '#1a1f2e', 
+             borderRadius: '24px',
+             boxShadow: '0 20px 50px rgba(0,0,0,0.6)', zIndex: 10001, 
+@@ -1076,19 +1131,457 @@ export default function MetaContent({ result, id, datePreset, since: initSince,
+             overflow: 'hidden'
+           }}>
+             {/* Header */}
+-            <div style={{ padding: '2rem 2.5rem 1rem 2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+-              <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700, color: '#fff' }}>
++            <div style={{ padding: '1.5rem 2rem 0.8rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
++              <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>
+                 {selectedEntity.type === 'campaign' ? 'Kampanya' : selectedEntity.type === 'adset' ? 'Reklam Seti' : 'Reklam'} Detay─▒
+               </h2>
+               <button onClick={() => setShowDetailsPanel(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0.5rem' }}><X size={24} /></button>
+             </div>
+ 
+             {/* Content Area */}
+-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2.5rem 2.5rem 2.5rem' }}>
+-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+-                
+-                {/* Info Section */}
++            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
++              {selectedEntity.type === 'ad' ? (
++                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem', height: '100%', maxHeight: '65vh' }}>
++                  {/* Left Column - View/Edit fields */}
++                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
++                    
++                    {/* General Name */}
++                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
++                      <div>
++                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM ADI *</label>
++                        {isEditingEntity ? (
++                          <input 
++                            required
++                            className="form-control" 
++                            value={editName} 
++                            onChange={e => setEditName(e.target.value)} 
++                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                          />
++                        ) : (
++                          <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{selectedEntity.data.name}</div>
++                        )}
++                      </div>
++                    </div>
++
++                    {/* Section 1: Kimlik */}
++                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
++                      <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Kimlik</h3>
++                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Facebook Sayfas─▒</label>
++                          {isEditingEntity ? (
++                            <input 
++                              required
++                              className="form-control" 
++                              value={editCreativeData.page_id || ''} 
++                              onChange={e => setEditCreativeData({ ...editCreativeData, page_id: e.target.value })} 
++                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                            />
++                          ) : (
++                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{editCreativeData.page_id}</div>
++                          )}
++                        </div>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Instagram Profili</label>
++                          {isEditingEntity ? (
++                            <input 
++                              required
++                              className="form-control" 
++                              value={editCreativeData.instagram_actor_id || ''} 
++                              onChange={e => setEditCreativeData({ ...editCreativeData, instagram_actor_id: e.target.value })} 
++                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                            />
++                          ) : (
++                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{editCreativeData.instagram_actor_id}</div>
++                          )}
++                        </div>
++                      </div>
++                    </div>
++
++                    {/* Section 2: Reklam Kurulumu */}
++                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
++                      <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Reklam Kurulumu</h3>
++                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Reklam Kurulumu</label>
++                          <div style={{ background: '#090d16', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Reklam Olu┼ştur</div>
++                        </div>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Format</label>
++                          <div style={{ background: '#090d16', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Tek G├Ârsel veya Video</div>
++                        </div>
++                      </div>
++                    </div>
++
++                    {/* Section 3: Reklam Kreatifi */}
++                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
++                      <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Reklam Kreatifi</h3>
++                      
++                      <div>
++                        <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Medya (G├Ârsel URL) *</label>
++                        {isEditingEntity ? (
++                          <>
++                            <input 
++                              required
++                              className="form-control" 
++                              value={editCreativeData.image_url || ''} 
++                              onChange={e => setEditCreativeData({ ...editCreativeData, image_url: e.target.value })} 
++                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '0.5rem' }} 
++                            />
++                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
++                              {[
++                                { name: 'Ofis', url: 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80' },
++                                { name: 'Terapist', url: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80' },
++                                { name: 'Online Seans', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80' }
++                              ].map(img => (
++                                <button
++                                  key={img.name}
++                                  type="button"
++                                  onClick={() => setEditCreativeData({ ...editCreativeData, image_url: img.url })}
++                                  style={{
++                                    padding: '0.3rem 0.6rem',
++                                    borderRadius: '6px',
++                                    background: editCreativeData.image_url === img.url ? '#0064e0' : '#1e293b',
++                                    color: '#fff',
++                                    border: '1px solid rgba(255,255,255,0.1)',
++                                    fontSize: '0.7rem',
++                                    fontWeight: 600,
++                                    cursor: 'pointer'
++                                  }}
++                                >
++                                  {img.name}
++                                </button>
++                              ))}
++                            </div>
++                          </>
++                        ) : (
++                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', wordBreak: 'break-all' }}>{editCreativeData.image_url}</div>
++                        )}
++                      </div>
++
++                      <div>
++                        <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Ana Metin *</label>
++                        {isEditingEntity ? (
++                          <textarea 
++                            required
++                            className="form-control" 
++                            value={editCreativeData.primary_text || ''} 
++                            onChange={e => setEditCreativeData({ ...editCreativeData, primary_text: e.target.value })} 
++                            rows={4}
++                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.85rem', lineHeight: '1.4' }} 
++                          />
++                        ) : (
++                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{editCreativeData.primary_text}</div>
++                        )}
++                      </div>
++
++                      <div>
++                        <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Ba┼şl─▒k *</label>
++                        {isEditingEntity ? (
++                          <input 
++                            required
++                            className="form-control" 
++                            value={editCreativeData.headline || ''} 
++                            onChange={e => setEditCreativeData({ ...editCreativeData, headline: e.target.value })} 
++                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                          />
++                        ) : (
++                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{editCreativeData.headline}</div>
++                        )}
++                      </div>
++
++                      <div>
++                        <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>A├ğ─▒klama</label>
++                        {isEditingEntity ? (
++                          <input 
++                            className="form-control" 
++                            value={editCreativeData.description || ''} 
++                            onChange={e => setEditCreativeData({ ...editCreativeData, description: e.target.value })} 
++                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                          />
++                        ) : (
++                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{editCreativeData.description || '-'}</div>
++                        )}
++                      </div>
++
++                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>─░nternet Sitesi Adresi (URL) *</label>
++                          {isEditingEntity ? (
++                            <input 
++                              required
++                              type="url"
++                              className="form-control" 
++                              value={editCreativeData.website_url || ''} 
++                              onChange={e => setEditCreativeData({ ...editCreativeData, website_url: e.target.value })} 
++                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                            />
++                          ) : (
++                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{editCreativeData.website_url}</div>
++                          )}
++                        </div>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>G├Âr├╝nen Ba─şlant─▒</label>
++                          {isEditingEntity ? (
++                            <input 
++                              className="form-control" 
++                              value={editCreativeData.display_link || ''} 
++                              onChange={e => setEditCreativeData({ ...editCreativeData, display_link: e.target.value })} 
++                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                            />
++                          ) : (
++                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{editCreativeData.display_link || '-'}</div>
++                          )}
++                        </div>
++                      </div>
++
++                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Eylem ├ça─şr─▒s─▒ *</label>
++                          {isEditingEntity ? (
++                            <select 
++                              value={editCreativeData.call_to_action || 'LEARN_MORE'}
++                              onChange={e => setEditCreativeData({ ...editCreativeData, call_to_action: e.target.value })}
++                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
++                            >
++                              <option value="LEARN_MORE">Daha Fazla Bilgi Al</option>
++                              <option value="SIGN_UP">Kaydol</option>
++                              <option value="BOOK_TRAVEL">Rezervasyon Yap</option>
++                              <option value="CONTACT_US">Bize Ula┼ş─▒n</option>
++                              <option value="APPLY_NOW">Ba┼şvur</option>
++                            </select>
++                          ) : (
++                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{CTA_LABELS[editCreativeData.call_to_action || 'LEARN_MORE']}</div>
++                          )}
++                        </div>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Durum</label>
++                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center' }}>
++                            <StatusBadge status={selectedEntity.data.status} />
++                          </div>
++                        </div>
++                      </div>
++                    </div>
++
++                    {/* Section 4: Takip */}
++                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
++                      <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Takip</h3>
++                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
++                        <input type="checkbox" checked readOnly style={{ width: '14px', height: '14px', cursor: 'not-allowed', accentColor: '#0064e0' }} />
++                        <label style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>─░nternet sitesi olaylar─▒</label>
++                      </div>
++                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Piksel Se├ğimi *</label>
++                          {isEditingEntity ? (
++                            <input 
++                              required
++                              className="form-control" 
++                              value={editCreativeData.pixel_id || ''} 
++                              onChange={e => setEditCreativeData({ ...editCreativeData, pixel_id: e.target.value })} 
++                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                            />
++                          ) : (
++                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{editCreativeData.pixel_id}</div>
++                          )}
++                        </div>
++                        <div>
++                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>URL Parametreleri</label>
++                          {isEditingEntity ? (
++                            <input 
++                              className="form-control" 
++                              value={editCreativeData.url_params || ''} 
++                              onChange={e => setEditCreativeData({ ...editCreativeData, url_params: e.target.value })} 
++                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
++                            />
++                          ) : (
++                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>{editCreativeData.url_params || '-'}</div>
++                          )}
++                        </div>
++                      </div>
++                    </div>
++                  </div>
++
++                  {/* Right Column - Placement Preview Mockup */}
++                  <div style={{ 
++                    display: 'flex', 
++                    flexDirection: 'column', 
++                    alignItems: 'center', 
++                    background: 'rgba(255,255,255,0.01)', 
++                    padding: '1.25rem', 
++                    borderRadius: '16px', 
++                    border: '1px solid rgba(255,255,255,0.05)',
++                    alignSelf: 'start',
++                    width: '100%',
++                    boxSizing: 'border-box'
++                  }}>
++                    {/* Placement Switcher Tabs */}
++                    <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%', boxSizing: 'border-box' }}>
++                      <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Facebook Ak─▒┼ş</button>
++                      <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Instagram Ak─▒┼ş</button>
++                      <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Stories & Reels</button>
++                    </div>
++                    
++                    {/* Glassmorphic Smartphone Frame */}
++                    <div style={{ 
++                      width: '100%',
++                      maxWidth: '310px', 
++                      background: '#0a0e17', 
++                      borderRadius: '32px', 
++                      padding: '8px',
++                      border: '4px solid #334155',
++                      boxShadow: '0 15px 35px rgba(0,0,0,0.7)',
++                      fontFamily: 'system-ui, -apple-system, sans-serif',
++                      boxSizing: 'border-box',
++                      overflow: 'hidden'
++                    }}>
++                      {/* Notch */}
++                      <div style={{ width: '80px', height: '14px', background: '#334155', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
++                        <div style={{ width: '30px', height: '3px', background: '#0a0e17', borderRadius: '1.5px' }}></div>
++                      </div>
++                      
++                      {/* Facebook Feed */}
++                      {previewPlacement === 'fb_feed' && (
++                        <div style={{ width: '100%', boxSizing: 'border-box' }}>
++                          <div style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', borderBottom: '1px solid rgba(255,255,255,0.05)', gap: '6px' }}>
++                            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#3b5998', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.75rem', fontWeight: 800 }}>
++                              {editCreativeData.page_id ? editCreativeData.page_id.charAt(0).toUpperCase() : 'T'}
++                            </div>
++                            <div style={{ flex: 1 }}>
++                              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{editCreativeData.page_id || 'Terapimle'}</div>
++                              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '2px' }}>
++                                Sponsorlu ÔÇó ­şîÉ
++                              </div>
++                            </div>
++                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>ÔÇóÔÇóÔÇó</div>
++                          </div>
++                          
++                          <div style={{ fontSize: '0.7rem', color: '#fff', padding: '6px', whiteSpace: 'pre-wrap', lineHeight: '1.35', maxHeight: '80px', overflowY: 'auto' }}>
++                            {editCreativeData.primary_text || 'A├ğ─▒klama girilmedi.'}
++                          </div>
++                          
++                          <div style={{ width: '100%', height: '170px', background: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
++                            {editCreativeData.image_url ? (
++                              <img src={editCreativeData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
++                            ) : (
++                              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>G├Ârsel Se├ğilmedi</div>
++                            )}
++                          </div>
++                          
++                          <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', padding: '8px 6px', gap: '6px', borderBottomRightRadius: '16px', borderBottomLeftRadius: '16px' }}>
++                            <div style={{ flex: 1, minWidth: 0 }}>
++                              <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
++                                {(() => {
++                                  try {
++                                    return new URL(editCreativeData.display_link || editCreativeData.website_url || 'https://terapiyle.com/').hostname.toUpperCase();
++                                  } catch(e) {
++                                    return 'TERAPIYLE.COM';
++                                  }
++                                })()}
++                              </div>
++                              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
++                                {editCreativeData.headline || 'Ba┼şl─▒k girilmedi.'}
++                              </div>
++                              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
++                                {editCreativeData.description || 'A├ğ─▒klama girilmedi.'}
++                              </div>
++                            </div>
++                            <div style={{ 
++                              background: '#0064e0', 
++                              color: '#fff', 
++                              padding: '4px 8px', 
++                              borderRadius: '4px', 
++                              fontSize: '0.6rem', 
++                              fontWeight: 700,
++                              whiteSpace: 'nowrap',
++                              cursor: 'pointer'
++                            }}>
++                              {CTA_LABELS[editCreativeData.call_to_action || 'LEARN_MORE']}
++                            </div>
++                          </div>
++                        </div>
++                      )}
++
++                      {/* Instagram Feed */}
++                      {previewPlacement === 'ig_feed' && (
++                        <div style={{ width: '100%', boxSizing: 'border-box' }}>
++                          <div style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', borderBottom: '1px solid rgba(255,255,255,0.05)', gap: '6px' }}>
++                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', padding: '2px' }}>
++                              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0a0e17', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.65rem', fontWeight: 800 }}>
++                                {editCreativeData.instagram_actor_id ? editCreativeData.instagram_actor_id.charAt(0).toUpperCase() : 'I'}
++                              </div>
++                            </div>
++                            <div style={{ flex: 1 }}>
++                              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{editCreativeData.instagram_actor_id || 'terapiylecom'}</div>
++                              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>Sponsorlu</div>
++                            </div>
++                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>ÔÇóÔÇóÔÇó</div>
++                          </div>
++
++                          <div style={{ width: '100%', height: '170px', background: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
++                            {editCreativeData.image_url ? (
++                              <img src={editCreativeData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
++                            ) : (
++                              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>G├Ârsel Se├ğilmedi</div>
++                            )}
++                          </div>
++
++                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px 4px 8px', color: '#fff', fontSize: '0.8rem' }}>
++                            <div style={{ display: 'flex', gap: '8px' }}>
++                              <span>ÔÖí</span> <span>­şÆ¼</span> <span>Ô£ê´©Å</span>
++                            </div>
++                            <span>´ú┐</span>
++                          </div>
++
++                          <div style={{ background: '#0064e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', cursor: 'pointer' }}>
++                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>{CTA_LABELS[editCreativeData.call_to_action || 'LEARN_MORE']}</span>
++                            <span style={{ fontSize: '0.65rem', color: '#fff' }}>ÔŞö</span>
++                          </div>
++
++                          <div style={{ fontSize: '0.7rem', color: '#fff', padding: '4px 6px 10px 6px', lineHeight: '1.3', maxHeight: '60px', overflowY: 'auto' }}>
++                            <strong>{editCreativeData.instagram_actor_id || 'terapiylecom'}</strong> {editCreativeData.primary_text || 'A├ğ─▒klama...'}
++                          </div>
++                        </div>
++                      )}
++
++                      {/* Instagram Stories */}
++                      {previewPlacement === 'ig_stories' && (
++                        <div style={{ width: '100%', height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '16px', boxSizing: 'border-box' }}>
++                          {editCreativeData.image_url ? (
++                            <img src={editCreativeData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
++                          ) : (
++                            <div style={{ width: '100%', height: '100%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem', position: 'absolute', inset: 0 }}>G├Ârsel Se├ğilmedi</div>
++                          )}
++                          
++                          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)', padding: '8px 8px 16px 8px', display: 'flex', alignItems: 'center', gap: '6px', zIndex: 2 }}>
++                            <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #bc1888 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.6rem', fontWeight: 800 }}>
++                              {editCreativeData.instagram_actor_id ? editCreativeData.instagram_actor_id.charAt(0).toUpperCase() : 'I'}
++                            </div>
++                            <div style={{ flex: 1 }}>
++                              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>{editCreativeData.instagram_actor_id || 'terapiylecom'}</div>
++                              <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.6)' }}>Sponsorlu</div>
++                            </div>
++                          </div>
++                          
++                          <div style={{ position: 'absolute', bottom: '50px', left: '8px', right: '8px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', padding: '6px 8px', borderRadius: '8px', color: '#fff', fontSize: '0.65rem', lineHeight: '1.25', zIndex: 2 }}>
++                            <div style={{ fontWeight: 700, marginBottom: '2px' }}>{editCreativeData.headline || 'Terapiyle Sana En Uygun Terapisti Bul'}</div>
++                            <div style={{ opacity: 0.85, maxHeight: '50px', overflowY: 'auto' }}>{editCreativeData.primary_text || 'A├ğ─▒klama...'}</div>
++                          </div>
++                          
++                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', padding: '8px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
++                            <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>Ôû▓</div>
++                            <div style={{ background: '#0064e0', color: '#fff', padding: '3px 8px', borderRadius: '8px', fontSize: '0.55rem', fontWeight: 700, cursor: 'pointer' }}>
++                              {CTA_LABELS[editCreativeData.call_to_action || 'LEARN_MORE']}
++                            </div>
++                          </div>
++                        </div>
++                      )}
++                    </div>
++                  </div>
++                </div>
++              ) : (
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
++                  {/* Campaign/AdSet details */}
+                   <div>
+                     <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>BA┼ŞLIK *</label>
+                     {isEditingEntity ? (
+@@ -1116,43 +1609,43 @@ export default function MetaContent({ result, id, datePreset, since: initSince,
+                       </div>
+                     </div>
+                   </div>
+-                </div>
+ 
+-                {/* Performance Section */}
+-                <div>
+-                  <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>PERFORMANS ├ûZET─░</label>
+-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+-                    <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+-                      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.4rem' }}>Harcama</div>
+-                      <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
+-                    </div>
+-                    <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+-                      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.4rem' }}>G├Âsterim</div>
+-                      <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
++                  {/* Performance Section */}
++                  <div>
++                    <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>PERFORMANS ├ûZET─░</label>
++                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
++                      <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
++                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.4rem' }}>Harcama</div>
++                        <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
++                      </div>
++                      <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
++                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.4rem' }}>G├Âsterim</div>
++                        <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
++                      </div>
+                     </div>
+                   </div>
+                 </div>
+-              </div>
++              )}
+             </div>
+ 
+             {/* Footer Buttons */}
+-            <div style={{ padding: '1.5rem 2.5rem 2.5rem 2.5rem', display: 'flex', gap: '1rem' }}>
++            <div style={{ padding: '1.2rem 2rem 2rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+               {isEditingEntity ? (
+                 <>
+-                  <button onClick={() => setIsEditingEntity(false)} style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}>─░ptal</button>
+-                  <button onClick={handleUpdateName} style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: 'linear-gradient(90deg, #c026d3 0%, #db2777 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}>Kaydet</button>
++                  <button onClick={() => setIsEditingEntity(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>─░ptal</button>
++                  <button onClick={handleUpdateName} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #c026d3 0%, #db2777 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>Kaydet</button>
+                 </>
+               ) : (
+                 <>
+                   <button 
+                     onClick={() => handleToggleStatus(selectedEntity.data.id, selectedEntity.data.status, selectedEntity.type)} 
+-                    style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: '#4b5563', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}
++                    style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#4b5563', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}
+                   >
+                     {selectedEntity.data.status === 'ACTIVE' || selectedEntity.data.status === 'ENABLED' ? 'Durdur' : 'Ba┼şlat'}
+                   </button>
+                   <button 
+                     onClick={() => setIsEditingEntity(true)} 
+-                    style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: 'linear-gradient(90deg, #c026d3 0%, #db2777 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}
++                    style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: 'linear-gradient(90deg, #c026d3 0%, #db2777 100%)', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}
+                   >
+                     D├╝zenle
+                   </button>

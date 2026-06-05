@@ -1742,19 +1742,26 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                       <div style={{ 
                         width: '100%',
                         maxWidth: '310px', 
-                        background: '#e4e6eb', 
-                        borderRadius: '32px', 
-                        padding: '8px',
-                        border: '4px solid #ccd0d5',
-                        boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
+                        background: '#1a1a1a', 
+                        borderRadius: '40px', 
+                        padding: '10px',
+                        border: '3px solid #333',
+                        boxShadow: '0 20px 50px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.05) inset',
                         fontFamily: 'system-ui, -apple-system, sans-serif',
                         boxSizing: 'border-box',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        position: 'relative'
                       }}>
-                        <div style={{ width: '80px', height: '14px', background: '#ccd0d5', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                          <div style={{ width: '30px', height: '3px', background: '#ffffff', borderRadius: '1.5px' }}></div>
+                        {/* Notch */}
+                        <div style={{ width: '100px', height: '22px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 16px 16px', position: 'relative', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                          <div style={{ width: '40px', height: '3px', background: '#2a2a2a', borderRadius: '2px' }}></div>
                         </div>
-                        {renderAdPreview(previewPlacement, createFormData)}
+                        <div style={{ borderRadius: '30px', overflow: 'hidden', background: '#ffffff' }}>
+                          {renderAdPreview(previewPlacement, createFormData)}
+                        </div>
+                        {/* Home Indicator */}
+                        <div style={{ width: '100px', height: '4px', background: '#555', margin: '8px auto 2px auto', borderRadius: '2px' }}></div>
                       </div>
                     </div>
                   ) : (
@@ -2039,19 +2046,26 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                       <div style={{ 
                         width: '100%',
                         maxWidth: '310px', 
-                        background: '#e4e6eb', 
-                        borderRadius: '32px', 
-                        padding: '8px',
-                        border: '4px solid #ccd0d5',
-                        boxShadow: '0 15px 35px rgba(0,0,0,0.15)',
+                        background: '#1a1a1a', 
+                        borderRadius: '40px', 
+                        padding: '10px',
+                        border: '3px solid #333',
+                        boxShadow: '0 20px 50px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.05) inset',
                         fontFamily: 'system-ui, -apple-system, sans-serif',
                         boxSizing: 'border-box',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        position: 'relative'
                       }}>
-                        <div style={{ width: '80px', height: '14px', background: '#ccd0d5', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                          <div style={{ width: '30px', height: '3px', background: '#ffffff', borderRadius: '1.5px' }}></div>
+                        {/* Notch */}
+                        <div style={{ width: '100px', height: '22px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 16px 16px', position: 'relative', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                          <div style={{ width: '40px', height: '3px', background: '#2a2a2a', borderRadius: '2px' }}></div>
                         </div>
-                        {renderAdPreview(previewPlacement, editCreativeData)}
+                        <div style={{ borderRadius: '30px', overflow: 'hidden', background: '#ffffff' }}>
+                          {renderAdPreview(previewPlacement, editCreativeData)}
+                        </div>
+                        {/* Home Indicator */}
+                        <div style={{ width: '100px', height: '4px', background: '#555', margin: '8px auto 2px auto', borderRadius: '2px' }}></div>
                       </div>
                     </div>
                   ) : (
@@ -2144,17 +2158,16 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
       {/* ADVANCED PREVIEW MODAL */}
       {showAdvancedPreviewModal && (
         <>
-          <div onClick={() => setShowAdvancedPreviewModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 11000 }} />
+          <div onClick={() => setShowAdvancedPreviewModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 11000 }} />
           <div style={{ 
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-            width: '95%', maxWidth: '1400px', height: '90vh',
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            width: '100vw', height: '100vh',
             background: '#f0f2f5', 
-            borderRadius: '24px',
-            boxShadow: '0 12px 28px 0 rgba(0,0,0,0.2), 0 2px 4px 0 rgba(0,0,0,0.1)', zIndex: 11001, 
+            borderRadius: 0,
+            boxShadow: 'none', zIndex: 11001, 
             display: 'flex', flexDirection: 'column',
-            animation: 'modalFadeIn 0.3s ease-out',
-            overflow: 'hidden',
-            border: '1px solid #ccd0d5'
+            animation: 'modalFadeIn 0.2s ease-out',
+            overflow: 'hidden'
           }}>
             {/* Header */}
             <div style={{ padding: '1.2rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #dddfe2', background: '#ffffff' }}>
@@ -2229,10 +2242,10 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             </div>
 
             {/* Grid Content */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '2rem 3rem' }}>
               <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+                gridTemplateColumns: 'repeat(3, 1fr)', 
                 gap: '2rem' 
               }}>
                 {/* 1. Facebook Feed */}
@@ -2240,7 +2253,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Facebook Akışı</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('fb_feed', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('fb_feed', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2250,7 +2270,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Instagram Akışı</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('ig_feed', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('ig_feed', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2260,7 +2287,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Instagram Hikayeleri</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('ig_stories', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('ig_stories', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2270,7 +2304,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Facebook Hikayeleri</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('fb_stories', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('fb_stories', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2280,7 +2321,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Instagram Reels</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('ig_reels', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('ig_reels', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2290,7 +2338,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Facebook Reels</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('fb_reels', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('fb_reels', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2300,7 +2355,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Threads Akışı</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('threads', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('threads', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2310,7 +2372,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Facebook Arama Sonuçları</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('search_results', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('search_results', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2320,7 +2389,14 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                   <div style={previewCardStyle}>
                     <div style={previewCardHeaderStyle}>Messenger Hikayeleri</div>
                     <div style={phoneWrapperStyle}>
-                      {renderAdPreview('messenger_stories', showDetailsPanel ? editCreativeData : createFormData)}
+                      <div style={{ width: '80px', height: '18px', background: '#1a1a1a', margin: '0 auto', borderRadius: '0 0 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #333' }}></div>
+                        <div style={{ width: '32px', height: '2.5px', background: '#2a2a2a', borderRadius: '1.5px' }}></div>
+                      </div>
+                      <div style={{ borderRadius: '28px', overflow: 'hidden', background: '#ffffff' }}>
+                        {renderAdPreview('messenger_stories', showDetailsPanel ? editCreativeData : createFormData)}
+                      </div>
+                      <div style={{ width: '80px', height: '3px', background: '#555', margin: '6px auto 2px auto', borderRadius: '1.5px' }}></div>
                     </div>
                   </div>
                 )}
@@ -2394,33 +2470,35 @@ const previewCardStyle = {
   background: '#ffffff',
   border: '1px solid #dddfe2',
   borderRadius: '16px',
-  padding: '1rem',
+  padding: '1.5rem 1.2rem',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '0.8rem',
-  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+  gap: '1rem',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03)',
+  transition: 'box-shadow 0.2s ease'
 };
 
 const previewCardHeaderStyle = {
-  fontSize: '0.8rem',
+  fontSize: '0.82rem',
   fontWeight: 700,
   color: '#1c1e21',
   textAlign: 'center',
   width: '100%',
   borderBottom: '1px solid #e5e7eb',
-  paddingBottom: '0.4rem',
-  marginBottom: '0.2rem'
+  paddingBottom: '0.6rem',
+  marginBottom: '0.2rem',
+  letterSpacing: '0.01em'
 };
 
 const phoneWrapperStyle = {
   width: '100%',
   maxWidth: '280px', 
-  background: '#e4e6eb', 
-  borderRadius: '24px', 
-  padding: '6px',
-  border: '3px solid #ccd0d5',
-  boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
+  background: '#1a1a1a', 
+  borderRadius: '36px', 
+  padding: '8px',
+  border: '3px solid #333',
+  boxShadow: '0 15px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05) inset',
   fontFamily: 'system-ui, -apple-system, sans-serif',
   boxSizing: 'border-box',
   overflow: 'hidden'
