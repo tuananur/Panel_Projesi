@@ -1006,7 +1006,7 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
     // Fetch ad sets with campaign_id and insights
     const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,campaign_id,start_time,stop_time,insights.${nestedParams}{spend,clicks,impressions,reach}&access_token=${accessToken}`;
     // Fetch ads with adset_id and insights
-    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
+    const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url,title,object_story_spec,link_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
     try {
       const [insightsRes, campaignsRes, adSetsRes, adsRes] = await Promise.all([
         fetchWithTimeout(insightsUrl, { cache: 'no-store' }),
@@ -3003,15 +3003,77 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
     }
 
     const accessToken = client.metaAccessToken.trim();
-    const url = `https://graph.facebook.com/v19.0/${entityId}`;
+    const finalAccountId = client.metaAdAccountId?.startsWith('act_') ? client.metaAdAccountId : `act_${client.metaAdAccountId}`;
     
+    // If it's an ad and creative fields are updated
+    let creativeId = updateData.creative_id || null;
+    if (updateData.primary_text && !creativeId) {
+      // Create new Ad Creative
+      const creativePayload = {
+        name: `${updateData.name || 'Guncellenmis Reklam'} - Kreatif`,
+        object_story_spec: {
+          page_id: updateData.page_id || '100000000000000',
+          instagram_actor_id: updateData.instagram_actor_id || undefined,
+          link_data: {
+            link: updateData.website_url || 'https://terapiyle.com/',
+            message: updateData.primary_text,
+            name: updateData.headline || '',
+            description: updateData.description || '',
+            display_link: updateData.display_link || undefined,
+            call_to_action: {
+              type: updateData.call_to_action || 'LEARN_MORE',
+              value: {
+                link: updateData.website_url || 'https://terapiyle.com/'
+              }
+            },
+            picture: updateData.image_url || 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80'
+          }
+        },
+        access_token: accessToken
+      };
+
+      if (!updateData.instagram_actor_id || updateData.instagram_actor_id.trim() === '') {
+        delete creativePayload.object_story_spec.instagram_actor_id;
+      }
+
+      const creativeCreateUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adcreatives`;
+      const creativeCreateRes = await fetch(creativeCreateUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(creativePayload)
+      });
+      const creativeCreateData = await creativeCreateRes.json();
+      if (creativeCreateData.error) {
+        console.error('Meta Update AdCreative Error:', creativeCreateData.error);
+        return { error: `Kreatif guncelleme hatasi: ${creativeCreateData.error.message}` };
+      }
+      creativeId = creativeCreateData.id;
+    }
+
+    const url = `https://graph.facebook.com/v19.0/${entityId}`;
     const payload = {
-      ...updateData,
       access_token: accessToken
     };
 
-    if (updateData.daily_budget) {
-      payload.daily_budget = Math.round(updateData.daily_budget * 100);
+    if (updateData.name) payload.name = updateData.name;
+    if (updateData.status) payload.status = updateData.status;
+    if (updateData.daily_budget) payload.daily_budget = Math.round(updateData.daily_budget * 100);
+    
+    if (creativeId) {
+      payload.creative = { creative_id: creativeId };
+    }
+    
+    if (updateData.url_params) {
+      payload.url_tags = updateData.url_params;
+    }
+
+    if (updateData.pixel_id && updateData.pixel_id.trim() !== '') {
+      payload.tracking_specs = [
+        {
+          'action.type': ['offsite_conversion'],
+          'fb_pixel': [updateData.pixel_id.trim()]
+        }
+      ];
     }
 
     const response = await fetch(url, {
@@ -3030,10 +3092,10 @@ export async function updateMetaEntityAction(clientId, entityId, updateData) {
       };
     }
 
-
     await logActivity('UPDATE', 'META_ADS', `Meta objesi güncellendi: ${entityId}`, clientId);
     return { success: true };
   } catch (error) {
+    console.error('updateMetaEntityAction error:', error);
     return { error: 'Güncelleme yapılamadı.' };
   }
 }
