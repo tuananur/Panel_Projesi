@@ -2896,6 +2896,7 @@ export async function createMetaAdAction(clientId, adData) {
             message: adData.primary_text,
             name: adData.headline || '',
             description: adData.description || '',
+            display_link: adData.display_link || undefined,
             call_to_action: {
               type: adData.call_to_action || 'LEARN_MORE',
               value: {
@@ -2950,6 +2951,7 @@ export async function createMetaAdAction(clientId, adData) {
       adset_id: adData.parent_id,
       status: adData.status || 'PAUSED',
       creative: { creative_id: creativeId },
+      url_tags: adData.url_params || undefined,
       access_token: accessToken
     };
 

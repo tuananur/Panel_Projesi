@@ -20,6 +20,14 @@ const DATE_PRESETS = [
   { id: 'last_month', label: 'Geçen Ay' }
 ];
 
+const CTA_LABELS = {
+  LEARN_MORE: 'Daha Fazla Bilgi Al',
+  SIGN_UP: 'Kaydol',
+  BOOK_TRAVEL: 'Rezervasyon Yap',
+  CONTACT_US: 'Bize Ulaşın',
+  APPLY_NOW: 'Başvur'
+};
+
 export default function MetaContent({ result, id, datePreset, since: initSince, until: initUntil }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -36,6 +44,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createFormData, setCreateFormData] = useState({ name: '', daily_budget: '', status: 'ACTIVE', parent_id: '' });
   const [isCreating, setIsCreating] = useState(false);
+  const [previewPlacement, setPreviewPlacement] = useState('fb_feed');
   const [messageModal, setMessageModal] = useState({ show: false, title: '', message: '', details: '', type: 'error' });
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, entity: null, type: null });
   const [selectedIds, setSelectedIds] = useState([]);
@@ -238,6 +247,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
         parent_id: selectedAdSetId || '',
         status: 'ACTIVE',
         website_url: 'https://terapiyle.com/',
+        display_link: 'https://terapiyle.com/',
         primary_text: 'Bazen sadece doğru uzmanla konuşmak her şeyi değiştirir. Terapiyle, seni anlayan terapistle hızlı ve güvenli şekilde eşleşmeni sağlar. Kendin için bir adım at.',
         headline: 'Terapiyle Sana En Uygun Terapisti Bul',
         description: 'Terapiyle. Online, güvenli ve kolay! Dilediğin anda dilediğin uzman...',
@@ -245,6 +255,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
         page_id: 'Terapimle',
         instagram_actor_id: 'terapiylecom',
         pixel_id: '1850906787926541',
+        url_params: 'anahtar1=deger1&anahtar2=deger2',
         image_url: 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80',
       });
     } else {
@@ -551,184 +562,257 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             <form onSubmit={handleCreateEntity} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
               {activeTab === 'ads' ? (
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '2rem', height: '100%', maxHeight: '65vh' }}>
-                  {/* Left Column - Form Inputs */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
-                    <div>
-                      <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>REKLAM ADI *</label>
-                      <input 
-                        required
-                        className="form-control" 
-                        value={createFormData.name || ''} 
-                        onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
-                        placeholder="Örn: Yeni Etkileşim Reklamı"
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px' }} 
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>REKLAM SETİ SEÇİN *</label>
-                      <select 
-                        required
-                        value={createFormData.parent_id || ''}
-                        onChange={e => setCreateFormData({ ...createFormData, parent_id: e.target.value })}
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px', outline: 'none' }}
-                      >
-                        <option value="">Seçiniz...</option>
-                        {adSets.map(item => (
-                          <option key={item.id} value={item.id}>{item.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  {/* Left Column - Form Inputs styled like Facebook Ads Manager */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
+                    {/* General Ad Details */}
+                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       <div>
-                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>FACEBOOK SAYFASI</label>
-                        <input 
-                          className="form-control" 
-                          value={createFormData.page_id || ''} 
-                          onChange={e => setCreateFormData({ ...createFormData, page_id: e.target.value })} 
-                          placeholder="Terapimle"
-                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px' }} 
-                        />
-                      </div>
-                      <div>
-                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>INSTAGRAM PROFİLİ</label>
-                        <input 
-                          className="form-control" 
-                          value={createFormData.instagram_actor_id || ''} 
-                          onChange={e => setCreateFormData({ ...createFormData, instagram_actor_id: e.target.value })} 
-                          placeholder="terapiylecom"
-                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px' }} 
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
-                      <div>
-                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>WEB SİTESİ URL *</label>
+                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM ADI *</label>
                         <input 
                           required
-                          type="url"
                           className="form-control" 
-                          value={createFormData.website_url || ''} 
-                          onChange={e => setCreateFormData({ ...createFormData, website_url: e.target.value })} 
-                          placeholder="https://terapiyle.com/"
-                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px' }} 
+                          value={createFormData.name || ''} 
+                          onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
+                          placeholder="Örn: Yeni Etkileşim Reklamı"
+                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
                         />
                       </div>
+
                       <div>
-                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>PİKSEL ID</label>
+                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ SEÇİN *</label>
+                        <select 
+                          required
+                          value={createFormData.parent_id || ''}
+                          onChange={e => setCreateFormData({ ...createFormData, parent_id: e.target.value })}
+                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                        >
+                          <option value="">Seçiniz...</option>
+                          {adSets.map(item => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Section 1: Kimlik */}
+                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Kimlik</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Facebook Sayfası *</label>
+                          <input 
+                            required
+                            className="form-control" 
+                            value={createFormData.page_id || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, page_id: e.target.value })} 
+                            placeholder="Terapimle"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Instagram Profili *</label>
+                          <input 
+                            required
+                            className="form-control" 
+                            value={createFormData.instagram_actor_id || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, instagram_actor_id: e.target.value })} 
+                            placeholder="terapiylecom"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2: Reklam Kurulumu */}
+                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Reklam Kurulumu</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Reklam Kurulumu</label>
+                          <input 
+                            className="form-control" 
+                            value="Reklam Oluştur" 
+                            readOnly 
+                            style={{ width: '100%', background: '#090d16', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', cursor: 'not-allowed' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Format</label>
+                          <input 
+                            className="form-control" 
+                            value="Tek Görsel veya Video" 
+                            readOnly 
+                            style={{ width: '100%', background: '#090d16', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', cursor: 'not-allowed' }} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 3: Reklam Kreatifi */}
+                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Reklam Kreatifi</h3>
+                      
+                      <div>
+                        <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Medya (Görsel URL) *</label>
+                        <input 
+                          required
+                          className="form-control" 
+                          value={createFormData.image_url || ''} 
+                          onChange={e => setCreateFormData({ ...createFormData, image_url: e.target.value })} 
+                          placeholder="Görsel adresi girin veya şablonlardan seçin..."
+                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '0.5rem' }} 
+                        />
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {[
+                            { name: 'Ofis', url: 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80' },
+                            { name: 'Terapist', url: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80' },
+                            { name: 'Online Seans', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80' }
+                          ].map(img => (
+                            <button
+                              key={img.name}
+                              type="button"
+                              onClick={() => setCreateFormData({ ...createFormData, image_url: img.url })}
+                              style={{
+                                padding: '0.3rem 0.6rem',
+                                borderRadius: '6px',
+                                background: createFormData.image_url === img.url ? '#0064e0' : '#1e293b',
+                                color: '#fff',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                fontSize: '0.7rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {img.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Ana Metin *</label>
+                        <textarea 
+                          required
+                          className="form-control" 
+                          value={createFormData.primary_text || ''} 
+                          onChange={e => setCreateFormData({ ...createFormData, primary_text: e.target.value })} 
+                          placeholder="Bazen sadece doğru uzmanla konuşmak..."
+                          rows={4}
+                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.85rem', lineHeight: '1.4' }} 
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Başlık *</label>
+                        <input 
+                          required
+                          className="form-control" 
+                          value={createFormData.headline || ''} 
+                          onChange={e => setCreateFormData({ ...createFormData, headline: e.target.value })} 
+                          placeholder="Terapiyle Sana En Uygun Terapisti Bul"
+                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Açıklama</label>
                         <input 
                           className="form-control" 
-                          value={createFormData.pixel_id || ''} 
-                          onChange={e => setCreateFormData({ ...createFormData, pixel_id: e.target.value })} 
-                          placeholder="1850906787926541"
-                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px' }} 
+                          value={createFormData.description || ''} 
+                          onChange={e => setCreateFormData({ ...createFormData, description: e.target.value })} 
+                          placeholder="Terapiyle. Online, güvenli ve kolay!..."
+                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
                         />
                       </div>
-                    </div>
 
-                    <div>
-                      <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>ANA METİN</label>
-                      <textarea 
-                        className="form-control" 
-                        value={createFormData.primary_text || ''} 
-                        onChange={e => setCreateFormData({ ...createFormData, primary_text: e.target.value })} 
-                        placeholder="Reklam açıklaması..."
-                        rows={3}
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.85rem' }} 
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>BAŞLIK</label>
-                      <input 
-                        className="form-control" 
-                        value={createFormData.headline || ''} 
-                        onChange={e => setCreateFormData({ ...createFormData, headline: e.target.value })} 
-                        placeholder="Örn: Terapiyle Sana En Uygun Terapisti Bul"
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px' }} 
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>AÇIKLAMA</label>
-                      <input 
-                        className="form-control" 
-                        value={createFormData.description || ''} 
-                        onChange={e => setCreateFormData({ ...createFormData, description: e.target.value })} 
-                        placeholder="Örn: Terapiyle. Online, güvenli ve kolay!..."
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px' }} 
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <div>
-                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>EYLEM ÇAĞRISI (CTA)</label>
-                        <select 
-                          value={createFormData.call_to_action || 'LEARN_MORE'}
-                          onChange={e => setCreateFormData({ ...createFormData, call_to_action: e.target.value })}
-                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px', outline: 'none' }}
-                        >
-                          <option value="LEARN_MORE">Daha Fazla Bilgi Al (Learn More)</option>
-                          <option value="SIGN_UP">Kaydol (Sign Up)</option>
-                          <option value="BOOK_TRAVEL">Rezervasyon Yap (Book Now)</option>
-                          <option value="CONTACT_US">Bize Ulaşın (Contact Us)</option>
-                          <option value="APPLY_NOW">Başvur (Apply Now)</option>
-                        </select>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İnternet Sitesi Adresi (URL) *</label>
+                          <input 
+                            required
+                            type="url"
+                            className="form-control" 
+                            value={createFormData.website_url || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, website_url: e.target.value })} 
+                            placeholder="https://terapiyle.com/"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Görünen Bağlantı</label>
+                          <input 
+                            className="form-control" 
+                            value={createFormData.display_link || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, display_link: e.target.value })} 
+                            placeholder="https://terapiyle.com/"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
                       </div>
 
-                      <div>
-                        <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İLK DURUM</label>
-                        <select 
-                          value={createFormData.status || 'ACTIVE'}
-                          onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
-                          style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px', outline: 'none' }}
-                        >
-                          <option value="ACTIVE">Aktif (Hemen Başlat)</option>
-                          <option value="PAUSED">Durdurulmuş (Taslak)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>GÖRSEL URL</label>
-                      <input 
-                        className="form-control" 
-                        value={createFormData.image_url || ''} 
-                        onChange={e => setCreateFormData({ ...createFormData, image_url: e.target.value })} 
-                        placeholder="Görsel adresi girin veya aşağıdan seçin..."
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.75rem 1rem', borderRadius: '10px', marginBottom: '0.5rem' }} 
-                      />
-                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        {[
-                          { name: 'Ofis', url: 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80' },
-                          { name: 'Terapist', url: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80' },
-                          { name: 'Online Seans', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80' }
-                        ].map(img => (
-                          <button
-                            key={img.name}
-                            type="button"
-                            onClick={() => setCreateFormData({ ...createFormData, image_url: img.url })}
-                            style={{
-                              padding: '0.3rem 0.6rem',
-                              borderRadius: '6px',
-                              background: createFormData.image_url === img.url ? '#0064e0' : '#1e293b',
-                              color: '#fff',
-                              border: '1px solid rgba(255,255,255,0.1)',
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              cursor: 'pointer'
-                            }}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Eylem Çağrısı *</label>
+                          <select 
+                            value={createFormData.call_to_action || 'LEARN_MORE'}
+                            onChange={e => setCreateFormData({ ...createFormData, call_to_action: e.target.value })}
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
                           >
-                            {img.name}
-                          </button>
-                        ))}
+                            <option value="LEARN_MORE">Daha Fazla Bilgi Al</option>
+                            <option value="SIGN_UP">Kaydol</option>
+                            <option value="BOOK_TRAVEL">Rezervasyon Yap</option>
+                            <option value="CONTACT_US">Bize Ulaşın</option>
+                            <option value="APPLY_NOW">Başvur</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İlk Durum</label>
+                          <select 
+                            value={createFormData.status || 'ACTIVE'}
+                            onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                          >
+                            <option value="ACTIVE">Aktif (Hemen Başlat)</option>
+                            <option value="PAUSED">Durdurulmuş (Taslak)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 4: Takip */}
+                    <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.4rem' }}>Takip</h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <input type="checkbox" checked readOnly style={{ width: '14px', height: '14px', cursor: 'not-allowed', accentColor: '#0064e0' }} />
+                        <label style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>İnternet sitesi olayları</label>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Piksel Seçimi *</label>
+                          <input 
+                            required
+                            className="form-control" 
+                            value={createFormData.pixel_id || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, pixel_id: e.target.value })} 
+                            placeholder="1850906787926541"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>URL Parametreleri</label>
+                          <input 
+                            className="form-control" 
+                            value={createFormData.url_params || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, url_params: e.target.value })} 
+                            placeholder="anahtar1=deger1&anahtar2=deger2"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right Column - Live Mockup Preview */}
+                  {/* Right Column - Multi-placement Feed Preview Mockup */}
                   <div style={{ 
                     display: 'flex', 
                     flexDirection: 'column', 
@@ -741,91 +825,167 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
                     width: '100%',
                     boxSizing: 'border-box'
                   }}>
-                    <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700, alignSelf: 'flex-start', letterSpacing: '0.05em' }}>REKLAM AKIŞ ÖNİZLEMESİ</h3>
+                    {/* Placement Switcher Tabs */}
+                    <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%', boxSizing: 'border-box' }}>
+                      <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
+                      <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
+                      <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Stories & Reels</button>
+                    </div>
                     
                     {/* Glassmorphic Smartphone Frame */}
                     <div style={{ 
                       width: '100%',
-                      maxWidth: '300px', 
+                      maxWidth: '310px', 
                       background: '#0a0e17', 
                       borderRadius: '32px', 
                       padding: '8px',
                       border: '4px solid #334155',
                       boxShadow: '0 15px 35px rgba(0,0,0,0.7)',
                       fontFamily: 'system-ui, -apple-system, sans-serif',
-                      boxSizing: 'border-box'
+                      boxSizing: 'border-box',
+                      overflow: 'hidden'
                     }}>
                       {/* Notch */}
                       <div style={{ width: '80px', height: '14px', background: '#334155', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <div style={{ width: '30px', height: '3px', background: '#0a0e17', borderRadius: '1.5px' }}></div>
                       </div>
                       
-                      {/* Insta Header */}
-                      <div style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', borderBottom: '1px solid rgba(255,255,255,0.05)', gap: '6px' }}>
-                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', p: '2px' }}>
-                          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0a0e17', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.65rem', fontWeight: 800 }}>
-                            {createFormData.page_id ? createFormData.page_id.charAt(0).toUpperCase() : 'T'}
+                      {/* Placement Mode: Facebook Feed */}
+                      {previewPlacement === 'fb_feed' && (
+                        <div style={{ width: '100%', boxSizing: 'border-box' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', borderBottom: '1px solid rgba(255,255,255,0.05)', gap: '6px' }}>
+                            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#3b5998', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.75rem', fontWeight: 800 }}>
+                              {createFormData.page_id ? createFormData.page_id.charAt(0).toUpperCase() : 'T'}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{createFormData.page_id || 'Terapimle'}</div>
+                              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                Sponsorlu • 🌐
+                              </div>
+                            </div>
+                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>•••</div>
+                          </div>
+                          
+                          <div style={{ fontSize: '0.7rem', color: '#fff', padding: '6px', whiteSpace: 'pre-wrap', lineHeight: '1.35', maxHeight: '80px', overflowY: 'auto' }}>
+                            {createFormData.primary_text || 'Açıklama girilmedi.'}
+                          </div>
+                          
+                          <div style={{ width: '100%', height: '170px', background: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {createFormData.image_url ? (
+                              <img src={createFormData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>Görsel Seçilmedi</div>
+                            )}
+                          </div>
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', padding: '8px 6px', gap: '6px', borderBottomRightRadius: '16px', borderBottomLeftRadius: '16px' }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {(() => {
+                                  try {
+                                    return new URL(createFormData.display_link || createFormData.website_url || 'https://terapiyle.com/').hostname.toUpperCase();
+                                  } catch(e) {
+                                    return 'TERAPIYLE.COM';
+                                  }
+                                })()}
+                              </div>
+                              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
+                                {createFormData.headline || 'Başlık girilmedi.'}
+                              </div>
+                              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
+                                {createFormData.description || 'Açıklama girilmedi.'}
+                              </div>
+                            </div>
+                            <div style={{ 
+                              background: '#0064e0', 
+                              color: '#fff', 
+                              padding: '4px 8px', 
+                              borderRadius: '4px', 
+                              fontSize: '0.6rem', 
+                              fontWeight: 700,
+                              whiteSpace: 'nowrap',
+                              cursor: 'pointer'
+                            }}>
+                              {CTA_LABELS[createFormData.call_to_action || 'LEARN_MORE']}
+                            </div>
                           </div>
                         </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{createFormData.page_id || 'Terapimle'}</div>
-                          <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>Sponsorlu</div>
-                        </div>
-                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>•••</div>
-                      </div>
-                      
-                      {/* Primary Text */}
-                      <div style={{ fontSize: '0.7rem', color: '#fff', padding: '6px', whiteSpace: 'pre-wrap', lineHeight: '1.3', maxHeight: '70px', overflowY: 'auto' }}>
-                        {createFormData.primary_text || 'Açıklama girilmedi.'}
-                      </div>
-                      
-                      {/* Media Image */}
-                      <div style={{ width: '100%', height: '170px', background: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {createFormData.image_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={createFormData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>Görsel Seçilmedi</div>
-                        )}
-                      </div>
-                      
-                      {/* CTA Panel */}
-                      <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', padding: '8px 6px', gap: '6px', borderBottomRightRadius: '16px', borderBottomLeftRadius: '16px' }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {(() => {
-                              try {
-                                return new URL(createFormData.website_url || 'https://terapiyle.com/').hostname.toUpperCase();
-                              } catch(e) {
-                                return 'TERAPIYLE.COM';
-                              }
-                            })()}
+                      )}
+
+                      {/* Placement Mode: Instagram Feed */}
+                      {previewPlacement === 'ig_feed' && (
+                        <div style={{ width: '100%', boxSizing: 'border-box' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', padding: '4px 6px', borderBottom: '1px solid rgba(255,255,255,0.05)', gap: '6px' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', padding: '2px' }}>
+                              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0a0e17', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.65rem', fontWeight: 800 }}>
+                                {createFormData.instagram_actor_id ? createFormData.instagram_actor_id.charAt(0).toUpperCase() : 'I'}
+                              </div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff' }}>{createFormData.instagram_actor_id || 'terapiylecom'}</div>
+                              <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)' }}>Sponsorlu</div>
+                            </div>
+                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>•••</div>
                           </div>
-                          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
-                            {createFormData.headline || 'Başlık girilmedi.'}
+
+                          <div style={{ width: '100%', height: '170px', background: '#1e293b', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {createFormData.image_url ? (
+                              <img src={createFormData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>Görsel Seçilmedi</div>
+                            )}
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px 4px 8px', color: '#fff', fontSize: '0.8rem' }}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <span>♡</span> <span>💬</span> <span>✈️</span>
+                            </div>
+                            <span></span>
+                          </div>
+
+                          <div style={{ background: '#0064e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', cursor: 'pointer' }}>
+                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>{CTA_LABELS[createFormData.call_to_action || 'LEARN_MORE']}</span>
+                            <span style={{ fontSize: '0.65rem', color: '#fff' }}>➔</span>
+                          </div>
+
+                          <div style={{ fontSize: '0.7rem', color: '#fff', padding: '4px 6px 10px 6px', lineHeight: '1.3', maxHeight: '60px', overflowY: 'auto' }}>
+                            <strong>{createFormData.instagram_actor_id || 'terapiylecom'}</strong> {createFormData.primary_text || 'Açıklama...'}
                           </div>
                         </div>
-                        <div style={{ 
-                          background: '#0064e0', 
-                          color: '#fff', 
-                          padding: '4px 8px', 
-                          borderRadius: '4px', 
-                          fontSize: '0.6rem', 
-                          fontWeight: 700,
-                          whiteSpace: 'nowrap',
-                          cursor: 'pointer'
-                        }}>
-                          {(() => {
-                            const cta = createFormData.call_to_action || 'LEARN_MORE';
-                            if (cta === 'LEARN_MORE') return 'Daha Fazla Bilgi Al';
-                            if (cta === 'SIGN_UP') return 'Kaydol';
-                            if (cta === 'BOOK_TRAVEL') return 'Rezervasyon Yap';
-                            if (cta === 'CONTACT_US') return 'Bize Ulaşın';
-                            if (cta === 'APPLY_NOW') return 'Başvur';
-                            return 'Daha Fazla Bilgi Al';
-                          })()}
+                      )}
+
+                      {/* Placement Mode: Instagram Stories */}
+                      {previewPlacement === 'ig_stories' && (
+                        <div style={{ width: '100%', height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '16px', boxSizing: 'border-box' }}>
+                          {createFormData.image_url ? (
+                            <img src={createFormData.image_url} alt="Creative" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem', position: 'absolute', inset: 0 }}>Görsel Seçilmedi</div>
+                          )}
+                          
+                          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)', padding: '8px 8px 16px 8px', display: 'flex', alignItems: 'center', gap: '6px', zIndex: 2 }}>
+                            <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #bc1888 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.6rem', fontWeight: 800 }}>
+                              {createFormData.instagram_actor_id ? createFormData.instagram_actor_id.charAt(0).toUpperCase() : 'I'}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>{createFormData.instagram_actor_id || 'terapiylecom'}</div>
+                              <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.6)' }}>Sponsorlu</div>
+                            </div>
+                          </div>
+                          
+                          <div style={{ position: 'absolute', bottom: '50px', left: '8px', right: '8px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', padding: '6px 8px', borderRadius: '8px', color: '#fff', fontSize: '0.65rem', lineHeight: '1.25', zIndex: 2 }}>
+                            <div style={{ fontWeight: 700, marginBottom: '2px' }}>{createFormData.headline || 'Terapiyle Sana En Uygun Terapisti Bul'}</div>
+                            <div style={{ opacity: 0.85, maxHeight: '50px', overflowY: 'auto' }}>{createFormData.primary_text || 'Açıklama...'}</div>
+                          </div>
+                          
+                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', padding: '8px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+                            <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>▲</div>
+                            <div style={{ background: '#0064e0', color: '#fff', padding: '3px 8px', borderRadius: '8px', fontSize: '0.55rem', fontWeight: 700, cursor: 'pointer' }}>
+                              {CTA_LABELS[createFormData.call_to_action || 'LEARN_MORE']}
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
