@@ -2882,20 +2882,69 @@ export async function createMetaAdAction(clientId, adData) {
     const finalAccountId = accountId.startsWith('act_') ? accountId : `act_${accountId}`;
     const accessToken = client.metaAccessToken.trim();
     
-    const url = `https://graph.facebook.com/v19.0/${finalAccountId}/ads`;
-    
-    // We need a creative ID. We'll try to fetch existing creatives first.
-    const creativeUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adcreatives?limit=1&access_token=${accessToken}`;
-    const creativeRes = await fetch(creativeUrl);
-    const creativeData = await creativeRes.json();
-    
-    let creativeId = null;
-    if (creativeData.data && creativeData.data.length > 0) {
-      creativeId = creativeData.data[0].id;
-    } else {
-      return { error: 'Hesapta mevcut kreatif bulunamadı. Lütfen önce Meta Ads Manager üzerinden bir kreatif oluşturun.' };
+    let creativeId = adData.creative_id || null;
+
+    // If creative details are provided, create a new Ad Creative first
+    if (!creativeId && adData.primary_text) {
+      const creativePayload = {
+        name: `${adData.name} - Kreatif`,
+        object_story_spec: {
+          page_id: adData.page_id || '100000000000000',
+          instagram_actor_id: adData.instagram_actor_id || undefined,
+          link_data: {
+            link: adData.website_url || 'https://terapiyle.com/',
+            message: adData.primary_text,
+            name: adData.headline || '',
+            description: adData.description || '',
+            call_to_action: {
+              type: adData.call_to_action || 'LEARN_MORE',
+              value: {
+                link: adData.website_url || 'https://terapiyle.com/'
+              }
+            },
+            picture: adData.image_url || 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80'
+          }
+        },
+        access_token: accessToken
+      };
+
+      // Remove instagram_actor_id if it's not a number or is empty to avoid API errors
+      if (!adData.instagram_actor_id || adData.instagram_actor_id.trim() === '') {
+        delete creativePayload.object_story_spec.instagram_actor_id;
+      }
+
+      const creativeCreateUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adcreatives`;
+      const creativeCreateRes = await fetch(creativeCreateUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(creativePayload)
+      });
+      
+      const creativeCreateData = await creativeCreateRes.json();
+      if (creativeCreateData.error) {
+        console.error('Meta AdCreative Error:', creativeCreateData.error);
+        return { 
+          error: `Kreatif oluşturma hatası: ${creativeCreateData.error.message}`, 
+          details: creativeCreateData.error.error_user_msg || creativeCreateData.error.error_user_title || null,
+        };
+      }
+      creativeId = creativeCreateData.id;
     }
 
+    // Fallback if no creativeId was specified or created
+    if (!creativeId) {
+      const creativeUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adcreatives?limit=1&access_token=${accessToken}`;
+      const creativeRes = await fetch(creativeUrl);
+      const creativeData = await creativeRes.json();
+      
+      if (creativeData.data && creativeData.data.length > 0) {
+        creativeId = creativeData.data[0].id;
+      } else {
+        return { error: 'Hesapta mevcut kreatif bulunamadı. Lütfen panel üzerinden detayları doldurarak yeni bir kreatif oluşturun veya Meta Ads Manager\'ı kullanın.' };
+      }
+    }
+
+    const url = `https://graph.facebook.com/v19.0/${finalAccountId}/ads`;
     const payload = {
       name: adData.name,
       adset_id: adData.parent_id,
@@ -2903,6 +2952,16 @@ export async function createMetaAdAction(clientId, adData) {
       creative: { creative_id: creativeId },
       access_token: accessToken
     };
+
+    // Add website tracking pixel if provided
+    if (adData.pixel_id && adData.pixel_id.trim() !== '') {
+      payload.tracking_specs = [
+        {
+          'action.type': ['offsite_conversion'],
+          'fb_pixel': [adData.pixel_id.trim()]
+        }
+      ];
+    }
 
     const response = await fetch(url, {
       method: 'POST',
@@ -2923,6 +2982,7 @@ export async function createMetaAdAction(clientId, adData) {
     await logActivity('CREATE', 'META_ADS', `Yeni reklam oluşturuldu: ${adData.name}`, clientId);
     return { success: true, id: data.id };
   } catch (error) {
+    console.error('createMetaAdAction error:', error);
     return { error: 'Reklam oluşturulamadı.' };
   }
 }
