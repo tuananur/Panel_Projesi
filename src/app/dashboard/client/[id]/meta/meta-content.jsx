@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createMetaArmyCommandAction, approveMetaArmyRecommendationAction, toggleMetaStatusAction, createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction, updateMetaEntityAction, deleteMetaEntityAction } from '@/app/actions';
+import { toggleMetaStatusAction, createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction, updateMetaEntityAction, deleteMetaEntityAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import {
   TrendingUp, MousePointer2, Eye, Users as UsersIcon,
   Wallet, Search, Calendar, ChevronRight,
   AlertCircle, CheckCircle, Play, Pause, BarChart3,
-  Bot, Send, ShieldCheck, Clock, Zap, ClipboardCheck, Edit, Trash2, X, BarChart
+  Edit, Trash2, X, BarChart
 } from 'lucide-react';
 
 const DATE_PRESETS = [
@@ -20,11 +20,11 @@ const DATE_PRESETS = [
   { id: 'last_month', label: 'Geçen Ay' }
 ];
 
-export default function MetaContent({ result, armyResult, id, datePreset, since: initSince, until: initUntil }) {
+export default function MetaContent({ result, id, datePreset, since: initSince, until: initUntil }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [activeTab, setActiveTab] = useState('army'); // army, campaigns, adsets, ads
+  const [activeTab, setActiveTab] = useState('campaigns');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [selectedAdSetId, setSelectedAdSetId] = useState(null);
@@ -307,7 +307,7 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
             <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
             <input type="text" placeholder="Ara..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }} />
           </div>
-          {activeTab !== 'army' && <button onClick={() => setShowCreateModal(true)} className="btn btn-primary" style={{ background: '#0064e0', padding: '0.5rem 1.2rem' }}>+ Yeni Oluştur</button>}
+          <button onClick={() => setShowCreateModal(true)} className="btn btn-primary" style={{ background: '#0064e0', padding: '0.5rem 1.2rem' }}>+ Yeni Oluştur</button>
         </div>
       </div>
 
@@ -321,7 +321,6 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
       {/* Tabs */}
       <div style={{ borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '2rem' }}>
-        <TabButton id="army" label="Meta Ads Army" count={armyResult?.summary?.pendingCommands || 0} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="campaigns" label="Kampanyalar" count={filteredCampaigns.length} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="adsets" label="Reklam Setleri" count={filteredAdSets.length} activeTab={activeTab} onClick={setActiveTab} />
         <TabButton id="ads" label="Reklamlar" count={filteredAds.length} activeTab={activeTab} onClick={setActiveTab} />
@@ -348,8 +347,6 @@ export default function MetaContent({ result, armyResult, id, datePreset, since:
 
       {/* Tables */}
       <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
-        {activeTab === 'army' && <MetaArmyPanel clientId={id} armyResult={armyResult} />}
-        
         {activeTab === 'campaigns' && (
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1100px' }}>
             <thead>
@@ -785,88 +782,4 @@ const thStyle = { padding: '1rem 1.5rem', fontSize: '0.7rem', fontWeight: 800, c
 const tdStyle = { padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' };
 const trStyle = { transition: 'background 0.2s' };
 const dateInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', color: '#fff', padding: '0.3rem 0.5rem', fontSize: '0.75rem', outline: 'none' };
-const prioritySelectStyle = { background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.4rem 0.8rem', fontSize: '0.8rem', outline: 'none' };
-const priorityOptionStyle = { background: '#0f172a', color: '#fff' };
 const smallButtonStyle = { padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, border: 'none', cursor: 'pointer' };
-
-// META ARMY PANEL COMPONENT
-function MetaArmyPanel({ clientId, armyResult }) {
-  const router = useRouter();
-  const [isSubmitting, startCommandTransition] = useTransition();
-  const [message, setMessage] = useState(null);
-  const data = armyResult?.success ? armyResult : null;
-  const summary = data?.summary || {};
-  const commands = data?.commands || [];
-  const runs = data?.runs || [];
-  const findings = data?.findings || [];
-  const recommendations = data?.recommendations || [];
-
-  const submitCommand = (formData) => {
-    setMessage(null);
-    startCommandTransition(async () => {
-      const result = await createMetaArmyCommandAction(clientId, formData);
-      if (result?.error) { setMessage({ type: 'error', text: result.error }); return; }
-      setMessage({ type: 'success', text: 'Komut kuyruğa alındı.' });
-      router.refresh();
-    });
-  };
-
-  const approveRecommendation = (recommendationId) => {
-    startCommandTransition(async () => {
-      const result = await approveMetaArmyRecommendationAction(recommendationId, `ONAY: ${recommendationId}`);
-      if (result?.error) { alert(result.error); return; }
-      router.refresh();
-    });
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <ArmyStat title="Son Kontrol" value={summary.latestRunAt ? new Date(summary.latestRunAt).toLocaleTimeString('tr-TR') : 'Yok'} icon={<Clock size={16} />} color="#3b82f6" />
-        <ArmyStat title="Bekleyen" value={summary.pendingCommands || 0} icon={<Bot size={16} />} color="#a855f7" />
-        <ArmyStat title="Onay Bekleyen" value={summary.pendingApprovals || 0} icon={<ClipboardCheck size={16} />} color="#f59e0b" />
-        <ArmyStat title="Kritik Bulgu" value={summary.criticalFindings || 0} icon={<AlertCircle size={16} />} color="#ef4444" />
-      </div>
-
-      <div className="card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(16,185,129,0.05), rgba(59,130,246,0.05))' }}>
-        <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Bot size={22} /> Komut Merkezi</h2>
-        <form action={submitCommand} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <textarea name="command" rows={4} placeholder="Agent'a görev verin..." style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', color: '#fff' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <select name="priority" defaultValue="NORMAL" style={prioritySelectStyle}>
-              <option value="LOW">Düşük</option><option value="NORMAL">Normal</option><option value="HIGH">Yüksek</option>
-            </select>
-            <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ background: '#10b981' }}>{isSubmitting ? 'Gönderiliyor...' : 'Army’ye Gönder'}</button>
-          </div>
-        </form>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-        <div className="card" style={{ padding: '1rem' }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Bulgular</h3>
-          {findings.map(f => <div key={f.id} style={{ padding: '0.8rem 0', borderTop: '1px solid var(--border-color)' }}>
-            <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{f.title}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{f.details}</div>
-          </div>)}
-        </div>
-        <div className="card" style={{ padding: '1rem' }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Öneriler</h3>
-          {recommendations.map(r => <div key={r.id} style={{ padding: '0.8rem 0', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{r.title}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{r.details}</div>
-            </div>
-            {r.status === 'PENDING_APPROVAL' && <button onClick={() => approveRecommendation(r.id)} className="btn btn-primary" style={{ padding: '0.2rem 0.6rem', fontSize: '0.7rem' }}>Onayla</button>}
-          </div>)}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ArmyStat({ title, value, icon, color }) {
-  return (<div className="card" style={{ padding: '1rem', borderLeft: `4px solid ${color}` }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{title}<span style={{ color }}>{icon}</span></div>
-    <div style={{ fontSize: '1.2rem', fontWeight: 900, marginTop: '0.4rem' }}>{value}</div>
-  </div>);
-}
