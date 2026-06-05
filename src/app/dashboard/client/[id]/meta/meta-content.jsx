@@ -1132,6 +1132,52 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
     );
   };
 
+  const renderAudienceCard = () => {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%' }}>
+        {/* Hedef Kitle Tanımı */}
+        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+          <h3 style={{ margin: 0, fontSize: '0.8rem', color: '#fff', fontWeight: 700 }}>Hedef Kitle Tanımı</h3>
+          <div style={{ position: 'relative', height: '12px', background: 'linear-gradient(to right, #f59e0b 0%, #10b981 40%, #10b981 60%, #3b82f6 100%)', borderRadius: '6px', marginTop: '0.5rem' }}>
+            <div style={{ position: 'absolute', top: '-4px', left: '50%', transform: 'translateX(-50%)', width: '20px', height: '20px', borderRadius: '50%', background: '#fff', border: '3px solid #10b981', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+            <span>Özel</span>
+            <span style={{ color: '#10b981' }}>Tanımlı</span>
+            <span>Geniş</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', lineHeight: '1.35' }}>
+            Hedef kitleniz tanımlı. Potansiyel erişim genişliği dengeli ve dönüşüm olasılığı yüksektir.
+          </p>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.6rem', marginTop: '0.2rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>POTANSİYEL ERİŞİM</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginTop: '0.2rem' }}>32.400.000 - 38.100.000 kişi</div>
+          </div>
+        </div>
+
+        {/* Tahmini Günlük Sonuçlar */}
+        <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+          <h3 style={{ margin: 0, fontSize: '0.8rem', color: '#fff', fontWeight: 700 }}>Tahmini Günlük Sonuçlar</h3>
+          <p style={{ margin: 0, fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', lineHeight: '1.3' }}>
+            Tahminler, ortalama bütçenize ve hedef kitle verilerinize dayanır.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.8rem' }}>
+            <div>
+              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>ERİŞİM</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginTop: '0.2rem' }}>4.5B - 13B</div>
+              <div style={{ height: '4px', background: '#3b82f6', borderRadius: '2px', width: '60%', marginTop: '0.4rem' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>BAĞLANTI TIKLAMALARI</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginTop: '0.2rem' }}>120 - 350</div>
+              <div style={{ height: '4px', background: '#10b981', borderRadius: '2px', width: '45%', marginTop: '0.4rem' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative' }}>
       {/* Loading Overlay */}
@@ -1368,7 +1414,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
           <div style={{ 
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
             width: '98%', 
-            maxWidth: activeTab === 'ads' ? '1380px' : '520px', 
+            maxWidth: '1380px', 
             maxHeight: '92vh',
             background: '#1a1f2e', 
             borderRadius: '24px',
@@ -1385,167 +1431,254 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             </div>
 
             <form onSubmit={handleCreateEntity} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
-              {activeTab === 'ads' ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', height: '100%', maxHeight: '68vh' }}>
-                  {/* Sol Sütun - Hiyerarşik Ağaç Görünümü */}
-                  <div style={{ background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                      {/* Kampanya Düğümü */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.02)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.03)' }}>
-                        <span style={{ fontSize: '0.9rem' }}>📁</span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
-                          {adSets.find(as => as.id === createFormData.parent_id) 
-                            ? (campaigns.find(c => c.id === adSets.find(as => as.id === createFormData.parent_id)?.campaign_id)?.name || 'Terapiyle Campaign')
-                            : 'Kampanya Seçilmedi'}
-                        </span>
-                      </div>
-                      {/* Reklam Seti Düğümü */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.02)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.03)', marginLeft: '12px' }}>
-                        <span style={{ fontSize: '0.9rem' }}>📂</span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
-                          {adSets.find(as => as.id === createFormData.parent_id)?.name || 'Set Seçilmedi'}
-                        </span>
-                      </div>
-                      {/* Reklam Düğümü */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(0,100,224,0.15)', fontSize: '0.75rem', color: '#fff', border: '1px solid rgba(0,100,224,0.3)', marginLeft: '24px' }}>
-                        <span style={{ fontSize: '0.9rem' }}>✨</span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 700 }}>
-                          {createFormData.name || 'Yeni Etkileşim Reklamı'}
-                        </span>
-                      </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', height: '100%', maxHeight: '68vh' }}>
+                {/* Sol Sütun - Hiyerarşik Ağaç Görünümü */}
+                <div style={{ background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {/* Kampanya Düğümü */}
+                    <div style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
+                      background: activeTab === 'campaigns' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      fontSize: '0.75rem', 
+                      color: activeTab === 'campaigns' ? '#fff' : 'rgba(255,255,255,0.7)', 
+                      border: activeTab === 'campaigns' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      fontWeight: activeTab === 'campaigns' ? 700 : 500
+                    }}>
+                      <span style={{ fontSize: '0.9rem' }}>📁</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {activeTab === 'campaigns' 
+                          ? (createFormData.name || 'Yeni Kampanya') 
+                          : (campaigns.find(c => c.id === adSets.find(as => as.id === createFormData.parent_id)?.campaign_id)?.name || 'Terapiyle Campaign')}
+                      </span>
+                    </div>
+                    {/* Reklam Seti Düğümü */}
+                    <div style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
+                      background: activeTab === 'adsets' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      fontSize: '0.75rem', 
+                      color: activeTab === 'adsets' ? '#fff' : 'rgba(255,255,255,0.7)', 
+                      border: activeTab === 'adsets' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      marginLeft: '12px',
+                      fontWeight: activeTab === 'adsets' ? 700 : 500
+                    }}>
+                      <span style={{ fontSize: '0.9rem' }}>📂</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {activeTab === 'campaigns'
+                          ? 'Yeni Reklam Seti'
+                          : (activeTab === 'adsets' 
+                            ? (createFormData.name || 'Yeni Reklam Seti')
+                            : (adSets.find(as => as.id === createFormData.parent_id)?.name || 'Set Seçilmedi'))}
+                      </span>
+                    </div>
+                    {/* Reklam Düğümü */}
+                    <div style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
+                      background: activeTab === 'ads' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      fontSize: '0.75rem', 
+                      color: activeTab === 'ads' ? '#fff' : 'rgba(255,255,255,0.7)', 
+                      border: activeTab === 'ads' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      marginLeft: '24px',
+                      fontWeight: activeTab === 'ads' ? 700 : 500
+                    }}>
+                      <span style={{ fontSize: '0.9rem' }}>✨</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {activeTab === 'ads' ? (createFormData.name || 'Yeni Reklam') : 'Yeni Reklam'}
+                      </span>
                     </div>
                   </div>
+                </div>
 
-                  {/* Orta Sütun - Form Alanları (Kimlik, Kurulum, Kreatif, Takip) */}
-                  {renderAdFormFields(createFormData, setCreateFormData, true, true)}
-
-                  {/* Sağ Sütun - Önizleme Mockup */}
-                  <div style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    background: 'rgba(255,255,255,0.01)', 
-                    padding: '1rem', 
-                    borderRadius: '16px', 
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    alignSelf: 'start',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }}>
-                    {/* Önizleme Başlığı ve Gelişmiş Önizleme Butonu */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>Reklam Önizlemesi</span>
-                      <button
-                        type="button"
-                        onClick={() => setShowAdvancedPreviewModal(true)}
-                        style={{
-                          background: 'rgba(0,100,224,0.15)',
-                          color: '#38bdf8',
-                          border: '1px solid rgba(0,100,224,0.3)',
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}
-                      >
-                        🔍 Gelişmiş Önizleme
-                      </button>
-                    </div>
-
-                    {/* Yerleşim Seçici Sekmeler */}
-                    <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%', boxSizing: 'border-box' }}>
-                      <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
-                      <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
-                      <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
-                    </div>
-                    
-                    {/* Akıllı Telefon Çerçevesi */}
-                    <div style={{ 
-                      width: '100%',
-                      maxWidth: '310px', 
-                      background: '#0a0e17', 
-                      borderRadius: '32px', 
-                      padding: '8px',
-                      border: '4px solid #334155',
-                      boxShadow: '0 15px 35px rgba(0,0,0,0.7)',
-                      fontFamily: 'system-ui, -apple-system, sans-serif',
-                      boxSizing: 'border-box',
-                      overflow: 'hidden'
-                    }}>
-                      {/* Notching */}
-                      <div style={{ width: '80px', height: '14px', background: '#334155', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <div style={{ width: '30px', height: '3px', background: '#0a0e17', borderRadius: '1.5px' }}></div>
+                {/* Orta Sütun - Form Alanları */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
+                  {activeTab === 'campaigns' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {/* Kampanya Adı */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>KAMPANYA ADI *</label>
+                          <input 
+                            required
+                            className="form-control" 
+                            value={createFormData.name || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
+                            placeholder="Örn: Terapiyle Kayıt Reklamı 11.02"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
                       </div>
                       
-                      {renderAdPreview(previewPlacement, createFormData)}
+                      {/* Kampanya Detayları */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Kampanya Detayları</h3>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Özel Reklam Kategorileri</label>
+                          <select disabled style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }}>
+                            <option>Hiçbir Kategori Seçilmedi</option>
+                          </select>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                          <div>
+                            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Satın Alma Türü</label>
+                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Açık Artırma</div>
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Amacı</label>
+                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Trafik / Üye Kaydı</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Kampanya Bütçesi */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Kampanya Bütçesi</h3>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL) *</label>
+                          <input 
+                            type="number" 
+                            required
+                            className="form-control" 
+                            value={createFormData.daily_budget || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, daily_budget: e.target.value })} 
+                            placeholder="Örn: 500"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Durumu</label>
+                          <select 
+                            value={createFormData.status || 'ACTIVE'}
+                            onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                          >
+                            <option value="ACTIVE">Aktif (Hemen Başlat)</option>
+                            <option value="PAUSED">Durdurulmuş (Taslak)</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>BAŞLIK *</label>
-                    <input 
-                      required
-                      className="form-control" 
-                      value={createFormData.name || ''} 
-                      onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
-                      placeholder="Örn: Yaz İndirimi 2024"
-                      style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px' }} 
-                    />
-                  </div>
+                  )}
 
                   {activeTab === 'adsets' && (
-                    <div>
-                      <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>
-                        ÜST KAMPANYA SEÇİN *
-                      </label>
-                      <select 
-                        required
-                        value={createFormData.parent_id || ''}
-                        onChange={e => setCreateFormData({ ...createFormData, parent_id: e.target.value })}
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px', outline: 'none' }}
-                      >
-                        <option value="">Seçiniz...</option>
-                        {campaigns.map(item => (
-                          <option key={item.id} value={item.id}>{item.name}</option>
-                        ))}
-                      </select>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {/* Reklam Seti Adı */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ ADI *</label>
+                          <input 
+                            required
+                            className="form-control" 
+                            value={createFormData.name || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} 
+                            placeholder="Örn: Terapiyle Reklam Seti 1"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>ÜST KAMPANYA SEÇİN *</label>
+                          <select 
+                            required
+                            value={createFormData.parent_id || ''}
+                            onChange={e => setCreateFormData({ ...createFormData, parent_id: e.target.value })}
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                          >
+                            <option value="">Seçiniz...</option>
+                            {campaigns.map(item => (
+                              <option key={item.id} value={item.id}>{item.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Bütçe ve Durum */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Bütçe ve Durum</h3>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL) *</label>
+                          <input 
+                            type="number" 
+                            required
+                            className="form-control" 
+                            value={createFormData.daily_budget || ''} 
+                            onChange={e => setCreateFormData({ ...createFormData, daily_budget: e.target.value })} 
+                            placeholder="Örn: 500"
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İlk Durum</label>
+                          <select 
+                            value={createFormData.status || 'ACTIVE'}
+                            onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
+                            style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', outline: 'none' }}
+                          >
+                            <option value="ACTIVE">Aktif (Hemen Başlat)</option>
+                            <option value="PAUSED">Durdurulmuş (Taslak)</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  {activeTab !== 'ads' && (
-                    <div>
-                      <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>GÜNLÜK BÜTÇE (TL)</label>
-                      <input 
-                        type="number" 
-                        className="form-control" 
-                        value={createFormData.daily_budget || ''} 
-                        onChange={e => setCreateFormData({ ...createFormData, daily_budget: e.target.value })} 
-                        placeholder="Örn: 500"
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px' }} 
-                      />
-                    </div>
-                  )}
-
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>İLK DURUM</label>
-                    <select 
-                      value={createFormData.status || 'ACTIVE'}
-                      onChange={e => setCreateFormData({ ...createFormData, status: e.target.value })}
-                      style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px', outline: 'none' }}
-                    >
-                      <option value="ACTIVE">Aktif (Hemen Başlat)</option>
-                      <option value="PAUSED">Durdurulmuş (Taslak)</option>
-                    </select>
-                  </div>
+                  {activeTab === 'ads' && renderAdFormFields(createFormData, setCreateFormData, true, true)}
                 </div>
-              )}
+
+                {/* Sağ Sütun - Önizleme Mockup / Audience Summary */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                  {activeTab === 'ads' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>Reklam Önizlemesi</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowAdvancedPreviewModal(true)}
+                          style={{
+                            background: 'rgba(0,100,224,0.15)',
+                            color: '#38bdf8',
+                            border: '1px solid rgba(0,100,224,0.3)',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          🔍 Gelişmiş Önizleme
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%' }}>
+                        <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
+                        <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
+                        <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
+                      </div>
+
+                      <div style={{ 
+                        width: '100%',
+                        maxWidth: '310px', 
+                        background: '#0a0e17', 
+                        borderRadius: '32px', 
+                        padding: '8px',
+                        border: '4px solid #334155',
+                        boxShadow: '0 15px 35px rgba(0,0,0,0.7)',
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        boxSizing: 'border-box',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{ width: '80px', height: '14px', background: '#334155', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <div style={{ width: '30px', height: '3px', background: '#0a0e17', borderRadius: '1.5px' }}></div>
+                        </div>
+                        {renderAdPreview(previewPlacement, createFormData)}
+                      </div>
+                    </div>
+                  ) : (
+                    renderAudienceCard()
+                  )}
+                </div>
+              </div>
 
               <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
                 <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', background: '#374151', color: '#fff', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>Vazgeç</button>
@@ -1565,7 +1698,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
           <div style={{ 
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
             width: '98%',
-            maxWidth: selectedEntity.type === 'ad' ? '1380px' : '520px', 
+            maxWidth: '1380px', 
             maxHeight: '92vh',
             background: '#1a1f2e', 
             borderRadius: '24px',
@@ -1584,152 +1717,264 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
 
             {/* Content Area */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem' }}>
-              {selectedEntity.type === 'ad' ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', height: '100%', maxHeight: '68vh' }}>
-                  {/* Left Column - Hiyerarşik Ağaç Görünümü */}
-                  <div style={{ background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                      {/* Kampanya Düğümü */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.02)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.03)' }}>
-                        <span style={{ fontSize: '0.9rem' }}>📁</span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
-                          {campaigns.find(c => c.id === adSets.find(as => as.id === selectedEntity.data.adset_id)?.campaign_id)?.name || 'Kampanya Seçilmedi'}
-                        </span>
-                      </div>
-                      {/* Reklam Seti Düğümü */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.02)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.03)', marginLeft: '12px' }}>
-                        <span style={{ fontSize: '0.9rem' }}>📂</span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
-                          {adSets.find(as => as.id === selectedEntity.data.adset_id)?.name || 'Set Seçilmedi'}
-                        </span>
-                      </div>
-                      {/* Reklam Düğümü */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(0,100,224,0.15)', fontSize: '0.75rem', color: '#fff', border: '1px solid rgba(0,100,224,0.3)', marginLeft: '24px' }}>
-                        <span style={{ fontSize: '0.9rem' }}>✨</span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 700 }}>
-                          {isEditingEntity ? editName : selectedEntity.data.name}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Orta Sütun - Form Alanları (Kimlik, Kurulum, Kreatif, Takip) */}
-                  {renderAdFormFields(editCreativeData, setEditCreativeData, false, isEditingEntity)}
-
-                  {/* Sağ Sütun - Önizleme Mockup */}
-                  <div style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    background: 'rgba(255,255,255,0.01)', 
-                    padding: '1rem', 
-                    borderRadius: '16px', 
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    alignSelf: 'start',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }}>
-                    {/* Önizleme Başlığı ve Gelişmiş Önizleme Butonu */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>Reklam Önizlemesi</span>
-                      <button
-                        type="button"
-                        onClick={() => setShowAdvancedPreviewModal(true)}
-                        style={{
-                          background: 'rgba(0,100,224,0.15)',
-                          color: '#38bdf8',
-                          border: '1px solid rgba(0,100,224,0.3)',
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}
-                      >
-                        🔍 Gelişmiş Önizleme
-                      </button>
-                    </div>
-
-                    {/* Yerleşim Seçici Sekmeler */}
-                    <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%', boxSizing: 'border-box' }}>
-                      <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
-                      <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
-                      <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
-                    </div>
-                    
-                    {/* Akıllı Telefon Çerçevesi */}
+              <div style={{ display: 'grid', gridTemplateColumns: '220px 1.2fr 340px', gap: '1.5rem', height: '100%', maxHeight: '68vh' }}>
+                {/* Sol Sütun - Hiyerarşik Ağaç Görünümü */}
+                <div style={{ background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reklam Düzenleme</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {/* Kampanya Düğümü */}
                     <div style={{ 
-                      width: '100%',
-                      maxWidth: '310px', 
-                      background: '#0a0e17', 
-                      borderRadius: '32px', 
-                      padding: '8px',
-                      border: '4px solid #334155',
-                      boxShadow: '0 15px 35px rgba(0,0,0,0.7)',
-                      fontFamily: 'system-ui, -apple-system, sans-serif',
-                      boxSizing: 'border-box',
-                      overflow: 'hidden'
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
+                      background: selectedEntity.type === 'campaign' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      fontSize: '0.75rem', 
+                      color: selectedEntity.type === 'campaign' ? '#fff' : 'rgba(255,255,255,0.7)', 
+                      border: selectedEntity.type === 'campaign' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      fontWeight: selectedEntity.type === 'campaign' ? 700 : 500
                     }}>
-                      {/* Notch */}
-                      <div style={{ width: '80px', height: '14px', background: '#334155', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <div style={{ width: '30px', height: '3px', background: '#0a0e17', borderRadius: '1.5px' }}></div>
-                      </div>
-                      
-                      {renderAdPreview(previewPlacement, editCreativeData)}
+                      <span style={{ fontSize: '0.9rem' }}>📁</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {selectedEntity.type === 'campaign' 
+                          ? (isEditingEntity ? editName : selectedEntity.data.name) 
+                          : (campaigns.find(c => c.id === adSets.find(as => as.id === selectedEntity.data.adset_id)?.campaign_id)?.name || 'Terapiyle Campaign')}
+                      </span>
+                    </div>
+                    {/* Reklam Seti Düğümü */}
+                    <div style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
+                      background: selectedEntity.type === 'adset' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      fontSize: '0.75rem', 
+                      color: selectedEntity.type === 'adset' ? '#fff' : 'rgba(255,255,255,0.7)', 
+                      border: selectedEntity.type === 'adset' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      marginLeft: '12px',
+                      fontWeight: selectedEntity.type === 'adset' ? 700 : 500
+                    }}>
+                      <span style={{ fontSize: '0.9rem' }}>📂</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {selectedEntity.type === 'campaign'
+                          ? 'Reklam Seti'
+                          : (selectedEntity.type === 'adset' 
+                            ? (isEditingEntity ? editName : selectedEntity.data.name)
+                            : (adSets.find(as => as.id === selectedEntity.data.adset_id)?.name || 'Set Seçilmedi'))}
+                      </span>
+                    </div>
+                    {/* Reklam Düğümü */}
+                    <div style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', 
+                      background: selectedEntity.type === 'ad' ? 'rgba(0,100,224,0.15)' : 'rgba(255,255,255,0.02)', 
+                      fontSize: '0.75rem', 
+                      color: selectedEntity.type === 'ad' ? '#fff' : 'rgba(255,255,255,0.7)', 
+                      border: selectedEntity.type === 'ad' ? '1px solid rgba(0,100,224,0.3)' : '1px solid rgba(255,255,255,0.03)',
+                      marginLeft: '24px',
+                      fontWeight: selectedEntity.type === 'ad' ? 700 : 500
+                    }}>
+                      <span style={{ fontSize: '0.9rem' }}>✨</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {selectedEntity.type === 'ad' ? (isEditingEntity ? editName : selectedEntity.data.name) : 'Reklam Detayı'}
+                      </span>
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  {/* Campaign/AdSet details */}
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>BAŞLIK *</label>
-                    {isEditingEntity ? (
-                      <input className="form-control" value={editName} onChange={e => setEditName(e.target.value)} style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px' }} />
-                    ) : (
-                      <div style={{ fontWeight: 600, fontSize: '1rem', color: '#fff', background: '#0f172a', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>{selectedEntity.data.name}</div>
-                    )}
-                  </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    {(selectedEntity.type === 'campaign' || selectedEntity.type === 'adset') && (
-                      <div>
-                        <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>GÜNLÜK BÜTÇE</label>
-                        {isEditingEntity ? (
-                          <input type="number" className="form-control" value={editBudget} onChange={e => setEditBudget(e.target.value)} style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '1rem', borderRadius: '12px' }} />
-                        ) : (
-                          <div style={{ fontWeight: 600, fontSize: '1rem', color: '#fff', background: '#0f172a', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>
-                        )}
+                {/* Orta Sütun - Form Alanları */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
+                  {selectedEntity.type === 'campaign' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {/* Kampanya Adı */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>KAMPANYA ADI *</label>
+                          {isEditingEntity ? (
+                            <input 
+                              required
+                              className="form-control" 
+                              value={editName} 
+                              onChange={e => setEditName(e.target.value)} 
+                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                            />
+                          ) : (
+                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{selectedEntity.data.name}</div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    <div>
-                      <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>DURUM</label>
-                      <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center' }}>
-                        <StatusBadge status={selectedEntity.data.status} />
+
+                      {/* Kampanya Detayları */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Kampanya Detayları</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                          <div>
+                            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Satın Alma Türü</label>
+                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Açık Artırma</div>
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kampanya Amacı</label>
+                            <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>Trafik</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bütçe ve Durum */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Bütçe ve Durum</h3>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL)</label>
+                          {isEditingEntity ? (
+                            <input 
+                              type="number" 
+                              className="form-control" 
+                              value={editBudget} 
+                              onChange={e => setEditBudget(e.target.value)} 
+                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                            />
+                          ) : (
+                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>
+                          )}
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Durum</label>
+                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center' }}>
+                            <StatusBadge status={selectedEntity.data.status} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Performance Section */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Performans Özeti</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.3rem' }}>Harcama</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
+                          </div>
+                          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.3rem' }}>Gösterim</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Performance Section */}
-                  <div>
-                    <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.6rem', fontWeight: 600 }}>PERFORMANS ÖZETİ</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.4rem' }}>Harcama</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
+                  {selectedEntity.type === 'adset' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {/* Reklam Seti Adı */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM SETİ ADI *</label>
+                          {isEditingEntity ? (
+                            <input 
+                              required
+                              className="form-control" 
+                              value={editName} 
+                              onChange={e => setEditName(e.target.value)} 
+                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                            />
+                          ) : (
+                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{selectedEntity.data.name}</div>
+                          )}
+                        </div>
                       </div>
-                      <div style={{ background: '#0f172a', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.4rem' }}>Gösterim</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
+
+                      {/* Bütçe ve Durum */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Bütçe ve Durum</h3>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Günlük Bütçe (TL)</label>
+                          {isEditingEntity ? (
+                            <input 
+                              type="number" 
+                              className="form-control" 
+                              value={editBudget} 
+                              onChange={e => setEditBudget(e.target.value)} 
+                              style={{ width: '100%', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem' }} 
+                            />
+                          ) : (
+                            <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#fff', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>{(selectedEntity.data.daily_budget / 100).toFixed(2)} TL</div>
+                          )}
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Durum</label>
+                          <div style={{ background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center' }}>
+                            <StatusBadge status={selectedEntity.data.status} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Performance Section */}
+                      <div style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.85rem', color: '#fff', fontWeight: 700 }}>Performans Özeti</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.3rem' }}>Harcama</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{selectedEntity.data.insights?.data?.[0]?.spend || 0} TL</div>
+                          </div>
+                          <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.3rem' }}>Gösterim</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{Number(selectedEntity.data.insights?.data?.[0]?.impressions || 0).toLocaleString()}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+
+                  {selectedEntity.type === 'ad' && renderAdFormFields(editCreativeData, setEditCreativeData, false, isEditingEntity)}
                 </div>
-              )}
+
+                {/* Sağ Sütun - Önizleme Mockup / Audience Summary */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                  {selectedEntity.type === 'ad' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>Reklam Önizlemesi</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowAdvancedPreviewModal(true)}
+                          style={{
+                            background: 'rgba(0,100,224,0.15)',
+                            color: '#38bdf8',
+                            border: '1px solid rgba(0,100,224,0.3)',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          🔍 Gelişmiş Önizleme
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%', boxSizing: 'border-box' }}>
+                        <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
+                        <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
+                        <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? '#0064e0' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
+                      </div>
+
+                      <div style={{ 
+                        width: '100%',
+                        maxWidth: '310px', 
+                        background: '#0a0e17', 
+                        borderRadius: '32px', 
+                        padding: '8px',
+                        border: '4px solid #334155',
+                        boxShadow: '0 15px 35px rgba(0,0,0,0.7)',
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        boxSizing: 'border-box',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{ width: '80px', height: '14px', background: '#334155', margin: '0 auto 8px auto', borderRadius: '0 0 10px 10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <div style={{ width: '30px', height: '3px', background: '#0a0e17', borderRadius: '1.5px' }}></div>
+                        </div>
+                        {renderAdPreview(previewPlacement, editCreativeData)}
+                      </div>
+                    </div>
+                  ) : (
+                    renderAudienceCard()
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Footer Buttons */}
