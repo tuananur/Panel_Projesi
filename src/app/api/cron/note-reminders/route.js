@@ -1,0 +1,62 @@
+import { NextResponse } from 'next/server';
+import { processDueNoteReminders } from '@/lib/note-reminders';
+import prisma from '@/lib/prisma';
+
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
+async function createNotification({ userId, title, message, url, type, dedupeKey }) {
+  if (!userId) return null;
+  try {
+    return await prisma.notification.create({
+      data: {
+        userId: Number(userId),
+        title,
+        message,
+        url,
+        type,
+        dedupeKey,
+      },
+    });
+  } catch (error) {
+    if (error?.code === 'P2002') return null;
+    console.error('Note reminder notification error:', error);
+    return null;
+  }
+}
+
+function assertCronAuth(req) {
+  const expected = process.env.CRON_SECRET;
+  if (!expected) {
+    return { ok: false, status: 503, body: { success: false, error: 'CRON_SECRET_NOT_CONFIGURED' } };
+  }
+
+  const auth = req.headers.get('authorization') || '';
+  const bearer = auth.toLowerCase().startsWith('bearer ') ? auth.slice(7).trim() : '';
+  const headerSecret = req.headers.get('x-cron-secret')?.trim() || '';
+  const received = bearer || headerSecret;
+
+  if (!received || received !== expected) {
+    return { ok: false, status: 401, body: { success: false, error: 'UNAUTHORIZED' } };
+  }
+
+  return { ok: true };
+}
+
+export async function GET(req) {
+  const auth = assertCronAuth(req);
+  if (!auth.ok) {
+    return NextResponse.json(auth.body, { status: auth.status });
+  }
+
+  try {
+    const result = await processDueNoteReminders({ createNotification });
+    return NextResponse.json({ success: true, ...result });
+  } catch (error) {
+    console.error('Note reminders cron failed:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'NOTE_REMINDERS_FAILED' },
+      { status: 500 }
+    );
+  }
+}

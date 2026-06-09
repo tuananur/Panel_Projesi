@@ -31,9 +31,9 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
-  const defaultDateValue = activeDay
-    ? `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(activeDay).padStart(2, '0')}`
-    : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const defaultDateTimeValue = activeDay
+    ? `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(activeDay).padStart(2, '0')}T09:00`
+    : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
   const MONTHS = [
     'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
@@ -82,12 +82,14 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
     setGlobalLoading(true);
     formData.append('clientId', clientId);
     formData.append('category', category);
-    const selectedDate = formData.get('date');
-    if (selectedDate) {
-      const [year, month, day] = selectedDate.toString().split('-').map(Number);
-      const dateWithCurrentTime = new Date();
-      dateWithCurrentTime.setFullYear(year, month - 1, day);
-      formData.set('createdAt', dateWithCurrentTime.toISOString());
+    const createdAtRaw = formData.get('createdAt');
+    if (createdAtRaw) {
+      const parsed = new Date(createdAtRaw.toString());
+      if (!Number.isNaN(parsed.getTime())) {
+        formData.set('createdAt', parsed.toISOString());
+      } else {
+        formData.set('createdAt', new Date().toISOString());
+      }
     } else {
       formData.set('createdAt', new Date().toISOString());
     }
@@ -593,8 +595,10 @@ export default function NotesClient({ clientId, notes, currentUserId, userRole, 
             <input type="text" name="title" className="input-field" placeholder="Örn: İçerik metnini kontrol et" required />
           </div>
           <div className="input-group">
-            <label className="input-label">Tarih <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(boş bırakılırsa bugün)</span></label>
-            <input type="date" name="date" className="input-field" defaultValue={defaultDateValue} />
+            <label className="input-label">
+              Tarih ve saat <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(ileri tarih seçilirse o saatte hatırlatma bildirimi gelir)</span>
+            </label>
+            <input type="datetime-local" name="createdAt" className="input-field" defaultValue={defaultDateTimeValue} />
           </div>
           <div className="input-group">
             <label className="input-label">Açıklama <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel)</span></label>

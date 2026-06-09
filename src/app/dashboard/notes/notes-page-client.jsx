@@ -502,7 +502,7 @@ export default function NotesPageClient({ initialNotes, clients, currentUserId, 
 
           <div className="input-group">
             <label className="input-label">
-              Tarih <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel — boş bırakılırsa şu an)</span>
+              Tarih ve saat <span style={{ color: 'var(--text-secondary)', fontWeight: 400 }}>(opsiyonel — ileri tarih seçilirse o saatte hatırlatma bildirimi gelir)</span>
             </label>
             <input type="datetime-local" name="createdAt" className="input-field" />
           </div>

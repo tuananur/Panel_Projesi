@@ -7,6 +7,7 @@ import { deleteMessages, getMailAddressSuggestions, getMailConfig, getMessage, g
 import { ASSIGNABLE_ROLE_OPTIONS, can, getRoleAssignableRoles, getRolePermissions, saveRoleAssignableRoles, saveRolePermissions, saveUserPermissionsSettings } from '@/lib/permissions';
 import { SPECIAL_DAYS } from '@/lib/holidays';
 import { ALLOWED_NOTIFICATION_SOUNDS, DEFAULT_APPEARANCE, sanitizeAppearance } from '@/lib/appearance';
+import { isFutureReminderTime, processDueNoteReminders } from '@/lib/note-reminders';
 async function fetchWithTimeout(resource, options = {}) {
   const { timeout = 8000 } = options;
   const controller = new AbortController();
@@ -687,7 +688,8 @@ export async function addNoteAction(formData) {
   const titleText = (formData.get('title') || '').toString().trim();
   const title = titleText || null;
   const createdAtRaw = formData.get('createdAt');
-  const createdAt = createdAtRaw ? new Date(createdAtRaw) : undefined;
+  const parsedCreatedAt = createdAtRaw ? new Date(createdAtRaw.toString()) : null;
+  const createdAt = parsedCreatedAt && !Number.isNaN(parsedCreatedAt.getTime()) ? parsedCreatedAt : undefined;
   const assigneeUserIdRaw = formData.get('assigneeUserId');
   const categoryRaw = formData.get('category');
   const category = categoryRaw === 'DEV' ? 'DEV' : 'TASK';
@@ -704,6 +706,8 @@ export async function addNoteAction(formData) {
     const createdByUserId = (isAdmin && assigneeUserIdRaw && parseInt(assigneeUserIdRaw) !== session.userId)
       ? session.userId
       : null;
+    const noteCreatedAt = createdAt || new Date();
+    const scheduleReminder = isFutureReminderTime(noteCreatedAt);
     await prisma.note.create({
       data: {
         clientId,
@@ -712,7 +716,9 @@ export async function addNoteAction(formData) {
         title,
         content,
         category,
-        createdAt
+        createdAt: noteCreatedAt,
+        remindAt: scheduleReminder ? noteCreatedAt : null,
+        reminderUserId: scheduleReminder ? session.userId : null,
       }
     });
     const isDevNote = category === 'DEV';
@@ -2287,6 +2293,9 @@ async function ensureReminderNotifications(userId) {
     }
   }
 }
+async function ensureNoteReminderNotifications(userId) {
+  await processDueNoteReminders({ userId, createNotification });
+}
 function notificationSettingKey(userId) {
   return `notification_settings_user_${userId}`;
 }
@@ -2394,7 +2403,10 @@ export async function resetNotificationSettingsAction() {
 export async function getNotificationsAction(limit = 20) {
   const session = await getSession();
   if (!session) return { error: 'Oturum bulunamadı.', notifications: [], count: 0 };
-  await ensureReminderNotifications(session.userId);
+  await Promise.all([
+    ensureReminderNotifications(session.userId),
+    ensureNoteReminderNotifications(session.userId),
+  ]);
   const [notifications, count] = await Promise.all([
     prisma.notification.findMany({
       where: { userId: session.userId },
@@ -2408,7 +2420,10 @@ export async function getNotificationsAction(limit = 20) {
 export async function getNotificationUnreadCountAction() {
   const session = await getSession();
   if (!session) return { count: 0 };
-  await ensureReminderNotifications(session.userId);
+  await Promise.all([
+    ensureReminderNotifications(session.userId),
+    ensureNoteReminderNotifications(session.userId),
+  ]);
   return { count: await prisma.notification.count({ where: { userId: session.userId, readAt: null } }) };
 }
 export async function markNotificationReadAction(notificationId) {

@@ -186,8 +186,13 @@ model Note {
   content         String   @default("") @db.Text
   category        String   @default("TASK") // "TASK" (iş takibi) | "DEV" (yazılım)
   isDone          Boolean  @default(false)
+  remindAt        DateTime?
+  reminderSentAt  DateTime?
+  reminderUserId  Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([reminderUserId, remindAt, reminderSentAt])
 }
 
 model WorkItem {
