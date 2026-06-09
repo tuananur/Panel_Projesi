@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processDueNoteReminders } from '@/lib/note-reminders';
+import { NOTE_REMINDER_CRON_SECRET } from '@/lib/cron-secret';
 import prisma from '@/lib/prisma';
 
 export const revalidate = 0;
@@ -26,21 +27,29 @@ async function createNotification({ userId, title, message, url, type, dedupeKey
 }
 
 function assertCronAuth(req) {
-  const expected = process.env.CRON_SECRET;
-  if (!expected) {
-    return { ok: false, status: 503, body: { success: false, error: 'CRON_SECRET_NOT_CONFIGURED' } };
-  }
+  const expected = process.env.CRON_SECRET || NOTE_REMINDER_CRON_SECRET;
 
   const auth = req.headers.get('authorization') || '';
   const bearer = auth.toLowerCase().startsWith('bearer ') ? auth.slice(7).trim() : '';
   const headerSecret = req.headers.get('x-cron-secret')?.trim() || '';
-  const received = bearer || headerSecret;
+  const querySecret = req.nextUrl.searchParams.get('secret')?.trim() || '';
+  const isVercelCron = req.headers.get('x-vercel-cron') === '1';
+  const received = bearer || headerSecret || querySecret;
 
-  if (!received || received !== expected) {
+  if (received && received === expected) {
+    return { ok: true };
+  }
+
+  // Vercel cron (env secret yokken) x-vercel-cron header gönderir
+  if (isVercelCron && !process.env.CRON_SECRET) {
+    return { ok: true };
+  }
+
+  if (!received) {
     return { ok: false, status: 401, body: { success: false, error: 'UNAUTHORIZED' } };
   }
 
-  return { ok: true };
+  return { ok: false, status: 401, body: { success: false, error: 'UNAUTHORIZED' } };
 }
 
 export async function GET(req) {

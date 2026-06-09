@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/note-reminders",
+      "path": "/api/cron/note-reminders?secret=ba-note-reminders-K8m2pQx7nRw4",
       "schedule": "* * * * *"
     }
   ]
