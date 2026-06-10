@@ -6,7 +6,7 @@ import {
   Plus, Trash2, Calendar, Wallet, 
   TrendingUp, TrendingDown, 
   BarChart3,
-  PieChart, Scale, Check
+  PieChart, Scale, Check, Landmark
 } from 'lucide-react';
 import {
   addAccountingEntryAction,
@@ -14,6 +14,9 @@ import {
   addAccountingDebtAction,
   toggleAccountingDebtPaidAction,
   deleteAccountingDebtAction,
+  addAccountingCreditAction,
+  payAccountingCreditAction,
+  deleteAccountingCreditAction,
 } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { useTheme } from '@/app/components/theme-provider';
@@ -140,11 +143,19 @@ function expandLedgerEventsUpTo(entries, cutoffEnd) {
   return out;
 }
 
-export default function AccountingClient({ initialEntries, initialDebts = [], userRole }) {
+function isCreditPaidThisMonth(lastPaidAt) {
+  if (!lastPaidAt) return false;
+  const now = new Date();
+  const paid = new Date(lastPaidAt);
+  return paid.getFullYear() === now.getFullYear() && paid.getMonth() === now.getMonth();
+}
+
+export default function AccountingClient({ initialEntries, initialDebts = [], initialCredits = [], userRole }) {
   const router = useRouter();
   const { setGlobalLoading } = useTheme();
   const [loading, setLoading] = useState(false);
   const [debtLoading, setDebtLoading] = useState(false);
+  const [creditLoading, setCreditLoading] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [entryType, setEntryType] = useState('INCOME'); // INCOME or EXPENSE
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -303,6 +314,72 @@ export default function AccountingClient({ initialEntries, initialDebts = [], us
     router.refresh();
     setDebtLoading(false);
     setGlobalLoading(false);
+  };
+
+  const activeCredits = useMemo(
+    () => initialCredits.filter((c) => c.remainingAmount > 0),
+    [initialCredits]
+  );
+  const totalRemainingCredit = useMemo(
+    () => activeCredits.reduce((sum, c) => sum + c.remainingAmount, 0),
+    [activeCredits]
+  );
+  const totalMonthlyCreditPayment = useMemo(
+    () => activeCredits.reduce((sum, c) => sum + c.monthlyPayment, 0),
+    [activeCredits]
+  );
+
+  const handleAddCredit = async (e) => {
+    e.preventDefault();
+    if (creditLoading) return;
+    setCreditLoading(true);
+    setGlobalLoading(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await addAccountingCreditAction(formData);
+      if (result?.error) {
+        alert(result.error);
+      } else {
+        e.currentTarget.reset();
+        router.refresh();
+      }
+    } finally {
+      setCreditLoading(false);
+      setGlobalLoading(false);
+    }
+  };
+
+  const handlePayCredit = async (id) => {
+    if (creditLoading) return;
+    setCreditLoading(true);
+    setGlobalLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('id', id);
+      const result = await payAccountingCreditAction(formData);
+      if (result?.error) alert(result.error);
+      else router.refresh();
+    } finally {
+      setCreditLoading(false);
+      setGlobalLoading(false);
+    }
+  };
+
+  const handleDeleteCredit = async (id) => {
+    if (creditLoading) return;
+    if (!confirm('Bu kredi kaydını silmek istediğinize emin misiniz?')) return;
+    setCreditLoading(true);
+    setGlobalLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('id', id);
+      const result = await deleteAccountingCreditAction(formData);
+      if (result?.error) alert(result.error);
+      else router.refresh();
+    } finally {
+      setCreditLoading(false);
+      setGlobalLoading(false);
+    }
   };
 
   const handleAddEntry = async (formData) => {
@@ -519,6 +596,83 @@ export default function AccountingClient({ initialEntries, initialDebts = [], us
             ))
           ) : (
             <EmptyList message={showPaidDebts ? 'Henüz borç kaydı yok.' : 'Açık borç yok. Yukarıdan ekleyebilirsiniz.'} />
+          )}
+        </div>
+      </div>
+
+      {/* Kredi ödemeleri */}
+      <div className="glass-panel" style={{ padding: '1.75rem', borderLeft: '4px solid #f59e0b' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Landmark size={24} style={{ color: '#f59e0b' }} />
+            <div>
+              <h2 className="heading-2" style={{ marginBottom: '0.15rem' }}>Kredi Ödemeleri</h2>
+              <p className="text-muted" style={{ fontSize: '0.85rem', maxWidth: '520px' }}>
+                Banka kredilerinizi takip edin. &quot;Ödendi&quot; dediğinizde aylık tutar otomatik giderlere eklenir.
+              </p>
+            </div>
+          </div>
+          <div style={{
+            padding: '0.6rem 1.2rem',
+            borderRadius: '10px',
+            background: 'rgba(245,158,11,0.1)',
+            border: '1px solid #f59e0b',
+            textAlign: 'right',
+          }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Kalan toplam</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#f59e0b' }}>
+              {totalRemainingCredit.toLocaleString('tr-TR')} TL
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+              Aylık toplam: {totalMonthlyCreditPayment.toLocaleString('tr-TR')} TL
+            </div>
+          </div>
+        </div>
+
+        <form
+          onSubmit={handleAddCredit}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '0.75rem',
+            alignItems: 'end',
+            marginBottom: '1.25rem',
+            padding: '1rem',
+            borderRadius: '12px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid var(--border-color)',
+          }}
+        >
+          <div className="input-group" style={{ margin: 0 }}>
+            <label className="input-label">Banka</label>
+            <input type="text" name="bankName" className="input-field" placeholder="Örn. Ziraat Bankası" required />
+          </div>
+          <div className="input-group" style={{ margin: 0 }}>
+            <label className="input-label">Toplam kredi (TL)</label>
+            <input type="number" step="0.01" min="0.01" name="totalAmount" className="input-field" placeholder="500000" required />
+          </div>
+          <div className="input-group" style={{ margin: 0 }}>
+            <label className="input-label">Aylık ödeme (TL)</label>
+            <input type="number" step="0.01" min="0.01" name="monthlyPayment" className="input-field" placeholder="15000" required />
+          </div>
+          <button type="submit" className="btn btn-primary" disabled={creditLoading} style={{ height: '42px', whiteSpace: 'nowrap' }}>
+            <Plus size={16} /> Ekle
+          </button>
+        </form>
+
+        <div className="card" style={{ padding: 0 }}>
+          {initialCredits.length > 0 ? (
+            initialCredits.map((credit) => (
+              <CreditItem
+                key={credit.id}
+                credit={credit}
+                onPay={handlePayCredit}
+                onDelete={handleDeleteCredit}
+                disabled={creditLoading}
+              />
+            ))
+          ) : (
+            <EmptyList message="Henüz kredi kaydı yok. Yukarıdan ekleyebilirsiniz." />
           )}
         </div>
       </div>
@@ -805,6 +959,71 @@ function EntryItem({ item, onDelete, color }) {
           onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.2)'}
         >
           <Trash2 size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CreditItem({ credit, onPay, onDelete, disabled }) {
+  const fullyPaid = credit.remainingAmount <= 0;
+  const paidThisMonth = isCreditPaidThisMonth(credit.lastPaidAt);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '0.75rem',
+        padding: '1rem 1.1rem',
+        borderBottom: '1px solid rgba(255,255,255,0.03)',
+        opacity: fullyPaid ? 0.55 : 1,
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{credit.bankName}</div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+          Toplam: {credit.totalAmount.toLocaleString('tr-TR')} TL · Kalan: {credit.remainingAmount.toLocaleString('tr-TR')} TL
+        </div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
+          Aylık ödeme: {credit.monthlyPayment.toLocaleString('tr-TR')} TL
+        </div>
+        {fullyPaid && (
+          <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700, marginTop: '0.25rem', display: 'inline-block' }}>
+            Tamamen ödendi
+          </span>
+        )}
+        {!fullyPaid && paidThisMonth && (
+          <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700, marginTop: '0.25rem', display: 'inline-block' }}>
+            Bu ay ödendi
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+        {!fullyPaid && (
+          <button
+            type="button"
+            disabled={disabled || paidThisMonth}
+            onClick={() => onPay(credit.id)}
+            className="btn btn-primary"
+            style={{
+              padding: '0.35rem 0.75rem',
+              fontSize: '0.75rem',
+              opacity: paidThisMonth ? 0.5 : 1,
+            }}
+          >
+            <Check size={14} /> {paidThisMonth ? 'Bu ay ödendi' : 'Ödendi'}
+          </button>
+        )}
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onDelete(credit.id)}
+          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: disabled ? 'wait' : 'pointer', padding: '0.25rem' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#ef4444'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)'; }}
+        >
+          <Trash2 size={15} />
         </button>
       </div>
     </div>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare, Bell, Megaphone, UtensilsCrossed } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare, Bell, Megaphone, UtensilsCrossed, UsersRound } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction, getWorkItemBadgeCountAction, getNotificationUnreadCountAction } from '@/app/actions';
 import { can } from '@/lib/permissions';
@@ -30,6 +30,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
   const canLogs = can(permissions, role, 'page.logs');
   const canAccounting = can(permissions, role, 'page.accounting');
   const canMeals = can(permissions, role, 'page.meals');
+  const canGroups = can(permissions, role, 'page.groups');
   const canSendNotifications = can(permissions, role, 'page.send_notifications');
   const canNotifications = can(permissions, role, 'page.notifications');
   const [hasNewLogs, setHasNewLogs] = useState(false);
@@ -143,6 +144,9 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
     ] : []),
     ...(canMeals ? [
       { href: '/dashboard/yemek', label: 'Yemek', icon: <UtensilsCrossed size={20} /> },
+    ] : []),
+    ...(canGroups ? [
+      { href: '/dashboard/gruplar', label: 'Gruplar', icon: <UsersRound size={20} /> },
     ] : []),
     ...(canCredentials ? [
       { href: '/dashboard/credentials', label: 'Giriş Bilgileri', icon: <Lock size={20} /> },

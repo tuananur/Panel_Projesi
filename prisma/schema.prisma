@@ -23,6 +23,7 @@ model User {
   approvedWorkItems WorkItem[]      @relation("WorkItemApprover")
   workItemEvents    WorkItemEvent[]
   notifications     Notification[]
+  clientGroups      ClientGroup[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
@@ -53,6 +54,7 @@ model Client {
   logs                    ActivityLog[]
   notes                   Note[]
   workItems               WorkItem[]
+  clientGroups            ClientGroup[]
   metaArmyCommands        MetaArmyCommand[]
   metaArmyRuns            MetaArmyRun[]
   metaArmyFindings        MetaArmyFinding[]
@@ -277,6 +279,34 @@ model AccountingDebt {
   isPaid      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+/// Banka kredileri — aylık ödeme giderlere eklenir
+model AccountingCredit {
+  id              Int       @id @default(autoincrement())
+  bankName        String
+  totalAmount     Float
+  remainingAmount Float
+  monthlyPayment  Float
+  lastPaidAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+/// Çalışanların müşterilerle açtığı grup takibi
+model ClientGroup {
+  id        Int      @id @default(autoincrement())
+  name      String
+  clientId  Int
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([clientId])
 }
 
 model MealOrder {

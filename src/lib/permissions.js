@@ -34,6 +34,7 @@ export const PERMISSION_GROUPS = [
       { key: 'page.users', label: 'Kullanıcılar' },
       { key: 'page.accounting', label: 'Muhasebe' },
       { key: 'page.meals', label: 'Yemek' },
+      { key: 'page.groups', label: 'Gruplar' },
       { key: 'page.logs', label: 'Sistem Logları' },
       { key: 'page.credentials', label: 'Giriş Bilgileri' },
       { key: 'page.notes', label: 'Kişisel Notlar' },
@@ -66,6 +67,7 @@ export const ALL_PERMISSION_KEYS = PERMISSION_GROUPS.flatMap((g) => g.items.map(
 export const DEFAULT_PERMISSIONS = {
   DESIGNER: {
     'page.meals': true,
+    'page.groups': true,
     'page.credentials': true,
     'page.notes': true,
     'page.work_items': true,
@@ -83,6 +85,7 @@ export const DEFAULT_PERMISSIONS = {
   },
   DESIGNER_MANAGER: {
     'page.meals': true,
+    'page.groups': true,
     'page.credentials': true,
     'page.notes': true,
     'page.work_items': true,
@@ -100,6 +103,7 @@ export const DEFAULT_PERMISSIONS = {
   },
   ADVERTISER: {
     'page.meals': true,
+    'page.groups': true,
     'page.credentials': true,
     'page.notes': true,
     'page.work_items': true,
@@ -117,6 +121,7 @@ export const DEFAULT_PERMISSIONS = {
   },
   ADVERTISER_MANAGER: {
     'page.meals': true,
+    'page.groups': true,
     'page.credentials': true,
     'page.notes': true,
     'page.work_items': true,
@@ -134,6 +139,7 @@ export const DEFAULT_PERMISSIONS = {
   },
   DEVELOPER: {
     'page.meals': true,
+    'page.groups': true,
     'page.credentials': false,
     'page.notes': true,
     'page.work_items': true,

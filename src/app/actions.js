@@ -2025,6 +2025,101 @@ export async function deleteAccountingDebtAction(formData) {
   }
 }
 
+function isCreditPaidThisMonth(lastPaidAt) {
+  if (!lastPaidAt) return false;
+  const now = new Date();
+  const paid = new Date(lastPaidAt);
+  return paid.getFullYear() === now.getFullYear() && paid.getMonth() === now.getMonth();
+}
+
+export async function addAccountingCreditAction(formData) {
+  const bankName = String(formData.get('bankName') || '').trim();
+  const totalAmount = parseFloat(formData.get('totalAmount'));
+  const monthlyPayment = parseFloat(formData.get('monthlyPayment'));
+
+  if (!bankName) return { error: 'Banka adı gerekli.' };
+  if (Number.isNaN(totalAmount) || totalAmount <= 0) return { error: 'Geçerli toplam kredi tutarı girin.' };
+  if (Number.isNaN(monthlyPayment) || monthlyPayment <= 0) return { error: 'Geçerli aylık ödeme tutarı girin.' };
+
+  try {
+    await prisma.accountingCredit.create({
+      data: {
+        bankName,
+        totalAmount,
+        remainingAmount: totalAmount,
+        monthlyPayment,
+      },
+    });
+    await logActivity('CREATE', 'ACCOUNTING', `Kredi eklendi: ${bankName} (${totalAmount} TL)`);
+    return { success: true };
+  } catch (error) {
+    console.error('Accounting credit create error:', error);
+    return { error: 'Kredi kaydedilemedi.' };
+  }
+}
+
+export async function payAccountingCreditAction(formData) {
+  const id = parseInt(formData.get('id'), 10);
+  if (!id) return { error: 'Geçersiz ID' };
+
+  try {
+    const credit = await prisma.accountingCredit.findUnique({ where: { id } });
+    if (!credit) return { error: 'Kredi bulunamadı.' };
+    if (credit.remainingAmount <= 0) return { error: 'Bu kredi zaten tamamen ödenmiş.' };
+    if (isCreditPaidThisMonth(credit.lastPaidAt)) {
+      return { error: 'Bu kredi için bu ay ödeme zaten işlendi.' };
+    }
+
+    const paymentAmount = Math.min(credit.monthlyPayment, credit.remainingAmount);
+    const now = new Date();
+
+    await prisma.$transaction([
+      prisma.accountingEntry.create({
+        data: {
+          type: 'EXPENSE',
+          amount: paymentAmount,
+          description: `Kredi ödemesi — ${credit.bankName}`,
+          category: 'CREDIT',
+          date: now,
+          frequency: 'MANUAL',
+        },
+      }),
+      prisma.accountingCredit.update({
+        where: { id },
+        data: {
+          remainingAmount: Math.max(0, credit.remainingAmount - paymentAmount),
+          lastPaidAt: now,
+        },
+      }),
+    ]);
+
+    await logActivity(
+      'UPDATE',
+      'ACCOUNTING',
+      `Kredi ödemesi giderlere eklendi: ${credit.bankName} (${paymentAmount} TL)`
+    );
+    return { success: true };
+  } catch (error) {
+    console.error('Accounting credit payment error:', error);
+    return { error: 'Kredi ödemesi işlenemedi.' };
+  }
+}
+
+export async function deleteAccountingCreditAction(formData) {
+  const id = parseInt(formData.get('id'), 10);
+  if (!id) return { error: 'Geçersiz ID' };
+
+  try {
+    const credit = await prisma.accountingCredit.findUnique({ where: { id } });
+    await prisma.accountingCredit.delete({ where: { id } });
+    await logActivity('DELETE', 'ACCOUNTING', `Kredi silindi: ${credit?.bankName}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Accounting credit delete error:', error);
+    return { error: 'Kredi silinemedi.' };
+  }
+}
+
 function parseMealOrderDate(value) {
   if (!value) {
     const now = new Date();
@@ -2049,10 +2144,22 @@ export async function addMealOrderAction(formData) {
   }
 
   try {
-    await prisma.mealOrder.create({
-      data: { date, personCount, cost },
-    });
     const dateLabel = date.toLocaleDateString('tr-TR');
+    await prisma.$transaction([
+      prisma.mealOrder.create({
+        data: { date, personCount, cost },
+      }),
+      prisma.accountingEntry.create({
+        data: {
+          type: 'EXPENSE',
+          amount: cost,
+          description: `Yemek — ${dateLabel} (${personCount} kişi)`,
+          category: 'MEAL',
+          date,
+          frequency: 'MANUAL',
+        },
+      }),
+    ]);
     await logActivity(
       'CREATE',
       'MEAL',
@@ -2080,6 +2187,60 @@ export async function deleteMealOrderAction(formData) {
   } catch (error) {
     console.error('Meal order delete error:', error);
     return { error: 'Kayıt silinemedi.' };
+  }
+}
+
+export async function addClientGroupAction(formData) {
+  const session = await getSession();
+  if (!session) return { error: 'Oturum bulunamadı.' };
+
+  const name = String(formData.get('name') || '').trim();
+  const clientId = parseInt(formData.get('clientId'), 10);
+  const members = String(formData.get('members') || '').trim();
+
+  if (!name) return { error: 'Grup adı gerekli.' };
+  if (!clientId || Number.isNaN(clientId)) return { error: 'Müşteri seçin.' };
+  if (!members) return { error: 'Gruptaki kişileri girin.' };
+
+  try {
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    if (!client) return { error: 'Müşteri bulunamadı.' };
+
+    await prisma.clientGroup.create({
+      data: {
+        name,
+        clientId,
+        userId: session.userId,
+        members,
+      },
+    });
+    await logActivity('CREATE', 'CLIENT_GROUP', `Grup eklendi: ${name} (${client.companyName})`);
+    return { success: true };
+  } catch (error) {
+    console.error('Client group create error:', error);
+    return { error: 'Grup eklenemedi.' };
+  }
+}
+
+export async function deleteClientGroupAction(formData) {
+  const session = await getSession();
+  if (!session) return { error: 'Oturum bulunamadı.' };
+
+  const id = parseInt(formData.get('id'), 10);
+  if (!id) return { error: 'Geçersiz ID' };
+
+  try {
+    const group = await prisma.clientGroup.findUnique({ where: { id } });
+    if (!group) return { error: 'Grup bulunamadı.' };
+    if (group.userId !== session.userId && session.role !== 'ADMIN') {
+      return { error: 'Bu grubu silme yetkiniz yok.' };
+    }
+    await prisma.clientGroup.delete({ where: { id } });
+    await logActivity('DELETE', 'CLIENT_GROUP', `Grup silindi: ${group.name}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Client group delete error:', error);
+    return { error: 'Grup silinemedi.' };
   }
 }
 

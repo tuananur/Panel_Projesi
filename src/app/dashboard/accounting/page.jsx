@@ -19,6 +19,7 @@ export default async function AccountingPage() {
   });
 
   let debts = [];
+  let credits = [];
   try {
     debts = await prisma.accountingDebt.findMany({
       orderBy: [{ isPaid: 'asc' }, { createdAt: 'desc' }],
@@ -26,11 +27,19 @@ export default async function AccountingPage() {
   } catch (error) {
     console.error('AccountingDebt fetch error (migration pending?):', error);
   }
+  try {
+    credits = await prisma.accountingCredit.findMany({
+      orderBy: [{ remainingAmount: 'desc' }, { createdAt: 'desc' }],
+    });
+  } catch (error) {
+    console.error('AccountingCredit fetch error (migration pending?):', error);
+  }
 
   return (
     <AccountingClient
       initialEntries={entries}
       initialDebts={debts}
+      initialCredits={credits}
       userRole={session.role}
     />
   );

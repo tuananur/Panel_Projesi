@@ -1,10 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { UtensilsCrossed, Plus, Trash2, Users } from 'lucide-react';
+import { UtensilsCrossed, Plus, Trash2, Users, Calendar } from 'lucide-react';
 import { addMealOrderAction, deleteMealOrderAction } from '@/app/actions';
-import { useTheme } from '@/app/components/theme-provider';
 
 function localDateInputValue(date = new Date()) {
   const y = date.getFullYear();
@@ -24,12 +23,15 @@ function formatDateTr(iso) {
 
 export default function MealsClient({ initialOrders = [] }) {
   const router = useRouter();
-  const { setGlobalLoading } = useTheme();
+  const formRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => localDateInputValue());
 
-  const today = useMemo(() => new Date(), []);
-  const todayLabel = useMemo(() => formatDateTr(today), [today]);
-  const todayValue = useMemo(() => localDateInputValue(today), [today]);
+  const todayValue = useMemo(() => localDateInputValue(new Date()), []);
+  const selectedDateLabel = useMemo(() => {
+    const [y, m, d] = selectedDate.split('-').map(Number);
+    return formatDateTr(new Date(y, m - 1, d));
+  }, [selectedDate]);
 
   const totalCost = useMemo(
     () => initialOrders.reduce((sum, o) => sum + o.cost, 0),
@@ -40,24 +42,25 @@ export default function MealsClient({ initialOrders = [] }) {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
-    setGlobalLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const result = await addMealOrderAction(formData);
+    const form = formRef.current;
+    const formData = new FormData(form);
 
-    if (result.success) {
-      e.currentTarget.reset();
-      const dateInput = e.currentTarget.querySelector('[name="date"]');
-      if (dateInput) dateInput.value = todayValue;
-      const select = e.currentTarget.querySelector('[name="personCount"]');
+    try {
+      const result = await addMealOrderAction(formData);
+      if (result?.error) {
+        alert(result.error);
+        return;
+      }
+      form?.reset();
+      const dateInput = form?.querySelector('[name="date"]');
+      if (dateInput) dateInput.value = selectedDate;
+      const select = form?.querySelector('[name="personCount"]');
       if (select) select.value = '1';
       router.refresh();
-    } else {
-      alert(result.error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-    setGlobalLoading(false);
   };
 
   const handleDelete = async (id) => {
@@ -65,14 +68,15 @@ export default function MealsClient({ initialOrders = [] }) {
     if (!confirm('Bu yemek kaydını silmek istediğinize emin misiniz?')) return;
 
     setLoading(true);
-    setGlobalLoading(true);
-    const formData = new FormData();
-    formData.append('id', id);
-    const result = await deleteMealOrderAction(formData);
-    if (!result.success) alert(result.error);
-    router.refresh();
-    setLoading(false);
-    setGlobalLoading(false);
+    try {
+      const formData = new FormData();
+      formData.append('id', id);
+      const result = await deleteMealOrderAction(formData);
+      if (result?.error) alert(result.error);
+      else router.refresh();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -82,19 +86,16 @@ export default function MealsClient({ initialOrders = [] }) {
           <UtensilsCrossed size={28} style={{ color: 'var(--accent-primary)' }} />
           Yemek
         </h1>
-        <p className="text-muted">Günlük yemek siparişlerini kaydedin ve geçmişi listeleyin.</p>
+        <p className="text-muted">Günlük yemek siparişlerini kaydedin. Geçmiş tarih için de giriş yapabilirsiniz; tutar otomatik giderlere eklenir.</p>
       </div>
 
       <div className="glass-panel" style={{ padding: '1.75rem', borderLeft: '4px solid var(--accent-primary)' }}>
         <p style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.25rem', color: 'var(--text-primary)' }}>
-          {todayLabel}
-        </p>
-
-        <p style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '1rem' }}>
-          Kaç kişi yemek söyledi?
+          {selectedDateLabel}
         </p>
 
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           style={{
             display: 'grid',
@@ -103,7 +104,20 @@ export default function MealsClient({ initialOrders = [] }) {
             alignItems: 'end',
           }}
         >
-          <input type="hidden" name="date" defaultValue={todayValue} />
+          <div className="input-group" style={{ margin: 0 }}>
+            <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Calendar size={14} /> Tarih
+            </label>
+            <input
+              type="date"
+              name="date"
+              className="input-field"
+              value={selectedDate}
+              max={todayValue}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              required
+            />
+          </div>
 
           <div className="input-group" style={{ margin: 0 }}>
             <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -132,7 +146,7 @@ export default function MealsClient({ initialOrders = [] }) {
           </div>
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ height: '42px' }}>
-            <Plus size={16} /> Kaydet
+            <Plus size={16} /> {loading ? 'Kaydediliyor...' : 'Kaydet'}
           </button>
         </form>
       </div>
