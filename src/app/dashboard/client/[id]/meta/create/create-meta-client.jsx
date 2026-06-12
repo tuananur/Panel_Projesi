@@ -981,8 +981,43 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                                       <input type="checkbox" checked={createFormData.planIncreases || false} onChange={e => setCreateFormData({ ...createFormData, planIncreases: e.target.checked })} style={{ cursor: 'pointer' }} />
                                       <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
                                     </div>
-                                    <button type="button" style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.3rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>Gör ▾</button>
-                                  </div>
+                                    <div style={{ position: 'relative' }}>
+                                      <button 
+                                        type="button" 
+                                        onClick={() => setCreateFormData({ ...createFormData, gorDropdownOpen: !createFormData.gorDropdownOpen })}
+                                        style={{ background: '#f0f2f5', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.3rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                      >
+                                        Gör ▾
+                                      </button>
+                                      {createFormData.gorDropdownOpen && (
+                                        <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', minWidth: '220px', padding: '0.5rem 0' }}>
+                                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>Filtrele</div>
+                                          
+                                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}>
+                                            <span>Yaklaşan girişler</span>
+                                            <span style={{ background: '#e6f4ea', color: '#137333', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>1</span>
+                                          </div>
+                                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}>
+                                            <span>Tamamlanan girişler</span>
+                                            <span style={{ background: '#f1f3f4', color: '#5f6368', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>0</span>
+                                          </div>
+                                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', background: '#e7f3ff', cursor: 'pointer' }}>
+                                            <span>Tüm girişler</span>
+                                            <span style={{ background: '#f0f2f5', color: '#1c1e21', border: '1px solid #ced0d4', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>1</span>
+                                          </div>
+
+                                          <div style={{ borderTop: '1px solid var(--border-color)', margin: '0.4rem 0' }}></div>
+                                          
+                                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>Sırala</div>
+                                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <span style={{ fontSize: '1rem', lineHeight: '10px' }}>↑</span> En yeniden en eskiye sırala
+                                          </div>
+                                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <span style={{ fontSize: '1rem', lineHeight: '10px' }}>↓</span> En eskiden en yeniye sırala
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
 
                                   {createFormData.planIncreases && (
                                     <div style={{ marginTop: '0.8rem', padding: '1rem', background: 'rgba(24, 119, 242, 0.05)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.2)' }}>
