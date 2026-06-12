@@ -872,7 +872,7 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                       </div>
                       <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Daha fazla sonuç elde etmek için bütçenizi reklam setlerine dağıtın. Her bir reklam seti için harcamayı kontrol edebilirsiniz. <span style={{ color: '#1877f2', cursor: 'pointer' }}>Advantage+ kampanya bütçesi hakkında</span></p>
 
-                      {createFormData.advantage_budget !== false && (
+                      {createFormData.advantage_budget === false && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
                             <input type="checkbox" defaultChecked style={{ marginTop: '3px' }} />
@@ -884,6 +884,121 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                           <div style={{ marginTop: '0.5rem' }}>
                             <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.2rem' }}>Kampanya Teklif Stratejisi <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></label>
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>En yüksek hacim</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {createFormData.advantage_budget !== false && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+                          <div>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.4rem' }}>Bütçe <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></label>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <select style={{ width: '140px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
+                                <option>Günlük bütçe</option>
+                                <option>Toplam bütçe</option>
+                              </select>
+                              <div style={{ flex: 1, position: 'relative' }}>
+                                <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>TL</span>
+                                <input type="number" required className="form-control" value={createFormData.daily_budget || ''} onChange={e => setCreateFormData({ ...createFormData, daily_budget: e.target.value })} placeholder="0,00" style={{ width: '100%', background: 'var(--bg-secondary)', border: `1px solid ${Number(createFormData.daily_budget) < 13 && createFormData.daily_budget ? '#ef4444' : 'var(--border-color)'}`, color: 'var(--text-primary)', padding: '0.65rem 0.85rem 0.65rem 2rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} />
+                                <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: Number(createFormData.daily_budget) < 13 && createFormData.daily_budget ? '#ef4444' : 'var(--text-secondary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>TRY {Number(createFormData.daily_budget) < 13 && createFormData.daily_budget && <span style={{ color: '#ef4444', fontWeight: 900 }}>⊘</span>}</span>
+                              </div>
+                            </div>
+                            {Number(createFormData.daily_budget) < 13 && createFormData.daily_budget ? (
+                              <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.4rem', fontWeight: 600 }}>Bütçeniz çok düşük. Devam etmek için bütçenizi artırın.</div>
+                            ) : null}
+                            {createFormData.daily_budget && (
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.8rem', lineHeight: '1.4' }}>
+                                Günde ortalama {Number(createFormData.daily_budget).toFixed(2).replace('.', ',')} TL harcayacaksın. Maksimum günlük harcaman <strong>{(Number(createFormData.daily_budget) * 1.75).toFixed(2).replace('.', ',')} TL</strong>, maksimum haftalık harcaman <strong>{(Number(createFormData.daily_budget) * 7).toFixed(2).replace('.', ',')} TL</strong>. <br/><span style={{ color: '#1877f2', cursor: 'pointer' }}>Günlük bütçe hakkında</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.2rem' }}>Kampanya Teklif Stratejisi <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></label>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Reklam açık artırmalarında nasıl teklif vereceğimiz.</div>
+                            <select style={{ width: '100%', maxWidth: '250px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
+                              <option>En yüksek hacim</option>
+                              <option>Sonuç başına ücret hedefi</option>
+                              <optgroup label="Diğer seçenekler">
+                                <option>Teklif üst sınırı</option>
+                              </optgroup>
+                            </select>
+                          </div>
+
+                          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                            <div style={{ color: '#1877f2', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', marginBottom: '0.8rem' }} onClick={() => setCreateFormData({ ...createFormData, hideOptions: !createFormData.hideOptions })}>
+                              {createFormData.hideOptions ? 'Seçenekleri Göster ▴' : 'Seçenekleri Gizle ▴'}
+                            </div>
+                            
+                            {!createFormData.hideOptions && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>Bütçe planlama <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
+                                  </div>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Belirli gün veya saatlerde bütçenizi artırın.</div>
+                                  
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                      <input type="checkbox" checked={createFormData.planIncreases || false} onChange={e => setCreateFormData({ ...createFormData, planIncreases: e.target.checked })} style={{ cursor: 'pointer' }} />
+                                      <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
+                                    </div>
+                                    <button type="button" style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.3rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>Gör ▾</button>
+                                  </div>
+
+                                  {createFormData.planIncreases && (
+                                    <div style={{ marginTop: '0.8rem', padding: '1rem', background: 'rgba(24, 119, 242, 0.05)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.2)' }}>
+                                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
+                                        Bütçe artışı için süre <span style={{ fontSize: '0.85rem' }}>⌃</span>
+                                      </div>
+                                      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '0.5rem', alignItems: 'center', marginBottom: '0.8rem' }}>
+                                        <div>
+                                          <div style={{ fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.2rem' }}>Başlangıç</div>
+                                          <div style={{ display: 'flex', gap: '0.2rem' }}>
+                                            <input type="text" defaultValue="Haz 13, 2026" className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                            <input type="text" defaultValue="00:00" className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                          </div>
+                                        </div>
+                                        <div style={{ marginTop: '1rem' }}>-</div>
+                                        <div>
+                                          <div style={{ fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.2rem' }}>Bitiş</div>
+                                          <div style={{ display: 'flex', gap: '0.2rem' }}>
+                                            <input type="text" defaultValue="Haz 14, 2026" className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                            <input type="text" defaultValue="00:00" className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                        <select style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', outline: 'none', background: '#fff' }}>
+                                          <option>Günlük bütçeyi değer miktarına göre artır (TL)</option>
+                                        </select>
+                                        <div style={{ display: 'flex', alignItems: 'center', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '4px', width: '90px' }}>
+                                          <span style={{ fontSize: '0.75rem', paddingLeft: '0.5rem', color: 'var(--text-secondary)' }}>TL</span>
+                                          <input type="text" defaultValue="1,88" style={{ width: '100%', padding: '0.5rem 0.2rem', fontSize: '0.75rem', border: 'none', outline: 'none' }} />
+                                          <span style={{ fontSize: '0.75rem', paddingRight: '0.5rem', color: 'var(--text-secondary)' }}>TRY</span>
+                                        </div>
+                                      </div>
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>Meta 13 Haz ile 14 Haz arasında günde 9,38 TL harcamayı amaçlayacak (1,88 TL artış).</div>
+                                      <button type="button" style={{ background: '#fff', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                                        <X size={12} /> Bu dönemi kaldır
+                                      </button>
+                                      
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                                        <button type="button" style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                                          <span style={{ fontSize: '1rem', lineHeight: '10px' }}>⊕</span> Başka bir zaman aralığı ekle
+                                        </button>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>1/50 zaman dilimi</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.2rem' }}>Reklam Planlaması <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Reklamları sürekli yayınla</div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
