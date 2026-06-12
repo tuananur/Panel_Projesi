@@ -60,7 +60,7 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
   
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', minHeight: '80vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minHeight: '100vh', paddingBottom: '2rem' }}>
       {messageModal.show && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '2rem', textAlign: 'center' }}>
@@ -85,7 +85,7 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
         </div>
       </div>
 
-      <form onSubmit={handleCreateEntity} style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f0f2f5', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
+      <form onSubmit={handleCreateEntity} style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f0f2f5', borderRadius: '0 0 8px 8px', overflow: 'visible' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', flex: 1, padding: '1.5rem 2rem' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
