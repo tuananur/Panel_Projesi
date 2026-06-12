@@ -1053,6 +1053,7 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                                         </div>
                                       )}
                                     </div>
+                                  </div>
 
                                   {createFormData.planIncreases && (
                                     <div style={{ marginTop: '0.8rem', padding: '1rem', background: 'rgba(24, 119, 242, 0.05)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.2)' }}>
