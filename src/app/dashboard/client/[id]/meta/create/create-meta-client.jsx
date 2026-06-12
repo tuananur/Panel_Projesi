@@ -1152,28 +1152,96 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
 
                       {createFormData.ab_test && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
-                          <div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Neyi test etmek istiyorsunuz?</div>
-                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none', appearance: 'none' }}>
-                              <option>Kreatif</option>
-                              <option>Hedef Kitle</option>
-                              <option>Yerleşimler</option>
-                            </select>
+                          <div style={{ position: 'relative' }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Neyi test etmek istiyorsunuz?</div>
+                            <div 
+                              onClick={() => setCreateFormData({ ...createFormData, abTestDropdownOpen: !createFormData.abTestDropdownOpen })}
+                              style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                            >
+                              {createFormData.abTestType || 'Kreatif'}
+                              <span style={{ fontSize: '0.7rem' }}>▼</span>
+                            </div>
+                            
+                            {createFormData.abTestDropdownOpen && (
+                              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ padding: '0.5rem' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.4rem 0.6rem', background: 'var(--bg-primary)' }}>
+                                    <span style={{ color: 'var(--text-secondary)', marginRight: '0.5rem', fontSize: '12px' }}>🔍</span>
+                                    <input 
+                                      type="text" 
+                                      placeholder="Ara" 
+                                      style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '0.85rem', color: 'var(--text-primary)' }}
+                                    />
+                                  </div>
+                                </div>
+                                <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                                  {[
+                                    { id: 'Kreatif', title: 'Kreatif', desc: 'Hangi görsellerin, videoların veya reklam metninin en iyi sonucu verdiğini öğrenin.' },
+                                    { id: 'Hedef Kitle', title: 'Hedef Kitle', desc: 'Yeni bir hedef kitleyi hedeflemenin performansı nasıl etkileyebileceğini görün.' },
+                                    { id: 'Reklam Alanı', title: 'Reklam Alanı', desc: 'Reklamlarınızı göstermek için en etkili yerleri keşfedin.' },
+                                    { id: 'Özel', title: 'Özel', desc: 'Birden fazla değişkeni değiştirmenin sonuçları nasıl etkileyebileceğini öğrenin.' }
+                                  ].map(opt => (
+                                    <div 
+                                      key={opt.id}
+                                      onClick={() => setCreateFormData({ ...createFormData, abTestType: opt.id, abTestDropdownOpen: false })}
+                                      style={{ padding: '0.6rem 0.8rem', display: 'flex', gap: '0.8rem', cursor: 'pointer', background: (createFormData.abTestType || 'Kreatif') === opt.id ? 'rgba(24,119,242,0.1)' : 'transparent', borderBottom: '1px solid rgba(0,0,0,0.05)' }}
+                                    >
+                                      <div style={{ marginTop: '2px' }}>
+                                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: (createFormData.abTestType || 'Kreatif') === opt.id ? '5px solid #1877f2' : '1px solid var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }} />
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>{opt.title}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.3' }}>{opt.desc}</div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Test ne kadar süreyle yürütülmeli?</div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Test ne kadar süreyle yürütülmeli?</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Testiniz bu kadar gün boyunca veya reklam setiniz sona erene kadar çalışacak.</div>
-                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none', appearance: 'none' }}>
-                              <option>7 gün</option>
-                              <option>14 gün</option>
-                              <option>30 gün</option>
-                            </select>
+                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <input type="number" defaultValue="7" style={{ width: '100%', border: 'none', background: 'transparent', padding: '0.65rem 0.85rem', fontSize: '0.85rem', color: 'var(--text-primary)', outline: 'none' }} />
+                              <span style={{ padding: '0 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', borderLeft: '1px solid var(--border-color)' }}>gün</span>
+                            </div>
                           </div>
                           <div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '4px' }}>Performansı nasıl karşılaştırmak istersiniz? <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
-                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none', appearance: 'none' }}>
-                              <option>Ödeme Bilgisi Ekleme Başına Ücret</option>
-                              <option>Tıklama Başına Ücret (TBM)</option>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.4rem' }}>Performansı nasıl karşılaştırmak istersiniz? <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
+                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
+                              <option>Sonuç başına ücret</option>
+                              <option>Alışveriş Başına Ücret</option>
+                              <option>CPC (Bağlantı Tıklaması Başına Ücret)</option>
+                              <option>Erişilen 1.000 Meta Hesabı başına ücret</option>
+                              <optgroup label="Standart Olaylar">
+                                <option>3 saniyelik video oynatımı başına ücret</option>
+                                <option>Arama Başına Ücret</option>
+                                <option>Atlanan Seviye Başına Ücret</option>
+                                <option>Açılan Başarılar Başına Ücret</option>
+                                <option>Başlatılan Alışveriş Başına Ücret</option>
+                                <option>Beğenme başına ücret</option>
+                                <option>Dilek Listesine Ekleme Başına Ücret</option>
+                                <option>Etkinlik yanıtı başına ücret</option>
+                                <option>Gönderi Etkileşimi Başına Ücret</option>
+                                <option>Gönderilen Puan Başına Ücret</option>
+                                <option>Kredi harcaması başına ücret</option>
+                                <option>Mobil Uygulamada 2 Günlük Tutma Başına Ücret</option>
+                                <option>Mobil Uygulamada 7 Günlük Tutma Başına Ücret</option>
+                                <option>Potansiyel Müşteri Başına Ücret</option>
+                                <option>Reklam hatırlanırlığı yükselişi başına ücret</option>
+                                <option>Sepete Ekleme Başına Ücret</option>
+                                <option>Tamamlanan Eğitim Başına Ücret</option>
+                                <option>Tamamlanan Kayıt Başına Ücret</option>
+                                <option>Uygulama Aktivasyonu Başına Ücret</option>
+                                <option>Uygulama Yükleme Başına Ücret</option>
+                                <option>Yeni mesajlaşma kişisi başına ücret</option>
+                                <option>Yönlendirme Sayfası Görüntülemesi Başına Ücret</option>
+                                <option>Çevrimdışı Diğer Dönüşümler Başına Ücret</option>
+                                <option>Ödeme Bilgisi Ekleme Başına Ücret</option>
+                                <option>Özel Olay Başına Ücret</option>
+                                <option>İçerik Görüntülemesi Başına Ücret</option>
+                              </optgroup>
                             </select>
                           </div>
                         </div>
