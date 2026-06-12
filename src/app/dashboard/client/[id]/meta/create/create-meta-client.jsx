@@ -1056,47 +1056,96 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                                   </div>
 
                                   {createFormData.planIncreases && (
-                                    <div style={{ marginTop: '0.8rem', padding: '1rem', background: 'rgba(24, 119, 242, 0.05)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.2)' }}>
-                                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
-                                        Bütçe artışı için süre <span style={{ fontSize: '0.85rem' }}>⌃</span>
-                                      </div>
-                                      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '0.5rem', alignItems: 'center', marginBottom: '0.8rem' }}>
-                                        <div>
-                                          <div style={{ fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.2rem' }}>Başlangıç</div>
-                                          <div style={{ display: 'flex', gap: '0.2rem' }}>
-                                            <input type="text" defaultValue="Haz 13, 2026" className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
-                                            <input type="text" defaultValue="00:00" className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.8rem' }}>
+                                      {(createFormData.planIncreasePeriods || [1]).map((periodId, index) => (
+                                        <div key={periodId} style={{ padding: '1rem', background: 'rgba(24, 119, 242, 0.05)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.2)' }}>
+                                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
+                                            Bütçe artışı için süre <span style={{ fontSize: '0.85rem' }}>⌃</span>
                                           </div>
-                                        </div>
-                                        <div style={{ marginTop: '1rem' }}>-</div>
-                                        <div>
-                                          <div style={{ fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.2rem' }}>Bitiş</div>
-                                          <div style={{ display: 'flex', gap: '0.2rem' }}>
-                                            <input type="text" defaultValue="Haz 14, 2026" className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
-                                            <input type="text" defaultValue="00:00" className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '0.5rem', alignItems: 'center', marginBottom: '0.8rem' }}>
+                                            <div>
+                                              <div style={{ fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.2rem' }}>Başlangıç</div>
+                                              <div style={{ display: 'flex', gap: '0.2rem' }}>
+                                                <input type="text" defaultValue="Haz 13, 2026" className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                                <input type="text" defaultValue="00:00" className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                              </div>
+                                            </div>
+                                            <div style={{ marginTop: '1rem' }}>-</div>
+                                            <div>
+                                              <div style={{ fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.2rem' }}>Bitiş</div>
+                                              <div style={{ display: 'flex', gap: '0.2rem' }}>
+                                                <input type="text" defaultValue="Haz 14, 2026" className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                                <input type="text" defaultValue="00:00" className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                              </div>
+                                            </div>
                                           </div>
+                                          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                            
+                                            <div style={{ position: 'relative', flex: 1 }}>
+                                              <div 
+                                                onClick={() => setCreateFormData({ ...createFormData, [`budgetIncreaseDropdownOpen_${periodId}`]: !createFormData[`budgetIncreaseDropdownOpen_${periodId}`] })}
+                                                style={{ padding: '0.5rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', outline: 'none', background: 'var(--bg-secondary)', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                                              >
+                                                {createFormData[`budgetIncreaseType_${periodId}`] || 'Günlük bütçeyi değer miktarına göre artır (TL)'}
+                                                <span style={{ fontSize: '0.7rem' }}>▼</span>
+                                              </div>
+                                              {createFormData[`budgetIncreaseDropdownOpen_${periodId}`] && (
+                                                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '0.4rem 0' }}>
+                                                  {[
+                                                    'Günlük bütçeyi değer miktarına göre artır (TL)',
+                                                    'Günlük bütçeyi belirli bir oranda (%) artır'
+                                                  ].map(opt => (
+                                                    <div 
+                                                      key={opt}
+                                                      onClick={() => setCreateFormData({ ...createFormData, [`budgetIncreaseType_${periodId}`]: opt, [`budgetIncreaseDropdownOpen_${periodId}`]: false })}
+                                                      style={{ padding: '0.6rem 0.8rem', display: 'flex', gap: '0.6rem', alignItems: 'center', cursor: 'pointer', background: (createFormData[`budgetIncreaseType_${periodId}`] || 'Günlük bütçeyi değer miktarına göre artır (TL)') === opt ? 'rgba(24,119,242,0.1)' : 'transparent', borderBottom: '1px solid rgba(0,0,0,0.05)' }}
+                                                    >
+                                                      <div style={{ width: '14px', height: '14px', borderRadius: '50%', border: (createFormData[`budgetIncreaseType_${periodId}`] || 'Günlük bütçeyi değer miktarına göre artır (TL)') === opt ? '4px solid #1877f2' : '1px solid var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }} />
+                                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)' }}>{opt}</div>
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              )}
+                                            </div>
+
+                                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', width: '90px' }}>
+                                              <span style={{ fontSize: '0.75rem', paddingLeft: '0.5rem', color: 'var(--text-secondary)' }}>{createFormData[`budgetIncreaseType_${periodId}`]?.includes('%') ? '%' : 'TL'}</span>
+                                              <input type="text" defaultValue={createFormData[`budgetIncreaseType_${periodId}`]?.includes('%') ? '20' : '1,88'} style={{ width: '100%', padding: '0.5rem 0.2rem', fontSize: '0.75rem', border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-primary)' }} />
+                                              {!createFormData[`budgetIncreaseType_${periodId}`]?.includes('%') && (
+                                                <span style={{ fontSize: '0.75rem', paddingRight: '0.5rem', color: 'var(--text-secondary)' }}>TRY</span>
+                                              )}
+                                            </div>
+                                          </div>
+                                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>Meta 13 Haz ile 14 Haz arasında günde 9,38 TL harcamayı amaçlayacak (1,88 TL artış).</div>
+                                          <button 
+                                            type="button" 
+                                            onClick={() => {
+                                              const current = createFormData.planIncreasePeriods || [1];
+                                              if(current.length > 1) {
+                                                setCreateFormData({ ...createFormData, planIncreasePeriods: current.filter(id => id !== periodId) });
+                                              }
+                                            }}
+                                            style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: 'var(--text-primary)' }}
+                                          >
+                                            <X size={12} /> Bu dönemi kaldır
+                                          </button>
                                         </div>
-                                      </div>
-                                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                                        <select style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', outline: 'none', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
-                                          <option>Günlük bütçeyi değer miktarına göre artır (TL)</option>
-                                        </select>
-                                        <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', width: '90px' }}>
-                                          <span style={{ fontSize: '0.75rem', paddingLeft: '0.5rem', color: 'var(--text-secondary)' }}>TL</span>
-                                          <input type="text" defaultValue="1,88" style={{ width: '100%', padding: '0.5rem 0.2rem', fontSize: '0.75rem', border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-primary)' }} />
-                                          <span style={{ fontSize: '0.75rem', paddingRight: '0.5rem', color: 'var(--text-secondary)' }}>TRY</span>
-                                        </div>
-                                      </div>
-                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>Meta 13 Haz ile 14 Haz arasında günde 9,38 TL harcamayı amaçlayacak (1,88 TL artış).</div>
-                                      <button type="button" style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: 'var(--text-primary)' }}>
-                                        <X size={12} /> Bu dönemi kaldır
-                                      </button>
+                                      ))}
                                       
-                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-                                        <button type="button" style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                                        <button 
+                                          type="button" 
+                                          onClick={() => {
+                                            const current = createFormData.planIncreasePeriods || [1];
+                                            if(current.length < 50) {
+                                              setCreateFormData({ ...createFormData, planIncreasePeriods: [...current, Math.max(...current) + 1] });
+                                            }
+                                          }}
+                                          style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: 'var(--text-primary)' }}
+                                        >
                                           <span style={{ fontSize: '1rem', lineHeight: '10px' }}>⊕</span> Başka bir zaman aralığı ekle
                                         </button>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>1/50 zaman dilimi</span>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{(createFormData.planIncreasePeriods || [1]).length}/50 zaman dilimi</span>
                                       </div>
                                     </div>
                                   )}
