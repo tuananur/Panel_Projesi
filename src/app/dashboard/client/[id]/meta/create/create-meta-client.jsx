@@ -955,7 +955,7 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
               <div style={{ flex: 1.2, padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)' }}>
                 <div style={{ width: '100%', maxWidth: '250px', marginBottom: '1.5rem', position: 'relative' }}>
                   <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Map Illustration" style={{ width: '100%', height: 'auto', opacity: 0.2 }} />
-                  <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '80px', height: '80px', background: '#fff', borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '80px', height: '80px', background: 'var(--bg-secondary)', borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                      <img src="https://cdn-icons-png.flaticon.com/512/73/73196.png" alt="Compass" style={{ width: '40px', height: '40px', opacity: 0.6 }} />
                   </div>
                 </div>
@@ -995,7 +995,7 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
               </div>
 
               <label 
-                style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', border: trafficSetupType === 'custom' ? '1px solid #1877f2' : '1px solid transparent', borderRadius: '8px', cursor: 'pointer', background: trafficSetupType === 'custom' ? '#e7f3ff' : 'transparent', transition: 'background 0.2s' }}
+                style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', border: trafficSetupType === 'custom' ? '1px solid #1877f2' : '1px solid transparent', borderRadius: '8px', cursor: 'pointer', background: trafficSetupType === 'custom' ? 'rgba(24, 119, 242, 0.1)' : 'transparent', transition: 'background 0.2s' }}
               >
                 <input 
                   type="radio" 
@@ -1004,16 +1004,16 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                   onChange={() => setTrafficSetupType('custom')}
                   style={{ margin: 0, width: '18px', height: '18px', cursor: 'pointer', accentColor: '#1877f2', flexShrink: 0 }} 
                 />
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: trafficSetupType === 'custom' ? '#d0e5fb' : '#e7f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: trafficSetupType === 'custom' ? 'rgba(24, 119, 242, 0.2)' : 'rgba(24, 119, 242, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                    <img src="https://cdn-icons-png.flaticon.com/512/3256/3256083.png" alt="custom" style={{ width: '25px', height: '25px', objectFit: 'contain' }} />
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Size özel site trafiği kampanyası</div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem', lineHeight: '1.4' }}>Hızlıca, en uygun fiyata daha fazla site trafiği almanıza yardımcı olacak şekilde optimize edilmiş bir kampanya oluşturun.<br/>Ön ayarlarda Advantage+ reklam alanları, en yüksek hacim teklif stratejisi ve daha fazlası bulunur.</div>
                   <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.8rem' }}>
-                    <span style={{ padding: '0.3rem 0.6rem', background: '#f1f5f9', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>Basitleştirilmiş</span>
-                    <span style={{ padding: '0.3rem 0.6rem', background: '#f1f5f9', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>Özelleştirilmiş</span>
-                    <span style={{ padding: '0.3rem 0.6rem', background: '#f1f5f9', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>En iyi uygulamalar</span>
+                    <span style={{ padding: '0.3rem 0.6rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>Basitleştirilmiş</span>
+                    <span style={{ padding: '0.3rem 0.6rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>Özelleştirilmiş</span>
+                    <span style={{ padding: '0.3rem 0.6rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>En iyi uygulamalar</span>
                   </div>
                 </div>
               </label>
@@ -1021,7 +1021,7 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
               <div style={{ height: '1px', background: 'var(--border-color)', margin: '0' }} />
 
               <label 
-                style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', border: trafficSetupType === 'manual' ? '1px solid #1877f2' : '1px solid transparent', borderRadius: '8px', cursor: 'pointer', background: trafficSetupType === 'manual' ? '#e7f3ff' : 'var(--bg-secondary)', transition: 'background 0.2s' }}
+                style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', border: trafficSetupType === 'manual' ? '1px solid #1877f2' : '1px solid transparent', borderRadius: '8px', cursor: 'pointer', background: trafficSetupType === 'manual' ? 'rgba(24, 119, 242, 0.1)' : 'var(--bg-secondary)', transition: 'background 0.2s' }}
               >
                 <input 
                   type="radio" 
@@ -1030,7 +1030,7 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                   onChange={() => setTrafficSetupType('manual')}
                   style={{ margin: 0, width: '18px', height: '18px', cursor: 'pointer', accentColor: '#1877f2', flexShrink: 0 }} 
                 />
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                    <img src="https://cdn-icons-png.flaticon.com/512/3524/3524335.png" alt="manual" style={{ width: '25px', height: '25px', objectFit: 'contain' }} />
                 </div>
                 <div>
