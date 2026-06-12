@@ -1001,26 +1001,30 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
     // Determine time range for top-level and nested insights
     let topLevelParams = `date_preset=${datePreset}`;
     let nestedParams = `date_preset(${datePreset})`;
-    if (since && until) {
+    if (since && until && since !== 'null' && until !== 'null') {
       topLevelParams = `time_range={"since":"${since}","until":"${until}"}`;
       nestedParams = `time_range({"since":"${since}","until":"${until}"})`;
     }
     // Fetch account insights
-    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?fields=spend,clicks,impressions,reach,cpc,ctr&${topLevelParams}&access_token=${accessToken}`;
+    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?level=account&fields=spend,clicks,impressions,reach,cpc,ctr&${topLevelParams}&access_token=${accessToken}`;
     // Fetch active campaigns with detailed insights and fields
     const campaignsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns?fields=name,status,objective,daily_budget,lifetime_budget,start_time,stop_time,bid_strategy,insights.${nestedParams}{spend,impressions,reach,inline_link_clicks,cost_per_inline_link_click}&access_token=${accessToken}`;
     // Fetch ad sets with campaign_id and insights
     const adSetsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/adsets?fields=name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,campaign_id,start_time,stop_time,insights.${nestedParams}{spend,clicks,impressions,reach}&access_token=${accessToken}`;
     // Fetch ads with adset_id and insights
     const adsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/ads?fields=name,status,adset_id,creative{name,body,image_url,thumbnail_url,title,object_story_spec,link_url},insights.${nestedParams}{spend,clicks,impressions,reach,ctr}&limit=50&access_token=${accessToken}`;
+    
     try {
-      const [insightsRes, campaignsRes, adSetsRes, adsRes] = await Promise.all([
-        fetchWithTimeout(insightsUrl, { cache: 'no-store' }),
+      // Execute insights first to avoid concurrent Code 1 issues on account level
+      const insightsRes = await fetchWithTimeout(insightsUrl, { cache: 'no-store' });
+      const insightsData = await insightsRes.json();
+      
+      const [campaignsRes, adSetsRes, adsRes] = await Promise.all([
         fetchWithTimeout(campaignsUrl, { cache: 'no-store' }),
         fetchWithTimeout(adSetsUrl, { cache: 'no-store' }),
         fetchWithTimeout(adsUrl, { cache: 'no-store' })
       ]);
-      const insightsData = await insightsRes.json();
+      
       const campaignsData = await campaignsRes.json();
       const adSetsData = await adSetsRes.json();
       const adsData = await adsRes.json();
