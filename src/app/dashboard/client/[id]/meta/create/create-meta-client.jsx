@@ -831,7 +831,7 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                                       style={{ padding: '0.6rem 0.8rem', display: 'flex', gap: '0.8rem', cursor: 'pointer', background: (createFormData.abTestType || 'Kreatif') === opt.id ? 'rgba(24,119,242,0.1)' : 'transparent', borderBottom: '1px solid rgba(0,0,0,0.05)' }}
                                     >
                                       <div style={{ marginTop: '2px' }}>
-                                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: (createFormData.abTestType || 'Kreatif') === opt.id ? '5px solid #1877f2' : '1px solid var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }} />
+                                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: (createFormData.abTestType || 'Kreatif') === opt.id ? '5px solid #1877f2' : '1px solid var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }} />
                                       </div>
                                       <div>
                                         <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>{opt.title}</div>
@@ -957,14 +957,14 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                             <div style={{ position: 'relative', width: '100%', maxWidth: '250px' }}>
                               <div 
                                 onClick={() => setCreateFormData({ ...createFormData, teklifStratejisiDropdownOpen: !createFormData.teklifStratejisiDropdownOpen })}
-                                style={{ background: '#f0f2f5', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                               >
                                 {createFormData.teklifStratejisi || 'En yüksek hacim'}
                                 <span style={{ fontSize: '0.7rem' }}>▼</span>
                               </div>
                               
                               {createFormData.teklifStratejisiDropdownOpen && (
-                                <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', width: '400px', maxWidth: '90vw', padding: '0.5rem 0' }}>
+                                <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', width: '400px', maxWidth: '90vw', padding: '0.5rem 0' }}>
                                   
                                   <div 
                                     onClick={() => setCreateFormData({ ...createFormData, teklifStratejisi: 'En yüksek hacim', teklifStratejisiDropdownOpen: false })}
@@ -1020,12 +1020,12 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                                       <button 
                                         type="button" 
                                         onClick={() => setCreateFormData({ ...createFormData, gorDropdownOpen: !createFormData.gorDropdownOpen })}
-                                        style={{ background: '#f0f2f5', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.3rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                        style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.3rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                                       >
                                         Gör ▾
                                       </button>
                                       {createFormData.gorDropdownOpen && (
-                                        <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', minWidth: '220px', padding: '0.5rem 0' }}>
+                                        <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', minWidth: '220px', padding: '0.5rem 0' }}>
                                           <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>Filtrele</div>
                                           
                                           <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}>
@@ -1078,17 +1078,17 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                                         </div>
                                       </div>
                                       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                                        <select style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', outline: 'none', background: '#fff' }}>
+                                        <select style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', outline: 'none', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
                                           <option>Günlük bütçeyi değer miktarına göre artır (TL)</option>
                                         </select>
-                                        <div style={{ display: 'flex', alignItems: 'center', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '4px', width: '90px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', width: '90px' }}>
                                           <span style={{ fontSize: '0.75rem', paddingLeft: '0.5rem', color: 'var(--text-secondary)' }}>TL</span>
-                                          <input type="text" defaultValue="1,88" style={{ width: '100%', padding: '0.5rem 0.2rem', fontSize: '0.75rem', border: 'none', outline: 'none' }} />
+                                          <input type="text" defaultValue="1,88" style={{ width: '100%', padding: '0.5rem 0.2rem', fontSize: '0.75rem', border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-primary)' }} />
                                           <span style={{ fontSize: '0.75rem', paddingRight: '0.5rem', color: 'var(--text-secondary)' }}>TRY</span>
                                         </div>
                                       </div>
                                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>Meta 13 Haz ile 14 Haz arasında günde 9,38 TL harcamayı amaçlayacak (1,88 TL artış).</div>
-                                      <button type="button" style={{ background: '#fff', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                                      <button type="button" style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: 'var(--text-primary)' }}>
                                         <X size={12} /> Bu dönemi kaldır
                                       </button>
                                       
