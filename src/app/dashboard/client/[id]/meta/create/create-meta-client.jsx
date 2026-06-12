@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction } from '@/app/actions';
-import { X, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, Check } from 'lucide-react';
 
 
 const CTA_LABELS = {
@@ -699,20 +699,26 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                 {selectedObjective === 'Bilinirlik' && (
                   <>
                     {/* Özel Reklam Kategorileri Kartı */}
-                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>Özel Reklam Kategorileri</h3>
+                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '1px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Check size={10} color="#10b981" />
                         </div>
+                        <h3 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 700 }}>Özel Reklam Kategorileri</h3>
                       </div>
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Kredi, istihdam veya konut fırsatlarıyla ya da sosyal meseleler, seçimler veya siyasetle ilgili reklamlar beyan edilmelidir.</p>
-                      <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
-                        <option>Hiçbir Kategori Seçilmedi</option>
-                        <option>Kredi</option>
-                        <option>İstihdam</option>
-                        <option>Konut</option>
-                        <option>Sosyal Meseleler, Seçimler veya Siyaset</option>
-                      </select>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Reklamlarınızın finansal ürünler ve hizmetler, istihdam, konut ya da sosyal meseleler, seçimler veya siyasetle ilgili olup olmadığını beyan ederek reklamlarınızın reddedilmesini önleyin. Koşullar ülkeye göre değişir. <span style={{ color: '#1877f2', cursor: 'pointer' }}>Özel Reklam Kategorileri Hakkında</span></p>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem' }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Kategoriler</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Bu kampanyanın neyin reklamını yapacağını en iyi tanımlayan kategorileri seçin.</div>
+                        <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none', appearance: 'none', cursor: 'pointer' }}>
+                          <option>Varsa kategori beyan et</option>
+                          <option>Finansal ürünler ve hizmetler</option>
+                          <option>İstihdam</option>
+                          <option>Konut</option>
+                          <option>Sosyal Meseleler, Seçimler veya Siyaset</option>
+                        </select>
+                      </div>
                     </div>
 
                     {/* Canlı Video Reklamı Kartı */}
@@ -768,27 +774,60 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                     </div>
 
                     {/* A/B Testi Kartı */}
-                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>A/B Testi</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '1px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Check size={10} color="#10b981" />
+                          </div>
+                          <h3 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 700 }}>A/B Testi</h3>
+                        </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Kapalı</span>
-                          <div style={{ width: '40px', height: '22px', background: '#e5e7eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', opacity: 0.7 }}>
-                            <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{createFormData.ab_test ? 'Açık' : 'Kapalı'}</span>
+                          <div 
+                            onClick={() => setCreateFormData({ ...createFormData, ab_test: !createFormData.ab_test })}
+                            style={{ width: '40px', height: '22px', background: createFormData.ab_test ? '#1877f2' : '#e5e7eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }}
+                          >
+                            <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: createFormData.ab_test ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
                           </div>
                         </div>
                       </div>
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Farklı görselleri, metinleri veya hedef kitleleri test ederek hangisinin daha iyi performans gösterdiğini bulun. <span style={{ color: '#1877f2', cursor: 'pointer' }}>Daha fazla bilgi</span></p>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Hangisinin en iyi sonucu verdiğini görmek için sürümleri karşılaştırarak reklam performansını artırmaya yardımcı olun. Doğru sonuçlar için, sürümlerin her biri hedef kitlenizin ayrı gruplarına gösterilecektir. <span style={{ color: '#1877f2', cursor: 'pointer' }}>A/B testleri hakkında</span></p>
+
+                      {createFormData.ab_test && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+                          <div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Neyi test etmek istiyorsunuz?</div>
+                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
+                              <option>Kreatif</option>
+                              <option>Hedef Kitle</option>
+                              <option>Yerleşimler</option>
+                            </select>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Test ne kadar süreyle yürütülmeli?</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Testiniz bu kadar gün boyunca veya reklam setiniz sona erene kadar çalışacak.</div>
+                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', overflow: 'hidden' }}>
+                              <input type="number" defaultValue="7" style={{ width: '100%', border: 'none', background: 'transparent', padding: '0.65rem 0.85rem', fontSize: '0.85rem', color: 'var(--text-primary)', outline: 'none' }} />
+                              <span style={{ padding: '0 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', borderLeft: '1px solid var(--border-color)' }}>gün</span>
+                            </div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.4rem' }}>Performansı nasıl karşılaştırmak istersiniz? <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
+                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
+                              <option>Sonuç başına ücret</option>
+                              <option>Tıklama başına ücret</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Advantage+ Kampanya Bütçesi Kartı */}
                     <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid #ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ width: '10px', height: '2px', background: '#ef4444' }} />
-                          </div>
-                          <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>Advantage+ kampanya bütçesi ✨</h3>
+                          <h3 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 700 }}>Advantage+ kampanya bütçesi ✨</h3>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{createFormData.advantage_budget !== false ? 'Açık' : 'Kapalı'}</span>
@@ -804,41 +843,16 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
 
                       {createFormData.advantage_budget !== false && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
-                          <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.4rem' }}>Bütçe <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></label>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <select style={{ width: '140px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
-                                <option>Toplam bütçe</option>
-                                <option>Günlük bütçe</option>
-                              </select>
-                              <div style={{ flex: 1, position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>TL</span>
-                                <input type="number" required className="form-control" value={createFormData.daily_budget || ''} onChange={e => setCreateFormData({ ...createFormData, daily_budget: e.target.value })} placeholder="0,00" style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem 0.65rem 2rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} />
-                                <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>TRY</span>
-                              </div>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                            <input type="checkbox" defaultChecked style={{ marginTop: '3px' }} />
+                            <div>
+                              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>Bütçenizin bir kısmını diğer reklam setleriyle paylaşın <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Performansı artırma olasılığı yüksek olduğunda, reklam seti bütçenizin %20 kadarını bu kampanyadaki diğer reklam setleriyle paylaşacağız. <span style={{ color: '#1877f2', cursor: 'pointer' }}>Reklam seti bütçe paylaşımı hakkında</span></div>
                             </div>
                           </div>
-
-                          <div>
+                          <div style={{ marginTop: '0.5rem' }}>
                             <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.2rem' }}>Kampanya Teklif Stratejisi <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></label>
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>En yüksek hacim</div>
-                          </div>
-
-                          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>Bütçe planlama <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
-                              <button type="button" style={{ background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '0.3rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>Gör</button>
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Belirli gün veya saatlerde bütçenizi artırın.</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', opacity: 0.5 }}>
-                              <input type="checkbox" disabled />
-                              <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
-                            </div>
-                          </div>
-
-                          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.2rem' }}>Reklam Planlaması <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Reklamları sürekli yayınla</div>
                           </div>
                         </div>
                       )}
