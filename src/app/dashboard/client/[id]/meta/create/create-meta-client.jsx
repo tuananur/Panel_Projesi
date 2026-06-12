@@ -1060,30 +1060,54 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', paddingRight: '0.5rem' }}>
             {activeTab === 'ads' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '1rem' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>Reklam Önizlemesi</span>
+              <div style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '1rem' }}>
+                <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '0.4rem' }}>Gelişmiş Önizleme</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Advantage+ kreatif ile reklamınızın farklı reklam alanlarında nasıl görüneceğini gözden geçirebilirsiniz. Performansı en çok artıracağını tahmin ettiğimiz unsurlara göre reklamınızın varyasyonlarını göstereceğiz.</span>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.1)', padding: '3px', borderRadius: '8px', marginBottom: '1.2rem', width: '100%' }}>
-                  <button type="button" onClick={() => setPreviewPlacement('fb_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'fb_feed' ? 'var(--bg-secondary)' : 'transparent', color: previewPlacement === 'fb_feed' ? 'var(--text-primary)' : 'var(--text-secondary)', boxShadow: previewPlacement === 'fb_feed' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Facebook Akış</button>
-                  <button type="button" onClick={() => setPreviewPlacement('ig_feed')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_feed' ? 'var(--bg-secondary)' : 'transparent', color: previewPlacement === 'ig_feed' ? 'var(--text-primary)' : 'var(--text-secondary)', boxShadow: previewPlacement === 'ig_feed' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Instagram Akış</button>
-                  <button type="button" onClick={() => setPreviewPlacement('ig_stories')} style={{ flex: 1, padding: '0.5rem 0.2rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: previewPlacement === 'ig_stories' ? 'var(--bg-secondary)' : 'transparent', color: previewPlacement === 'ig_stories' ? 'var(--text-primary)' : 'var(--text-secondary)', boxShadow: previewPlacement === 'ig_stories' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', fontWeight: 600 }}>Hikaye & Reels</button>
-                </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '1rem' }}>Reklamınızın görüleceği şekiller</div>
 
-                <div style={{ 
-                  width: '100%', maxWidth: '310px', background: 'var(--text-primary)', borderRadius: '40px', padding: '10px',
-                  border: '3px solid #333', boxShadow: 'none',
-                  fontFamily: 'system-ui, -apple-system, sans-serif', boxSizing: 'border-box', overflow: 'hidden', position: 'relative'
-                }}>
-                  <div style={{ width: '100px', height: '22px', background: 'var(--text-primary)', margin: '0 auto', borderRadius: '0 0 16px 16px', position: 'relative', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--text-primary)', border: '1px solid #333' }}></div>
-                    <div style={{ width: '40px', height: '3px', background: 'var(--text-primary)', borderRadius: '2px' }}></div>
-                  </div>
-                  <div style={{ borderRadius: '30px', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
-                    {renderAdPreview(previewPlacement, createFormData)}
-                  </div>
-                  <div style={{ width: '100px', height: '4px', background: '#555', margin: '8px auto 2px auto', borderRadius: '2px' }}></div>
+                <div className="custom-scrollbar" style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1.5rem', width: '100%' }}>
+                  {[
+                    { id: 'fb_feed', label: 'Facebook Akış', icon: 'f', isMobile: false },
+                    { id: 'ig_feed', label: 'Instagram Akış', icon: 'i', isMobile: false },
+                    { id: 'ig_stories', label: 'Instagram Stories', icon: 'i', isMobile: true },
+                    { id: 'fb_stories', label: 'Facebook Stories', icon: 'f', isMobile: true },
+                    { id: 'ig_reels', label: 'Instagram Reels', icon: 'i', isMobile: true },
+                    { id: 'fb_reels', label: 'Facebook Reels', icon: 'f', isMobile: true },
+                    { id: 'threads', label: 'Threads Akış', icon: '@', isMobile: false },
+                    { id: 'search_results', label: 'Arama Sonuçları', icon: 'f', isMobile: false }
+                  ].map(p => (
+                    <div key={p.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', minWidth: p.isMobile ? '260px' : '300px', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                        <div style={{ width: '18px', height: '18px', borderRadius: '4px', background: p.icon === 'i' ? 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' : p.icon === '@' ? '#000' : '#1877f2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold' }}>
+                          {p.icon}
+                        </div>
+                        {p.label}
+                      </div>
+
+                      {p.isMobile ? (
+                        <div style={{ 
+                          width: '100%', background: '#ffffff', borderRadius: '32px', padding: '6px',
+                          border: '2px solid #e5e7eb', boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                          fontFamily: 'system-ui, -apple-system, sans-serif', boxSizing: 'border-box', overflow: 'hidden', position: 'relative'
+                        }}>
+                          <div style={{ width: '80px', height: '20px', background: '#e5e7eb', margin: '0 auto', borderRadius: '0 0 12px 12px', position: 'relative', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', top: '-6px' }}>
+                            <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#9ca3af' }}></div>
+                            <div style={{ width: '24px', height: '3px', background: '#9ca3af', borderRadius: '2px' }}></div>
+                          </div>
+                          <div style={{ borderRadius: '26px', overflow: 'hidden', background: '#000000', marginTop: '-14px' }}>
+                            {renderAdPreview(p.id, createFormData)}
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ width: '100%', background: '#ffffff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                          {renderAdPreview(p.id, createFormData)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (
