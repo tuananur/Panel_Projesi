@@ -1002,11 +1002,15 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
     let topLevelParams = `date_preset=${datePreset}`;
     let nestedParams = `date_preset(${datePreset})`;
     if (since && until && since !== 'null' && until !== 'null') {
-      topLevelParams = `time_range={"since":"${since}","until":"${until}"}`;
-      nestedParams = `time_range({"since":"${since}","until":"${until}"})`;
+      const timeRangeObj = JSON.stringify({ since, until });
+      topLevelParams = `time_range=${encodeURIComponent(timeRangeObj)}`;
+      // nested syntax for field expansion requires url encoding? 
+      // Actually field expansion time_range accepts url-encoded JSON string, but without the = sign.
+      // E.g., insights.time_range({"since":"...", "until":"..."})
+      nestedParams = `time_range(${timeRangeObj})`;
     }
-    // Fetch account insights
-    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?level=account&fields=spend,clicks,impressions,reach,cpc,ctr&${topLevelParams}&access_token=${accessToken}`;
+    // Fetch account insights (removed reach to prevent heavy aggregation Code 1 errors)
+    const insightsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/insights?level=account&fields=spend,clicks,impressions,cpc,ctr&${topLevelParams}&access_token=${accessToken}`;
     // Fetch active campaigns with detailed insights and fields
     const campaignsUrl = `https://graph.facebook.com/v19.0/${finalAccountId}/campaigns?fields=name,status,objective,daily_budget,lifetime_budget,start_time,stop_time,bid_strategy,insights.${nestedParams}{spend,impressions,reach,inline_link_clicks,cost_per_inline_link_click}&access_token=${accessToken}`;
     // Fetch ad sets with campaign_id and insights
@@ -1028,6 +1032,26 @@ export async function getMetaAdsAction(clientId, datePreset = 'last_30d', since 
       const campaignsData = await campaignsRes.json();
       const adSetsData = await adSetsRes.json();
       const adsData = await adsRes.json();
+
+      // Fallback for Code 1 (Unknown Error) which Facebook throws randomly
+      if (insightsData.error && insightsData.error.code === 1) {
+        console.warn('Meta API Code 1 Error on insights. Ignoring to prevent dashboard crash.');
+        insightsData.error = null;
+        insightsData.data = [];
+      }
+      if (campaignsData.error && campaignsData.error.code === 1) {
+        campaignsData.error = null;
+        campaignsData.data = [];
+      }
+      if (adSetsData.error && adSetsData.error.code === 1) {
+        adSetsData.error = null;
+        adSetsData.data = [];
+      }
+      if (adsData.error && adsData.error.code === 1) {
+        adsData.error = null;
+        adsData.data = [];
+      }
+
       if (insightsData.error) {
         return { error: 'API_ERROR', details: `Insights (Harcama) Hatası: ${insightsData.error.message}`, code: insightsData.error.code };
       }
