@@ -25,6 +25,8 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
   const [editName, setEditName] = useState('');
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [showObjectiveModal, setShowObjectiveModal] = useState(true);
+  const [showTrafficSetupModal, setShowTrafficSetupModal] = useState(false);
+  const [trafficSetupType, setTrafficSetupType] = useState('custom');
   const [selectedObjective, setSelectedObjective] = useState('Bilinirlik');
   const objectives = [
     { id: 'Bilinirlik', label: 'Bilinirlik', desc: 'Reklamlarınızı onları hatırlama olasılığı yüksek kişilere gösterin.', icon: '📢' },
@@ -391,7 +393,73 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
             </div>
             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '1rem', background: 'var(--bg-secondary)' }}>
               <button onClick={() => setShowObjectiveModal(false)} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>İptal</button>
-              <button onClick={() => setShowObjectiveModal(false)} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: 'none', background: '#1877f2', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Devam Et</button>
+              <button onClick={() => {
+                setShowObjectiveModal(false);
+                if (selectedObjective === 'Trafik') setShowTrafficSetupModal(true);
+              }} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: 'none', background: '#1877f2', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Devam Et</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showTrafficSetupModal && activeTab === 'campaigns' && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="card" style={{ width: '100%', maxWidth: '600px', padding: '0', overflow: 'hidden', background: 'var(--bg-primary)' }}>
+            <div style={{ padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>Bir kampanya kurulumu seçin</h3>
+              <button onClick={() => setShowTrafficSetupModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            <div style={{ padding: '1.5rem', maxHeight: '70vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Amacı trafik olan kampanyanızı, özelleştirilmiş ve kolay bir kurulum kullanarak veya manuel olarak oluşturun. Öneriler, reklam hesabınızdaki son hareketlere göre değişebilir.</p>
+              
+              <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
+                 <div style={{ marginTop: '2px' }}><AlertCircle size={16} color="var(--text-secondary)" /></div>
+                 <div>
+                   <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Bu öneriyi neden görüyorum?</div>
+                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Bu kurulum, reklam hesabınızdaki bilgilere ve hareketlere dayalı olarak önerilmiştir.</div>
+                 </div>
+                 <button style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X size={16} /></button>
+              </div>
+
+              <div 
+                onClick={() => setTrafficSetupType('custom')}
+                style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', border: trafficSetupType === 'custom' ? '1px solid #1877f2' : '1px solid transparent', borderRadius: '8px', cursor: 'pointer', background: trafficSetupType === 'custom' ? 'rgba(24,119,242,0.05)' : 'transparent' }}
+              >
+                <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: trafficSetupType === 'custom' ? '6px solid #1877f2' : '1px solid var(--border-color)', background: '#fff', flexShrink: 0 }} />
+                <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#e7f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                   <img src="https://cdn-icons-png.flaticon.com/512/3256/3256083.png" alt="custom" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Size özel site trafiği kampanyası</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Hızlıca, en uygun fiyata daha fazla site trafiği almanıza yardımcı olacak şekilde optimize edilmiş bir kampanya oluşturun. Ön ayarlarda Advantage+ reklam alanları, en yüksek hacim teklif stratejisi ve daha fazlası bulunur.</div>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.6rem' }}>
+                    <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(0,0,0,0.05)', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Basitleştirilmiş</span>
+                    <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(0,0,0,0.05)', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Özelleştirilmiş</span>
+                    <span style={{ padding: '0.2rem 0.6rem', background: 'rgba(0,0,0,0.05)', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary)' }}>En iyi uygulamalar</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ height: '1px', background: 'var(--border-color)', margin: '0.5rem 0' }} />
+
+              <div 
+                onClick={() => setTrafficSetupType('manual')}
+                style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', border: trafficSetupType === 'manual' ? '1px solid #1877f2' : '1px solid transparent', borderRadius: '8px', cursor: 'pointer', background: trafficSetupType === 'manual' ? 'rgba(24,119,242,0.05)' : 'var(--bg-secondary)' }}
+              >
+                <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: trafficSetupType === 'manual' ? '6px solid #1877f2' : '1px solid var(--border-color)', background: '#fff', flexShrink: 0 }} />
+                <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                   <img src="https://cdn-icons-png.flaticon.com/512/3524/3524335.png" alt="manual" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>Manuel trafik kampanyası</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Tüm ayarlar üzerinde daha hassas kontrol sağlamak için sıfırdan bir trafik kampanyası oluşturun.</div>
+                </div>
+              </div>
+
+            </div>
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '1rem', background: 'var(--bg-secondary)' }}>
+              <button onClick={() => { setShowTrafficSetupModal(false); setShowObjectiveModal(true); }} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>Geri</button>
+              <button onClick={() => setShowTrafficSetupModal(false)} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: 'none', background: '#1877f2', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Devam</button>
             </div>
           </div>
         </div>
@@ -681,20 +749,162 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
 
             {activeTab === 'campaigns' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.4rem' }}>
-                      <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
+                {selectedObjective === 'Trafik' && trafficSetupType === 'custom' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div style={{ position: 'relative', background: '#f0f5ff', borderRadius: '8px', overflow: 'hidden', display: 'flex', border: '1px solid #c2e0ff', padding: '1.5rem' }}>
+                      <div style={{ flex: 1, zIndex: 2 }}>
+                        <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.2rem', color: '#000', fontWeight: 800 }}>Size özel site trafiği kampanyası</h2>
+                        <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.85rem', color: '#1c1e21', maxWidth: '350px', lineHeight: '1.4' }}>Hızlıca, en uygun fiyata daha fazla site trafiği almanıza yardımcı olacak şekilde optimize edilmiş bir kampanya oluşturun.</p>
+                        <button type="button" style={{ background: '#fff', border: '1px solid #cdd0d5', padding: '0.5rem 1rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                          <span style={{ fontSize: '1rem' }}>⚙️</span> Tüm ön ayarları gör
+                        </button>
                       </div>
-                      <label style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0, fontWeight: 700 }}>Kampanya Adı</label>
+                      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '45%' }}>
+                        <img src="https://img.freepik.com/free-vector/flat-hand-drawn-website-ui-illustration_23-2148995574.jpg" alt="Campaign Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #f0f5ff 0%, transparent 100%)' }} />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                      <input required className="form-control" value={createFormData.name || ''} onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} placeholder={"Örn: Yeni " + selectedObjective + " Kampanyası"} style={{ flex: 1, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} />
-                      <button type="button" style={{ padding: '0.65rem 1rem', background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>Şablon Oluştur</button>
+                    
+                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.8rem' }}>
+                          <label style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0, fontWeight: 700 }}>Adı</label>
+                        </div>
+                        <input required className="form-control" value={createFormData.name || ''} onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} placeholder="Size özel site trafiği kampanyası 12.06.2026" style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} />
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>Canlı video reklamı</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{createFormData.live_video_ad ? 'Açık' : 'Kapalı'}</span>
+                          <div 
+                            onClick={() => setCreateFormData({ ...createFormData, live_video_ad: !createFormData.live_video_ad })}
+                            style={{ width: '40px', height: '22px', background: createFormData.live_video_ad ? '#1877f2' : '#e5e7eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }}
+                          >
+                            <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: createFormData.live_video_ad ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                          </div>
+                        </div>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Canlı video reklam için önerilen ayarları kullanın. Bu ayarlar, reklamlarınızı daha verimli şekilde sunmak ve etkileşimi artırmak için bütçenizi ve planınızı ayarlayacaktır.</p>
+                      
+                      {createFormData.live_video_ad && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Canlı video konumu</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>Canlı videonu nerede yayınlayacağını seç.</div>
+                          <div style={{ background: 'rgba(24, 119, 242, 0.05)', border: '1px solid #1877f2', borderRadius: '6px', padding: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                            <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '5px solid #1877f2', background: '#fff' }} />
+                            <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: '#1877f2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>f</div>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600 }}>Facebook</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>A/B Testi</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{createFormData.ab_test ? 'Açık' : 'Kapalı'}</span>
+                          <div 
+                            onClick={() => setCreateFormData({ ...createFormData, ab_test: !createFormData.ab_test })}
+                            style={{ width: '40px', height: '22px', background: createFormData.ab_test ? '#1877f2' : '#e5e7eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }}
+                          >
+                            <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: createFormData.ab_test ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                          </div>
+                        </div>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Hangisinin en iyi sonucu verdiğini görmek için sürümleri karşılaştırarak reklam performansını artırmaya yardımcı olun. Doğru sonuçlar için, sürümlerin her biri hedef kitlenizin ayrı gruplarına gösterilecektir. <span style={{ color: '#1877f2', cursor: 'pointer' }}>A/B testleri hakkında</span></p>
+
+                      {createFormData.ab_test && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+                          <div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Neyi test etmek istiyorsunuz?</div>
+                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none', appearance: 'none' }}>
+                              <option>Kreatif</option>
+                              <option>Hedef Kitle</option>
+                              <option>Yerleşimler</option>
+                            </select>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Test ne kadar süreyle yürütülmeli?</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Testiniz bu kadar gün boyunca veya reklam setiniz sona erene kadar çalışacak.</div>
+                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none', appearance: 'none' }}>
+                              <option>7 gün</option>
+                              <option>14 gün</option>
+                              <option>30 gün</option>
+                            </select>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '4px' }}>Performansı nasıl karşılaştırmak istersiniz? <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
+                            <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none', appearance: 'none' }}>
+                              <option>Ödeme Bilgisi Ekleme Başına Ücret</option>
+                              <option>Tıklama Başına Ücret (TBM)</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <h3 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 700 }}>Özel Reklam Kategorileri</h3>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Reklamlarınızın finansal ürünler ve hizmetler, istihdam, konut ya da sosyal meseleler, seçimler veya siyasetle ilgili olup olmadığını beyan ederek reklamlarınızın reddedilmesini önleyin. Koşullar ülkeye göre değişir. <span style={{ color: '#1877f2', cursor: 'pointer' }}>Özel Reklam Kategorileri Hakkında</span></p>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem' }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>Kategoriler</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Bu kampanyanın neyin reklamını yapacağını en iyi tanımlayan kategorileri seçin.</div>
+                        <div style={{ position: 'relative' }}>
+                          <div 
+                            onClick={() => setCreateFormData({ ...createFormData, categoryDropdownOpen: !createFormData.categoryDropdownOpen })}
+                            style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid #1877f2', color: 'var(--text-secondary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                          >
+                            Varsa kategori beyan et <span style={{ fontSize: '0.7rem', color: '#000' }}>▼</span>
+                          </div>
+                          {createFormData.categoryDropdownOpen && (
+                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+                              {[
+                                { id: 'fin', label: 'Finansal ürünler ve hizmetler', desc: 'Kredi kartları, uzun vadeli finansman, vadesiz ve tasarruf hesapları, yatırım hizmetleri, sigorta hizmetleri veya diğer ilgili finansal fırsatlara yönelik reklamlar.', icon: '💳' },
+                                { id: 'emp', label: 'İstihdam', desc: 'İş teklifleri, stajlar, profesyonel sertifika programları ve ilgili diğer fırsatlara yönelik reklamlar.', icon: '💼' },
+                                { id: 'hou', label: 'Konut', desc: 'Emlak ilanları, konut sigortası, mortgage kredileri veya ilgili diğer fırsatlara yönelik reklamlar.', icon: '🏠' },
+                                { id: 'soc', label: 'Sosyal Meseleler, Seçimler veya Siyaset', desc: 'Sosyal meseleler (örneğin ekonomi veya vatandaşlık hakları ve sosyal haklar), seçimler veya siyasetçiler ya da siyasi kampanyalarla ilgili reklamlar', icon: '📢' }
+                              ].map(cat => (
+                                <div key={cat.id} style={{ display: 'flex', gap: '0.8rem', padding: '0.8rem 1rem', borderBottom: '1px solid rgba(0,0,0,0.05)', cursor: 'pointer', alignItems: 'flex-start', background: createFormData[`cat_${cat.id}`] ? 'rgba(24,119,242,0.05)' : 'transparent' }} onClick={() => setCreateFormData({ ...createFormData, [`cat_${cat.id}`]: !createFormData[`cat_${cat.id}`] })}>
+                                  <div style={{ width: '16px', height: '16px', border: '1px solid var(--border-color)', borderRadius: '4px', background: createFormData[`cat_${cat.id}`] ? '#1877f2' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                                    {createFormData[`cat_${cat.id}`] && <Check size={12} color="#fff" />}
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>{cat.label}</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem', lineHeight: '1.4' }}>{cat.desc}</div>
+                                  </div>
+                                </div>
+                              ))}
+                              <div style={{ padding: '1rem', background: '#f9fafb', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                                Kategorilerden hiçbiri reklamınız için geçerli değilse özel bir reklam kategorisi seçmenize gerek olmayabilir. Emin değilseniz kategorileri bildirme konusunda yardım da alabilirsiniz.
+                                <div style={{ color: '#1877f2', marginTop: '0.5rem', cursor: 'pointer' }}>Kategorileri Bildirme Hakkında Yardım Alın</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.4rem' }}>
+                        <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
+                        </div>
+                        <label style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0, fontWeight: 700 }}>Kampanya Adı</label>
+                      </div>
+                      <div style={{ display: 'flex', gap: '1rem' }}>
+                        <input required className="form-control" value={createFormData.name || ''} onChange={e => setCreateFormData({ ...createFormData, name: e.target.value })} placeholder={"Örn: Yeni " + selectedObjective + " Kampanyası"} style={{ flex: 1, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} />
+                        <button type="button" style={{ padding: '0.65rem 1rem', background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>Şablon Oluştur</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {selectedObjective === 'Bilinirlik' && (
                   <>
