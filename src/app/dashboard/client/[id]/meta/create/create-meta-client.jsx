@@ -698,6 +698,23 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
 
                 {selectedObjective === 'Bilinirlik' && (
                   <>
+                    {/* Özel Reklam Kategorileri Kartı */}
+                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>Özel Reklam Kategorileri</h3>
+                        </div>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Kredi, istihdam veya konut fırsatlarıyla ya da sosyal meseleler, seçimler veya siyasetle ilgili reklamlar beyan edilmelidir.</p>
+                      <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
+                        <option>Hiçbir Kategori Seçilmedi</option>
+                        <option>Kredi</option>
+                        <option>İstihdam</option>
+                        <option>Konut</option>
+                        <option>Sosyal Meseleler, Seçimler veya Siyaset</option>
+                      </select>
+                    </div>
+
                     {/* Canlı Video Reklamı Kartı */}
                     <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -748,6 +765,20 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                         </div>
                         <button type="button" onClick={() => setShowObjectiveModal(true)} style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>Düzenle</button>
                       </div>
+                    </div>
+
+                    {/* A/B Testi Kartı */}
+                    <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 700 }}>A/B Testi</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Kapalı</span>
+                          <div style={{ width: '40px', height: '22px', background: '#e5e7eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', opacity: 0.7 }}>
+                            <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                          </div>
+                        </div>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>Farklı görselleri, metinleri veya hedef kitleleri test ederek hangisinin daha iyi performans gösterdiğini bulun. <span style={{ color: '#1877f2', cursor: 'pointer' }}>Daha fazla bilgi</span></p>
                     </div>
 
                     {/* Advantage+ Kampanya Bütçesi Kartı */}
