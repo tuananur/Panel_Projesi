@@ -954,13 +954,48 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                           <div>
                             <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.2rem' }}>Kampanya Teklif Stratejisi <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></label>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Reklam açık artırmalarında nasıl teklif vereceğimiz.</div>
-                            <select style={{ width: '100%', maxWidth: '250px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
-                              <option>En yüksek hacim</option>
-                              <option>Sonuç başına ücret hedefi</option>
-                              <optgroup label="Diğer seçenekler">
-                                <option>Teklif üst sınırı</option>
-                              </optgroup>
-                            </select>
+                            <div style={{ position: 'relative', width: '100%', maxWidth: '250px' }}>
+                              <div 
+                                onClick={() => setCreateFormData({ ...createFormData, teklifStratejisiDropdownOpen: !createFormData.teklifStratejisiDropdownOpen })}
+                                style={{ background: '#f0f2f5', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                              >
+                                {createFormData.teklifStratejisi || 'En yüksek hacim'}
+                                <span style={{ fontSize: '0.7rem' }}>▼</span>
+                              </div>
+                              
+                              {createFormData.teklifStratejisiDropdownOpen && (
+                                <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', background: '#fff', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', width: '400px', maxWidth: '90vw', padding: '0.5rem 0' }}>
+                                  
+                                  <div 
+                                    onClick={() => setCreateFormData({ ...createFormData, teklifStratejisi: 'En yüksek hacim', teklifStratejisiDropdownOpen: false })}
+                                    style={{ padding: '0.6rem 1rem', cursor: 'pointer', background: (createFormData.teklifStratejisi || 'En yüksek hacim') === 'En yüksek hacim' ? 'rgba(24,119,242,0.1)' : 'transparent' }}
+                                  >
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>En yüksek hacim</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Bütçeniz için en fazla sonucu elde edin.</div>
+                                  </div>
+
+                                  <div 
+                                    onClick={() => setCreateFormData({ ...createFormData, teklifStratejisi: 'Sonuç başına ücret hedefi', teklifStratejisiDropdownOpen: false })}
+                                    style={{ padding: '0.6rem 1rem', cursor: 'pointer', background: createFormData.teklifStratejisi === 'Sonuç başına ücret hedefi' ? 'rgba(24,119,242,0.1)' : 'transparent' }}
+                                  >
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Sonuç başına ücret hedefi</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Sonuçların hacmini en üst düzeye çıkarırken sonuç başına belirli bir ücret hedefleyin.</div>
+                                  </div>
+
+                                  <div 
+                                    onClick={() => setCreateFormData({ ...createFormData, teklifStratejisi: 'Teklif üst sınırı', teklifStratejisiDropdownOpen: false })}
+                                    style={{ padding: '0.6rem 1rem', cursor: 'pointer', background: createFormData.teklifStratejisi === 'Teklif üst sınırı' ? 'rgba(24,119,242,0.1)' : 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                  >
+                                    <div>
+                                      <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Diğer seçenekler</div>
+                                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Teklif üst sınırı</div>
+                                    </div>
+                                    <span style={{ color: 'var(--text-secondary)' }}>&gt;</span>
+                                  </div>
+
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
