@@ -975,7 +975,7 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
       </div>
 
       <form onSubmit={handleCreateEntity} style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'transparent', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', flex: 1, padding: '1.5rem 2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: activeTab === 'ads' ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', flex: 1, padding: '1.5rem 2rem' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {activeTab === 'campaigns' && (
@@ -1068,7 +1068,7 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
 
                 <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '1rem' }}>Reklamınızın görüleceği şekiller</div>
 
-                <div className="custom-scrollbar" style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1.5rem', width: '100%' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', paddingBottom: '1.5rem', width: '100%', justifyContent: 'flex-start' }}>
                   {[
                     { id: 'fb_feed', label: 'Facebook Akış', icon: 'f', isMobile: false },
                     { id: 'ig_feed', label: 'Instagram Akış', icon: 'i', isMobile: false },
