@@ -985,7 +985,7 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
             <div style={{ padding: '0 1.5rem 1.5rem 1.5rem', maxHeight: '75vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: '1.4' }}>Amacı trafik olan kampanyanızı, özelleştirilmiş ve kolay bir kurulum kullanarak veya manuel olarak oluşturun. Öneriler, reklam hesabınızdaki son hareketlere göre değişebilir.</p>
               
-              <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', gap: '0.8rem', alignItems: 'flex-start', background: '#fff' }}>
+              <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', gap: '0.8rem', alignItems: 'flex-start', background: 'var(--bg-secondary)' }}>
                  <div style={{ marginTop: '2px' }}><AlertCircle size={16} color="var(--text-secondary)" /></div>
                  <div>
                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Bu öneriyi neden görüyorum?</div>
