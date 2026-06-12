@@ -652,71 +652,7 @@ const renderBudgetPlanning = (data, setData) => (
 const renderAdFormFields = (data, setData, isCreate, isEditing) => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
-      {showObjectiveModal && activeTab === 'campaigns' && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="card" style={{ width: '100%', maxWidth: '750px', padding: '0', overflow: 'hidden', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-            <div style={{ padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Bir kampanya amacı seçin</h3>
-              <button onClick={() => setShowObjectiveModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X size={20} /></button>
-            </div>
-            
-            <div style={{ display: 'flex' }}>
-              <div style={{ flex: 1, padding: '1rem', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '50vh', overflowY: 'auto' }}>
-                {objectives.map(obj => (
-                  <label 
-                    key={obj.id}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      gap: '1rem', 
-                      padding: '0.6rem',
-                      cursor: 'pointer',
-                      borderRadius: '8px',
-                      background: selectedObjective === obj.id ? 'var(--bg-secondary)' : 'transparent',
-                      transition: 'background 0.2s'
-                    }}
-                  >
-                    <input 
-                      type="radio" 
-                      name="objective"
-                      value={obj.id}
-                      checked={selectedObjective === obj.id}
-                      onChange={() => setSelectedObjective(obj.id)}
-                      style={{ margin: 0, width: '16px', height: '16px', cursor: 'pointer', accentColor: '#1877f2' }} 
-                    />
-                    <div style={{ width: '40px', height: '40px', background: '#f3f4f6', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
-                      {obj.icon}
-                    </div>
-                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                      {obj.label}
-                    </div>
-                  </label>
-                ))}
-              </div>
-              
-              <div style={{ flex: 1.2, padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)' }}>
-                <div style={{ width: '100%', maxWidth: '250px', marginBottom: '1.5rem', position: 'relative' }}>
-                  <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Map Illustration" style={{ width: '100%', height: 'auto', opacity: 0.2 }} />
-                  <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '80px', height: '80px', background: '#fff', borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                     <img src="https://cdn-icons-png.flaticon.com/512/73/73196.png" alt="Compass" style={{ width: '40px', height: '40px', opacity: 0.6 }} />
-                  </div>
-                </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: '1.5', padding: '0 1rem' }}>
-                  Kampanya amacınız, reklamlarınızı yayınlayarak ulaşmayı amaçladığınız işletme hedefidir. Daha fazla bilgi için fareyi her birinin üzerine getirin.
-                </div>
-              </div>
-            </div>
-            
-            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '1rem', background: 'var(--bg-primary)' }}>
-              <button onClick={() => setShowObjectiveModal(false)} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>İptal</button>
-              <button onClick={() => {
-                setShowObjectiveModal(false);
-                if (selectedObjective === 'Trafik') setShowTrafficSetupModal(true);
-              }} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: 'none', background: '#1877f2', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Devam</button>
-            </div>
-          </div>
-        </div>
-      )}
+      
 
       {showTrafficSetupModal && activeTab === 'campaigns' && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1043,6 +979,74 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', minHeight: '80vh' }}>
+
+{showObjectiveModal && activeTab === 'campaigns' && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="card" style={{ width: '100%', maxWidth: '750px', padding: '0', overflow: 'hidden', background: 'var(--bg-primary)', borderRadius: '8px' }}>
+            <div style={{ padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Bir kampanya amacı seçin</h3>
+              <button onClick={() => setShowObjectiveModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            
+            <div style={{ display: 'flex' }}>
+              <div style={{ flex: 1, padding: '1rem', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '50vh', overflowY: 'auto' }}>
+                {objectives.map(obj => (
+                  <label 
+                    key={obj.id}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      gap: '1rem', 
+                      padding: '0.6rem',
+                      cursor: 'pointer',
+                      borderRadius: '8px',
+                      background: selectedObjective === obj.id ? 'var(--bg-secondary)' : 'transparent',
+                      transition: 'background 0.2s'
+                    }}
+                  >
+                    <input 
+                      type="radio" 
+                      name="objective"
+                      value={obj.id}
+                      checked={selectedObjective === obj.id}
+                      onChange={() => setSelectedObjective(obj.id)}
+                      style={{ margin: 0, width: '16px', height: '16px', cursor: 'pointer', accentColor: '#1877f2' }} 
+                    />
+                    <div style={{ width: '40px', height: '40px', background: '#f3f4f6', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                      {obj.icon}
+                    </div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                      {obj.label}
+                    </div>
+                  </label>
+                ))}
+              </div>
+              
+              <div style={{ flex: 1.2, padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)' }}>
+                <div style={{ width: '100%', maxWidth: '250px', marginBottom: '1.5rem', position: 'relative' }}>
+                  <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Map Illustration" style={{ width: '100%', height: 'auto', opacity: 0.2 }} />
+                  <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '80px', height: '80px', background: '#fff', borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                     <img src="https://cdn-icons-png.flaticon.com/512/73/73196.png" alt="Compass" style={{ width: '40px', height: '40px', opacity: 0.6 }} />
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: '1.5', padding: '0 1rem' }}>
+                  Kampanya amacınız, reklamlarınızı yayınlayarak ulaşmayı amaçladığınız işletme hedefidir. Daha fazla bilgi için fareyi her birinin üzerine getirin.
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '1rem', background: 'var(--bg-primary)' }}>
+              <button onClick={() => setShowObjectiveModal(false)} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}>İptal</button>
+              <button onClick={() => {
+                setShowObjectiveModal(false);
+                if (selectedObjective === 'Trafik') setShowTrafficSetupModal(true);
+              }} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', border: 'none', background: '#1877f2', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Devam</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {messageModal.show && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '2rem', textAlign: 'center' }}>
