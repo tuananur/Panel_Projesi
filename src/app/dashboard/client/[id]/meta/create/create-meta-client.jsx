@@ -343,31 +343,25 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
     }
   };
 
-    const renderAdFormFields = (data, setData, isCreate, isEditing) => {
-    const parentCampaignName = campaigns.find(c => c.id === adSets.find(as => as.id === data.parent_id)?.campaign_id)?.name;
-    const parentAdSetName = adSets.find(as => as.id === data.parent_id)?.name;
-
+const renderAdFormFields = (data, setData, isCreate, isEditing) => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
-        {/* Card 1: Reklam Adı */}
+        {/* Card 1: Reklam Adı ve Set Seçimi */}
         <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM ADI *</label>
-              {isEditing ? (
-                <input 
-                  required
-                  className="form-control" 
-                  value={isCreate ? data.name : editName} 
-                  onChange={e => isCreate ? setData({ ...data, name: e.target.value }) : setEditName(e.target.value)} 
-                  placeholder="Örn: Yeni Etkileşim Reklamı"
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
-                />
-              ) : (
-                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>{selectedEntity?.data?.name}</div>
-              )}
-            </div>
-            <button type="button" style={{ padding: '0.65rem 1rem', background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>Şablon Oluştur</button>
+          <div>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>REKLAM ADI *</label>
+            {isEditing ? (
+              <input 
+                required
+                className="form-control" 
+                value={isCreate ? data.name : editName} 
+                onChange={e => isCreate ? setData({ ...data, name: e.target.value }) : setEditName(e.target.value)} 
+                placeholder="Örn: Yeni Etkileşim Reklamı"
+                style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
+              />
+            ) : (
+              <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>{selectedEntity?.data?.name}</div>
+            )}
           </div>
           {isCreate && (
             <div>
@@ -387,27 +381,10 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
           )}
         </div>
 
-        {/* Card 2: Ortaklık Reklamı */}
-        <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Ortaklık Reklamı</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.7rem', color: data.partnership_ad ? '#1877f2' : 'var(--text-secondary)', fontWeight: 700 }}>
-                {data.partnership_ad ? 'AÇIK' : 'KAPALI'}
-              </span>
-              <StatusToggle active={!!data.partnership_ad} onToggle={() => isEditing && setData({ ...data, partnership_ad: !data.partnership_ad })} />
-            </div>
-          </div>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-            İçerik üreticileri, markalar ve diğer işletmelerle birlikte reklamlar yayınlayın. Bu reklamlar, kampanya performansını artırmak için her iki profilden gelen sinyallerden yararlanır.
-          </p>
-        </div>
-
-        {/* Card 3: Kimlik */}
+        {/* Card 2: Kimlik */}
         <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Kimlik</h3>
-            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Reklamınızda kullanılacak profiller</p>
+            <h3 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Yayınlanacak Profiller</h3>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
@@ -441,258 +418,16 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
               )}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <input 
-                type="checkbox" 
-                disabled={!isEditing}
-                checked={data.threads_enabled !== false} 
-                onChange={e => setData({ ...data, threads_enabled: e.target.checked })} 
-                style={{ width: '14px', height: '14px', accentColor: '#1877f2', cursor: isEditing ? 'pointer' : 'default' }}
-              />
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>Instagram hesabını kullan (Threads profili)</span>
-            </div>
-            <button type="button" style={{ padding: '0.3rem 0.6rem', background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Profil oluştur</button>
-          </div>
         </div>
 
-        {/* Card 4: Reklam Kurulumu */}
-        <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <h3 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Reklam Kurulumu</h3>
+        {/* Card 3: Reklam İçeriği */}
+        <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Reklam Kurulumu</label>
-            {isEditing ? (
-              <select 
-                value={data.setup_type || 'Reklam Oluştur'}
-                onChange={e => setData({ ...data, setup_type: e.target.value })}
-                style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}
-              >
-                <option value="Reklam Oluştur">Reklam Oluştur</option>
-                <option value="Mevcut Gönderiyi Kullan">Mevcut Gönderiyi Kullan</option>
-              </select>
-            ) : (
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>{data.setup_type || 'Reklam Oluştur'}</div>
-            )}
+            <h3 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Reklam İçeriği</h3>
           </div>
           
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Medya Kurulumu</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.2rem' }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
-                <input 
-                  type="radio" 
-                  name={`media_setup_${isCreate ? 'c' : 'e'}`}
-                  disabled={!isEditing}
-                  checked={data.media_setup !== 'catalog'} 
-                  onChange={() => setData({ ...data, media_setup: 'manuel' })}
-                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
-                />
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>Manuel yükleme</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Medyayı ve metinleri kendiniz seçin.</div>
-                </div>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
-                <input 
-                  type="radio" 
-                  name={`media_setup_${isCreate ? 'c' : 'e'}`}
-                  disabled={!isEditing}
-                  checked={data.media_setup === 'catalog'} 
-                  onChange={() => setData({ ...data, media_setup: 'catalog' })}
-                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
-                />
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>Advantage+ katalog reklamları</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Kataloğunuzdaki ürün görsellerini ve videolarını otomatik olarak gösterin.</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Format</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.2rem' }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
-                <input 
-                  type="radio" 
-                  name={`format_${isCreate ? 'c' : 'e'}`}
-                  disabled={!isEditing}
-                  checked={data.format !== 'carousel' && data.format !== 'collection'} 
-                  onChange={() => setData({ ...data, format: 'single_image' })}
-                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
-                />
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>Tek Görsel veya Video</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Bir görsel ya da video veya birden fazla görsel içeren slayt gösterisi.</div>
-                </div>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
-                <input 
-                  type="radio" 
-                  name={`format_${isCreate ? 'c' : 'e'}`}
-                  disabled={!isEditing}
-                  checked={data.format === 'carousel'} 
-                  onChange={() => setData({ ...data, format: 'carousel' })}
-                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
-                />
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>Döngü</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Kaydırılabilen iki veya daha fazla görsel ya da video.</div>
-                </div>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: isEditing ? 'pointer' : 'default' }}>
-                <input 
-                  type="radio" 
-                  name={`format_${isCreate ? 'c' : 'e'}`}
-                  disabled={!isEditing}
-                  checked={data.format === 'collection'} 
-                  onChange={() => setData({ ...data, format: 'collection' })}
-                  style={{ marginTop: '3px', accentColor: '#1877f2' }}
-                />
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>Koleksiyon</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Tam ekran mobil deneyimle açılan öğe grubu.</div>
-                </div>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 5: Yönlendirme Hedefi */}
-        <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <h3 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Yönlendirme Hedefi</h3>
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'default' }}>
-            <input type="radio" checked readOnly style={{ marginTop: '3px', accentColor: '#1877f2' }} />
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>İnternet Sitesi</div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>İnsanları internet sitenize yönlendirin.</div>
-            </div>
-          </label>
-
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', marginTop: '0.2rem' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>İnternet Sitesi Adresi (URL) *</label>
-              {isEditing ? (
-                <input 
-                  required
-                  type="url"
-                  className="form-control" 
-                  value={data.website_url || ''} 
-                  onChange={e => setData({ ...data, website_url: e.target.value })} 
-                  placeholder="https://terapiyle.com/"
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
-                />
-              ) : (
-                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.website_url}</div>
-              )}
-            </div>
-            <button 
-              type="button" 
-              onClick={() => { if (data.website_url) window.open(data.website_url, '_blank'); }}
-              style={{ padding: '0.65rem 1rem', background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
-            >
-              URL Önizlemesini Gör
-            </button>
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Görünen Bağlantı</label>
-            {isEditing ? (
-              <input 
-                className="form-control" 
-                value={data.display_link || ''} 
-                onChange={e => setData({ ...data, display_link: e.target.value })} 
-                placeholder="https://terapiyle.com/"
-                style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
-              />
-            ) : (
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.display_link || '-'}</div>
-            )}
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.4rem', display: 'flex', gap: '4px' }}>
-              <span>ℹ️ URL parametreleri tek bir yerden yönetebilmeniz için Takip bölümüne taşındı.</span>
-            </div>
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Tarayıcı eklentileri</label>
-            <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.2rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-                <input 
-                  type="radio" 
-                  name={`browser_add_on_${isCreate ? 'c' : 'e'}`}
-                  disabled={!isEditing}
-                  checked={data.browser_add_on !== 'call' && data.browser_add_on !== 'whatsapp'} 
-                  onChange={() => setData({ ...data, browser_add_on: 'none' })}
-                  style={{ accentColor: '#1877f2' }}
-                />
-                Yok
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-                <input 
-                  type="radio" 
-                  name={`browser_add_on_${isCreate ? 'c' : 'e'}`}
-                  disabled={!isEditing}
-                  checked={data.browser_add_on === 'call'} 
-                  onChange={() => setData({ ...data, browser_add_on: 'call' })}
-                  style={{ accentColor: '#1877f2' }}
-                />
-                Ara
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-                <input 
-                  type="radio" 
-                  name={`browser_add_on_${isCreate ? 'c' : 'e'}`}
-                  disabled={!isEditing}
-                  checked={data.browser_add_on === 'whatsapp'} 
-                  onChange={() => setData({ ...data, browser_add_on: 'whatsapp' })}
-                  style={{ accentColor: '#1877f2' }}
-                />
-                WhatsApp
-              </label>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-              <input 
-                type="checkbox" 
-                disabled={!isEditing}
-                checked={data.instant_experience === true} 
-                onChange={e => setData({ ...data, instant_experience: e.target.checked })} 
-                style={{ accentColor: '#1877f2' }}
-              />
-              Hızlı Deneyim (Instant Experience)
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: isEditing ? 'pointer' : 'default', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-              <input 
-                type="checkbox" 
-                disabled={!isEditing}
-                checked={data.facebook_event === true} 
-                onChange={e => setData({ ...data, facebook_event: e.target.checked })} 
-                style={{ accentColor: '#1877f2' }}
-              />
-              Facebook Etkinliği
-            </label>
-          </div>
-        </div>
-
-        {/* Card 6: Reklam Kreatifi */}
-        <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Reklam Kreatifi</h3>
-            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Reklam metninizi, medyanızı ve iyileştirmelerinizi seçin ve optimize edin.</p>
-          </div>
-          
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Medya (Görsel URL) *</label>
-              {isEditing && (
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <button type="button" style={{ padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 600, cursor: 'pointer' }}>Medyayı Düzenle</button>
-                  <button type="button" onClick={() => setData({ ...data, image_url: '' })} style={{ padding: '0.25rem 0.5rem', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 600, cursor: 'pointer' }}>🗑️</button>
-                </div>
-              )}
-            </div>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Görsel URL *</label>
             {isEditing ? (
               <>
                 <input 
@@ -735,7 +470,7 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Ana Metin *</label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Reklam Metni *</label>
             {isEditing ? (
               <textarea 
                 required
@@ -751,50 +486,24 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
             )}
           </div>
 
-          <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Başlık *</label>
-            {isEditing ? (
-              <input 
-                required
-                className="form-control" 
-                value={data.headline || ''} 
-                onChange={e => setData({ ...data, headline: e.target.value })} 
-                placeholder="Terapiyle Sana En Uygun Terapisti Bul"
-                style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
-              />
-            ) : (
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>{data.headline}</div>
-            )}
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Açıklama</label>
-            {isEditing ? (
-              <input 
-                className="form-control" 
-                value={data.description || ''} 
-                onChange={e => setData({ ...data, description: e.target.value })} 
-                placeholder="Terapiyle. Online, güvenli ve kolay!..."
-                style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
-              />
-            ) : (
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>{data.description || '-'}</div>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '0.8rem' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>Metni kişiye göre optimize et</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.65rem', color: data.optimize_text !== false ? '#45bd62' : 'var(--text-secondary)', fontWeight: 700 }}>
-                {data.optimize_text !== false ? 'ETKİN' : 'DEVRE DIŞI'}
-              </span>
-              <StatusToggle active={data.optimize_text !== false} onToggle={() => isEditing && setData({ ...data, optimize_text: data.optimize_text === false })} />
-            </div>
-          </div>
-
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Eylem Çağrısı *</label>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Başlık *</label>
+              {isEditing ? (
+                <input 
+                  required
+                  className="form-control" 
+                  value={data.headline || ''} 
+                  onChange={e => setData({ ...data, headline: e.target.value })} 
+                  placeholder="Terapiyle Sana En Uygun Terapisti Bul"
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
+                />
+              ) : (
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>{data.headline}</div>
+              )}
+            </div>
+            <div>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Eylem Çağrısı (Buton) *</label>
               {isEditing ? (
                 <select 
                   value={data.call_to_action || 'LEARN_MORE'}
@@ -811,97 +520,38 @@ export default function CreateMetaClient({ clientId, initialCampaigns, initialAd
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>{CTA_LABELS[data.call_to_action || 'LEARN_MORE']}</div>
               )}
             </div>
-            <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Advantage+ kreatif</label>
-              <div style={{ padding: '0.65rem 0.85rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-                <span>Kreatif iyileştirmeleri (2/7)</span>
-                <button type="button" style={{ background: 'none', border: 'none', color: '#1877f2', fontWeight: 700, cursor: 'pointer', fontSize: '0.75rem' }}>Düzenle</button>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.8rem' }}>
-            <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Kreatif testi</label>
-              <button type="button" style={{ width: '100%', padding: '0.6rem', background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>Test oluştur</button>
-            </div>
-            <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Diller</label>
-              <div style={{ padding: '0.4rem 0.8rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-                <span>Otomatik çeviriler</span>
-                <StatusToggle active={false} onToggle={() => {}} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 7: Takip */}
-        <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Takip</h3>
-            <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Takip edilecek dönüşüm olaylarını seçin.</p>
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-              <input type="checkbox" checked readOnly style={{ accentColor: '#1877f2' }} />
-              İnternet sitesi olayları
-            </label>
-            <div style={{ marginLeft: '22px', padding: '0.6rem 0.8rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#45bd62', display: 'inline-block' }}></span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>TERAPİYLE - Piksel</span>
-              </div>
-              {isEditing ? (
-                <input 
-                  required
-                  className="form-control" 
-                  value={data.pixel_id || '1850906787926541'} 
-                  onChange={e => setData({ ...data, pixel_id: e.target.value })} 
-                  style={{ width: '160px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', textAlign: 'right', outline: 'none' }} 
-                />
-              ) : (
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>{data.pixel_id || '1850906787926541'}</div>
-              )}
-            </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem', opacity: 0.5, color: 'var(--text-primary)' }}>
-              <input type="checkbox" disabled style={{ accentColor: '#1877f2' }} />
-              Uygulama Olayları
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--text-primary)' }}>
-                <input type="checkbox" checked readOnly style={{ accentColor: '#1877f2' }} />
-                Çevrimdışı olaylar
-              </label>
-              <button type="button" style={{ padding: '0.3rem 0.6rem', background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Ayarla</button>
-            </div>
           </div>
 
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>URL Parametreleri</label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem', fontWeight: 600 }}>Yönlendirilecek Web Sitesi (URL) *</label>
             {isEditing ? (
               <input 
+                required
+                type="url"
                 className="form-control" 
-                value={data.url_params || ''} 
-                onChange={e => setData({ ...data, url_params: e.target.value })} 
-                placeholder="anahtar1=deger1&anahtar2=deger2"
-                style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '0.4rem', outline: 'none' }} 
+                value={data.website_url || ''} 
+                onChange={e => setData({ ...data, website_url: e.target.value })} 
+                placeholder="https://terapiyle.com/"
+                style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }} 
               />
             ) : (
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>{data.url_params || '-'}</div>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>{data.website_url}</div>
             )}
-            <button type="button" style={{ background: 'none', border: 'none', color: '#1877f2', fontWeight: 700, cursor: 'pointer', fontSize: '0.75rem', padding: 0 }}>Bir URL parametresi oluşturun</button>
+          </div>
+          
+          <div style={{ background: 'rgba(24, 119, 242, 0.05)', border: '1px solid rgba(24, 119, 242, 0.2)', padding: '0.8rem', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1877f2', fontWeight: 700, fontSize: '0.8rem', marginBottom: '4px' }}>
+              <span>💡</span> Otomatik Ayarlar Devrede
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Katalog, Piksel, Döngüsel Format, Advantage+ Kreatif İyileştirmeleri ve Çevrimdışı Olaylar gibi tüm teknik Meta ayarları arka planda en optimize şekilde otomatik uygulanır.
+            </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '0.8rem', marginTop: '0.2rem' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Üçüncü taraf raporlama araçları</span>
-            <button type="button" style={{ padding: '0.3rem 0.6rem', background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}>Bağla</button>
-          </div>
         </div>
       </div>
     );
   };
-
     const renderAudienceCard = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%' }}>
