@@ -801,7 +801,8 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                             <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
                               <option>Kreatif</option>
                               <option>Hedef Kitle</option>
-                              <option>Yerleşimler</option>
+                              <option>Reklam Alanı</option>
+                              <option>Özel</option>
                             </select>
                           </div>
                           <div>
@@ -816,7 +817,37 @@ const renderAdFormFields = (data, setData, isCreate, isEditing) => {
                             <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '0.4rem' }}>Performansı nasıl karşılaştırmak istersiniz? <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--text-secondary)', color: 'var(--bg-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>i</span></div>
                             <select style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem 0.85rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }}>
                               <option>Sonuç başına ücret</option>
-                              <option>Tıklama başına ücret</option>
+                              <option>Alışveriş Başına Ücret</option>
+                              <option>CPC (Bağlantı Tıklaması Başına Ücret)</option>
+                              <option>Erişilen 1.000 Meta Hesabı başına ücret</option>
+                              <optgroup label="Standart Olaylar">
+                                <option>3 saniyelik video oynatımı başına ücret</option>
+                                <option>Arama Başına Ücret</option>
+                                <option>Atlanan Seviye Başına Ücret</option>
+                                <option>Açılan Başarılar Başına Ücret</option>
+                                <option>Başlatılan Alışveriş Başına Ücret</option>
+                                <option>Beğenme başına ücret</option>
+                                <option>Dilek Listesine Ekleme Başına Ücret</option>
+                                <option>Etkinlik yanıtı başına ücret</option>
+                                <option>Gönderi Etkileşimi Başına Ücret</option>
+                                <option>Gönderilen Puan Başına Ücret</option>
+                                <option>Kredi harcaması başına ücret</option>
+                                <option>Mobil Uygulamada 2 Günlük Tutma Başına Ücret</option>
+                                <option>Mobil Uygulamada 7 Günlük Tutma Başına Ücret</option>
+                                <option>Potansiyel Müşteri Başına Ücret</option>
+                                <option>Reklam hatırlanırlığı yükselişi başına ücret</option>
+                                <option>Sepete Ekleme Başına Ücret</option>
+                                <option>Tamamlanan Eğitim Başına Ücret</option>
+                                <option>Tamamlanan Kayıt Başına Ücret</option>
+                                <option>Uygulama Aktivasyonu Başına Ücret</option>
+                                <option>Uygulama Yükleme Başına Ücret</option>
+                                <option>Yeni mesajlaşma kişisi başına ücret</option>
+                                <option>Yönlendirme Sayfası Görüntülemesi Başına Ücret</option>
+                                <option>Çevrimdışı Diğer Dönüşümler Başına Ücret</option>
+                                <option>Ödeme Bilgisi Ekleme Başına Ücret</option>
+                                <option>Özel Olay Başına Ücret</option>
+                                <option>İçerik Görüntülemesi Başına Ücret</option>
+                              </optgroup>
                             </select>
                           </div>
                         </div>
