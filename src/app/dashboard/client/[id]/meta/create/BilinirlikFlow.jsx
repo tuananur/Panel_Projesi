@@ -296,21 +296,75 @@ export default function BilinirlikFlow({ onBack, clientName }) {
               <label style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.4rem', display: 'block', fontWeight: 600 }}>Kategoriler</label>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Bu kampanyanın neyin reklamını yapacağını en iyi tanımlayan kategorileri seçin.</div>
               <div style={{ position: 'relative' }}>
-                <select 
-                  value={formData.specialCategory}
-                  onChange={e => setFormData({...formData, specialCategory: e.target.value})}
-                  style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.5rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-secondary)', appearance: 'none' }}>
-                  <option>Kategori seçin</option>
-                  <option>Sosyal Meseleler, Seçimler veya Siyaset</option>
-                  <option>Konut</option>
-                  <option value="İstihdam">İstihdam</option>
-                </select>
-                <div style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                  {formData.specialCategory === 'İstihdam' ? <span style={{fontSize:'16px'}}>💼</span> : null}
+                <div 
+                  onClick={() => setFormData({...formData, specialCategoryOpen: !formData.specialCategoryOpen})}
+                  style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.5rem', border: formData.specialCategoryOpen ? '1px solid #1877f2' : '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', background: 'var(--bg-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: formData.specialCategoryOpen ? '0 0 0 2px rgba(24,119,242,0.2)' : 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'absolute', left: '0.8rem' }}>
+                    {formData.specialCategory === 'Sosyal Meseleler, Seçimler veya Siyaset' ? <span style={{fontSize:'16px'}}>📢</span> : formData.specialCategory === 'İstihdam' ? <span style={{fontSize:'16px'}}>💼</span> : formData.specialCategory === 'Konut' ? <span style={{fontSize:'16px'}}>🏠</span> : formData.specialCategory === 'Finansal ürünler ve hizmetler' ? <span style={{fontSize:'16px'}}>💳</span> : null}
+                  </div>
+                  <span>{formData.specialCategory !== 'Varsa kategori beyan et' && formData.specialCategory !== 'Kategori seçin' ? formData.specialCategory : 'Kategori seçin'}</span>
+                  <ChevronDown size={16} color="var(--text-primary)" style={{ transform: formData.specialCategoryOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                 </div>
-                <div style={{ position: 'absolute', right: '0.8rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                  <ChevronDown size={16} color="var(--text-primary)" />
-                </div>
+                
+                {formData.specialCategoryOpen && (
+                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 50, overflow: 'hidden' }}>
+                    <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                      {[
+                        { 
+                          id: 'Finansal ürünler ve hizmetler', 
+                          icon: '💳', 
+                          desc: 'Kredi kartları, uzun vadeli finansman, vadesiz ve tasarruf hesapları, yatırım hizmetleri, sigorta hizmetleri veya diğer ilgili finansal fırsatlara yönelik reklamlar.' 
+                        },
+                        { 
+                          id: 'İstihdam', 
+                          icon: '💼', 
+                          desc: 'İş teklifleri, stajlar, profesyonel sertifika programları ve ilgili diğer fırsatlara yönelik reklamlar.' 
+                        },
+                        { 
+                          id: 'Konut', 
+                          icon: '🏠', 
+                          desc: 'Emlak ilanları, konut sigortası, mortgage kredileri veya ilgili diğer fırsatlara yönelik reklamlar.' 
+                        },
+                        { 
+                          id: 'Sosyal Meseleler, Seçimler veya Siyaset', 
+                          icon: '📢', 
+                          desc: 'Sosyal meseleler (örneğin ekonomi veya vatandaşlık hakları ve sosyal haklar), seçimler veya siyasetçiler ya da siyasi kampanyalarla ilgili reklamlar' 
+                        }
+                      ].map(cat => (
+                        <div 
+                          key={cat.id}
+                          onClick={() => {
+                            if (formData.specialCategory === cat.id) {
+                              setFormData({...formData, specialCategory: 'Varsa kategori beyan et'});
+                            } else {
+                              setFormData({...formData, specialCategory: cat.id});
+                            }
+                          }}
+                          style={{ display: 'flex', gap: '0.8rem', padding: '0.8rem 1rem', cursor: 'pointer', background: formData.specialCategory === cat.id ? '#e7f3ff' : 'transparent', borderBottom: '1px solid rgba(0,0,0,0.05)' }}
+                        >
+                          <div style={{ paddingTop: '2px' }}>
+                            <div style={{ width: '18px', height: '18px', border: formData.specialCategory === cat.id ? 'none' : '1px solid #ccd0d5', borderRadius: '4px', background: formData.specialCategory === cat.id ? '#1877f2' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {formData.specialCategory === cat.id && <CheckCircle2 size={14} color="#fff" strokeWidth={3} />}
+                            </div>
+                          </div>
+                          <div style={{ paddingTop: '1px' }}>
+                            <span style={{fontSize:'16px'}}>{cat.icon}</span>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.9rem', color: '#1c1e21', fontWeight: 600, marginBottom: '2px' }}>{cat.id}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#606770', lineHeight: '1.3' }}>{cat.desc}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ padding: '1rem', background: '#fff', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                      <p style={{ margin: '0 0 0.8rem 0', fontSize: '0.8rem', color: '#606770', lineHeight: '1.4' }}>
+                        Kategorilerden hiçbiri reklamınız için geçerli değilse özel bir reklam kategorisi seçmenize gerek olmayabilir. Emin değilseniz kategorileri bildirme konusunda yardım da alabilirsiniz.
+                      </p>
+                      <a href="#" style={{ fontSize: '0.85rem', color: '#1877f2', textDecoration: 'none', fontWeight: 500 }}>Kategorileri Bildirme Hakkında Yardım Alın</a>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
