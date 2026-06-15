@@ -16,8 +16,15 @@ export default function BilinirlikFlow({ onBack }) {
     abTestDuration: 7,
     abTestCompare: 'Sonuç başına ücret',
     specialCategory: 'Varsa kategori beyan et',
-    specialCategoryCountry: 'Türkiye'
+    specialCategoryCountry: 'Türkiye',
+    purchaseType: 'Açık Artırma',
+    campaignObjective: 'Bilinirlik',
+    bidStrategy: 'Sonuç başına ücret hedefi',
+    budgetPlanVisible: true
   });
+
+  const [purchaseTypeOpen, setPurchaseTypeOpen] = useState(false);
+  const [bidStrategyOpen, setBidStrategyOpen] = useState(false);
 
   const [budgetError, setBudgetError] = useState(false);
 
@@ -171,26 +178,68 @@ export default function BilinirlikFlow({ onBack }) {
             <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 600 }}>Kampanya Detayları</h3>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ position: 'relative' }}>
+              <label style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.4rem', display: 'block', fontWeight: 600 }}>Satın Alma Türü</label>
+              <div 
+                onClick={() => setPurchaseTypeOpen(!purchaseTypeOpen)}
+                style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', background: 'var(--bg-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                {formData.purchaseType || 'Açık Artırma'}
+                <ChevronDown size={16} />
+              </div>
+              {purchaseTypeOpen && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 10 }}>
+                  <div 
+                    onClick={() => { setFormData({...formData, purchaseType: 'Açık Artırma'}); setPurchaseTypeOpen(false); }}
+                    style={{ padding: '0.8rem', cursor: 'pointer', background: formData.purchaseType === 'Açık Artırma' ? 'rgba(24, 119, 242, 0.1)' : 'transparent', display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                    <input type="radio" checked={formData.purchaseType === 'Açık Artırma'} readOnly style={{ accentColor: '#1877f2', width: '16px', height: '16px', marginTop: '2px' }} />
+                    <div>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 500 }}>Açık Artırma</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Uygun maliyetli tekliflerle gerçek zamanlı olarak satın alın.</div>
+                    </div>
+                  </div>
+                  <div 
+                    onClick={() => { setFormData({...formData, purchaseType: 'Rezervasyon'}); setPurchaseTypeOpen(false); }}
+                    style={{ padding: '0.8rem', cursor: 'pointer', background: formData.purchaseType === 'Rezervasyon' ? 'rgba(24, 119, 242, 0.1)' : 'transparent', display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                    <input type="radio" checked={formData.purchaseType === 'Rezervasyon'} readOnly style={{ accentColor: '#1877f2', width: '16px', height: '16px', marginTop: '2px' }} />
+                    <div>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 500 }}>Rezervasyon</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Daha öngörülebilir sonuçlar için önceden satın alın.</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>Satın Alma Türü</div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between' }}>
-                Açık Artırma
-                <button style={{ background: 'none', border: 'none', color: '#1877f2', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}><Edit2 size={12}/> Düzenle</button>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>Kampanya amacı <HelpCircle size={12} /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {[
+                  { id: 'Bilinirlik', icon: <Megaphone size={16} color="#fff" />, bg: '#1877f2' },
+                  { id: 'Trafik', icon: <span style={{fontSize:'16px'}}>🖱️</span>, bg: 'var(--bg-primary)' },
+                  { id: 'Etkileşim', icon: <span style={{fontSize:'16px'}}>💬</span>, bg: 'var(--bg-primary)' },
+                  { id: 'Potansiyel Müşteriler', icon: <span style={{fontSize:'16px'}}>📋</span>, bg: 'var(--bg-primary)' },
+                  { id: 'Uygulama tanıtımı', icon: <span style={{fontSize:'16px'}}>📱</span>, bg: 'var(--bg-primary)' },
+                  { id: 'Satışlar', icon: <span style={{fontSize:'16px'}}>🛍️</span>, bg: 'var(--bg-primary)' }
+                ].map(obj => (
+                  <label key={obj.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.6rem', cursor: 'pointer', borderRadius: '6px', background: formData.campaignObjective === obj.id ? 'rgba(24, 119, 242, 0.1)' : 'transparent' }}>
+                    <input type="radio" checked={formData.campaignObjective === obj.id} onChange={() => setFormData({...formData, campaignObjective: obj.id})} style={{ accentColor: '#1877f2', width: '16px', height: '16px' }} />
+                    <div style={{ width: '32px', height: '32px', background: obj.bg, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {obj.icon}
+                    </div>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{obj.id}</span>
+                  </label>
+                ))}
               </div>
             </div>
             
-            <div style={{ height: '1px', background: 'var(--border-color)' }} />
-            
-            <div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '4px' }}>Kampanya amacı <HelpCircle size={12} /></div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between' }}>
-                Bilinirlik
-                <button style={{ background: 'none', border: 'none', color: '#1877f2', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}><Edit2 size={12}/> Düzenle</button>
+            <div style={{ marginTop: '0.5rem' }}>
+              <button style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>Seçenekleri Gizle <ChevronDown size={14} style={{transform: 'rotate(180deg)'}} /></button>
+              <div style={{ marginTop: '0.5rem' }}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>Kampanya Harcama Sınırı <span style={{color:'var(--text-secondary)', fontWeight: 400}}>· İsteğe bağlı</span> <HelpCircle size={12}/></div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem', paddingLeft: '0.5rem' }}>Hiçbiri eklenmedi</div>
               </div>
             </div>
-            
-            <button style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', marginTop: '0.5rem' }}>Daha Fazla Seçenek Göster</button>
           </div>
         </div>
 
@@ -238,19 +287,111 @@ export default function BilinirlikFlow({ onBack }) {
                 </div>
               </div>
               
-              <div>
+              <div style={{ position: 'relative' }}>
                 <label style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>Kampanya Teklif Stratejisi <HelpCircle size={12} /></label>
-                <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>En yüksek hacim</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>Reklam açık artırmalarında nasıl teklif vereceğimiz.</div>
+                
+                <div 
+                  onClick={() => setBidStrategyOpen(!bidStrategyOpen)}
+                  style={{ width: 'fit-content', minWidth: '220px', padding: '0.6rem 0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', background: 'var(--bg-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                  {formData.bidStrategy || 'Sonuç başına ücret hedefi'}
+                  <ChevronDown size={16} />
+                </div>
+
+                {bidStrategyOpen && (
+                  <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', width: '380px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 10 }}>
+                    <div 
+                      onClick={() => { setFormData({...formData, bidStrategy: 'En yüksek hacim'}); setBidStrategyOpen(false); }}
+                      style={{ padding: '0.8rem', cursor: 'pointer', background: formData.bidStrategy === 'En yüksek hacim' ? 'rgba(24, 119, 242, 0.1)' : 'transparent' }}>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 500 }}>En yüksek hacim</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Bütçeniz için en fazla sonucu elde edin.</div>
+                    </div>
+                    <div 
+                      onClick={() => { setFormData({...formData, bidStrategy: 'Sonuç başına ücret hedefi'}); setBidStrategyOpen(false); }}
+                      style={{ padding: '0.8rem', cursor: 'pointer', background: formData.bidStrategy === 'Sonuç başına ücret hedefi' ? 'rgba(24, 119, 242, 0.1)' : 'transparent' }}>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 500 }}>Sonuç başına ücret hedefi</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Sonuçların hacmini en üst düzeye çıkarırken sonuç başına belirli bir ücret hedefleyin.</div>
+                    </div>
+                    <div 
+                      onClick={() => { setBidStrategyOpen(false); }}
+                      style={{ padding: '0.8rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Diğer seçenekler</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>Teklif üst sınırı</div>
+                      </div>
+                      <ChevronDown size={16} style={{transform: 'rotate(-90deg)'}} />
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <input type="checkbox" disabled style={{ width: '16px', height: '16px' }} />
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Bütçe artışlarını planlayın</span>
-                  <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#1877f2', fontWeight: 600, cursor: 'pointer' }}>Gör</span>
+                  <input type="checkbox" checked={formData.budgetPlanVisible} onChange={() => setFormData({...formData, budgetPlanVisible: !formData.budgetPlanVisible})} style={{ width: '16px', height: '16px', accentColor: '#1877f2', cursor: 'pointer' }} />
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
+                  <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-color)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer', background: 'var(--bg-secondary)' }}>
+                    Gör <ChevronDown size={14} />
+                  </div>
                 </div>
+
+                {formData.budgetPlanVisible && (
+                  <div style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(24, 119, 242, 0.03)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Bütçe artışı için süre</div>
+                      <ChevronDown size={16} />
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Başlangıç</div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <input value="Haz 16, 2026" readOnly style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            <span style={{fontSize: '14px'}}>🕒</span> 00:00
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ color: 'var(--text-secondary)', marginTop: '1.5rem' }}>-</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Bitiş</div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <input value="Haz 17, 2026" readOnly style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            <span style={{fontSize: '14px'}}>🕒</span> 00:00
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                      <select style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }}>
+                        <option>Günlük bütçeyi değer miktarına göre artır (TL)</option>
+                      </select>
+                      <div style={{ display: 'flex', alignItems: 'center', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', width: '120px' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>TL 12,50</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: 'auto' }}>TRY</span>
+                      </div>
+                    </div>
+                    
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', marginBottom: '1rem', lineHeight: '1.4' }}>
+                      Meta 16 Haz ile 17 Haz arasında günde 62,50 TL harcamayı amaçlayacak (12,50 TL artış).
+                    </div>
+                    
+                    <button style={{ padding: '0.5rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{fontSize: '14px'}}>🗑️</span> Bu dönemi kaldır
+                    </button>
+                    
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button style={{ padding: '0.5rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{fontSize: '14px', fontWeight: 'bold'}}>+</span> Başka bir zaman aralığı ekle
+                      </button>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>1/50 zaman dilimi</div>
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ marginTop: '1rem' }}>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Reklam Planlaması</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>Reklam Planlaması <HelpCircle size={12} /></div>
                   <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.2rem' }}>Reklamları sürekli yayınla</div>
                 </div>
               </div>
