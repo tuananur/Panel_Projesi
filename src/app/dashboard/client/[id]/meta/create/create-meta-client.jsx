@@ -796,6 +796,22 @@ const renderBudgetPlanning = (data, setData) => (
           <div>
             <h3 style={{ margin: '0 0 0.4rem 0', fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 700 }}>Reklam İçeriği</h3>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Kullanıcıların göreceği görsel, metin ve hedef bağlantı.</div>
+          {/* Kimlik Seçimi */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase' }}>FACEBOOK SAYFASI i</label>
+              <select value={data.page_id || 'Terapimle'} onChange={e => setData({...data, page_id: e.target.value})} style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem', borderRadius: '6px', fontSize: '0.85rem' }}>
+                <option value="Terapimle">Terapimle</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase' }}>INSTAGRAM PROFİLİ i</label>
+              <select value={data.instagram_actor_id || 'terapiylecom'} onChange={e => setData({...data, instagram_actor_id: e.target.value})} style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem', borderRadius: '6px', fontSize: '0.85rem' }}>
+                <option value="terapiylecom">terapiylecom</option>
+              </select>
+            </div>
+          </div>
+
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
