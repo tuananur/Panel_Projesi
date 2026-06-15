@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import BilinirlikFlow from './BilinirlikFlow';
 import { useRouter } from 'next/navigation';
 import { createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction } from '@/app/actions';
-import { X, CheckCircle, AlertCircle, Check } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, Check, ChevronDown, Pencil, HelpCircle } from 'lucide-react';
 
 
 const CTA_LABELS = {
@@ -920,8 +920,13 @@ const renderAdsetFormFields = (data, setData, isCreate, isEditing) => {
             <div>
               <label style={{ fontSize: '0.75rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>Bütçe <span style={{ cursor: 'help' }} title="Günlük veya toplam kampanya bütçesi belirleyin.">i</span></label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <select style={{ flex: 1, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem', borderRadius: '4px', fontSize: '0.85rem' }}>
-                  <option>Günlük Bütçe</option><option>Toplam Bütçe</option>
+                <select 
+                  value={data.adsetBudgetType || 'Günlük Bütçe'}
+                  onChange={e => setData({...data, adsetBudgetType: e.target.value})}
+                  style={{ flex: 1, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '0.65rem', borderRadius: '4px', fontSize: '0.85rem' }}
+                >
+                  <option value="Günlük Bütçe">Günlük Bütçe</option>
+                  <option value="Toplam Bütçe">Toplam Bütçe</option>
                 </select>
                 <div style={{ position: 'relative', flex: 1 }}>
                   <input type="number" value={data.daily_budget || ''} onChange={e => setData({...data, daily_budget: e.target.value})} placeholder="50,00" style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid #1877f2', color: 'var(--text-primary)', padding: '0.65rem', borderRadius: '4px', fontSize: '0.85rem', textAlign: 'right', paddingRight: '2.5rem' }} />
@@ -930,6 +935,40 @@ const renderAdsetFormFields = (data, setData, isCreate, isEditing) => {
               </div>
             </div>
           </div>
+
+          {data.adsetBudgetType !== 'Toplam Bütçe' && (
+            <div style={{ marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <button type="button" style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>Seçenekleri Gizle <ChevronDown size={14} style={{transform: 'rotate(180deg)'}} /></button>
+                <button type="button" onClick={() => setData({...data, adsetSpendingLimitEditMode: !data.adsetSpendingLimitEditMode})} style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}><Pencil size={14} /> Düzenle</button>
+              </div>
+              
+              <div style={{ marginTop: '0.5rem' }}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>Reklam Seti Harcama Sınırı <span style={{color:'var(--text-secondary)', fontWeight: 400}}>· İsteğe bağlı</span> <HelpCircle size={12}/></div>
+                
+                {data.adsetSpendingLimitEditMode ? (
+                  <div style={{ marginTop: '0.8rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', marginBottom: '0.8rem' }}>
+                      <input type="checkbox" checked={data.adsetSpendingLimitEnabled} onChange={() => setData({...data, adsetSpendingLimitEnabled: !data.adsetSpendingLimitEnabled})} style={{ accentColor: '#1877f2', width: '16px', height: '16px' }} />
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Reklam Seti Harcama Sınırı Ekle</span>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-primary)', fontSize: '0.95rem' }}>TL</span>
+                      <input 
+                        placeholder="Ayarlı Sınır Yok"
+                        value={data.adsetSpendingLimitAmount || ''}
+                        onChange={e => setData({...data, adsetSpendingLimitAmount: e.target.value})}
+                        style={{ width: '100%', padding: '0.6rem 0.6rem 0.6rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-secondary)' }}
+                      />
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>Toplam 0,00 TL Harcandı</div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem', paddingLeft: '0.5rem' }}>Hiçbiri eklenmedi</div>
+                )}
+              </div>
+            </div>
+          )}
           <div>
             <h4 style={{ margin: '0 0 0.8rem 0', fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>Plan</h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.8rem' }}>
