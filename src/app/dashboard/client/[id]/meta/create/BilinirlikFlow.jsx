@@ -245,7 +245,7 @@ export default function BilinirlikFlow({ onBack, clientName }) {
               )}
             </div>
             
-            {formData.purchaseType !== 'Rezervasyon' && (
+            {formData.purchaseType !== 'Rezervasyon' && !(formData.budgetEnabled && formData.budgetType === 'Toplam bütçe') && (
               <div style={{ marginTop: '0.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <button style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>Seçenekleri Gizle <ChevronDown size={14} style={{transform: 'rotate(180deg)'}} /></button>
