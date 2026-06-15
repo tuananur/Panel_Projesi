@@ -340,10 +340,10 @@ export default function BilinirlikFlow({ onBack, clientName }) {
                               setFormData({...formData, specialCategory: cat.id});
                             }
                           }}
-                          style={{ display: 'flex', gap: '0.8rem', padding: '0.8rem 1rem', cursor: 'pointer', background: formData.specialCategory === cat.id ? '#e7f3ff' : 'transparent', borderBottom: '1px solid rgba(0,0,0,0.05)' }}
+                          style={{ display: 'flex', gap: '0.8rem', padding: '0.8rem 1rem', cursor: 'pointer', background: formData.specialCategory === cat.id ? 'rgba(24, 119, 242, 0.1)' : 'transparent', borderBottom: '1px solid var(--border-color)' }}
                         >
                           <div style={{ paddingTop: '2px' }}>
-                            <div style={{ width: '18px', height: '18px', border: formData.specialCategory === cat.id ? 'none' : '1px solid #ccd0d5', borderRadius: '4px', background: formData.specialCategory === cat.id ? '#1877f2' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '18px', height: '18px', border: formData.specialCategory === cat.id ? 'none' : '1px solid var(--border-color)', borderRadius: '4px', background: formData.specialCategory === cat.id ? '#1877f2' : 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               {formData.specialCategory === cat.id && <CheckCircle2 size={14} color="#fff" strokeWidth={3} />}
                             </div>
                           </div>
@@ -351,14 +351,14 @@ export default function BilinirlikFlow({ onBack, clientName }) {
                             <span style={{fontSize:'16px'}}>{cat.icon}</span>
                           </div>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.9rem', color: '#1c1e21', fontWeight: 600, marginBottom: '2px' }}>{cat.id}</div>
-                            <div style={{ fontSize: '0.8rem', color: '#606770', lineHeight: '1.3' }}>{cat.desc}</div>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '2px' }}>{cat.id}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.3' }}>{cat.desc}</div>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <div style={{ padding: '1rem', background: '#fff', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-                      <p style={{ margin: '0 0 0.8rem 0', fontSize: '0.8rem', color: '#606770', lineHeight: '1.4' }}>
+                    <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)' }}>
+                      <p style={{ margin: '0 0 0.8rem 0', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
                         Kategorilerden hiçbiri reklamınız için geçerli değilse özel bir reklam kategorisi seçmenize gerek olmayabilir. Emin değilseniz kategorileri bildirme konusunda yardım da alabilirsiniz.
                       </p>
                       <a href="#" style={{ fontSize: '0.85rem', color: '#1877f2', textDecoration: 'none', fontWeight: 500 }}>Kategorileri Bildirme Hakkında Yardım Alın</a>
