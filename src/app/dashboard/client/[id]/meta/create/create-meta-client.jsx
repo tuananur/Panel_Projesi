@@ -653,6 +653,34 @@ const renderBudgetPlanning = (data, setData) => (
   const renderAdsetFormFields = (data, setData, isCreate, isEditing) => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto', paddingRight: '0.8rem' }}>
+        {/* Dönüşüm Yeri */}
+        <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 700 }}>Dönüşüm</h3>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Trafiği nereye yönlendirmek istediğinizi seçin. <span style={{ color: '#1877f2', cursor: 'pointer' }}>Daha fazla bilgi alın</span></div>
+          </div>
+          
+          <div>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.4rem', fontWeight: 700 }}>Dönüşüm yeri <span style={{ cursor: 'help' }} title="Trafik hedefi.">i</span></label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
+                <input type="radio" name="conversion_location" defaultChecked style={{ marginTop: '2px' }} />
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>İnternet sitesi</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Trafiği internet sitenize gönderin.</div>
+                </div>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
+                <input type="radio" name="conversion_location" style={{ marginTop: '2px' }} />
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Uygulama</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Trafiği uygulamanıza gönderin.</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div style={{ padding: '1.2rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           <div><h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 700 }}>Bütçe ve Plan</h3></div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
