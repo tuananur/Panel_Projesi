@@ -562,16 +562,16 @@ const renderBudgetPlanning = (data, setData) => (
                     <div>
                       <div style={{ fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.2rem' }}>Başlangıç</div>
                       <div style={{ display: 'flex', gap: '0.2rem' }}>
-                        <input type="text" defaultValue="Haz 13, 2026" className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
-                        <input type="text" defaultValue="00:00" className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                        <input type="text" value={data[`budgetIncreaseStart_${periodId}`] || "16 Haz 2026"} onChange={e => setData({...data, [`budgetIncreaseStart_${periodId}`]: e.target.value})} className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                        <input type="text" value={data[`budgetIncreaseStartTime_${periodId}`] || "00:00"} onChange={e => setData({...data, [`budgetIncreaseStartTime_${periodId}`]: e.target.value})} className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
                       </div>
                     </div>
                     <div style={{ marginTop: '1rem' }}>-</div>
                     <div>
                       <div style={{ fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.2rem' }}>Bitiş</div>
                       <div style={{ display: 'flex', gap: '0.2rem' }}>
-                        <input type="text" defaultValue="Haz 14, 2026" className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
-                        <input type="text" defaultValue="00:00" className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                        <input type="text" value={data[`budgetIncreaseEnd_${periodId}`] || "17 Haz 2026"} onChange={e => setData({...data, [`budgetIncreaseEnd_${periodId}`]: e.target.value})} className="form-control" style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                        <input type="text" value={data[`budgetIncreaseEndTime_${periodId}`] || "00:00"} onChange={e => setData({...data, [`budgetIncreaseEndTime_${periodId}`]: e.target.value})} className="form-control" style={{ width: '60px', padding: '0.4rem', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
                       </div>
                     </div>
                   </div>
@@ -604,18 +604,22 @@ const renderBudgetPlanning = (data, setData) => (
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', width: '90px' }}>
                       <span style={{ fontSize: '0.75rem', paddingLeft: '0.5rem', color: 'var(--text-secondary)' }}>{data[`budgetIncreaseType_${periodId}`]?.includes('%') ? '%' : 'TL'}</span>
-                      <input type="text" defaultValue={data[`budgetIncreaseType_${periodId}`]?.includes('%') ? '20' : '7,50'} style={{ width: '100%', padding: '0.5rem 0.2rem', fontSize: '0.75rem', border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-primary)' }} />
+                      <input type="text" value={data[`budgetIncreaseAmount_${periodId}`] || (data[`budgetIncreaseType_${periodId}`]?.includes('%') ? '20' : '12,50')} onChange={e => setData({...data, [`budgetIncreaseAmount_${periodId}`]: e.target.value})} style={{ width: '100%', padding: '0.5rem 0.2rem', fontSize: '0.75rem', border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-primary)' }} />
                       {!data[`budgetIncreaseType_${periodId}`]?.includes('%') && (
                         <span style={{ fontSize: '0.75rem', paddingRight: '0.5rem', color: 'var(--text-secondary)' }}>TRY</span>
                       )}
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>Meta 13 Haz ile 14 Haz arasında günde 37,50 TL harcamayı amaçlayacak (7,50 TL artış).</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>
+                    Meta {(data[`budgetIncreaseStart_${periodId}`] || "16 Haz").split(' ')[0] + " " + (data[`budgetIncreaseStart_${periodId}`] || "16 Haz").split(' ')[1]} ile {(data[`budgetIncreaseEnd_${periodId}`] || "17 Haz").split(' ')[0] + " " + (data[`budgetIncreaseEnd_${periodId}`] || "17 Haz").split(' ')[1]} arasında günde {(parseFloat(data.daily_budget || 50) + parseFloat((data[`budgetIncreaseAmount_${periodId}`] || "12,50").replace(',','.'))).toFixed(2).replace('.', ',')} TL harcamayı amaçlayacak ({data[`budgetIncreaseAmount_${periodId}`] || "12,50"} TL artış).
+                  </div>
                   <button 
                     type="button" 
                     onClick={() => {
                       const current = data.planIncreasePeriods || [1];
-                      if(current.length > 1) {
+                      if(current.length === 1) {
+                        setData({ ...data, planIncreases: false, planIncreasePeriods: [1] });
+                      } else {
                         setData({ ...data, planIncreasePeriods: current.filter(id => id !== periodId) });
                       }
                     }}
