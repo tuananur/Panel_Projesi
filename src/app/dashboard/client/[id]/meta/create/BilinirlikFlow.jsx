@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Search, ChevronDown, CheckCircle2, AlertCircle, Edit2, Eye, ArrowLeft, MoreHorizontal, Video, Megaphone, HelpCircle } from 'lucide-react';
+import { X, Search, ChevronDown, CheckCircle2, AlertCircle, Edit2, Pencil, Eye, ArrowLeft, MoreHorizontal, Video, Megaphone, HelpCircle } from 'lucide-react';
 
 export default function BilinirlikFlow({ onBack }) {
   const [isReviewMode, setIsReviewMode] = useState(false);
@@ -20,11 +20,15 @@ export default function BilinirlikFlow({ onBack }) {
     purchaseType: 'Rezervasyon',
     campaignObjective: 'Bilinirlik',
     bidStrategy: 'Sonuç başına ücret hedefi',
-    budgetPlanVisible: true
+    budgetPlanVisible: true,
+    spendingLimitEnabled: true,
+    spendingLimitAmount: ''
   });
 
   const [purchaseTypeOpen, setPurchaseTypeOpen] = useState(false);
   const [bidStrategyOpen, setBidStrategyOpen] = useState(false);
+  const [spendingLimitEditMode, setSpendingLimitEditMode] = useState(false);
+  const [showReauthModal, setShowReauthModal] = useState(false);
 
   const [budgetError, setBudgetError] = useState(false);
 
@@ -234,10 +238,34 @@ export default function BilinirlikFlow({ onBack }) {
             </div>
             
             <div style={{ marginTop: '0.5rem' }}>
-              <button style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>Seçenekleri Gizle <ChevronDown size={14} style={{transform: 'rotate(180deg)'}} /></button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <button style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>Seçenekleri Gizle <ChevronDown size={14} style={{transform: 'rotate(180deg)'}} /></button>
+                <button onClick={() => setSpendingLimitEditMode(!spendingLimitEditMode)} style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}><Pencil size={14} /> Düzenle</button>
+              </div>
+              
               <div style={{ marginTop: '0.5rem' }}>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>Kampanya Harcama Sınırı <span style={{color:'var(--text-secondary)', fontWeight: 400}}>· İsteğe bağlı</span> <HelpCircle size={12}/></div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem', paddingLeft: '0.5rem' }}>Hiçbiri eklenmedi</div>
+                
+                {spendingLimitEditMode ? (
+                  <div style={{ marginTop: '0.8rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', marginBottom: '0.8rem' }}>
+                      <input type="checkbox" checked={formData.spendingLimitEnabled} onChange={() => setFormData({...formData, spendingLimitEnabled: !formData.spendingLimitEnabled})} style={{ accentColor: '#1877f2', width: '16px', height: '16px' }} />
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Kampanya Harcama Sınırı Ekle</span>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-primary)', fontSize: '0.95rem' }}>TL</span>
+                      <input 
+                        placeholder="Ayarlı Sınır Yok"
+                        value={formData.spendingLimitAmount}
+                        onChange={e => setFormData({...formData, spendingLimitAmount: e.target.value})}
+                        style={{ width: '100%', padding: '0.6rem 0.6rem 0.6rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-secondary)' }}
+                      />
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>Toplam 0,00 TL Harcandı</div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem', paddingLeft: '0.5rem' }}>Hiçbiri eklenmedi</div>
+                )}
               </div>
             </div>
           </div>
@@ -302,40 +330,56 @@ export default function BilinirlikFlow({ onBack }) {
 
             {formData.specialCategory === 'Sosyal Meseleler, Seçimler veya Siyaset' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ background: 'var(--bg-primary)', borderRadius: '8px', padding: '1rem', border: '1px solid var(--border-color)', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                  <AlertCircle color="#dc2626" size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '6px', borderLeft: '3px solid #dc2626', border: '1px solid var(--border-color)' }}>
+                  <AlertCircle size={18} color="#dc2626" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Onaylanan Kimlik</h4>
-                    <p style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                      Sosyal meseleler, seçimler veya siyasetle ilgili reklamlar yayınlamak için kimliğinizi onaylamanız ve sorumluluk reddi oluşturmanız gerekir. Bu bilgiler Reklam Kütüphanesinde görünür.
-                    </p>
-                    <button style={{ background: '#1877f2', color: 'var(--bg-secondary)', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>Kimliği Onayla</button>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.4rem' }}>Sosyal meseleler, seçimler veya siyasetle ilgili reklamlar yayınlamak için kimliğini doğrulaman ve bir sorumluluk reddi oluşturman gerekiyor.</span>
+                    <span style={{ fontSize: '0.85rem', color: '#1877f2', cursor: 'pointer' }}>Detayları Gör</span>
+                  </div>
+                </div>
+                
+                <h4 style={{ margin: '0.5rem 0 0 0', fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 600 }}>Sosyal Meselelerle, Seçimlerle İlgili veya Siyasi Reklamlar Yayınlama Yetkisi</h4>
+
+                <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '0', display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '0.9rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>Onaylanan Kimlik <HelpCircle size={14}/></h4>
+                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
+                      <div style={{ background: '#dc2626', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', fontWeight: 'bold', flexShrink: 0, marginTop: '2px' }}>-</div>
+                      <div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.2rem' }}>Kimliğinizi onaylayın</div>
+                        <p style={{ margin: '0 0 0.8rem 0', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                          Sosyal meselelerle, seçimlerle ilgili veya siyasi reklamlar yayınlamak isteyen kişilerden öncelikle bir devlet kurumu tarafından verilmiş geçerli bir kimlik belgesinin kopyasını yüklemelerini şart koşuyoruz. Kimlik bilgileri reklamlarda veya Meta Reklam Kütüphanesi'nde gösterilmeyecektir. Kimliğinizi onayladıktan sonra kimlik belgenizi 30 gün içinde sileriz.
+                        </p>
+                        <button onClick={() => setShowReauthModal(true)} style={{ background: '#1877f2', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>Kimliği Onayla</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-primary)', borderRadius: '8px', padding: '1rem', border: '1px solid var(--border-color)', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                  <AlertCircle color="#dc2626" size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <div style={{ width: '100%' }}>
-                    <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Sayfalar ve Sorumluluk Redleri</h4>
-                    <p style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                      Sosyal meseleler, seçimler veya siyaset hakkındaki reklamları yayınlayabileceğiniz bir Sayfanız yok. Bir Sayfayı bu reklam hesabına bağlayın.
-                    </p>
-                    <select disabled style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-secondary)', outline: 'none', background: 'var(--bg-primary)' }}>
-                      <option>Sayfa seç</option>
-                    </select>
+                <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '0', display: 'flex', gap: '0.8rem', alignItems: 'flex-start', marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '0.9rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>Sayfalar ve Sorumluluk Retleri <HelpCircle size={14}/></h4>
+                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
+                      <div style={{ background: '#dc2626', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', fontWeight: 'bold', flexShrink: 0, marginTop: '2px' }}>-</div>
+                      <div style={{ width: '100%' }}>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.2rem' }}>Hiçbir Sayfa reklam yayınlamak için ayarlanmadı</div>
+                        <p style={{ margin: '0 0 0.8rem 0', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                          Bir Sayfayı onaylanmış bir reklam hesabına bağlayın ve bir sorumluluk reddi oluşturun.
+                        </p>
+                        <select disabled style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.9rem', color: 'var(--text-secondary)', outline: 'none', background: 'var(--bg-primary)' }}>
+                          <option>Sayfa seç</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <div style={{ marginTop: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                    <ChevronDown size={16} /> Özel Reklam Kategorisi detayları
-                  </div>
-                  <div style={{ paddingLeft: '1.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Dürüst seçimi korumaya yardımcı olur</div>
+                  <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '0.9rem', color: 'var(--text-primary)' }}>Özel Reklam Kategorisi detayları</h4>
+                  <div style={{ paddingLeft: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Dürüst seçimi korumaya yardımcı olur</div>
                   
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }}>
-                    <ChevronDown size={16} /> Özel Reklam Kategorisi seçenekleri
-                  </div>
-                  <ul style={{ paddingLeft: '2.5rem', margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <h4 style={{ margin: '1rem 0 0.4rem 0', fontSize: '0.9rem', color: 'var(--text-primary)' }}>Özel Reklam Kategorisi seçenekleri</h4>
+                  <ul style={{ paddingLeft: '1.5rem', margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                     <li>Yetkilendirme işlemini tamamla</li>
                     <li>Sorumluluk reddi ekle</li>
                   </ul>
@@ -575,5 +619,44 @@ export default function BilinirlikFlow({ onBack }) {
     </div>
   );
 
-  return isReviewMode ? renderReviewPage() : renderForm();
+  return (
+    <>
+      {isReviewMode ? renderReviewPage() : renderForm()}
+      
+      {showReauthModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255, 255, 255, 0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '480px', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', overflow: 'hidden', border: '1px solid #ddd' }}>
+            <div style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ color: '#1877f2', fontWeight: 'bold', fontSize: '1.4rem', fontFamily: 'Helvetica, Arial, sans-serif', letterSpacing: '-0.5px' }}>facebook</div>
+            </div>
+            <div style={{ padding: '2rem 3rem' }}>
+              <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1rem', color: '#1c1e21', textAlign: 'center', fontWeight: 600 }}>Devam etmek için lütfen şifrenizi girin</h3>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', justifyContent: 'center', background: '#f5f6f7', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}>
+                <div style={{ width: '40px', height: '40px', background: '#204f63', borderRadius: '4px' }}></div>
+                <div style={{ fontSize: '0.95rem', color: '#1c1e21', fontWeight: 600 }}>Tuana Nur Yalçın</div>
+              </div>
+              
+              <p style={{ fontSize: '0.85rem', color: '#606770', textAlign: 'center', marginBottom: '1.5rem' }}>
+                Ziyaret etmek istediğiniz sayfa için şifrenizi yeniden girmeniz gerekmektedir.
+              </p>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: '#1c1e21', textAlign: 'right' }}>Şifre</span>
+                <input type="password" style={{ padding: '0.5rem', border: '1px solid #ccd0d5', borderRadius: '4px', width: '200px', outline: 'none' }} />
+              </div>
+              
+              <div style={{ textAlign: 'center', marginTop: '0.8rem' }}>
+                <a href="#" style={{ color: '#1877f2', fontSize: '0.85rem', textDecoration: 'none' }}>Şifreni mi unuttun?</a>
+              </div>
+            </div>
+            <div style={{ background: '#f5f6f7', padding: '0.8rem 1rem', borderTop: '1px solid #ddd', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button onClick={() => setShowReauthModal(false)} style={{ background: '#e4e6eb', color: '#4b4f56', border: '1px solid #ccd0d5', padding: '0.4rem 1rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}>İptal</button>
+              <button onClick={() => setShowReauthModal(false)} style={{ background: '#1877f2', color: '#fff', border: '1px solid #1877f2', padding: '0.4rem 1rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}>Devam</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
