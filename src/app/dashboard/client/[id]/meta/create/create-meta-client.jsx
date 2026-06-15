@@ -633,10 +633,13 @@ const renderBudgetPlanning = (data, setData) => (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
                 <button 
                   type="button" 
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     const current = data.planIncreasePeriods || [1];
                     if(current.length < 50) {
-                      setData({ ...data, planIncreasePeriods: [...current, Math.max(...current) + 1] });
+                      const nextId = current.length > 0 ? Math.max(...current.map(n => Number(n))) + 1 : 1;
+                      setData({ ...data, planIncreasePeriods: [...current, nextId] });
                     }
                   }}
                   style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: 'var(--text-primary)' }}
