@@ -15,8 +15,8 @@ export default function BilinirlikFlow({ onBack }) {
     abTestMetric: 'Kreatif',
     abTestDuration: 7,
     abTestCompare: 'Sonuç başına ücret',
-    specialCategory: 'İstihdam',
-    specialCategoryCountry: 'Ülkeler seçin',
+    specialCategory: 'Varsa kategori beyan et',
+    specialCategoryCountry: 'Türkiye',
     purchaseType: 'Rezervasyon',
     campaignObjective: 'Bilinirlik',
     bidStrategy: 'Sonuç başına ücret hedefi',
@@ -150,7 +150,8 @@ export default function BilinirlikFlow({ onBack }) {
         </div>
 
         {/* Card B: Canlı Video Reklamı */}
-        <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', border: '1px solid var(--border-color)' }}>
+        {formData.purchaseType !== 'Rezervasyon' && (
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', border: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)', fontWeight: 600 }}>Canlı video reklamı</h3>
             <div 
@@ -174,6 +175,7 @@ export default function BilinirlikFlow({ onBack }) {
             </div>
           )}
         </div>
+        )}
 
         {/* Card C: Kampanya Detayları */}
         <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', border: '1px solid var(--border-color)' }}>
@@ -217,57 +219,65 @@ export default function BilinirlikFlow({ onBack }) {
             
             <div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>Kampanya amacı <HelpCircle size={12} /></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {[
-                  { id: 'Bilinirlik', icon: <Megaphone size={16} color="#fff" />, bg: '#1877f2' },
-                  { id: 'Trafik', icon: <span style={{fontSize:'16px'}}>🖱️</span>, bg: 'var(--bg-primary)', hideOnRez: true },
-                  { id: 'Etkileşim', icon: <span style={{fontSize:'16px'}}>💬</span>, bg: 'var(--bg-primary)' },
-                  { id: 'Potansiyel Müşteriler', icon: <span style={{fontSize:'16px'}}>📋</span>, bg: 'var(--bg-primary)', hideOnRez: true },
-                  { id: 'Uygulama tanıtımı', icon: <span style={{fontSize:'16px'}}>📱</span>, bg: 'var(--bg-primary)', hideOnRez: true },
-                  { id: 'Satışlar', icon: <span style={{fontSize:'16px'}}>🛍️</span>, bg: 'var(--bg-primary)', hideOnRez: true }
-                ].filter(obj => !(formData.purchaseType === 'Rezervasyon' && obj.hideOnRez)).map(obj => (
-                  <label key={obj.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.6rem', cursor: 'pointer', borderRadius: '6px', background: formData.campaignObjective === obj.id ? 'rgba(24, 119, 242, 0.1)' : 'transparent' }}>
-                    <input type="radio" checked={formData.campaignObjective === obj.id} onChange={() => setFormData({...formData, campaignObjective: obj.id})} style={{ accentColor: '#1877f2', width: '16px', height: '16px' }} />
-                    <div style={{ width: '32px', height: '32px', background: obj.bg, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {obj.icon}
-                    </div>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{obj.id}</span>
-                  </label>
-                ))}
-              </div>
+              {formData.purchaseType === 'Rezervasyon' ? (
+                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                  {formData.campaignObjective}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {[
+                    { id: 'Bilinirlik', icon: <Megaphone size={16} color="#fff" />, bg: '#1877f2' },
+                    { id: 'Trafik', icon: <span style={{fontSize:'16px'}}>🖱️</span>, bg: 'var(--bg-primary)', hideOnRez: true },
+                    { id: 'Etkileşim', icon: <span style={{fontSize:'16px'}}>💬</span>, bg: 'var(--bg-primary)' },
+                    { id: 'Potansiyel Müşteriler', icon: <span style={{fontSize:'16px'}}>📋</span>, bg: 'var(--bg-primary)', hideOnRez: true },
+                    { id: 'Uygulama tanıtımı', icon: <span style={{fontSize:'16px'}}>📱</span>, bg: 'var(--bg-primary)', hideOnRez: true },
+                    { id: 'Satışlar', icon: <span style={{fontSize:'16px'}}>🛍️</span>, bg: 'var(--bg-primary)', hideOnRez: true }
+                  ].filter(obj => !(formData.purchaseType === 'Rezervasyon' && obj.hideOnRez)).map(obj => (
+                    <label key={obj.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.6rem', cursor: 'pointer', borderRadius: '6px', background: formData.campaignObjective === obj.id ? 'rgba(24, 119, 242, 0.1)' : 'transparent' }}>
+                      <input type="radio" checked={formData.campaignObjective === obj.id} onChange={() => setFormData({...formData, campaignObjective: obj.id})} style={{ accentColor: '#1877f2', width: '16px', height: '16px' }} />
+                      <div style={{ width: '32px', height: '32px', background: obj.bg, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {obj.icon}
+                      </div>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{obj.id}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
             
-            <div style={{ marginTop: '0.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <button style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>Seçenekleri Gizle <ChevronDown size={14} style={{transform: 'rotate(180deg)'}} /></button>
-                <button onClick={() => setSpendingLimitEditMode(!spendingLimitEditMode)} style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}><Pencil size={14} /> Düzenle</button>
-              </div>
-              
+            {formData.purchaseType !== 'Rezervasyon' && (
               <div style={{ marginTop: '0.5rem' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>Kampanya Harcama Sınırı <span style={{color:'var(--text-secondary)', fontWeight: 400}}>· İsteğe bağlı</span> <HelpCircle size={12}/></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}>Seçenekleri Gizle <ChevronDown size={14} style={{transform: 'rotate(180deg)'}} /></button>
+                  <button onClick={() => setSpendingLimitEditMode(!spendingLimitEditMode)} style={{ background: 'none', border: 'none', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px' }}><Pencil size={14} /> Düzenle</button>
+                </div>
                 
-                {spendingLimitEditMode ? (
-                  <div style={{ marginTop: '0.8rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', marginBottom: '0.8rem' }}>
-                      <input type="checkbox" checked={formData.spendingLimitEnabled} onChange={() => setFormData({...formData, spendingLimitEnabled: !formData.spendingLimitEnabled})} style={{ accentColor: '#1877f2', width: '16px', height: '16px' }} />
-                      <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Kampanya Harcama Sınırı Ekle</span>
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <span style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-primary)', fontSize: '0.95rem' }}>TL</span>
-                      <input 
-                        placeholder="Ayarlı Sınır Yok"
-                        value={formData.spendingLimitAmount}
-                        onChange={e => setFormData({...formData, spendingLimitAmount: e.target.value})}
-                        style={{ width: '100%', padding: '0.6rem 0.6rem 0.6rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-secondary)' }}
-                      />
+                <div style={{ marginTop: '0.5rem' }}>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>Kampanya Harcama Sınırı <span style={{color:'var(--text-secondary)', fontWeight: 400}}>· İsteğe bağlı</span> <HelpCircle size={12}/></div>
+                  
+                  {spendingLimitEditMode ? (
+                    <div style={{ marginTop: '0.8rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', marginBottom: '0.8rem' }}>
+                        <input type="checkbox" checked={formData.spendingLimitEnabled} onChange={() => setFormData({...formData, spendingLimitEnabled: !formData.spendingLimitEnabled})} style={{ accentColor: '#1877f2', width: '16px', height: '16px' }} />
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Kampanya Harcama Sınırı Ekle</span>
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-primary)', fontSize: '0.95rem' }}>TL</span>
+                        <input 
+                          placeholder="Ayarlı Sınır Yok"
+                          value={formData.spendingLimitAmount}
+                          onChange={e => setFormData({...formData, spendingLimitAmount: e.target.value})}
+                          style={{ width: '100%', padding: '0.6rem 0.6rem 0.6rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-secondary)' }}
+                        />
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>Toplam 0,00 TL Harcandı</div>
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>Toplam 0,00 TL Harcandı</div>
-                  </div>
-                ) : (
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem', paddingLeft: '0.5rem' }}>Hiçbiri eklenmedi</div>
-                )}
+                  ) : (
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem', paddingLeft: '0.5rem' }}>Hiçbiri eklenmedi</div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -390,7 +400,8 @@ export default function BilinirlikFlow({ onBack }) {
         </div>
 
         {/* Card D: Advantage+ Kampanya Bütçesi */}
-        <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', border: '1px solid var(--border-color)' }}>
+        {formData.purchaseType !== 'Rezervasyon' && (
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', border: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <CheckCircle2 size={20} color="#10b981" />
@@ -544,9 +555,10 @@ export default function BilinirlikFlow({ onBack }) {
             </div>
           )}
         </div>
+        )}
 
-        {/* Card E: A/B Testi */}
-        <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', border: '1px solid var(--border-color)' }}>
+        {formData.purchaseType !== 'Rezervasyon' && (
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', border: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <CheckCircle2 size={20} color="#10b981" />
@@ -612,6 +624,7 @@ export default function BilinirlikFlow({ onBack }) {
             </div>
           )}
         </div>
+        )}
 
         {/* Old Özel Reklam Kategorileri location is now empty since we moved it up */}
 
