@@ -492,57 +492,87 @@ export default function BilinirlikFlow({ onBack, clientName }) {
                 </div>
 
                 {formData.budgetPlanVisible && (
-                  <div style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(24, 119, 242, 0.03)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.1)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Bütçe artışı için süre</div>
-                      <ChevronDown size={16} />
-                    </div>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Başlangıç</div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <input value="Haz 16, 2026" readOnly style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                            <span style={{fontSize: '14px'}}>🕒</span> 00:00
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.8rem' }}>
+                    {(formData.planIncreasePeriods || [1]).map((periodId) => (
+                      <div key={periodId} style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(24, 119, 242, 0.03)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.1)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Bütçe artışı için süre</div>
+                          <ChevronDown size={16} />
+                        </div>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Başlangıç</div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <input value={formData[`budgetIncreaseStart_${periodId}`] || "16 Haz 2026"} onChange={e => setFormData({...formData, [`budgetIncreaseStart_${periodId}`]: e.target.value})} style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                                <span style={{fontSize: '14px'}}>🕒</span> <input value={formData[`budgetIncreaseStartTime_${periodId}`] || "00:00"} onChange={e => setFormData({...formData, [`budgetIncreaseStartTime_${periodId}`]: e.target.value})} style={{ border: 'none', background: 'transparent', outline: 'none', width: '40px', color: 'var(--text-primary)' }} />
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ color: 'var(--text-secondary)', marginTop: '1.5rem' }}>-</div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Bitiş</div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <input value={formData[`budgetIncreaseEnd_${periodId}`] || "17 Haz 2026"} onChange={e => setFormData({...formData, [`budgetIncreaseEnd_${periodId}`]: e.target.value})} style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                                <span style={{fontSize: '14px'}}>🕒</span> <input value={formData[`budgetIncreaseEndTime_${periodId}`] || "00:00"} onChange={e => setFormData({...formData, [`budgetIncreaseEndTime_${periodId}`]: e.target.value})} style={{ border: 'none', background: 'transparent', outline: 'none', width: '40px', color: 'var(--text-primary)' }} />
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div style={{ color: 'var(--text-secondary)', marginTop: '1.5rem' }}>-</div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Bitiş</div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <input value="Haz 17, 2026" readOnly style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                            <span style={{fontSize: '14px'}}>🕒</span> 00:00
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                          <select style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }}>
+                            <option>Günlük bütçeyi değer miktarına göre artır (TL)</option>
+                          </select>
+                          <div style={{ display: 'flex', alignItems: 'center', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', width: '120px' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>TL </span>
+                            <input value={formData[`budgetIncreaseAmount_${periodId}`] || "12,50"} onChange={e => setFormData({...formData, [`budgetIncreaseAmount_${periodId}`]: e.target.value})} style={{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--text-primary)', width: '40px' }} />
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: 'auto' }}>TRY</span>
                           </div>
                         </div>
+                        
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', marginBottom: '1rem', lineHeight: '1.4' }}>
+                          Meta {(formData[`budgetIncreaseStart_${periodId}`] || "16 Haz").split(' ')[0] + " " + (formData[`budgetIncreaseStart_${periodId}`] || "16 Haz").split(' ')[1]} ile {(formData[`budgetIncreaseEnd_${periodId}`] || "17 Haz").split(' ')[0] + " " + (formData[`budgetIncreaseEnd_${periodId}`] || "17 Haz").split(' ')[1]} arasında günde {(parseFloat(50) + parseFloat((formData[`budgetIncreaseAmount_${periodId}`] || "12,50").replace(',','.'))).toFixed(2).replace('.', ',')} TL harcamayı amaçlayacak ({formData[`budgetIncreaseAmount_${periodId}`] || "12,50"} TL artış).
+                        </div>
+                        
+                        <button 
+                          type="button" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const current = formData.planIncreasePeriods || [1];
+                            if(current.length === 1) {
+                              setFormData({ ...formData, budgetPlanVisible: false, planIncreasePeriods: [1] });
+                            } else {
+                              setFormData({ ...formData, planIncreasePeriods: current.filter(id => id !== periodId) });
+                            }
+                          }}
+                          style={{ padding: '0.5rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <span style={{fontSize: '14px'}}>🗑️</span> Bu dönemi kaldır
+                        </button>
                       </div>
-                    </div>
+                    ))}
                     
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                      <select style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }}>
-                        <option>Günlük bütçeyi değer miktarına göre artır (TL)</option>
-                      </select>
-                      <div style={{ display: 'flex', alignItems: 'center', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', width: '120px' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>TL 12,50</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginLeft: 'auto' }}>TRY</span>
-                      </div>
-                    </div>
-                    
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', marginBottom: '1rem', lineHeight: '1.4' }}>
-                      Meta 16 Haz ile 17 Haz arasında günde 62,50 TL harcamayı amaçlayacak (12,50 TL artış).
-                    </div>
-                    
-                    <button style={{ padding: '0.5rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{fontSize: '14px'}}>🗑️</span> Bu dönemi kaldır
-                    </button>
-                    
-                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <button style={{ padding: '0.5rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button 
+                        type="button" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const current = formData.planIncreasePeriods || [1];
+                          if(current.length < 50) {
+                            const nextId = current.length > 0 ? Math.max(...current.map(n => Number(n))) + 1 : 1;
+                            setFormData({ ...formData, planIncreasePeriods: [...current, nextId] });
+                          }
+                        }}
+                        style={{ padding: '0.5rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
                         <span style={{fontSize: '14px', fontWeight: 'bold'}}>+</span> Başka bir zaman aralığı ekle
                       </button>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>1/50 zaman dilimi</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{(formData.planIncreasePeriods || [1]).length}/50 zaman dilimi</div>
                     </div>
                   </div>
                 )}
