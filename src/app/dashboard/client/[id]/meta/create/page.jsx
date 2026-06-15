@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth';
 import { can, getRolePermissions } from '@/lib/permissions';
 import { redirect } from 'next/navigation';
 import CreateMetaClient from './create-meta-client';
+import prisma from '@/lib/prisma';
 
 export default async function CreateMetaPage({ params }) {
   const { id } = await params;
@@ -17,6 +18,12 @@ export default async function CreateMetaPage({ params }) {
 
   // Sadece kampanyaları ve reklam setlerini çekmek için (dropdown'lar için gerekli)
   const result = await getMetaAdsAction(id, 'last_30d');
+  
+  const client = await prisma.client.findUnique({
+    where: { id: parseInt(id) },
+    select: { companyName: true }
+  });
+  const clientName = client?.companyName || 'Bilinmeyen Müşteri';
 
   if (result.error) {
     return (
@@ -31,6 +38,7 @@ export default async function CreateMetaPage({ params }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', height: '100%' }}>
       <CreateMetaClient 
         clientId={id} 
+        clientName={clientName}
         initialCampaigns={result.activeCampaigns || []} 
         initialAdSets={result.adSets || []} 
       />

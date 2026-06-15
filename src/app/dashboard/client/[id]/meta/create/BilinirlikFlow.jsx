@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, ChevronDown, CheckCircle2, AlertCircle, Edit2, Pencil, Eye, ArrowLeft, MoreHorizontal, Video, Megaphone, HelpCircle } from 'lucide-react';
 
-export default function BilinirlikFlow({ onBack }) {
+export default function BilinirlikFlow({ onBack, clientName }) {
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [formData, setFormData] = useState({
     name: 'Yeni Bilinirlik Kampanyası',
@@ -647,7 +647,7 @@ export default function BilinirlikFlow({ onBack }) {
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', justifyContent: 'center', background: '#f5f6f7', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}>
                 <div style={{ width: '40px', height: '40px', background: '#204f63', borderRadius: '4px' }}></div>
-                <div style={{ fontSize: '0.95rem', color: '#1c1e21', fontWeight: 600 }}>Tuana Nur Yalçın</div>
+                <div style={{ fontSize: '0.95rem', color: '#1c1e21', fontWeight: 600 }}>{clientName || 'Facebook Kullanıcısı'}</div>
               </div>
               
               <p style={{ fontSize: '0.85rem', color: '#606770', textAlign: 'center', marginBottom: '1.5rem' }}>

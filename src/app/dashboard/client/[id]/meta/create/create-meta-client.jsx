@@ -15,7 +15,7 @@ const CTA_LABELS = {
   APPLY_NOW: 'Başvur'
 };
 
-export default function CreateMetaClient({ clientId, initialCampaigns, initialAdSets }) {
+export default function CreateMetaClient({ clientId, clientName, initialCampaigns, initialAdSets }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('campaigns');
@@ -1404,7 +1404,7 @@ const renderAudienceCard = () => {
 
 
             {activeTab === 'campaigns' && selectedObjective === 'Bilinirlik' ? (
-               <BilinirlikFlow onBack={() => { setSelectedObjective(null); setShowObjectiveModal(true); }} />
+               <BilinirlikFlow onBack={() => { setSelectedObjective(null); setShowObjectiveModal(true); }} clientName={clientName} />
             ) : activeTab === 'campaigns' && selectedObjective === 'Trafik' && trafficSetupType === 'custom' ? (
                renderTailoredTrafficFormFields(createFormData, setCreateFormData)
             ) : (
