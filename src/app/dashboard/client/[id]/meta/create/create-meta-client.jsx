@@ -1912,11 +1912,11 @@ const renderAudienceCard = () => {
 
             {activeTab === 'adsets' && renderAdsetFormFields(createFormData, setCreateFormData, true, true)}
             {activeTab === 'ads' && renderAdFormFields(createFormData, setCreateFormData, true, true)}
+              </>
+            )}
           </div>
 
 
-              </>
-            )}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', paddingRight: '0.5rem' }}>
             {activeTab === 'ads' ? (
               <div style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '1rem' }}>
