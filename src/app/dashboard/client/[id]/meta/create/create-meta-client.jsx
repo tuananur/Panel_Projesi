@@ -534,13 +534,13 @@ const renderBudgetPlanning = (data, setData) => (
                 <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', minWidth: '220px', padding: '0.5rem 0' }}>
                   <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>Filtrele</div>
                   <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}>
-                    <span>Yaklaşan girişler</span><span style={{ background: '#e6f4ea', color: '#137333', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>1</span>
+                    <span>Yaklaşan girişler</span><span style={{ background: 'rgba(19, 115, 51, 0.1)', color: '#137333', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>1</span>
                   </div>
                   <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}>
-                    <span>Tamamlanan girişler</span><span style={{ background: '#f1f3f4', color: '#5f6368', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>0</span>
+                    <span>Tamamlanan girişler</span><span style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>0</span>
                   </div>
-                  <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', background: '#e7f3ff', cursor: 'pointer' }}>
-                    <span>Tüm girişler</span><span style={{ background: '#f0f2f5', color: '#1c1e21', border: '1px solid #ced0d4', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>1</span>
+                  <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', background: 'rgba(24, 119, 242, 0.1)', cursor: 'pointer' }}>
+                    <span>Tüm girişler</span><span style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', fontSize: '0.7rem', padding: '0 6px', borderRadius: '10px', fontWeight: 600 }}>1</span>
                   </div>
                   <div style={{ borderTop: '1px solid var(--border-color)', margin: '0.4rem 0' }}></div>
                   <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>Sırala</div>
@@ -953,13 +953,8 @@ const renderAdsetFormFields = (data, setData, isCreate, isEditing) => {
                 {data.showBudgetPlan ? 'Seçenekleri Gizle ▲' : 'Seçenekleri Göster ▼'}
               </div>
               {data.showBudgetPlan && (
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Bütçe planlama <span style={{ cursor: 'help' }} title="Belirli gün ve saatlerde reklam harcamalarınızı artırın veya azaltın.">i</span></div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Belirli gün veya saatlerde bütçenizi artırın.</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <input type="checkbox" style={{ width: '16px', height: '16px' }} />
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {renderBudgetPlanning(data, setData)}
                 </div>
               )}
             </div>
