@@ -519,8 +519,14 @@ const renderBudgetPlanning = (data, setData) => (
           
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input type="checkbox" checked={data.planIncreases || false} onChange={e => setData({ ...data, planIncreases: e.target.checked })} style={{ cursor: 'pointer' }} />
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
+              <input 
+                type="checkbox" 
+                checked={data.planIncreases || false} 
+                onChange={e => setData({ ...data, planIncreases: e.target.checked })} 
+                disabled={data.adsetBudgetType === 'Toplam Bütçe'}
+                style={{ cursor: data.adsetBudgetType === 'Toplam Bütçe' ? 'not-allowed' : 'pointer', opacity: data.adsetBudgetType === 'Toplam Bütçe' ? 0.5 : 1 }} 
+              />
+              <span style={{ fontSize: '0.8rem', color: data.adsetBudgetType === 'Toplam Bütçe' ? 'var(--text-secondary)' : 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
             </div>
             <div style={{ position: 'relative' }}>
               <button 

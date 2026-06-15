@@ -538,8 +538,14 @@ export default function BilinirlikFlow({ onBack, clientName }) {
               
               <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <input type="checkbox" checked={formData.budgetPlanVisible} onChange={() => setFormData({...formData, budgetPlanVisible: !formData.budgetPlanVisible})} style={{ width: '16px', height: '16px', accentColor: '#1877f2', cursor: 'pointer' }} />
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
+                  <input 
+                    type="checkbox" 
+                    checked={formData.budgetPlanVisible} 
+                    onChange={() => setFormData({...formData, budgetPlanVisible: !formData.budgetPlanVisible})} 
+                    disabled={formData.budgetType === 'Toplam bütçe'}
+                    style={{ width: '16px', height: '16px', accentColor: '#1877f2', cursor: formData.budgetType === 'Toplam bütçe' ? 'not-allowed' : 'pointer', opacity: formData.budgetType === 'Toplam bütçe' ? 0.5 : 1 }} 
+                  />
+                  <span style={{ fontSize: '0.9rem', color: formData.budgetType === 'Toplam bütçe' ? 'var(--text-secondary)' : 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
                   <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-color)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer', background: 'var(--bg-secondary)' }}>
                     Gör <ChevronDown size={14} />
                   </div>
