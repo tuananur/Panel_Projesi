@@ -1398,7 +1398,7 @@ const renderAudienceCard = () => {
       </div>
 
       <form onSubmit={handleCreateEntity} style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'transparent', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: activeTab === 'ads' ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', flex: 1, padding: '1.5rem 2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: activeTab === 'ads' || (activeTab === 'campaigns' && selectedObjective === 'Bilinirlik') ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', flex: 1, padding: '1.5rem 2rem' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -1936,7 +1936,8 @@ const renderAudienceCard = () => {
           </div>
 
 
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', paddingRight: '0.5rem' }}>
+          {!(activeTab === 'campaigns' && selectedObjective === 'Bilinirlik') && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', paddingRight: '0.5rem' }}>
             {activeTab === 'ads' ? (
               <div style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '1rem' }}>
                 <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
@@ -1992,6 +1993,7 @@ const renderAudienceCard = () => {
               renderAudienceCard()
             )}
           </div>
+          )}
         </div>
 
         <div style={{ padding: '1rem 2rem', display: 'flex', gap: '1rem', borderTop: '1px solid var(--border-color)', background: 'var(--bg-secondary)', flexShrink: 0 }}>
