@@ -227,7 +227,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
             <input 
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
-              style={{ flex: 1, padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none' }}
+              style={{ flex: 1, padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-primary)' }}
             />
             <button style={{ padding: '0.8rem 1.2rem', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer' }}>Şablon Oluştur</button>
           </div>
@@ -459,7 +459,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                 <select 
                   value={formData.specialCategoryCountry}
                   onChange={e => setFormData({...formData, specialCategoryCountry: e.target.value})}
-                  style={{ width: '100%', padding: '0.8rem', border: formData.specialCategoryCountry === 'Ülkeler seçin' ? '1px solid #dc2626' : '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: formData.specialCategoryCountry === 'Ülkeler seçin' ? 'var(--text-secondary)' : 'var(--text-primary)', outline: 'none', background: 'var(--bg-secondary)', appearance: 'none' }}>
+                  style={{ width: '100%', padding: '0.8rem', border: formData.specialCategoryCountry === 'Ülkeler seçin' ? '1px solid #dc2626' : '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: formData.specialCategoryCountry === 'Ülkeler seçin' ? 'var(--text-secondary)' : 'var(--text-primary)', outline: 'none', background: 'var(--bg-secondary)', appearance: 'none', background: 'var(--bg-primary)' }}>
                   <option>Ülkeler seçin</option>
                   <option>Türkiye</option>
                 </select>
@@ -575,7 +575,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                     <input 
                       value={formData.budgetAmount}
                       onChange={e => setFormData({...formData, budgetAmount: e.target.value})}
-                      style={{ width: '100%', padding: '0.8rem 1rem 0.8rem 2.5rem', border: budgetError ? '1px solid #dc2626' : '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none' }}
+                      style={{ width: '100%', padding: '0.8rem 1rem 0.8rem 2.5rem', border: budgetError ? '1px solid #dc2626' : '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-primary)' }}
                     />
                     <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>TRY</span>
                   </div>
@@ -657,30 +657,30 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <div 
                             onClick={() => setFormData({...formData, budgetFilter: 'upcoming'})}
-                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'upcoming' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'upcoming' ? '#e7f3ff' : 'transparent' }} 
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'upcoming' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'upcoming' ? 'rgba(24,119,242,0.12)' : 'transparent' }} 
                             onMouseOver={e => {if(filterType !== 'upcoming') e.currentTarget.style.background='#f5f6f7'}} 
                             onMouseOut={e => {if(filterType !== 'upcoming') e.currentTarget.style.background='transparent'}}
                           >
                             <span>Yaklaşan girişler</span>
-                            <span style={{ background: filterType === 'upcoming' ? '#e7f3ff' : '#e4f3eb', color: filterType === 'upcoming' ? '#1877f2' : '#108043', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'upcoming' ? '1px solid #bce0fd' : '1px solid #a3d9b5' }}>{upcomingCount}</span>
+                            <span style={{ background: filterType === 'upcoming' ? 'rgba(24,119,242,0.12)' : '#e4f3eb', color: filterType === 'upcoming' ? '#1877f2' : '#108043', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'upcoming' ? '1px solid #bce0fd' : '1px solid #a3d9b5' }}>{upcomingCount}</span>
                           </div>
                           <div 
                             onClick={() => setFormData({...formData, budgetFilter: 'completed'})}
-                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'completed' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'completed' ? '#e7f3ff' : 'transparent' }} 
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'completed' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'completed' ? 'rgba(24,119,242,0.12)' : 'transparent' }} 
                             onMouseOver={e => {if(filterType !== 'completed') e.currentTarget.style.background='#f5f6f7'}} 
                             onMouseOut={e => {if(filterType !== 'completed') e.currentTarget.style.background='transparent'}}
                           >
                             <span>Tamamlanan girişler</span>
-                            <span style={{ background: filterType === 'completed' ? '#e7f3ff' : '#f5f6f7', color: filterType === 'completed' ? '#1877f2' : '#606770', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'completed' ? '1px solid #bce0fd' : '1px solid #dddfe2' }}>{completedCount}</span>
+                            <span style={{ background: filterType === 'completed' ? 'rgba(24,119,242,0.12)' : '#f5f6f7', color: filterType === 'completed' ? '#1877f2' : '#606770', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'completed' ? '1px solid #bce0fd' : '1px solid #dddfe2' }}>{completedCount}</span>
                           </div>
                           <div 
                             onClick={() => setFormData({...formData, budgetFilter: 'all'})}
-                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'all' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'all' ? '#e7f3ff' : 'transparent' }}
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'all' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'all' ? 'rgba(24,119,242,0.12)' : 'transparent' }}
                             onMouseOver={e => {if(filterType !== 'all') e.currentTarget.style.background='#f5f6f7'}} 
                             onMouseOut={e => {if(filterType !== 'all') e.currentTarget.style.background='transparent'}}
                           >
                             <span>Tüm girişler</span>
-                            <span style={{ background: filterType === 'all' ? '#e7f3ff' : '#f5f6f7', color: filterType === 'all' ? '#1877f2' : '#606770', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'all' ? '1px solid #bce0fd' : '1px solid #dddfe2' }}>{allCount}</span>
+                            <span style={{ background: filterType === 'all' ? 'rgba(24,119,242,0.12)' : '#f5f6f7', color: filterType === 'all' ? '#1877f2' : '#606770', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'all' ? '1px solid #bce0fd' : '1px solid #dddfe2' }}>{allCount}</span>
                           </div>
                         </div>
                         
@@ -690,7 +690,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <div 
                             onClick={() => setFormData({...formData, budgetSort: 'newest'})}
-                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: sortType === 'newest' ? '#1877f2' : '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: sortType === 'newest' ? '#e7f3ff' : 'transparent' }} 
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: sortType === 'newest' ? '#1877f2' : '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: sortType === 'newest' ? 'rgba(24,119,242,0.12)' : 'transparent' }} 
                             onMouseOver={e => {if(sortType !== 'newest') e.currentTarget.style.background='#f5f6f7'}} 
                             onMouseOut={e => {if(sortType !== 'newest') e.currentTarget.style.background='transparent'}}
                           >
@@ -698,7 +698,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                           </div>
                           <div 
                             onClick={() => setFormData({...formData, budgetSort: 'oldest'})}
-                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: sortType === 'oldest' ? '#1877f2' : '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: sortType === 'oldest' ? '#e7f3ff' : 'transparent' }} 
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: sortType === 'oldest' ? '#1877f2' : '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: sortType === 'oldest' ? 'rgba(24,119,242,0.12)' : 'transparent' }} 
                             onMouseOver={e => {if(sortType !== 'oldest') e.currentTarget.style.background='#f5f6f7'}} 
                             onMouseOut={e => {if(sortType !== 'oldest') e.currentTarget.style.background='transparent'}}
                           >
@@ -726,7 +726,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                           <div style={{ flex: 1 }}>
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Başlangıç</div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <input value={formData[`budgetIncreaseStart_${periodId}`] || "16 Haz 2026"} onChange={e => setFormData({...formData, [`budgetIncreaseStart_${periodId}`]: e.target.value})} style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                              <input value={formData[`budgetIncreaseStart_${periodId}`] || "16 Haz 2026"} onChange={e => setFormData({...formData, [`budgetIncreaseStart_${periodId}`]: e.target.value})} style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-primary)' }} />
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
                                 <span style={{fontSize: '14px'}}>🕒</span> <input value={formData[`budgetIncreaseStartTime_${periodId}`] || "00:00"} onChange={e => setFormData({...formData, [`budgetIncreaseStartTime_${periodId}`]: e.target.value})} style={{ border: 'none', background: 'transparent', outline: 'none', width: '40px', color: 'var(--text-primary)' }} />
                               </div>
@@ -736,7 +736,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                           <div style={{ flex: 1 }}>
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Bitiş</div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <input value={formData[`budgetIncreaseEnd_${periodId}`] || "17 Haz 2026"} onChange={e => setFormData({...formData, [`budgetIncreaseEnd_${periodId}`]: e.target.value})} style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                              <input value={formData[`budgetIncreaseEnd_${periodId}`] || "17 Haz 2026"} onChange={e => setFormData({...formData, [`budgetIncreaseEnd_${periodId}`]: e.target.value})} style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-primary)' }} />
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
                                 <span style={{fontSize: '14px'}}>🕒</span> <input value={formData[`budgetIncreaseEndTime_${periodId}`] || "00:00"} onChange={e => setFormData({...formData, [`budgetIncreaseEndTime_${periodId}`]: e.target.value})} style={{ border: 'none', background: 'transparent', outline: 'none', width: '40px', color: 'var(--text-primary)' }} />
                               </div>
@@ -745,7 +745,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                         </div>
                         
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                          <select style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }}>
+                          <select style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-primary)' }}>
                             <option>Günlük bütçeyi değer miktarına göre artır (TL)</option>
                           </select>
                           <div style={{ display: 'flex', alignItems: 'center', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', width: '120px' }}>
@@ -894,7 +894,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
                 <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', textAlign: 'right' }}>Şifre</span>
-                <input type="password" style={{ padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px', width: '200px', outline: 'none' }} />
+                <input type="password" style={{ padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px', width: '200px', outline: 'none', background: 'var(--bg-primary)' }} />
               </div>
               
               <div style={{ textAlign: 'center', marginTop: '0.8rem' }}>

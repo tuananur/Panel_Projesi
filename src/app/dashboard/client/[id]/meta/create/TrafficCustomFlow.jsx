@@ -29,7 +29,7 @@ export default function TrafficCustomFlow({ onBack }) {
             <input 
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
-              style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none' }}
+              style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-primary)' }}
             />
           </div>
 
@@ -43,7 +43,7 @@ export default function TrafficCustomFlow({ onBack }) {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{formData.liveVideo ? 'Açık' : 'Kapalı'}</span>
-                <div onClick={() => setFormData({...formData, liveVideo: !formData.liveVideo})} style={{ width: '40px', height: '22px', background: formData.liveVideo ? '#1877f2' : '#e4e6eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }}>
+                <div onClick={() => setFormData({...formData, liveVideo: !formData.liveVideo})} style={{ width: '40px', height: '22px', background: formData.liveVideo ? '#1877f2' : 'var(--border-color)', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }}>
                   <div style={{ width: '18px', height: '18px', background: 'var(--bg-secondary)', borderRadius: '50%', position: 'absolute', top: '2px', left: formData.liveVideo ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
                 </div>
               </div>
@@ -70,8 +70,8 @@ export default function TrafficCustomFlow({ onBack }) {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{formData.abTest ? 'Açık' : 'Kapalı'}</span>
-                <div onClick={() => setFormData({...formData, abTest: !formData.abTest})} style={{ width: '40px', height: '22px', background: formData.abTest ? '#1877f2' : '#e4e6eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }}>
-                  <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: formData.abTest ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                <div onClick={() => setFormData({...formData, abTest: !formData.abTest})} style={{ width: '40px', height: '22px', background: formData.abTest ? '#1877f2' : 'var(--border-color)', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }}>
+                  <div style={{ width: '18px', height: '18px', background: 'var(--bg-secondary)', borderRadius: '50%', position: 'absolute', top: '2px', left: formData.abTest ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
                 </div>
               </div>
             </div>
@@ -81,29 +81,29 @@ export default function TrafficCustomFlow({ onBack }) {
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Neyi test etmek istiyorsunuz?</label>
                   <div style={{ position: 'relative' }}>
-                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none' }}>
+                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
                       <option>Kreatif</option>
                     </select>
-                    <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                    <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   </div>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Test ne kadar süreyle yürütülmeli?</label>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Testiniz bu kadar gün boyunca veya reklam setiniz sona erene kadar çalışacak.</div>
                   <div style={{ position: 'relative' }}>
-                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none' }}>
+                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
                       <option>7 gün</option>
                     </select>
-                    <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                    <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Performansı nasıl karşılaştırmak istersiniz? <Info size={14} color="#606770" /></label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Performansı nasıl karşılaştırmak istersiniz? <Info size={14} color="var(--text-secondary)" /></label>
                   <div style={{ position: 'relative' }}>
-                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none' }}>
+                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
                       <option>Ödeme Bilgisi Ekleme Başına Ücret</option>
                     </select>
-                    <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                    <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   </div>
                 </div>
               </div>
@@ -120,7 +120,7 @@ export default function TrafficCustomFlow({ onBack }) {
               <select 
                 value={formData.category}
                 onChange={e => setFormData({...formData, category: e.target.value})}
-                style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none' }}
+                style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}
               >
                 <option>Varsa kategori beyan et</option>
                 <option>Sosyal Meseleler, Seçimler veya Siyaset</option>
@@ -128,7 +128,7 @@ export default function TrafficCustomFlow({ onBack }) {
                 <option>İstihdam</option>
                 <option>Konut</option>
               </select>
-              <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
             </div>
 
             {formData.category === 'Sosyal Meseleler, Seçimler veya Siyaset' && (
@@ -147,10 +147,10 @@ export default function TrafficCustomFlow({ onBack }) {
                   <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>Sosyal Meselelerle, Seçimlerle İlgili veya Siyasi Reklamlar Yayınlama Yetkisi</div>
                   
                   <div style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Onaylanan Kimlik <Info size={14} color="#606770" /></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Onaylanan Kimlik <Info size={14} color="var(--text-secondary)" /></div>
                     <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
                       <div style={{ width: '20px', height: '20px', background: '#e02424', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
-                        <div style={{ width: '10px', height: '2px', background: '#fff' }} />
+                        <div style={{ width: '10px', height: '2px', background: 'var(--bg-secondary)' }} />
                       </div>
                       <div>
                         <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Kimliğinizi onaylayın</div>
@@ -161,10 +161,10 @@ export default function TrafficCustomFlow({ onBack }) {
                   </div>
 
                   <div style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Sayfalar ve Sorumluluk Retleri <Info size={14} color="#606770" /></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Sayfalar ve Sorumluluk Retleri <Info size={14} color="var(--text-secondary)" /></div>
                     <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
                       <div style={{ width: '20px', height: '20px', background: '#e02424', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
-                        <div style={{ width: '10px', height: '2px', background: '#fff' }} />
+                        <div style={{ width: '10px', height: '2px', background: 'var(--bg-secondary)' }} />
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Hiçbir Sayfa reklam yayınlamak için ayarlanmadı</div>
@@ -173,7 +173,7 @@ export default function TrafficCustomFlow({ onBack }) {
                           <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-muted)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }} disabled>
                             <option>Sayfa seç</option>
                           </select>
-                          <ChevronDown size={16} color="#8d949e" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                          <ChevronDown size={16} color="var(--text-muted)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                         </div>
                       </div>
                     </div>
@@ -181,11 +181,11 @@ export default function TrafficCustomFlow({ onBack }) {
                   
                   <div style={{ borderTop: '1px solid #e4e6eb', padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Özel Reklam Kategorisi detayları</span>
-                    <ChevronDown size={16} color="#606770" />
+                    <ChevronDown size={16} color="var(--text-secondary)" />
                   </div>
                   <div style={{ borderTop: '1px solid #e4e6eb', padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Özel Reklam Kategorisi seçenekleri</span>
-                    <ChevronDown size={16} color="#606770" />
+                    <ChevronDown size={16} color="var(--text-secondary)" />
                   </div>
                 </div>
               </div>
@@ -196,10 +196,10 @@ export default function TrafficCustomFlow({ onBack }) {
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Ülkeler</label>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: '0.5rem' }}>Bu kampanyayı nerede yayınlamak istediğinizi seçin. Bu konumlarda reklamlarınızı yayınlamak için ilave koşullar varsa, reklam seçenekleriniz bu koşullara göre ayarlanacak.</div>
                 <div style={{ position: 'relative' }}>
-                  <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none' }}>
+                  <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
                     <option>Türkiye</option>
                   </select>
-                  <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                  <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                 </div>
               </div>
             )}
@@ -212,17 +212,17 @@ export default function TrafficCustomFlow({ onBack }) {
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
               <div style={{ flex: 1, position: 'relative' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
-                  Bütçe <Info size={14} color="#606770"/>
+                  Bütçe <Info size={14} color="var(--text-secondary)"/>
                 </label>
                 <select 
                   value={formData.budgetType}
                   onChange={e => setFormData({...formData, budgetType: e.target.value})}
-                  style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none' }}
+                  style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}
                 >
                   <option>Günlük Bütçe</option>
                   <option>Toplam Bütçe</option>
                 </select>
-                <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', bottom: '1rem', pointerEvents: 'none' }} />
+                <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', bottom: '1rem', pointerEvents: 'none' }} />
               </div>
 
               <div style={{ flex: 1 }}>
@@ -231,7 +231,7 @@ export default function TrafficCustomFlow({ onBack }) {
                   <input 
                     value={formData.budgetAmount}
                     onChange={e => setFormData({...formData, budgetAmount: e.target.value})}
-                    style={{ width: '100%', padding: '0.8rem 2.5rem', border: '1px solid #e02424', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none' }}
+                    style={{ width: '100%', padding: '0.8rem 2.5rem', border: '1px solid #e02424', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-primary)' }}
                   />
                   <div style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 600 }}>TL</div>
                   <AlertCircle size={16} color="#e02424" style={{ position: 'absolute', right: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
@@ -312,8 +312,8 @@ export default function TrafficCustomFlow({ onBack }) {
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Özel Hedef Kitleler</label>
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <div style={{ position: 'relative', flex: 1 }}>
-                    <Search size={16} color="#8d949e" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
-                    <input placeholder="Mevcut hedef kitleleri arayın" style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.5rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', outline: 'none' }} />
+                    <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input placeholder="Mevcut hedef kitleleri arayın" style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.5rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', background: 'var(--bg-primary)' }} />
                   </div>
                   <button style={{ padding: '0 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     Yeni Oluştur <ChevronDown size={14} />
@@ -329,11 +329,11 @@ export default function TrafficCustomFlow({ onBack }) {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Yaş <Info size={14} color="#606770"/></label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Yaş <Info size={14} color="var(--text-secondary)"/></label>
                   <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>18 - 65+</div>
                 </div>
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Cinsiyet <Info size={14} color="#606770"/></label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Cinsiyet <Info size={14} color="var(--text-secondary)"/></label>
                   <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Tüm cinsiyetler</div>
                 </div>
               </div>
@@ -342,8 +342,8 @@ export default function TrafficCustomFlow({ onBack }) {
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Detaylı Hedefleme</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <div style={{ position: 'relative', flex: 1 }}>
-                    <Search size={16} color="#8d949e" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
-                    <input placeholder="Demografik bilgiler, ilgi alanları veya davranışlar ekleyin" style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.5rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', outline: 'none' }} />
+                    <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input placeholder="Demografik bilgiler, ilgi alanları veya davranışlar ekleyin" style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.5rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', background: 'var(--bg-primary)' }} />
                   </div>
                   <button style={{ padding: '0 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1877f2' }}>Göz At</button>
                 </div>
@@ -361,10 +361,10 @@ export default function TrafficCustomFlow({ onBack }) {
             <div>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.8rem' }}>Reklam Şeffaflığı</div>
               <div style={{ position: 'relative', marginBottom: '1rem' }}>
-                <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-secondary)', outline: 'none', appearance: 'none' }}>
+                <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-secondary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
                   <option>Reklamvereni seçin</option>
                 </select>
-                <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.6 }}>
                 <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Reklamveren ve ödeyen farklı</span>
@@ -381,7 +381,7 @@ export default function TrafficCustomFlow({ onBack }) {
                 <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Ortaklık Reklamı</div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '85%' }}>Başka bir işletme, marka veya içerik üreticisiyle bir ortaklık reklamı oluşturun.</div>
               </div>
-              <div style={{ width: '40px', height: '22px', background: formData.partnershipAd ? '#1877f2' : '#e4e6eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }} onClick={() => setFormData({...formData, partnershipAd: !formData.partnershipAd})}>
+              <div style={{ width: '40px', height: '22px', background: formData.partnershipAd ? '#1877f2' : 'var(--border-color)', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }} onClick={() => setFormData({...formData, partnershipAd: !formData.partnershipAd})}>
                 <div style={{ width: '18px', height: '18px', background: 'var(--bg-secondary)', borderRadius: '50%', position: 'absolute', top: '2px', left: formData.partnershipAd ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>
             </div>
@@ -398,7 +398,7 @@ export default function TrafficCustomFlow({ onBack }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: 'var(--bg-secondary)' }}>
                   <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 'bold' }}>T</div>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', flex: 1 }}>Tuana Nur Yalçın</span>
-                  <ChevronDown size={16} color="#606770" />
+                  <ChevronDown size={16} color="var(--text-secondary)" />
                 </div>
               </div>
 
@@ -409,7 +409,7 @@ export default function TrafficCustomFlow({ onBack }) {
                     <img src="https://ui-avatars.com/api/?name=F&background=random" alt="avatar" style={{ width: '100%', height: '100%' }} />
                   </div>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', flex: 1 }}>flowervadi</span>
-                  <ChevronDown size={16} color="#606770" />
+                  <ChevronDown size={16} color="var(--text-secondary)" />
                 </div>
               </div>
 
@@ -417,7 +417,7 @@ export default function TrafficCustomFlow({ onBack }) {
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Threads profili</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: 'var(--bg-secondary)' }}>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', flex: 1 }}>Bir Threads profili seç</span>
-                  <ChevronDown size={16} color="#606770" />
+                  <ChevronDown size={16} color="var(--text-secondary)" />
                 </div>
               </div>
             </div>
@@ -429,10 +429,10 @@ export default function TrafficCustomFlow({ onBack }) {
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Reklam Kurulumu</label>
               <div style={{ position: 'relative' }}>
-                <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none' }}>
+                <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
                   <option>Mevcut gönderiyi kullan</option>
                 </select>
-                <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               </div>
             </div>
 
@@ -442,10 +442,10 @@ export default function TrafficCustomFlow({ onBack }) {
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Katalog</label>
                   <div style={{ position: 'relative' }}>
-                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-secondary)', outline: 'none', appearance: 'none' }}>
+                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-secondary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
                       <option>Bağlantıda değil</option>
                     </select>
-                    <ChevronDown size={16} color="#606770" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                    <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                   </div>
                 </div>
                 <button disabled style={{ padding: '0.8rem 1rem', background: 'var(--bg-primary)', border: 'none', borderRadius: '6px', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.85rem' }}>Görüntüle</button>
@@ -457,7 +457,7 @@ export default function TrafficCustomFlow({ onBack }) {
               <input 
                 placeholder="http://www.example.com/page" 
                 defaultValue="http://www.example.com/page"
-                style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none' }}
+                style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-primary)' }}
               />
             </div>
 
@@ -536,7 +536,7 @@ export default function TrafficCustomFlow({ onBack }) {
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>View Etiketleri</label>
                   <textarea 
                     rows={3}
-                    style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', resize: 'vertical' }}
+                    style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', resize: 'vertical', background: 'var(--bg-primary)' }}
                   />
                 </div>
 
@@ -577,7 +577,7 @@ export default function TrafficCustomFlow({ onBack }) {
           <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '1rem' }}>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Hedef Kitle Tanımı</div>
-              <Info size={16} color="#8d949e" />
+              <Info size={16} color="var(--text-muted)" />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
@@ -590,7 +590,7 @@ export default function TrafficCustomFlow({ onBack }) {
             {/* Gauge Dial */}
             <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
               <div style={{ display: 'flex', height: '12px', borderRadius: '6px', overflow: 'hidden' }}>
-                <div style={{ flex: 1, background: '#fca5a5' }} />
+                <div style={{ flex: 1, background: 'rgba(224,36,36,0.3)' }} />
                 <div style={{ flex: 1, background: '#fef08a' }} />
                 <div style={{ flex: 1, background: '#10b981' }} />
               </div>
@@ -604,7 +604,7 @@ export default function TrafficCustomFlow({ onBack }) {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '1.5rem' }}>
-              Tahmini hedef kitle büyüklüğü: 68.800.000 - 81.000.000 <Info size={14} color="#8d949e" />
+              Tahmini hedef kitle büyüklüğü: 68.800.000 - 81.000.000 <Info size={14} color="var(--text-muted)" />
             </div>
 
             <div style={{ borderTop: '1px solid #e4e6eb', paddingTop: '1rem', display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
@@ -638,7 +638,7 @@ export default function TrafficCustomFlow({ onBack }) {
 
             {/* Device Filters Row */}
             <div style={{ padding: '0.5rem 1rem', background: 'var(--bg-primary)', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <div style={{ padding: '0.4rem', background: '#e7f3ff', borderRadius: '6px', color: '#1877f2', cursor: 'pointer' }}>
+              <div style={{ padding: '0.4rem', background: 'rgba(24,119,242,0.12)', borderRadius: '6px', color: '#1877f2', cursor: 'pointer' }}>
                 <Monitor size={18} />
               </div>
               <div style={{ padding: '0.4rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
@@ -668,7 +668,7 @@ export default function TrafficCustomFlow({ onBack }) {
 
             <div style={{ padding: '0.8rem 1rem', background: 'var(--bg-secondary)', borderTop: '1px solid #e4e6eb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Önizlemeler farklı platformlara göre değişebilir.</span>
-              <Info size={14} color="#8d949e" />
+              <Info size={14} color="var(--text-muted)" />
             </div>
 
           </div>
