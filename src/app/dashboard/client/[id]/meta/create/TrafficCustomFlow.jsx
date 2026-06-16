@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, AlertCircle, Info, Check, Search, Plus, Sparkles, Monitor, Smartphone, LayoutTemplate, Share2 } from 'lucide-react';
+import { ChevronDown, AlertCircle, Info, Check, CheckCircle2, Search, Plus, Sparkles, Monitor, Smartphone, LayoutTemplate, Share2 } from 'lucide-react';
 
 export default function TrafficCustomFlow({ onBack }) {
   const [formData, setFormData] = useState({
@@ -114,92 +114,98 @@ export default function TrafficCustomFlow({ onBack }) {
           {/* Card 3: Özel Reklam Kategorileri */}
           <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Özel Reklam Kategorileri</label>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Kredi, istihdam veya konut ya da sosyal meseleler, seçimler veya siyasetle ilgili reklamlar beyan etmeniz gerekir.</div>
-            
-            <div style={{ position: 'relative' }}>
-              <select 
-                value={formData.category}
-                onChange={e => setFormData({...formData, category: e.target.value})}
-                style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}
-              >
-                <option>Varsa kategori beyan et</option>
-                <option>Sosyal Meseleler, Seçimler veya Siyaset</option>
-                <option>Kredi</option>
-                <option>İstihdam</option>
-                <option>Konut</option>
-              </select>
-              <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', lineHeight: '1.4' }}>Reklamlarınızın finansal ürünler ve hizmetler, istihdam, konut ya da sosyal meseleler, seçimler veya siyasetle ilgili olup olmadığını beyan ederek reklamlarınızın reddedilmesini önleyin. Koşullar ülkeye göre değişir. <span style={{ color: '#1877f2', cursor: 'pointer', fontWeight: 600 }}>Özel Reklam Kategorileri Hakkında</span></div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Kategoriler</label>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>Bu kampanyanın neyin reklamını yapacağını en iyi tanımlayan kategorileri seçin.</div>
+              <div style={{ position: 'relative' }}>
+                <select 
+                  value={formData.category}
+                  onChange={e => setFormData({...formData, category: e.target.value})}
+                  style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}
+                >
+                  <option>Varsa kategori beyan et</option>
+                  <option>Sosyal Meseleler, Seçimler veya Siyaset</option>
+                  <option>Finansal ürünler ve hizmetler</option>
+                  <option>İstihdam</option>
+                  <option>Konut</option>
+                </select>
+                <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              </div>
             </div>
 
             {formData.category === 'Sosyal Meseleler, Seçimler veya Siyaset' && (
-              <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ border: '1px solid #fca5a5', borderLeft: '3px solid #e02424', borderRadius: '6px', padding: '1rem', display: 'flex', gap: '0.8rem', background: 'var(--bg-secondary)' }}>
-                  <AlertCircle size={20} color="#e02424" style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '0.5rem', lineHeight: '1.4' }}>
-                      Sosyal meseleler, seçimler veya siyasetle ilgili reklamlar yayınlamak için kimliğini doğrulaman ve bir sorumluluk reddi oluşturman gerekiyor.
+              <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Sosyal Meselelerle, Seçimlerle İlgili veya Siyasi Reklamlar Yayınlama Yetkisi</div>
+                
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Onaylanan Kimlik <Info size={14} color="var(--text-secondary)" /></div>
+                  <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
+                    <div style={{ width: '20px', height: '20px', background: '#e02424', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px', flexShrink: 0 }}>
+                      <div style={{ width: '10px', height: '2px', background: 'var(--bg-secondary)' }} />
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: '#1877f2', fontWeight: 600, cursor: 'pointer' }}>Detayları Gör</div>
+                    <div>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Kimliğinizi onaylayın</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: '0.8rem' }}>Sosyal meselelerle, seçimlerle ilgili veya siyasi reklamlar yayınlamak isteyen kişilerden öncelikle bir devlet kurumu tarafından verilmiş geçerli bir kimlik belgesinin kopyasını yüklemelerini şart koşuyoruz. Kimlik bilgileri reklamlarda veya Meta Reklam Kütüphanesi'nde gösterilmeyecektir. Kimliğinizi onayladıktan sonra kimlik belgenizi 30 gün içinde sileriz.</div>
+                      <button style={{ padding: '0.5rem 1rem', background: '#1877f2', border: 'none', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#fff', cursor: 'pointer' }}>Kimliği Onayla</button>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>Sosyal Meselelerle, Seçimlerle İlgili veya Siyasi Reklamlar Yayınlama Yetkisi</div>
-                  
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Onaylanan Kimlik <Info size={14} color="var(--text-secondary)" /></div>
-                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
-                      <div style={{ width: '20px', height: '20px', background: '#e02424', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
-                        <div style={{ width: '10px', height: '2px', background: 'var(--bg-secondary)' }} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Kimliğinizi onaylayın</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: '0.8rem' }}>Sosyal meselelerle, seçimlerle ilgili veya siyasi reklamlar yayınlamak isteyen kişilerden öncelikle bir devlet kurumu tarafından verilmiş geçerli bir kimlik belgesinin kopyasını yüklemelerini şart koşuyoruz. Kimlik bilgileri reklamlarda veya Meta Reklam Kütüphanesi'nde gösterilmeyecektir. Kimliğinizi onayladıktan sonra kimlik belgenizi 30 gün içinde sileriz.</div>
-                        <button style={{ padding: '0.5rem 1rem', background: '#1877f2', border: 'none', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#fff', cursor: 'pointer' }}>Kimliği Onayla</button>
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Sayfalar ve Sorumluluk Retleri <Info size={14} color="var(--text-secondary)" /></div>
+                  <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
+                    <div style={{ width: '20px', height: '20px', background: '#e02424', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px', flexShrink: 0 }}>
+                      <div style={{ width: '10px', height: '2px', background: 'var(--bg-secondary)' }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Hiçbir Sayfa reklam yayınlamak için ayarlanmadı</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Bir Sayfayı onaylanmış bir reklam hesabına bağlayın ve bir sorumluluk reddi oluşturun.</div>
+                      <div style={{ position: 'relative' }}>
+                        <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-muted)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }} disabled>
+                          <option>Sayfa seç</option>
+                        </select>
+                        <ChevronDown size={16} color="var(--text-muted)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                       </div>
                     </div>
                   </div>
-
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Sayfalar ve Sorumluluk Retleri <Info size={14} color="var(--text-secondary)" /></div>
-                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
-                      <div style={{ width: '20px', height: '20px', background: '#e02424', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
-                        <div style={{ width: '10px', height: '2px', background: 'var(--bg-secondary)' }} />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Hiçbir Sayfa reklam yayınlamak için ayarlanmadı</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Bir Sayfayı onaylanmış bir reklam hesabına bağlayın ve bir sorumluluk reddi oluşturun.</div>
-                        <div style={{ position: 'relative' }}>
-                          <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-muted)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }} disabled>
-                            <option>Sayfa seç</option>
-                          </select>
-                          <ChevronDown size={16} color="var(--text-muted)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style={{ borderTop: '1px solid #e4e6eb', padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Özel Reklam Kategorisi detayları</span>
-                    <ChevronDown size={16} color="var(--text-secondary)" />
-                  </div>
-                  <div style={{ borderTop: '1px solid #e4e6eb', padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Özel Reklam Kategorisi seçenekleri</span>
-                    <ChevronDown size={16} color="var(--text-secondary)" />
-                  </div>
+                </div>
+                
+                <div style={{ borderTop: '1px solid var(--border-color)', padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Özel Reklam Kategorisi detayları</span>
+                  <ChevronDown size={16} color="var(--text-secondary)" />
+                </div>
+                <div style={{ borderTop: '1px solid var(--border-color)', padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Özel Reklam Kategorisi seçenekleri</span>
+                  <ChevronDown size={16} color="var(--text-secondary)" />
                 </div>
               </div>
             )}
             
-            {formData.category === 'İstihdam' && (
-              <div style={{ marginTop: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Ülkeler</label>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: '0.5rem' }}>Bu kampanyayı nerede yayınlamak istediğinizi seçin. Bu konumlarda reklamlarınızı yayınlamak için ilave koşullar varsa, reklam seçenekleriniz bu koşullara göre ayarlanacak.</div>
-                <div style={{ position: 'relative' }}>
-                  <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
-                    <option>Türkiye</option>
-                  </select>
-                  <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            {(formData.category === 'Finansal ürünler ve hizmetler' || formData.category === 'İstihdam' || formData.category === 'Konut') && (
+              <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Ülkeler</label>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: '0.5rem' }}>Bu kampanyayı nerede yayınlamak istediğinizi seçin. Bu konumlarda reklamlarınızı yayınlamak için ilave koşullar varsa, reklam seçenekleriniz bu koşullara göre ayarlanacak.</div>
+                  <div style={{ position: 'relative' }}>
+                    <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.95rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-primary)' }}>
+                      <option>Türkiye</option>
+                    </select>
+                    <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', padding: '0.8rem', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '6px', background: 'rgba(16,185,129,0.06)' }}>
+                  <CheckCircle2 size={18} color="#10b981" style={{ flexShrink: 0, marginTop: '1px' }} />
+                  <div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: '1.4' }}>
+                      {formData.category === 'Finansal ürünler ve hizmetler' && 'Finansal ürünler ve hizmetler kategorisi: Kredi kartları, uzun vadeli finansman, vadesiz ve tasarruf hesapları, yatırım hizmetleri, sigorta hizmetleri veya diğer ilgili finansal fırsatlara yönelik reklamlar.'}
+                      {formData.category === 'İstihdam' && 'İstihdam kategorisi: İş teklifleri, stajlar, profesyonel sertifika programları ve ilgili diğer fırsatlara yönelik reklamlar.'}
+                      {formData.category === 'Konut' && 'Konut kategorisi: Emlak ilanları, konut sigortası, mortgage kredileri veya ilgili diğer fırsatlara yönelik reklamlar.'}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: '#1877f2', fontWeight: 600, cursor: 'pointer', marginTop: '0.3rem' }}>Detayları Gör</div>
+                  </div>
                 </div>
               </div>
             )}
