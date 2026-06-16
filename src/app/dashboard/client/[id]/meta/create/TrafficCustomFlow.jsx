@@ -18,7 +18,14 @@ export default function TrafficCustomFlow({ onBack }) {
     abTestCompare: 'Sonuç başına ücret',
     specialCategoryOpen: false,
     specialCategory: 'Varsa kategori beyan et',
-    specialCategoryCountry: 'Türkiye'
+    specialCategoryCountry: 'Türkiye',
+    hasEndDate: true,
+    endDateSelect: 'Özel',
+    endDate: '3 Temmuz 2026',
+    endTime: '12:52 GMT+3',
+    budgetPlanOpen: true,
+    budgetIncreasesScheduled: true,
+    budgetPeriodsOpen: true
   });
   const [showReauthModal, setShowReauthModal] = useState(false);
 
@@ -349,29 +356,163 @@ export default function TrafficCustomFlow({ onBack }) {
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Başlangıç Tarihi</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input value={formData.date} readOnly style={{ flex: 1, padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)' }} />
-                  <input value={formData.time} readOnly style={{ width: '120px', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)' }} />
+                  <div style={{ position: 'relative', flex: 1 }}>
+                    <input value={formData.date} readOnly style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                    <div style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    </div>
+                  </div>
+                  <div style={{ position: 'relative', width: '140px' }}>
+                    <input value={formData.time} readOnly style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                    <div style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Bitiş Tarihi</label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.8rem 0' }}>
-                  <input type="checkbox" style={{ width: '16px', height: '16px', accentColor: '#1877f2' }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.8rem 0 0.4rem 0' }}>
+                  <input type="checkbox" checked={formData.hasEndDate} onChange={() => setFormData({...formData, hasEndDate: !formData.hasEndDate})} style={{ width: '16px', height: '16px', accentColor: '#1877f2' }} />
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>Bir bitiş tarihi belirleyin</span>
                 </label>
+                {formData.hasEndDate && (
+                  <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
+                    <div style={{ position: 'relative', width: '120px' }}>
+                      <select 
+                        value={formData.endDateSelect}
+                        onChange={e => setFormData({...formData, endDateSelect: e.target.value})}
+                        style={{ width: '100%', padding: '0.8rem', border: formData.endDateSelect === 'Özel' ? '1px solid #1877f2' : '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: formData.endDateSelect === 'Özel' ? 'rgba(24,119,242,0.08)' : 'var(--bg-primary)' }}>
+                        <option>14 gün</option>
+                        <option>30 gün</option>
+                        <option>60 gün</option>
+                        <option>Özel</option>
+                      </select>
+                      <ChevronDown size={16} color={formData.endDateSelect === 'Özel' ? '#1877f2' : 'var(--text-primary)'} style={{ position: 'absolute', right: '0.8rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                    </div>
+                    {formData.endDateSelect === 'Özel' && (
+                      <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
+                          <input value={formData.endDate} readOnly style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                          <div style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                          </div>
+                        </div>
+                        <div style={{ position: 'relative', width: '140px' }}>
+                          <input value={formData.endTime} readOnly style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                          <div style={{ position: 'absolute', left: '0.6rem', top: '50%', transform: 'translateY(-50%)' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
-            <div style={{ borderTop: '1px solid #e4e6eb', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Bütçe planlama</div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.4rem', opacity: 0.6 }}>
-                  <input type="checkbox" disabled style={{ width: '16px', height: '16px' }} />
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
-                </label>
+            {formData.budgetPlanOpen && (
+              <div style={{ marginBottom: '1rem', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => setFormData({...formData, budgetPlanOpen: false})}>
+                Seçenekleri Gizle <ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} />
               </div>
-              <button style={{ padding: '0.4rem 1rem', background: 'var(--bg-primary)', border: 'none', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', opacity: 0.6 }}>Gör</button>
-            </div>
+            )}
+            {!formData.budgetPlanOpen && (
+              <div style={{ marginBottom: '1rem', color: '#1877f2', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => setFormData({...formData, budgetPlanOpen: true})}>
+                Daha Fazla Seçenek Gör <ChevronDown size={14} />
+              </div>
+            )}
+
+            {formData.budgetPlanOpen && (
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
+                  Bütçe planlama <Info size={14} color="var(--text-secondary)" />
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', lineHeight: '1.4' }}>
+                  Belirli gün veya saatlerde bütçenizi artırın.
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={formData.budgetIncreasesScheduled} onChange={() => setFormData({...formData, budgetIncreasesScheduled: !formData.budgetIncreasesScheduled})} style={{ width: '16px', height: '16px', accentColor: '#1877f2' }} />
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
+                  </label>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button onClick={() => setFormData({...formData, budgetPeriodsOpen: !formData.budgetPeriodsOpen})} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.4rem 0.8rem', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
+                      {formData.budgetPeriodsOpen ? 'Gizle' : 'Gör'} <ChevronDown size={14} style={{ transform: formData.budgetPeriodsOpen ? 'rotate(180deg)' : 'none' }} />
+                    </button>
+                  </div>
+                </div>
+
+                {formData.budgetIncreasesScheduled && formData.budgetPeriodsOpen && (
+                  <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+                    <div style={{ background: 'rgba(24,119,242,0.08)', padding: '0.8rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Bütçe artışı için süre</span>
+                      <ChevronDown size={16} color="var(--text-primary)" style={{ transform: 'rotate(180deg)' }} />
+                    </div>
+                    
+                    <div style={{ padding: '1.5rem', background: 'var(--bg-primary)' }}>
+                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Başlangıç</label>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input value="Haz 17, 2026" readOnly style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                            <div style={{ position: 'relative', width: '100px' }}>
+                              <input value="00:00" readOnly style={{ width: '100%', padding: '0.6rem 0.6rem 0.6rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                              <div style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)' }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <span style={{ marginTop: '1.5rem', color: 'var(--text-secondary)' }}>-</span>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>Bitiş</label>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input value="Haz 18, 2026" readOnly style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                            <div style={{ position: 'relative', width: '100px' }}>
+                              <input value="00:00" readOnly style={{ width: '100%', padding: '0.6rem 0.6rem 0.6rem 2.2rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                              <div style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)' }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-secondary)' }}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
+                          <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none', appearance: 'none', background: 'var(--bg-secondary)' }}>
+                            <option>Günlük bütçeyi değer miktarına göre artır (TL)</option>
+                          </select>
+                          <ChevronDown size={16} color="var(--text-secondary)" style={{ position: 'absolute', right: '0.8rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                        </div>
+                        <div style={{ position: 'relative', width: '120px' }}>
+                          <input value="TL 7,50" readOnly style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', color: 'var(--text-primary)', outline: 'none' }} />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 0.5rem', fontSize: '0.9rem', color: 'var(--text-primary)' }}>TRY</div>
+                      </div>
+                      
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: '1.4', marginBottom: '1.5rem' }}>
+                        Meta 17 Haz ile 18 Haz arasında günde 37,50 TL harcamayı amaçlayacak (7,50 TL artış).
+                      </div>
+
+                      <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Bu dönemi kaldır
+                      </button>
+                    </div>
+
+                    <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'transparent', border: '1px solid var(--border-color)', padding: '0.6rem 1rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
+                        <Plus size={16} /> Başka bir zaman aralığı ekle
+                      </button>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>1/50 zaman dilimi</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Card 5: Hedef Kitle */}
