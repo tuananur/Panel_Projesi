@@ -645,7 +645,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                         right: 0,
                         marginTop: '4px',
                         background: 'var(--bg-secondary)',
-                        border: '1px solid #dddfe2',
+                        border: '1px solid var(--border-color)',
                         borderRadius: '6px',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                         width: '240px',
@@ -653,7 +653,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                         padding: '0.5rem 0',
                         textAlign: 'left'
                       }}>
-                        <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Filtrele</div>
+                        <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Filtrele</div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <div 
                             onClick={() => setFormData({...formData, budgetFilter: 'upcoming'})}
@@ -686,7 +686,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                         
                         <div style={{ borderTop: '1px solid #dddfe2', margin: '0.5rem 0' }}></div>
                         
-                        <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Sırala</div>
+                        <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Sırala</div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <div 
                             onClick={() => setFormData({...formData, budgetSort: 'newest'})}
@@ -881,28 +881,28 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
               <div style={{ color: '#1877f2', fontWeight: 'bold', fontSize: '1.4rem', fontFamily: 'Helvetica, Arial, sans-serif', letterSpacing: '-0.5px' }}>facebook</div>
             </div>
             <div style={{ padding: '2rem 3rem' }}>
-              <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1rem', color: '#1c1e21', textAlign: 'center', fontWeight: 600 }}>Devam etmek için lütfen şifrenizi girin</h3>
+              <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1rem', color: 'var(--text-primary)', textAlign: 'center', fontWeight: 600 }}>Devam etmek için lütfen şifrenizi girin</h3>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', justifyContent: 'center', background: '#f5f6f7', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', justifyContent: 'center', background: 'var(--bg-primary)', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}>
                 <div style={{ width: '40px', height: '40px', background: '#204f63', borderRadius: '4px' }}></div>
-                <div style={{ fontSize: '0.95rem', color: '#1c1e21', fontWeight: 600 }}>{clientName || 'Facebook Kullanıcısı'}</div>
+                <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 600 }}>{clientName || 'Facebook Kullanıcısı'}</div>
               </div>
               
-              <p style={{ fontSize: '0.85rem', color: '#606770', textAlign: 'center', marginBottom: '1.5rem' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1.5rem' }}>
                 Ziyaret etmek istediğiniz sayfa için şifrenizi yeniden girmeniz gerekmektedir.
               </p>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
-                <span style={{ fontSize: '0.9rem', color: '#1c1e21', textAlign: 'right' }}>Şifre</span>
-                <input type="password" style={{ padding: '0.5rem', border: '1px solid #ccd0d5', borderRadius: '4px', width: '200px', outline: 'none' }} />
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', textAlign: 'right' }}>Şifre</span>
+                <input type="password" style={{ padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '4px', width: '200px', outline: 'none' }} />
               </div>
               
               <div style={{ textAlign: 'center', marginTop: '0.8rem' }}>
                 <a href="#" style={{ color: '#1877f2', fontSize: '0.85rem', textDecoration: 'none' }}>Şifreni mi unuttun?</a>
               </div>
             </div>
-            <div style={{ background: '#f5f6f7', padding: '0.8rem 1rem', borderTop: '1px solid #ddd', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-              <button onClick={() => setShowReauthModal(false)} style={{ background: '#e4e6eb', color: '#4b4f56', border: '1px solid #ccd0d5', padding: '0.4rem 1rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}>İptal</button>
+            <div style={{ background: 'var(--bg-primary)', padding: '0.8rem 1rem', borderTop: '1px solid #ddd', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button onClick={() => setShowReauthModal(false)} style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', padding: '0.4rem 1rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}>İptal</button>
               <button onClick={() => setShowReauthModal(false)} style={{ background: '#1877f2', color: '#fff', border: '1px solid #1877f2', padding: '0.4rem 1rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}>Devam</button>
             </div>
           </div>
