@@ -121,7 +121,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
             <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: '1.4', marginBottom: '1rem' }}>
               Bu Reklam Türü İçin Yetkin Yok: Sosyal meselelerle, seçimlerle veya siyasetle ilgili reklamlar yayınlama yetkin yok. Lütfen yetkili bir reklam hesabı kullanıcısından bu reklamı yerleştirmesini iste veya https://www.facebook.com/id adresine giderek kimlik doğrulama işlemini kendin tamamla. (#2708008)
             </div>
-            <button style={{ padding: '0.4rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer' }}>Düzenle</button>
+            <button onClick={() => setIsReviewMode(false)} style={{ padding: '0.4rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer' }}>Düzenle</button>
           </div>
         </div>
 
