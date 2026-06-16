@@ -136,33 +136,33 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
 
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Satın Alma Türü</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Açık Artırma</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.purchaseType}</div>
           </div>
 
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Reklam Verme Amacı</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Bilinirlik</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.campaignObjective}</div>
           </div>
 
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>A/B Testi</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Yayınla'yı seçtikten sonra, A/B testinizin B sürümünü oluşturmak için bu kampanyayı çoğaltacağız.</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.abTestEnabled ? 'Yayınla\'yı seçtikten sonra, A/B testinizin B sürümünü oluşturmak için bu kampanyayı çoğaltacağız.' : 'Kapalı'}</div>
           </div>
 
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe Stratejisi</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Kampanya bütçesi</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.1rem' }}>Daily Bütçesi 50,00 TL</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.budgetEnabled ? 'Kampanya bütçesi' : 'Reklam seti bütçesi'}</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.1rem' }}>{formData.budgetEnabled ? `${formData.budgetType === 'Günlük bütçe' ? 'Günlük Bütçesi' : 'Toplam Bütçe'} ${formData.budgetAmount} TL` : 'Reklam seti bütçe paylaşımı: Açık'}</div>
           </div>
 
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe planlama</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Etkinleştirildi: Evet</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.budgetPlanVisible ? 'Etkinleştirildi: Evet' : 'Kapalı'}</div>
           </div>
 
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Kampanya Teklif Stratejisi</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>En yüksek hacim</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.bidStrategy}</div>
           </div>
 
           <div>
@@ -170,15 +170,19 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
             <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Standart</div>
           </div>
 
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Özel Reklam Kategorileri</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Sosyal Meseleler, Seçimler veya Siyaset</div>
-          </div>
+          {formData.specialCategory !== 'Varsa kategori beyan et' && (
+            <>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Özel Reklam Kategorileri</div>
+                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.specialCategory}</div>
+              </div>
 
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Özel Reklam Kategorisi Ülkeleri</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Türkiye</div>
-          </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Özel Reklam Kategorisi Ülkeleri</div>
+                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.specialCategoryCountry}</div>
+              </div>
+            </>
+          )}
 
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Reklam Setleri</div>
