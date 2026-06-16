@@ -799,20 +799,6 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                   <option>Reklam Alanı</option>
                   <option>Özel</option>
                 </select>
-                {formData.abTestMetric === 'Özel' && (
-                  <div style={{ marginTop: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
-                      <Search size={16} color="var(--text-secondary)" />
-                      <input placeholder="Ara" style={{ border: 'none', outline: 'none', width: '100%', fontSize: '0.9rem' }} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                      <div style={{ padding: '0.4rem', cursor: 'pointer', fontSize: '0.9rem' }}>Kreatif</div>
-                      <div style={{ padding: '0.4rem', cursor: 'pointer', fontSize: '0.9rem' }}>Hedef Kitle</div>
-                      <div style={{ padding: '0.4rem', cursor: 'pointer', fontSize: '0.9rem' }}>Reklam Alanı</div>
-                      <div style={{ padding: '0.4rem', cursor: 'pointer', fontSize: '0.9rem', background: 'rgba(24, 119, 242, 0.1)', color: '#1877f2', borderRadius: '4px' }}>Özel</div>
-                    </div>
-                  </div>
-                )}
               </div>
               
               <div>
