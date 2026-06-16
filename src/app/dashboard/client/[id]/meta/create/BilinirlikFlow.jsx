@@ -215,7 +215,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
 
       <div style={{ maxWidth: '800px', margin: '2rem auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '0 1rem', paddingBottom: '4rem' }}>
         
-        {activeTab === 'campaigns' || activeTab === 'adsets' ? (
+        {(activeTab === 'campaigns' || activeTab === 'adsets' || activeTab === 'ads') ? (
           <>
             {/* Card A: Kampanya Adı */}
             <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', border: '1px solid var(--border-color)' }}>
