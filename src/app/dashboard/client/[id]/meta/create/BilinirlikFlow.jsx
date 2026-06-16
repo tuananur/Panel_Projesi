@@ -39,7 +39,49 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
     } else {
       setBudgetError(false);
     }
-  }, [formData.budgetAmount, formData.budgetType, formData.budgetEnabled]);
+  }, [formData.budgetEnabled, formData.budgetType, formData.budgetAmount]);
+
+  const now = new Date(2026, 5, 16); 
+
+  const parseTurkishDate = (dateStr) => {
+    if (!dateStr) return now;
+    const months = { 'Oca': 0, 'Şub': 1, 'Mar': 2, 'Nis': 3, 'May': 4, 'Haz': 5, 'Tem': 6, 'Ağu': 7, 'Eyl': 8, 'Eki': 9, 'Kas': 10, 'Ara': 11 };
+    const parts = dateStr.split(' ');
+    if (parts.length >= 3) {
+      return new Date(parseInt(parts[2]), months[parts[1]] || 0, parseInt(parts[0]));
+    }
+    return now;
+  };
+
+  const filterType = formData.budgetFilter || 'all'; 
+  const sortType = formData.budgetSort || 'newest';
+
+  const periods = formData.planIncreasePeriods || [1];
+  
+  const analyzedPeriods = periods.map(id => {
+    const startStr = formData[`budgetIncreaseStart_${id}`] || "16 Haz 2026";
+    const endStr = formData[`budgetIncreaseEnd_${id}`] || "17 Haz 2026";
+    const startDate = parseTurkishDate(startStr);
+    const endDate = parseTurkishDate(endStr);
+    const isCompleted = endDate < now;
+    const isUpcoming = endDate >= now;
+    return { id, startDate, endDate, isCompleted, isUpcoming };
+  });
+
+  const upcomingCount = analyzedPeriods.filter(p => p.isUpcoming).length;
+  const completedCount = analyzedPeriods.filter(p => p.isCompleted).length;
+  const allCount = analyzedPeriods.length;
+
+  let displayedPeriods = analyzedPeriods.filter(p => {
+    if (filterType === 'upcoming') return p.isUpcoming;
+    if (filterType === 'completed') return p.isCompleted;
+    return true;
+  });
+
+  displayedPeriods.sort((a, b) => {
+    if (sortType === 'newest') return b.startDate - a.startDate;
+    return a.startDate - b.startDate;
+  });
 
   const renderHeader = () => (
     <div style={{ position: 'sticky', top: 0, zIndex: 50, background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem 1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
@@ -573,17 +615,32 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                       }}>
                         <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Filtrele</div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: 'transparent' }} onMouseOver={e => e.currentTarget.style.background='#f5f6f7'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                          <div 
+                            onClick={() => setFormData({...formData, budgetFilter: 'upcoming'})}
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'upcoming' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'upcoming' ? '#e7f3ff' : 'transparent' }} 
+                            onMouseOver={e => {if(filterType !== 'upcoming') e.currentTarget.style.background='#f5f6f7'}} 
+                            onMouseOut={e => {if(filterType !== 'upcoming') e.currentTarget.style.background='transparent'}}
+                          >
                             <span>Yaklaşan girişler</span>
-                            <span style={{ background: '#e4f3eb', color: '#108043', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: '1px solid #a3d9b5' }}>1</span>
+                            <span style={{ background: filterType === 'upcoming' ? '#e7f3ff' : '#e4f3eb', color: filterType === 'upcoming' ? '#1877f2' : '#108043', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'upcoming' ? '1px solid #bce0fd' : '1px solid #a3d9b5' }}>{upcomingCount}</span>
                           </div>
-                          <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: 'transparent' }} onMouseOver={e => e.currentTarget.style.background='#f5f6f7'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                          <div 
+                            onClick={() => setFormData({...formData, budgetFilter: 'completed'})}
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'completed' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'completed' ? '#e7f3ff' : 'transparent' }} 
+                            onMouseOver={e => {if(filterType !== 'completed') e.currentTarget.style.background='#f5f6f7'}} 
+                            onMouseOut={e => {if(filterType !== 'completed') e.currentTarget.style.background='transparent'}}
+                          >
                             <span>Tamamlanan girişler</span>
-                            <span style={{ background: '#f5f6f7', color: '#606770', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: '1px solid #dddfe2' }}>0</span>
+                            <span style={{ background: filterType === 'completed' ? '#e7f3ff' : '#f5f6f7', color: filterType === 'completed' ? '#1877f2' : '#606770', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'completed' ? '1px solid #bce0fd' : '1px solid #dddfe2' }}>{completedCount}</span>
                           </div>
-                          <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#1877f2', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: '#e7f3ff' }}>
+                          <div 
+                            onClick={() => setFormData({...formData, budgetFilter: 'all'})}
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: filterType === 'all' ? '#1877f2' : '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: filterType === 'all' ? '#e7f3ff' : 'transparent' }}
+                            onMouseOver={e => {if(filterType !== 'all') e.currentTarget.style.background='#f5f6f7'}} 
+                            onMouseOut={e => {if(filterType !== 'all') e.currentTarget.style.background='transparent'}}
+                          >
                             <span>Tüm girişler</span>
-                            <span style={{ background: '#e7f3ff', color: '#1877f2', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: '1px solid #bce0fd' }}>1</span>
+                            <span style={{ background: filterType === 'all' ? '#e7f3ff' : '#f5f6f7', color: filterType === 'all' ? '#1877f2' : '#606770', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: filterType === 'all' ? '1px solid #bce0fd' : '1px solid #dddfe2' }}>{allCount}</span>
                           </div>
                         </div>
                         
@@ -591,10 +648,20 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                         
                         <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Sırala</div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'transparent' }} onMouseOver={e => e.currentTarget.style.background='#f5f6f7'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                          <div 
+                            onClick={() => setFormData({...formData, budgetSort: 'newest'})}
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: sortType === 'newest' ? '#1877f2' : '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: sortType === 'newest' ? '#e7f3ff' : 'transparent' }} 
+                            onMouseOver={e => {if(sortType !== 'newest') e.currentTarget.style.background='#f5f6f7'}} 
+                            onMouseOut={e => {if(sortType !== 'newest') e.currentTarget.style.background='transparent'}}
+                          >
                             <span style={{ fontSize: '1rem', lineHeight: '10px' }}>↑</span> En yeniden en eskiye sırala
                           </div>
-                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'transparent' }} onMouseOver={e => e.currentTarget.style.background='#f5f6f7'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                          <div 
+                            onClick={() => setFormData({...formData, budgetSort: 'oldest'})}
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: sortType === 'oldest' ? '#1877f2' : '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: sortType === 'oldest' ? '#e7f3ff' : 'transparent' }} 
+                            onMouseOver={e => {if(sortType !== 'oldest') e.currentTarget.style.background='#f5f6f7'}} 
+                            onMouseOut={e => {if(sortType !== 'oldest') e.currentTarget.style.background='transparent'}}
+                          >
                             <span style={{ fontSize: '1rem', lineHeight: '10px' }}>↓</span> En eskiden en yeniye sırala
                           </div>
                         </div>
@@ -605,7 +672,10 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
 
                 {formData.budgetPlanVisible && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.8rem' }}>
-                    {(formData.planIncreasePeriods || [1]).map((periodId) => (
+                    {displayedPeriods.length === 0 && (
+                      <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center' }}>Bu kritere uygun bütçe artış planı bulunmuyor.</div>
+                    )}
+                    {displayedPeriods.map(({ id: periodId }) => (
                       <div key={periodId} style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(24, 119, 242, 0.03)', borderRadius: '8px', border: '1px solid rgba(24, 119, 242, 0.1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                           <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Bütçe artışı için süre</div>
