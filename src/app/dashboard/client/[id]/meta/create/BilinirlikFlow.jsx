@@ -548,8 +548,58 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                     style={{ width: '16px', height: '16px', accentColor: '#1877f2', cursor: formData.budgetType === 'Toplam bütçe' ? 'not-allowed' : 'pointer', opacity: formData.budgetType === 'Toplam bütçe' ? 0.5 : 1 }} 
                   />
                   <span style={{ fontSize: '0.9rem', color: formData.budgetType === 'Toplam bütçe' ? 'var(--text-secondary)' : 'var(--text-primary)' }}>Bütçe artışlarını planlayın</span>
-                  <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-color)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer', background: 'var(--bg-secondary)' }}>
-                    Gör <ChevronDown size={14} />
+                  <div style={{ position: 'relative', marginLeft: 'auto' }}>
+                    <div 
+                      onClick={() => setFormData({...formData, budgetDropdownVisible: !formData.budgetDropdownVisible})}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-color)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer', background: 'var(--bg-secondary)' }}
+                    >
+                      Gör <ChevronDown size={14} />
+                    </div>
+
+                    {formData.budgetDropdownVisible && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        right: 0,
+                        marginTop: '4px',
+                        background: '#fff',
+                        border: '1px solid #dddfe2',
+                        borderRadius: '6px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        width: '240px',
+                        zIndex: 10,
+                        padding: '0.5rem 0',
+                        textAlign: 'left'
+                      }}>
+                        <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Filtrele</div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: 'transparent' }} onMouseOver={e => e.currentTarget.style.background='#f5f6f7'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                            <span>Yaklaşan girişler</span>
+                            <span style={{ background: '#e4f3eb', color: '#108043', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: '1px solid #a3d9b5' }}>1</span>
+                          </div>
+                          <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#1c1e21', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: 'transparent' }} onMouseOver={e => e.currentTarget.style.background='#f5f6f7'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                            <span>Tamamlanan girişler</span>
+                            <span style={{ background: '#f5f6f7', color: '#606770', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: '1px solid #dddfe2' }}>0</span>
+                          </div>
+                          <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#1877f2', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', background: '#e7f3ff' }}>
+                            <span>Tüm girişler</span>
+                            <span style={{ background: '#e7f3ff', color: '#1877f2', padding: '0 6px', borderRadius: '10px', fontSize: '0.75rem', border: '1px solid #bce0fd' }}>1</span>
+                          </div>
+                        </div>
+                        
+                        <div style={{ borderTop: '1px solid #dddfe2', margin: '0.5rem 0' }}></div>
+                        
+                        <div style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Sırala</div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'transparent' }} onMouseOver={e => e.currentTarget.style.background='#f5f6f7'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                            <span style={{ fontSize: '1rem', lineHeight: '10px' }}>↑</span> En yeniden en eskiye sırala
+                          </div>
+                          <div style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', color: '#606770', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'transparent' }} onMouseOver={e => e.currentTarget.style.background='#f5f6f7'} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                            <span style={{ fontSize: '1rem', lineHeight: '10px' }}>↓</span> En eskiden en yeniye sırala
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
