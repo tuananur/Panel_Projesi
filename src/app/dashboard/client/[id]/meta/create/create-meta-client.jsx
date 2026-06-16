@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import BilinirlikFlow from './BilinirlikFlow';
 import { useRouter } from 'next/navigation';
 import { createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction } from '@/app/actions';
 import { X, CheckCircle, AlertCircle, Check, ChevronDown, Pencil, HelpCircle } from 'lucide-react';
+import { useTheme } from '@/app/components/theme-provider';
 
 
 const CTA_LABELS = {
@@ -17,6 +18,12 @@ const CTA_LABELS = {
 
 export default function CreateMetaClient({ clientId, clientName, initialCampaigns, initialAdSets }) {
   const router = useRouter();
+  const { setGlobalLoading } = useTheme();
+
+  useEffect(() => {
+    setGlobalLoading(false);
+  }, []);
+
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('campaigns');
   

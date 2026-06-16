@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toggleMetaStatusAction, createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction, updateMetaEntityAction, deleteMetaEntityAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
+import { useTheme } from '@/app/components/theme-provider';
 import {
   TrendingUp, MousePointer2, Eye, Users as UsersIcon,
   Wallet, Search, Calendar, ChevronRight,
@@ -30,6 +31,7 @@ const CTA_LABELS = {
 
 export default function MetaContent({ result, id, datePreset, since: initSince, until: initUntil }) {
   const router = useRouter();
+  const { setGlobalLoading } = useTheme();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('campaigns');
@@ -1298,7 +1300,7 @@ export default function MetaContent({ result, id, datePreset, since: initSince, 
             <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
             <input type="text" placeholder="Ara..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', color: '#fff' }} />
           </div>
-          <button onClick={() => router.push(`/dashboard/client/${id}/meta/create`)} className="btn btn-primary" style={{ background: '#0064e0', padding: '0.5rem 1.2rem' }}>+ Yeni Oluştur</button>
+          <button onClick={() => { setGlobalLoading(true); router.push(`/dashboard/client/${id}/meta/create`); }} className="btn btn-primary" style={{ background: '#0064e0', padding: '0.5rem 1.2rem' }}>+ Yeni Oluştur</button>
         </div>
       </div>
 
