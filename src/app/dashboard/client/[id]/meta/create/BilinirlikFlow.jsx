@@ -110,70 +110,70 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
       <div style={{ maxWidth: '600px', margin: '2rem auto' }}>
         
         {/* Error Box */}
-        <div style={{ border: '1px solid #dddfe2', borderRadius: '4px', background: '#fff', marginBottom: '1rem', borderLeft: '3px solid #e02424', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-          <div style={{ padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #dddfe2' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1c1e21', fontWeight: 600, fontSize: '0.9rem' }}>
+        <div style={{ border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--bg-secondary)', marginBottom: '1rem', borderLeft: '3px solid #e02424', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.9rem' }}>
               <AlertCircle size={16} color="#e02424" /> Değişiklikleriniz doğrulanıyor
             </div>
-            <ChevronDown size={16} color="#606770" style={{ transform: 'rotate(180deg)' }} />
+            <ChevronDown size={16} color="var(--text-secondary)" style={{ transform: 'rotate(180deg)' }} />
           </div>
           <div style={{ padding: '1rem' }}>
-            <div style={{ fontSize: '0.85rem', color: '#1c1e21', lineHeight: '1.4', marginBottom: '1rem' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: '1.4', marginBottom: '1rem' }}>
               Bu Reklam Türü İçin Yetkin Yok: Sosyal meselelerle, seçimlerle veya siyasetle ilgili reklamlar yayınlama yetkin yok. Lütfen yetkili bir reklam hesabı kullanıcısından bu reklamı yerleştirmesini iste veya https://www.facebook.com/id adresine giderek kimlik doğrulama işlemini kendin tamamla. (#2708008)
             </div>
-            <button style={{ padding: '0.4rem 1rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#4b4f56', cursor: 'pointer' }}>Düzenle</button>
+            <button style={{ padding: '0.4rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer' }}>Düzenle</button>
           </div>
         </div>
 
         {/* Details Box */}
-        <div style={{ background: '#fff', borderRadius: '4px', border: '1px solid #dddfe2', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+        <div style={{ background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-color)', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           
           <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Kampanya Adı</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.name}</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.1rem' }}>Kod: 6976233823825</div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Kampanya Adı</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.name}</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>Kod: 6976233823825</div>
           </div>
 
           <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Satın Alma Türü</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.purchaseType}</div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Satın Alma Türü</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.purchaseType}</div>
           </div>
 
           <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Reklam Verme Amacı</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.campaignObjective}</div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Reklam Verme Amacı</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.campaignObjective}</div>
           </div>
 
           {formData.purchaseType !== 'Rezervasyon' && (
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>A/B Testi</div>
-              <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.abTestEnabled ? 'Yayınla\'yı seçtikten sonra, A/B testinizin B sürümünü oluşturmak için bu kampanyayı çoğaltacağız.' : 'Kapalı'}</div>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>A/B Testi</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.abTestEnabled ? 'Yayınla\'yı seçtikten sonra, A/B testinizin B sürümünü oluşturmak için bu kampanyayı çoğaltacağız.' : 'Kapalı'}</div>
             </div>
           )}
 
           <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe Stratejisi</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.budgetEnabled ? 'Kampanya bütçesi' : 'Reklam seti bütçesi'}</div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Bütçe Stratejisi</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.budgetEnabled ? 'Kampanya bütçesi' : 'Reklam seti bütçesi'}</div>
             {formData.purchaseType !== 'Rezervasyon' && (
-              <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.1rem' }}>{formData.budgetEnabled ? `${formData.budgetType === 'Günlük bütçe' ? 'Günlük Bütçesi' : 'Toplam Bütçe'} ${formData.budgetAmount} TL` : 'Reklam seti bütçe paylaşımı: Açık'}</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>{formData.budgetEnabled ? `${formData.budgetType === 'Günlük bütçe' ? 'Günlük Bütçesi' : 'Toplam Bütçe'} ${formData.budgetAmount} TL` : 'Reklam seti bütçe paylaşımı: Açık'}</div>
             )}
           </div>
 
           {formData.purchaseType !== 'Rezervasyon' && (
             <>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe planlama</div>
-                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.budgetPlanVisible ? 'Etkinleştirildi: Evet' : 'Kapalı'}</div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Bütçe planlama</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.budgetPlanVisible ? 'Etkinleştirildi: Evet' : 'Kapalı'}</div>
               </div>
 
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Kampanya Teklif Stratejisi</div>
-                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.bidStrategy}</div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Kampanya Teklif Stratejisi</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.bidStrategy}</div>
               </div>
 
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Yayın türü</div>
-                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Standart</div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Yayın türü</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Standart</div>
               </div>
             </>
           )}
@@ -181,19 +181,19 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
           {formData.specialCategory !== 'Varsa kategori beyan et' && (
             <>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Özel Reklam Kategorileri</div>
-                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.specialCategory}</div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Özel Reklam Kategorileri</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.specialCategory}</div>
               </div>
 
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Özel Reklam Kategorisi Ülkeleri</div>
-                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.specialCategoryCountry}</div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Özel Reklam Kategorisi Ülkeleri</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{formData.specialCategoryCountry}</div>
               </div>
             </>
           )}
 
           <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Reklam Setleri</div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Reklam Setleri</div>
             <div style={{ fontSize: '0.85rem', color: '#e02424', marginTop: '0.2rem' }}>Lütfen şunları ekleyin: Reklam Setleri</div>
           </div>
 
