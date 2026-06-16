@@ -644,7 +644,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
                         top: '100%',
                         right: 0,
                         marginTop: '4px',
-                        background: '#fff',
+                        background: 'var(--bg-secondary)',
                         border: '1px solid #dddfe2',
                         borderRadius: '6px',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
@@ -876,7 +876,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
       
       {showReauthModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255, 255, 255, 0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: '480px', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', overflow: 'hidden', border: '1px solid #ddd' }}>
+          <div style={{ width: '480px', background: 'var(--bg-secondary)', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', overflow: 'hidden', border: '1px solid #ddd' }}>
             <div style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div style={{ color: '#1877f2', fontWeight: 'bold', fontSize: '1.4rem', fontFamily: 'Helvetica, Arial, sans-serif', letterSpacing: '-0.5px' }}>facebook</div>
             </div>

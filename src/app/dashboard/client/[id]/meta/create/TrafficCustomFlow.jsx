@@ -15,7 +15,7 @@ export default function TrafficCustomFlow({ onBack }) {
   });
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f0f2f5', overflow: 'hidden' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', overflow: 'hidden' }}>
       
       {/* İki Sütunlu Yapı */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', padding: '1.5rem', gap: '1.5rem', margin: '0 auto', maxWidth: '1600px', width: '100%' }}>
@@ -24,7 +24,7 @@ export default function TrafficCustomFlow({ onBack }) {
         <div style={{ flex: '0 0 65%', display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', paddingRight: '0.5rem' }}>
           
           {/* Card 1: Adı */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: '#1c1e21', marginBottom: '0.5rem' }}>Adı</label>
             <input 
               value={formData.name}
@@ -34,7 +34,7 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Card 2: Canlı video reklamı & A/B Testi */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <div>
@@ -44,7 +44,7 @@ export default function TrafficCustomFlow({ onBack }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', color: '#606770' }}>{formData.liveVideo ? 'Açık' : 'Kapalı'}</span>
                 <div onClick={() => setFormData({...formData, liveVideo: !formData.liveVideo})} style={{ width: '40px', height: '22px', background: formData.liveVideo ? '#1877f2' : '#e4e6eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }}>
-                  <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: formData.liveVideo ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                  <div style={{ width: '18px', height: '18px', background: 'var(--bg-secondary)', borderRadius: '50%', position: 'absolute', top: '2px', left: formData.liveVideo ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
                 </div>
               </div>
             </div>
@@ -54,7 +54,7 @@ export default function TrafficCustomFlow({ onBack }) {
                 <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21', marginBottom: '0.2rem' }}>Canlı video konumu</div>
                 <div style={{ fontSize: '0.85rem', color: '#606770', marginBottom: '0.8rem' }}>Canlı videonu nerede yayınlayacağını seç.</div>
                 <div style={{ background: '#e7f3ff', border: '1px solid #cce4ff', borderRadius: '6px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                  <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '4px solid #1877f2', background: '#fff' }} />
+                  <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '4px solid #1877f2', background: 'var(--bg-secondary)' }} />
                   <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#1877f2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>f</div>
                   <span style={{ fontSize: '0.9rem', color: '#1c1e21', fontWeight: 600 }}>Facebook</span>
                 </div>
@@ -112,7 +112,7 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Card 3: Özel Reklam Kategorileri */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: '#1c1e21', marginBottom: '0.2rem' }}>Özel Reklam Kategorileri</label>
             <div style={{ fontSize: '0.85rem', color: '#606770', marginBottom: '1rem' }}>Kredi, istihdam veya konut ya da sosyal meseleler, seçimler veya siyasetle ilgili reklamlar beyan etmeniz gerekir.</div>
             
@@ -133,7 +133,7 @@ export default function TrafficCustomFlow({ onBack }) {
 
             {formData.category === 'Sosyal Meseleler, Seçimler veya Siyaset' && (
               <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ border: '1px solid #fca5a5', borderLeft: '3px solid #e02424', borderRadius: '6px', padding: '1rem', display: 'flex', gap: '0.8rem', background: '#fff' }}>
+                <div style={{ border: '1px solid #fca5a5', borderLeft: '3px solid #e02424', borderRadius: '6px', padding: '1rem', display: 'flex', gap: '0.8rem', background: 'var(--bg-secondary)' }}>
                   <AlertCircle size={20} color="#e02424" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <div>
                     <div style={{ fontSize: '0.85rem', color: '#1c1e21', marginBottom: '0.5rem', lineHeight: '1.4' }}>
@@ -206,7 +206,7 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Card 4: Bütçe ve Plan */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1c1e21', marginBottom: '1.5rem' }}>Bütçe ve Plan</div>
             
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
@@ -247,7 +247,7 @@ export default function TrafficCustomFlow({ onBack }) {
               Günde ortalama 30,00 TL harcayacaksınız. Maksimum günlük harcamanız 52,50 TL, maksimum haftalık harcamanız 210,00 TL.
             </div>
 
-            <div style={{ background: '#e7f3ff', border: '1px solid #cce4ff', borderRadius: '6px', padding: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.8rem', marginBottom: '2rem', position: 'relative' }}>
+            <div style={{ background: 'rgba(24,119,242,0.08)', border: '1px solid rgba(24,119,242,0.25)', borderRadius: '6px', padding: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.8rem', marginBottom: '2rem', position: 'relative' }}>
               <Info size={16} color="#1877f2" style={{ marginTop: '2px' }} />
               <div style={{ fontSize: '0.85rem', color: '#1c1e21', lineHeight: '1.4' }}>
                 Son Trafik kampanyalarınız, yaklaşık Günlük 1.025,00 TL harcayarak sonuç elde etti.
@@ -285,21 +285,21 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Card 5: Hedef Kitle */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1c1e21', marginBottom: '1rem' }}>Hedef Kitle</div>
             
-            <div style={{ background: '#f5f6f7', padding: '1rem', borderRadius: '6px', fontSize: '0.85rem', color: '#1c1e21', lineHeight: '1.4', marginBottom: '1rem' }}>
+            <div style={{ background: 'var(--bg-primary)', padding: '1rem', borderRadius: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: '1rem' }}>
               Bu reklam hesabının hedef kitle kontrollerini tüm kampanyalara uygulanacak şekilde ayarlayabilirsiniz...
             </div>
 
-            <div style={{ border: '1px solid #10b981', background: '#f0fdf4', borderRadius: '8px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ border: '1px solid #10b981', background: 'rgba(16,185,129,0.08)', borderRadius: '8px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
               <div style={{ width: '40px', height: '40px', background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Sparkles size={20} color="#fff" />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, color: '#065f46', fontSize: '0.9rem', marginBottom: '0.2rem' }}>Advantage+ hedef kitlesi ile sonuç başına ücretinizi %9.7 düşürebilirsiniz</div>
               </div>
-              <button style={{ background: '#fff', border: '1px solid #10b981', color: '#065f46', padding: '0.6rem 1rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>Advantage+ hedef kitlesini kullan</button>
+              <button style={{ background: 'var(--bg-secondary)', border: '1px solid #10b981', color: '#065f46', padding: '0.6rem 1rem', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>Advantage+ hedef kitlesini kullan</button>
             </div>
 
             <div style={{ display: 'flex', gap: '1.5rem', borderBottom: '1px solid #e4e6eb', marginBottom: '1.5rem' }}>
@@ -315,7 +315,7 @@ export default function TrafficCustomFlow({ onBack }) {
                     <Search size={16} color="#8d949e" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
                     <input placeholder="Mevcut hedef kitleleri arayın" style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.5rem', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.9rem', outline: 'none' }} />
                   </div>
-                  <button style={{ padding: '0 1rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button style={{ padding: '0 1rem', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     Yeni Oluştur <ChevronDown size={14} />
                   </button>
                 </div>
@@ -345,18 +345,18 @@ export default function TrafficCustomFlow({ onBack }) {
                     <Search size={16} color="#8d949e" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
                     <input placeholder="Demografik bilgiler, ilgi alanları veya davranışlar ekleyin" style={{ width: '100%', padding: '0.8rem 0.8rem 0.8rem 2.5rem', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.9rem', outline: 'none' }} />
                   </div>
-                  <button style={{ padding: '0 1rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1877f2' }}>Göz At</button>
+                  <button style={{ padding: '0 1rem', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1877f2' }}>Göz At</button>
                 </div>
               </div>
 
               <div style={{ marginTop: '1rem' }}>
-                <button style={{ padding: '0.6rem 1rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21' }}>Hedef kitleyi kaydet</button>
+                <button style={{ padding: '0.6rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>Hedef kitleyi kaydet</button>
               </div>
             </div>
           </div>
 
           {/* Card 6: Reklam Şeffaflığı & Ortaklık Reklamı */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
             <div>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1c1e21', marginBottom: '0.8rem' }}>Reklam Şeffaflığı</div>
@@ -369,7 +369,7 @@ export default function TrafficCustomFlow({ onBack }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.6 }}>
                 <span style={{ fontSize: '0.9rem', color: '#1c1e21' }}>Reklamveren ve ödeyen farklı</span>
                 <div style={{ width: '40px', height: '22px', background: '#e4e6eb', borderRadius: '11px', position: 'relative' }}>
-                  <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                  <div style={{ width: '18px', height: '18px', background: 'var(--bg-secondary)', borderRadius: '50%', position: 'absolute', top: '2px', left: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
                 </div>
               </div>
             </div>
@@ -382,20 +382,20 @@ export default function TrafficCustomFlow({ onBack }) {
                 <div style={{ fontSize: '0.85rem', color: '#606770', maxWidth: '85%' }}>Başka bir işletme, marka veya içerik üreticisiyle bir ortaklık reklamı oluşturun.</div>
               </div>
               <div style={{ width: '40px', height: '22px', background: formData.partnershipAd ? '#1877f2' : '#e4e6eb', borderRadius: '11px', position: 'relative', cursor: 'pointer', transition: '0.2s' }} onClick={() => setFormData({...formData, partnershipAd: !formData.partnershipAd})}>
-                <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: formData.partnershipAd ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                <div style={{ width: '18px', height: '18px', background: 'var(--bg-secondary)', borderRadius: '50%', position: 'absolute', top: '2px', left: formData.partnershipAd ? '20px' : '2px', transition: '0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>
             </div>
 
           </div>
 
           {/* Card 7: Kimlik */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1c1e21', marginBottom: '1.5rem' }}>Kimlik</div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21', marginBottom: '0.4rem' }}>Facebook Sayfası</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid #ccd0d5', borderRadius: '6px', background: '#fff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid #ccd0d5', borderRadius: '6px', background: 'var(--bg-secondary)' }}>
                   <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 'bold' }}>T</div>
                   <span style={{ fontSize: '0.9rem', color: '#1c1e21', flex: 1 }}>Tuana Nur Yalçın</span>
                   <ChevronDown size={16} color="#606770" />
@@ -404,7 +404,7 @@ export default function TrafficCustomFlow({ onBack }) {
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21', marginBottom: '0.4rem' }}>Instagram profili</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid #ccd0d5', borderRadius: '6px', background: '#fff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid #ccd0d5', borderRadius: '6px', background: 'var(--bg-secondary)' }}>
                   <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#e4e6eb', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#606770', overflow: 'hidden' }}>
                     <img src="https://ui-avatars.com/api/?name=F&background=random" alt="avatar" style={{ width: '100%', height: '100%' }} />
                   </div>
@@ -415,7 +415,7 @@ export default function TrafficCustomFlow({ onBack }) {
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21', marginBottom: '0.4rem' }}>Threads profili</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid #ccd0d5', borderRadius: '6px', background: '#fff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.8rem', border: '1px solid #ccd0d5', borderRadius: '6px', background: 'var(--bg-secondary)' }}>
                   <span style={{ fontSize: '0.9rem', color: '#606770', flex: 1 }}>Bir Threads profili seç</span>
                   <ChevronDown size={16} color="#606770" />
                 </div>
@@ -424,7 +424,7 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Card 8: Reklam Kurulumu & Kaynakları */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21', marginBottom: '0.4rem' }}>Reklam Kurulumu</label>
@@ -436,7 +436,7 @@ export default function TrafficCustomFlow({ onBack }) {
               </div>
             </div>
 
-            <div style={{ background: '#f5f6f7', padding: '1rem', borderRadius: '6px', border: '1px solid #e4e6eb' }}>
+            <div style={{ background: 'var(--bg-primary)', padding: '1rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1c1e21', marginBottom: '0.8rem' }}>Reklam Kaynakları</div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
                 <div style={{ flex: 1 }}>
@@ -468,15 +468,15 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Card 9: Reklam Kreatifi */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1c1e21', marginBottom: '1rem' }}>Reklam Kreatifi</div>
             
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-              <button style={{ flex: 1, padding: '0.8rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: '#1c1e21', cursor: 'pointer' }}>Gönderi seç</button>
-              <button style={{ flex: 1, padding: '0.8rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: '#1c1e21', cursor: 'pointer' }}>+ Gönderi oluştur</button>
+              <button style={{ flex: 1, padding: '0.8rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', cursor: 'pointer' }}>Gönderi seç</button>
+              <button style={{ flex: 1, padding: '0.8rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', cursor: 'pointer' }}>+ Gönderi oluştur</button>
             </div>
 
-            <div style={{ background: '#fff8e1', border: '1px solid #ffe082', borderRadius: '6px', padding: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.8rem', marginBottom: '1rem' }}>
+            <div style={{ background: 'var(--bg-highlight)', border: '1px solid #ffe082', borderRadius: '6px', padding: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.8rem', marginBottom: '1rem' }}>
               <AlertCircle size={16} color="#f59e0b" style={{ marginTop: '2px' }} />
               <div style={{ fontSize: '0.85rem', color: '#b45309', fontWeight: 600 }}>Gönderi gereklidir. Yayınlamak için gönderi seçin veya oluşturun.</div>
             </div>
@@ -485,12 +485,12 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Card 10: Kreatif Testi & Takip */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             
             <div style={{ marginBottom: '2rem' }}>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1c1e21', marginBottom: '0.8rem' }}>Kreatif testi</div>
               <div style={{ fontSize: '0.85rem', color: '#606770', marginBottom: '1rem' }}>Öğelerin farklı kombinasyonlarını deneyerek hedef kitlenizde en iyi performansı hangisinin sağladığını bulun.</div>
-              <button style={{ padding: '0.6rem 1.2rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', cursor: 'pointer' }}>Test oluştur</button>
+              <button style={{ padding: '0.6rem 1.2rem', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', color: '#1c1e21', cursor: 'pointer' }}>Test oluştur</button>
             </div>
 
             <div style={{ width: '100%', height: '1px', background: '#e4e6eb', marginBottom: '1.5rem' }} />
@@ -505,7 +505,7 @@ export default function TrafficCustomFlow({ onBack }) {
                     <input type="checkbox" style={{ width: '16px', height: '16px', accentColor: '#1877f2' }} />
                     <span style={{ fontSize: '0.9rem', color: '#1c1e21', fontWeight: 600 }}>İnternet sitesi olayları</span>
                   </label>
-                  <button style={{ padding: '0.4rem 1rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Ayarla</button>
+                  <button style={{ padding: '0.4rem 1rem', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Ayarla</button>
                 </div>
 
                 <div>
@@ -520,7 +520,7 @@ export default function TrafficCustomFlow({ onBack }) {
                     <input type="checkbox" style={{ width: '16px', height: '16px', accentColor: '#1877f2' }} />
                     <span style={{ fontSize: '0.9rem', color: '#1c1e21', fontWeight: 600 }}>Çevrimdışı olaylar</span>
                   </label>
-                  <button style={{ padding: '0.4rem 1rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Ayarla</button>
+                  <button style={{ padding: '0.4rem 1rem', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Ayarla</button>
                 </div>
 
                 <div>
@@ -540,10 +540,10 @@ export default function TrafficCustomFlow({ onBack }) {
                   />
                 </div>
 
-                <div style={{ background: '#f5f6f7', borderRadius: '6px', padding: '1rem' }}>
+                <div style={{ background: 'var(--bg-primary)', borderRadius: '6px', padding: '1rem' }}>
                   <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1c1e21', marginBottom: '0.4rem' }}>Üçüncü taraf raporlama araçları</div>
                   <div style={{ fontSize: '0.85rem', color: '#606770', marginBottom: '0.8rem' }}>Google Analytics vb. entegrasyonlar.</div>
-                  <button style={{ padding: '0.4rem 1rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Bağla</button>
+                  <button style={{ padding: '0.4rem 1rem', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>Bağla</button>
                 </div>
 
               </div>
@@ -556,8 +556,8 @@ export default function TrafficCustomFlow({ onBack }) {
         <div style={{ flex: '0 0 35%', display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'sticky', top: '1.5rem', height: 'fit-content', maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: '0.5rem' }}>
           
           {/* Widget A: Hata Kontrol Paneli */}
-          <div style={{ border: '1px solid #e02424', borderRadius: '8px', background: '#fff', overflow: 'hidden', boxShadow: '0 4px 12px rgba(220,38,38,0.1)' }}>
-            <div style={{ background: '#fef2f2', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid #fecaca' }}>
+          <div style={{ border: '1px solid #e02424', borderRadius: '8px', background: 'var(--bg-secondary)', overflow: 'hidden', boxShadow: '0 4px 12px rgba(220,38,38,0.1)' }}>
+            <div style={{ background: 'rgba(224,36,36,0.12)', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid rgba(224,36,36,0.25)' }}>
               <AlertCircle size={18} color="#e02424" />
               <div style={{ color: '#991b1b', fontWeight: 700, fontSize: '0.9rem' }}>Değişiklikleriniz doğrulanıyor</div>
             </div>
@@ -566,7 +566,7 @@ export default function TrafficCustomFlow({ onBack }) {
                 Bütçenizin en az 46,44 TL olması gerekir; aksi takdirde reklamınız yayınlanmayabilir. Lütfen bu reklam seti için bütçenizi artırın. (#1885272)
               </div>
               <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button style={{ padding: '0.6rem 1.5rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: '#1c1e21', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                <button style={{ padding: '0.6rem 1.5rem', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: '#1c1e21', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                   Bütçeyi Güncelle
                 </button>
               </div>
@@ -574,7 +574,7 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Widget B: Hedef Kitle Tanımı */}
-          <div style={{ background: '#fff', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '1rem' }}>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1c1e21' }}>Hedef Kitle Tanımı</div>
               <Info size={16} color="#8d949e" />
@@ -616,28 +616,28 @@ export default function TrafficCustomFlow({ onBack }) {
           </div>
 
           {/* Widget C: Reklam önizlemesi Panel */}
-          <div style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: '400px' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: '400px' }}>
             
             {/* Top Bar */}
             <div style={{ padding: '1rem', borderBottom: '1px solid #e4e6eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{ width: '36px', height: '20px', background: '#1877f2', borderRadius: '10px', position: 'relative' }}>
-                  <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', right: '2px' }} />
+                  <div style={{ width: '16px', height: '16px', background: 'var(--bg-secondary)', borderRadius: '50%', position: 'absolute', top: '2px', right: '2px' }} />
                 </div>
                 <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1c1e21' }}>Reklam önizlemesi</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <button style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.4rem 0.8rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>
+                <button style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0.4rem 0.8rem', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: '#1c1e21' }}>
                   Gelişmiş Önizleme <ChevronDown size={14} />
                 </button>
-                <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '6px', color: '#1c1e21' }}>
+                <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'var(--bg-secondary)', border: '1px solid #ccd0d5', borderRadius: '6px', color: '#1c1e21' }}>
                   <Share2 size={14} />
                 </button>
               </div>
             </div>
 
             {/* Device Filters Row */}
-            <div style={{ padding: '0.5rem 1rem', background: '#f5f6f7', borderBottom: '1px solid #e4e6eb', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ padding: '0.5rem 1rem', background: 'var(--bg-primary)', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <div style={{ padding: '0.4rem', background: '#e7f3ff', borderRadius: '6px', color: '#1877f2', cursor: 'pointer' }}>
                 <Monitor size={18} />
               </div>
@@ -649,24 +649,24 @@ export default function TrafficCustomFlow({ onBack }) {
               </div>
               <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#e02424', fontSize: '0.8rem', fontWeight: 600 }}>
                 <AlertCircle size={16} />
-                <div style={{ background: '#e02424', color: '#fff', padding: '2px 6px', borderRadius: '10px', fontSize: '0.75rem' }}>15</div>
+                <div style={{ background: 'var(--error-color)', color: '#fff', padding: '2px 6px', borderRadius: '10px', fontSize: '0.75rem' }}>15</div>
               </div>
             </div>
 
             {/* Mock Canvas Area */}
-            <div style={{ flex: 1, background: '#f0f2f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+            <div style={{ flex: 1, background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
               <div style={{ width: '220px', height: '160px', background: '#e4e6eb', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 <img src="https://img.freepik.com/free-vector/flat-hand-drawn-people-working-office-illustration_23-2148818580.jpg" alt="mockup illustration" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
               </div>
               <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1c1e21', marginBottom: '1rem' }}>
                 Bu reklam için gösterilecek önizleme yok.
               </div>
-              <button style={{ padding: '0.6rem 1.5rem', background: '#1877f2', border: 'none', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: '#fff', cursor: 'pointer', boxShadow: '0 2px 4px rgba(24,119,242,0.2)' }}>
+              <button style={{ padding: '0.6rem 1.5rem', background: 'var(--primary-color)', border: 'none', borderRadius: '6px', fontWeight: 600, fontSize: '0.9rem', color: '#fff', cursor: 'pointer', boxShadow: '0 2px 4px rgba(24,119,242,0.2)' }}>
                 Bunu düzeltmeme yardım et
               </button>
             </div>
 
-            <div style={{ padding: '0.8rem 1rem', background: '#fff', borderTop: '1px solid #e4e6eb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+            <div style={{ padding: '0.8rem 1rem', background: 'var(--bg-secondary)', borderTop: '1px solid #e4e6eb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
               <span style={{ fontSize: '0.8rem', color: '#606770' }}>Önizlemeler farklı platformlara göre değişebilir.</span>
               <Info size={14} color="#8d949e" />
             </div>
@@ -678,7 +678,7 @@ export default function TrafficCustomFlow({ onBack }) {
       </div>
 
       {/* Sticky Bottom Action Bar */}
-      <div style={{ background: '#fff', borderTop: '1px solid #ccd0d5', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', bottom: 0, zIndex: 100, boxShadow: '0 -2px 10px rgba(0,0,0,0.05)' }}>
+      <div style={{ background: 'var(--bg-secondary)', borderTop: '1px solid #ccd0d5', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', bottom: 0, zIndex: 100, boxShadow: '0 -2px 10px rgba(0,0,0,0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
           <div style={{ width: '24px', height: '24px', background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Check size={14} color="#fff" strokeWidth={3} />
@@ -687,7 +687,7 @@ export default function TrafficCustomFlow({ onBack }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ fontSize: '0.8rem', color: '#606770' }}>Kurallar ve Politikalara tabi.</span>
-          <button style={{ padding: '0.6rem 2rem', background: '#10b981', border: 'none', borderRadius: '6px', fontWeight: 600, fontSize: '0.95rem', color: '#fff', cursor: 'pointer', boxShadow: '0 2px 4px rgba(16,185,129,0.2)' }}>
+          <button style={{ padding: '0.6rem 2rem', background: 'var(--success-color)', border: 'none', borderRadius: '6px', fontWeight: 600, fontSize: '0.95rem', color: '#fff', cursor: 'pointer', boxShadow: '0 2px 4px rgba(16,185,129,0.2)' }}>
             Yayınla
           </button>
         </div>
