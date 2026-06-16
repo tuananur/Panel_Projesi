@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import BilinirlikFlow from './BilinirlikFlow';
+import TrafficCustomFlow from './TrafficCustomFlow';
 import { useRouter } from 'next/navigation';
 import { createMetaCampaignAction, createMetaAdSetAction, createMetaAdAction } from '@/app/actions';
 import { X, CheckCircle, AlertCircle, Check, ChevronDown, Pencil, HelpCircle } from 'lucide-react';
@@ -1457,7 +1458,9 @@ const renderAudienceCard = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
 
-            {selectedObjective ? (
+            {selectedObjective === 'Trafik' && trafficSetupType === 'custom' ? (
+               <TrafficCustomFlow onBack={() => { setSelectedObjective(null); setShowObjectiveModal(true); }} />
+            ) : selectedObjective ? (
                <BilinirlikFlow activeTab={activeTab} onBack={() => { setSelectedObjective(null); setShowObjectiveModal(true); }} clientName={clientName} objective={selectedObjective} />
             ) : activeTab === 'campaigns' && selectedObjective === 'Trafik' && trafficSetupType === 'custom' ? (
                renderTailoredTrafficFormFields(createFormData, setCreateFormData)
