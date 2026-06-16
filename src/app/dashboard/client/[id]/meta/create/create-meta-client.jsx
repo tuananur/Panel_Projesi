@@ -1457,8 +1457,8 @@ const renderAudienceCard = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
 
-            {(activeTab === 'campaigns' || activeTab === 'adsets') && selectedObjective === 'Bilinirlik' ? (
-               <BilinirlikFlow activeTab={activeTab} onBack={() => { setSelectedObjective(null); setShowObjectiveModal(true); }} clientName={clientName} />
+            {(activeTab === 'campaigns' || activeTab === 'adsets') && selectedObjective ? (
+               <BilinirlikFlow activeTab={activeTab} onBack={() => { setSelectedObjective(null); setShowObjectiveModal(true); }} clientName={clientName} objective={selectedObjective} />
             ) : activeTab === 'campaigns' && selectedObjective === 'Trafik' && trafficSetupType === 'custom' ? (
                renderTailoredTrafficFormFields(createFormData, setCreateFormData)
             ) : (
@@ -1990,7 +1990,7 @@ const renderAudienceCard = () => {
           </div>
 
 
-          {!((activeTab === 'campaigns' || activeTab === 'adsets') && selectedObjective === 'Bilinirlik') && (
+          {!((activeTab === 'campaigns' || activeTab === 'adsets') && selectedObjective) && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', paddingRight: '0.5rem' }}>
             {activeTab === 'ads' ? (
               <div style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '1rem' }}>

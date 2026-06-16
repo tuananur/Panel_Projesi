@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, ChevronDown, CheckCircle2, AlertCircle, Edit2, Pencil, Eye, ArrowLeft, MoreHorizontal, Video, Megaphone, HelpCircle } from 'lucide-react';
 
-export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campaigns' }) {
+export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campaigns', objective = 'Bilinirlik' }) {
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [formData, setFormData] = useState({
-    name: 'Yeni Bilinirlik Kampanyası',
+    name: `Yeni ${objective} Kampanyası`,
     liveVideoAd: true,
     budgetEnabled: true,
     budgetType: 'Toplam bütçe',
@@ -18,7 +18,7 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
     specialCategory: 'Varsa kategori beyan et',
     specialCategoryCountry: 'Türkiye',
     purchaseType: 'Rezervasyon',
-    campaignObjective: 'Bilinirlik',
+    campaignObjective: objective,
     bidStrategy: 'Sonuç başına ücret hedefi',
     budgetPlanVisible: true,
     spendingLimitEnabled: true,
