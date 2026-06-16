@@ -144,31 +144,39 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
             <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.campaignObjective}</div>
           </div>
 
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>A/B Testi</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.abTestEnabled ? 'Yayınla\'yı seçtikten sonra, A/B testinizin B sürümünü oluşturmak için bu kampanyayı çoğaltacağız.' : 'Kapalı'}</div>
-          </div>
+          {formData.purchaseType !== 'Rezervasyon' && (
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>A/B Testi</div>
+              <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.abTestEnabled ? 'Yayınla\'yı seçtikten sonra, A/B testinizin B sürümünü oluşturmak için bu kampanyayı çoğaltacağız.' : 'Kapalı'}</div>
+            </div>
+          )}
 
           <div>
             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe Stratejisi</div>
             <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.budgetEnabled ? 'Kampanya bütçesi' : 'Reklam seti bütçesi'}</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.1rem' }}>{formData.budgetEnabled ? `${formData.budgetType === 'Günlük bütçe' ? 'Günlük Bütçesi' : 'Toplam Bütçe'} ${formData.budgetAmount} TL` : 'Reklam seti bütçe paylaşımı: Açık'}</div>
+            {formData.purchaseType !== 'Rezervasyon' && (
+              <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.1rem' }}>{formData.budgetEnabled ? `${formData.budgetType === 'Günlük bütçe' ? 'Günlük Bütçesi' : 'Toplam Bütçe'} ${formData.budgetAmount} TL` : 'Reklam seti bütçe paylaşımı: Açık'}</div>
+            )}
           </div>
 
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe planlama</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.budgetPlanVisible ? 'Etkinleştirildi: Evet' : 'Kapalı'}</div>
-          </div>
+          {formData.purchaseType !== 'Rezervasyon' && (
+            <>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe planlama</div>
+                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.budgetPlanVisible ? 'Etkinleştirildi: Evet' : 'Kapalı'}</div>
+              </div>
 
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Kampanya Teklif Stratejisi</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.bidStrategy}</div>
-          </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Kampanya Teklif Stratejisi</div>
+                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.bidStrategy}</div>
+              </div>
 
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Yayın türü</div>
-            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Standart</div>
-          </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Yayın türü</div>
+                <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Standart</div>
+              </div>
+            </>
+          )}
 
           {formData.specialCategory !== 'Varsa kategori beyan et' && (
             <>
