@@ -107,56 +107,84 @@ export default function BilinirlikFlow({ onBack, clientName, activeTab = 'campai
   const renderReviewPage = () => (
     <div style={{ flex: 1, background: 'var(--bg-primary)', overflowY: 'auto' }}>
       {renderHeader()}
-      <div style={{ maxWidth: '800px', margin: '2rem auto', background: 'var(--bg-secondary)', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Kampanya Adı</div>
-            <div style={{ fontSize: '1.2rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '0.2rem' }}>{formData.name}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Kod: 6975629799825</div>
+      <div style={{ maxWidth: '600px', margin: '2rem auto' }}>
+        
+        {/* Error Box */}
+        <div style={{ border: '1px solid #dddfe2', borderRadius: '4px', background: '#fff', marginBottom: '1rem', borderLeft: '3px solid #e02424', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #dddfe2' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1c1e21', fontWeight: 600, fontSize: '0.9rem' }}>
+              <AlertCircle size={16} color="#e02424" /> Değişiklikleriniz doğrulanıyor
+            </div>
+            <ChevronDown size={16} color="#606770" style={{ transform: 'rotate(180deg)' }} />
           </div>
-          
-          <div style={{ height: '1px', background: 'var(--border-color)' }} />
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Satın Alma Türü</div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.2rem' }}>Açık Artırma</div>
+          <div style={{ padding: '1rem' }}>
+            <div style={{ fontSize: '0.85rem', color: '#1c1e21', lineHeight: '1.4', marginBottom: '1rem' }}>
+              Bu Reklam Türü İçin Yetkin Yok: Sosyal meselelerle, seçimlerle veya siyasetle ilgili reklamlar yayınlama yetkin yok. Lütfen yetkili bir reklam hesabı kullanıcısından bu reklamı yerleştirmesini iste veya https://www.facebook.com/id adresine giderek kimlik doğrulama işlemini kendin tamamla. (#2708008)
             </div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Reklam Verme Amacı</div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.2rem' }}>Bilinirlik</div>
-            </div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Bütçe Stratejisi</div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.2rem' }}>Reklam seti bütçesi</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Reklam seti bütçe paylaşımı: Açık</div>
-            </div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Kampanya Teklif Stratejisi</div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.2rem' }}>En yüksek hacim</div>
-            </div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Yayın türü</div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.2rem' }}>Standart</div>
-            </div>
-            {formData.specialCategory !== 'Varsa kategori beyan et' && (
-              <>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Özel Reklam Kategorileri</div>
-                  <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.2rem' }}>{formData.specialCategory}</div>
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Özel Reklam Kategorisi Ülkeleri</div>
-                  <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.2rem' }}>{formData.specialCategoryCountry}</div>
-                </div>
-              </>
-            )}
+            <button style={{ padding: '0.4rem 1rem', background: '#fff', border: '1px solid #ccd0d5', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, color: '#4b4f56', cursor: 'pointer' }}>Düzenle</button>
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem 2rem', background: 'rgba(239, 68, 68, 0.1)', borderTop: '1px solid #f87171' }}>
-          <div style={{ color: '#dc2626', fontWeight: 700, fontSize: '1rem', marginBottom: '0.5rem' }}>Reklam Setleri</div>
-          <div style={{ color: '#dc2626', fontSize: '0.9rem' }}><strong>Lütfen şunları ekleyin:</strong> Reklam Setleri</div>
+        {/* Details Box */}
+        <div style={{ background: '#fff', borderRadius: '4px', border: '1px solid #dddfe2', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+          
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Kampanya Adı</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>{formData.name}</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.1rem' }}>Kod: 6976233823825</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Satın Alma Türü</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Açık Artırma</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Reklam Verme Amacı</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Bilinirlik</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>A/B Testi</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Yayınla'yı seçtikten sonra, A/B testinizin B sürümünü oluşturmak için bu kampanyayı çoğaltacağız.</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe Stratejisi</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Kampanya bütçesi</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.1rem' }}>Daily Bütçesi 50,00 TL</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Bütçe planlama</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Etkinleştirildi: Evet</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Kampanya Teklif Stratejisi</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>En yüksek hacim</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Yayın türü</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Standart</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Özel Reklam Kategorileri</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Sosyal Meseleler, Seçimler veya Siyaset</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Özel Reklam Kategorisi Ülkeleri</div>
+            <div style={{ fontSize: '0.85rem', color: '#4b4f56', marginTop: '0.2rem' }}>Türkiye</div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1c1e21' }}>Reklam Setleri</div>
+            <div style={{ fontSize: '0.85rem', color: '#e02424', marginTop: '0.2rem' }}>Lütfen şunları ekleyin: Reklam Setleri</div>
+          </div>
+
         </div>
       </div>
     </div>
