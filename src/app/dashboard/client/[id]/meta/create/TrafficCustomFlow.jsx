@@ -53,7 +53,7 @@ export default function TrafficCustomFlow({ onBack }) {
               <div style={{ marginTop: '-0.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.2rem' }}>Canlı video konumu</div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.8rem' }}>Canlı videonu nerede yayınlayacağını seç.</div>
-                <div style={{ background: '#e7f3ff', border: '1px solid #cce4ff', borderRadius: '6px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <div style={{ background: 'rgba(24,119,242,0.08)', border: '1px solid rgba(24,119,242,0.25)', borderRadius: '6px', padding: '0.8rem 1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                   <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '4px solid #1877f2', background: 'var(--bg-secondary)' }} />
                   <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#1877f2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>f</div>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>Facebook</span>
