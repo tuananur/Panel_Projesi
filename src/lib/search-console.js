@@ -109,24 +109,41 @@ function aggregateRowsByQuery(rows) {
     const position = row.position || 0;
 
     const existing = byQuery.get(query);
-    if (!existing || impressions > existing.impressions) {
+    if (!existing) {
       byQuery.set(query, {
         query,
         page,
-        position: Math.round(position * 10) / 10,
+        pageImpressions: impressions,
+        positionWeightedSum: position * impressions,
         impressions,
         clicks,
       });
-    } else if (existing && impressions === existing.impressions && position < existing.position) {
-      byQuery.set(query, {
-        ...existing,
-        page,
-        position: Math.round(position * 10) / 10,
-      });
+      return;
     }
+
+    byQuery.set(query, {
+      query,
+      page: impressions >= existing.pageImpressions ? page : existing.page,
+      pageImpressions: Math.max(existing.pageImpressions, impressions),
+      positionWeightedSum: existing.positionWeightedSum + position * impressions,
+      impressions: existing.impressions + impressions,
+      clicks: existing.clicks + clicks,
+    });
   });
 
-  return byQuery;
+  const result = new Map();
+  for (const [query, data] of byQuery) {
+    result.set(query, {
+      query: data.query,
+      page: data.page,
+      position: data.impressions > 0
+        ? Math.round((data.positionWeightedSum / data.impressions) * 10) / 10
+        : 0,
+      impressions: data.impressions,
+      clicks: data.clicks,
+    });
+  }
+  return result;
 }
 
 function buildChange(currentPos, previousPos) {
@@ -185,6 +202,9 @@ function buildWeeklyTrend(dailyRows, month, year) {
 
   return weeks;
 }
+
+export const GSC_KEYWORDS_PAGE_SIZE = 10;
+export const GSC_TOP_KEYWORDS_LIMIT = 10;
 
 export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = null) {
   const current = period
@@ -252,7 +272,7 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = 
         isNew: changeInfo.isNew,
       };
     })
-    .sort((a, b) => a.position - b.position || b.impressions - a.impressions);
+    .sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions || a.position - b.position);
 
   const summary = parseSummaryRow(summaryData.rows);
   const month = period?.month;

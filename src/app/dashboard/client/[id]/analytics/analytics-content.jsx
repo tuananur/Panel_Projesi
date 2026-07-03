@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   TrendingUp, Users, Eye, Clock, BarChart3, 
   Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe, HelpCircle,
-  Search, Monitor, ArrowUp, ArrowDown, Minus, AlertCircle
+  Search, ArrowUp, ArrowDown, Minus, AlertCircle,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
+import { GSC_KEYWORDS_PAGE_SIZE } from '@/lib/search-console';
 
 function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }) {
   const total = data.reduce((sum, item) => sum + Number(item.count || 0), 0);
@@ -471,6 +473,16 @@ export default function AnalyticsContent({ result, id }) {
 
 function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, onKeywordFilterChange, filteredKeywords }) {
   const sc = searchConsole;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [keywordFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredKeywords.length / GSC_KEYWORDS_PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pageStart = (safePage - 1) * GSC_KEYWORDS_PAGE_SIZE;
+  const paginatedKeywords = filteredKeywords.slice(pageStart, pageStart + GSC_KEYWORDS_PAGE_SIZE);
 
   return (
     <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid #4285F4' }}>
@@ -521,24 +533,81 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
               Bu dönem için organik sorgu verisi yok veya filtre eşleşmedi.
             </p>
           ) : (
+            <>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '720px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '820px' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>
-                    <th style={{ padding: '0.75rem 0.5rem', width: 72 }}>Sıra</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: 56 }}>#</th>
                     <th style={{ padding: '0.75rem 0.5rem' }}>Anahtar Kelime</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: 100, textAlign: 'right' }}>Tıklama</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: 100, textAlign: 'right' }}>Gösterim</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: 72, textAlign: 'right' }}>CTR</th>
+                    <th style={{ padding: '0.75rem 0.5rem', width: 72, textAlign: 'center' }}>Poz.</th>
                     <th style={{ padding: '0.75rem 0.5rem', width: 160 }}>Değişim</th>
                     <th style={{ padding: '0.75rem 0.5rem' }}>URL</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: 40 }} />
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredKeywords.map((row) => (
-                    <KeywordRankRow key={`${row.keyword}-${row.url}`} row={row} />
+                  {paginatedKeywords.map((row, idx) => (
+                    <KeywordRankRow key={`${row.keyword}-${row.url}`} row={row} rank={pageStart + idx + 1} />
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {filteredKeywords.length > GSC_KEYWORDS_PAGE_SIZE && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '1rem',
+                paddingTop: '1rem',
+                borderTop: '1px solid rgba(255,255,255,0.06)',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+              }}>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  {pageStart + 1}–{Math.min(pageStart + GSC_KEYWORDS_PAGE_SIZE, filteredKeywords.length)} / {filteredKeywords.length} sorgu
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={safePage <= 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid var(--border-color)',
+                      padding: '0.4rem 0.65rem',
+                      opacity: safePage <= 1 ? 0.4 : 1,
+                      cursor: safePage <= 1 ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, minWidth: '80px', textAlign: 'center' }}>
+                    {safePage} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={safePage >= totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid var(--border-color)',
+                      padding: '0.4rem 0.65rem',
+                      opacity: safePage >= totalPages ? 0.4 : 1,
+                      cursor: safePage >= totalPages ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+            </>
           )}
 
           <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '1rem', lineHeight: 1.45 }}>
@@ -551,7 +620,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
   );
 }
 
-function KeywordRankRow({ row }) {
+function KeywordRankRow({ row, rank }) {
   const changeColor = row.improved ? '#10b981' : row.positionChange < 0 ? '#ef4444' : 'var(--text-secondary)';
   const ChangeIcon = row.positionChange > 0 ? ArrowUp : row.positionChange < 0 ? ArrowDown : Minus;
   const changeLabel = row.positionChange > 0 ? `+${row.positionChange}` : String(row.positionChange);
@@ -568,17 +637,26 @@ function KeywordRankRow({ row }) {
 
   return (
     <tr className="table-row-hover" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-      <td style={{ padding: '0.9rem 0.5rem', fontWeight: 900, fontSize: '1.35rem', color: 'var(--text-primary)', verticalAlign: 'middle' }}>
-        {row.position}
+      <td style={{ padding: '0.9rem 0.5rem', fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-secondary)', verticalAlign: 'middle' }}>
+        {rank}
       </td>
       <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle' }}>
         <div style={{ fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.35 }}>{row.keyword}</div>
         <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
           Türkçe / Türkiye
-          {row.impressions > 0 && (
-            <span style={{ marginLeft: '0.5rem' }}>· {row.impressions.toLocaleString('tr-TR')} gösterim</span>
-          )}
         </div>
+      </td>
+      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle', textAlign: 'right', fontWeight: 800, color: '#10b981', fontSize: '0.95rem' }}>
+        {Number(row.clicks || 0).toLocaleString('tr-TR')}
+      </td>
+      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle', textAlign: 'right', color: 'var(--text-primary)', fontWeight: 600 }}>
+        {Number(row.impressions || 0).toLocaleString('tr-TR')}
+      </td>
+      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle', textAlign: 'right', color: '#4285F4', fontWeight: 700 }}>
+        %{row.ctr || '0.00'}
+      </td>
+      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle', textAlign: 'center', fontWeight: 900, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+        {row.position}
       </td>
       <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', fontWeight: 700 }}>
@@ -589,7 +667,7 @@ function KeywordRankRow({ row }) {
           <span style={{ color: changeColor }}>{changeLabel}</span>
         </div>
       </td>
-      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle', maxWidth: 280 }}>
+      <td style={{ padding: '0.9rem 0.5rem', verticalAlign: 'middle', maxWidth: 220 }}>
         {row.url ? (
           <a
             href={row.url.startsWith('http') ? row.url : `https://${row.url}`}
@@ -602,9 +680,6 @@ function KeywordRankRow({ row }) {
         ) : (
           <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>—</span>
         )}
-      </td>
-      <td style={{ padding: '0.9rem 0.5rem', textAlign: 'center', verticalAlign: 'middle' }}>
-        <Monitor size={16} style={{ color: 'var(--text-secondary)', opacity: 0.6 }} title="Masaüstü" />
       </td>
     </tr>
   );

@@ -11,6 +11,7 @@ import {
 import { toggleTaskAction, updateTaskDetailAction, deleteTaskAction, updateClientTabNamesAction } from '@/app/actions';
 import CustomDialog from '@/app/components/custom-dialog';
 import { SPECIAL_DAYS } from '@/lib/holidays';
+import { GSC_TOP_KEYWORDS_LIMIT } from '@/lib/search-console';
 
 function parseClientJsonObject(raw, fallback = '{}') {
   try {
@@ -1267,7 +1268,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                     </tr>
                   </thead>
                   <tbody>
-                    {(gsc.keywords || []).slice(0, 5).map((row, idx) => (
+                    {(gsc.keywords || []).slice(0, GSC_TOP_KEYWORDS_LIMIT).map((row, idx) => (
                       <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
                         <td style={{ padding: '12px', fontWeight: 700, color: '#ffffff' }}>{row.keyword}</td>
                         <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#0085FF' }}>{row.clicks} Tıklama</td>
