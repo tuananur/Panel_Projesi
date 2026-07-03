@@ -148,7 +148,7 @@ function SlideWrapper({ children }) {
   );
 }
 
-export default function StatsContent({ client, metaResult, googleResult, analyticsResult, customTabNames }) {
+export default function StatsContent({ client, metaResult, googleResult, analyticsResult, customTabNames, reportMonth, reportYear }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -233,14 +233,23 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
     trafficSources: [],
     topPages: [],
     countryBreakdown: [],
+    browserBreakdown: [],
     isMissing: true
   };
 
-  // 2. Resolve Search Console KPIs
-  const sessionTotal = analytics.isMissing ? 0 : (analytics.summary.sessions || 0);
-  const estimatedClicks = analytics.isMissing ? 0 : Math.round(sessionTotal * 0.48);
-  const estimatedImpressions = analytics.isMissing ? 0 : Math.round(estimatedClicks * 27.4);
-  const estimatedCtr = analytics.isMissing ? '0.00' : (estimatedImpressions > 0 ? ((estimatedClicks / estimatedImpressions) * 100).toFixed(2) : '0.00');
+  // 2. Resolve Search Console KPIs (gerçek GSC verisi)
+  const gscIsValid = analyticsResult?.searchConsole && !analyticsResult.searchConsole.error && analyticsResult.searchConsole.summary;
+  const gsc = gscIsValid ? analyticsResult.searchConsole : {
+    summary: { clicks: 0, impressions: 0, ctr: 0, position: 0 },
+    keywords: [],
+    weeklyTrend: [],
+    isMissing: true,
+  };
+
+  const organicClicks = gsc.summary?.clicks || 0;
+  const organicImpressions = gsc.summary?.impressions || 0;
+  const organicCtr = (gsc.summary?.ctr ?? 0).toFixed(2);
+  const avgPosition = gsc.summary?.position ?? 0;
 
   const renderApiMissingNotice = (platformName) => (
     <div style={{ 
@@ -282,17 +291,17 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
     { id: 'kapak', defaultTitle: 'Kapak', condition: true },
     { id: 'kullanici_1', defaultTitle: 'Kullanıcı 1', condition: client?.analyticsEnabled === true && !analytics.isMissing },
     { id: 'kullanici_2', defaultTitle: 'Kullanıcı 2', condition: client?.analyticsEnabled === true && !analytics.isMissing },
-    { id: 'seo_performans', defaultTitle: 'Arama/SEO', condition: activeServices.includes('SEO') && !analytics.isMissing },
+    { id: 'seo_performans', defaultTitle: 'Arama/SEO', condition: activeServices.includes('SEO') && !gsc.isMissing },
     { id: 'lokasyon', defaultTitle: 'Lokasyon', condition: client?.analyticsEnabled === true && !analytics.isMissing },
     { id: 'kanallar', defaultTitle: 'Kanallar', condition: client?.analyticsEnabled === true && !analytics.isMissing },
-    { id: 'arama_gorunurluk', defaultTitle: 'Görünürlük', condition: activeServices.includes('SEO') && !analytics.isMissing },
-    { id: 'sorgular', defaultTitle: 'Sorgular', condition: activeServices.includes('SEO') && !analytics.isMissing },
+    { id: 'arama_gorunurluk', defaultTitle: 'Görünürlük', condition: activeServices.includes('SEO') && !gsc.isMissing && (gsc.weeklyTrend?.length > 0) },
+    { id: 'sorgular', defaultTitle: 'Sorgular', condition: activeServices.includes('SEO') && !gsc.isMissing && (gsc.keywords?.length > 0) },
     { id: 'blog_performans', defaultTitle: 'Blog', condition: activeServices.includes('SEO') },
     { id: 'sosyal_medya', defaultTitle: 'Sosyal Medya', condition: activeServices.includes('Sosyal Medya') },
     { id: 'meta_reklam', defaultTitle: 'Meta Reklamı', condition: client?.metaEnabled === true && !metaResult?.error },
     { id: 'google_reklam', defaultTitle: 'Google Reklamı', condition: client?.googleEnabled === true && !googleResult?.error },
     { id: 'cihazlar', defaultTitle: 'Cihazlar', condition: client?.analyticsEnabled === true && !analytics.isMissing },
-    { id: 'tarayicilar', defaultTitle: 'Tarayıcılar', condition: client?.analyticsEnabled === true && !analytics.isMissing }
+    { id: 'tarayicilar', defaultTitle: 'Tarayıcılar', condition: client?.analyticsEnabled === true && !analytics.isMissing && (analytics.browserBreakdown?.length > 0) }
   ];
 
   const activeSlides = allPossibleSlides.filter(s => s.condition);
@@ -963,16 +972,16 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
           {headerDecoration}
           {slideHeader('Google Organik Arama Performansı')}
           
-          {analytics.isMissing ? (
+          {gsc.isMissing ? (
             renderApiMissingNotice('Google Search Console')
           ) : (
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
               <div style={{ width: '60%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 {[
-                  { label: 'ORGANİK TIKLAMALAR', val: estimatedClicks.toLocaleString(), desc: 'Google arama tıklama sayısı', icon: '🖱️', color: '#10b981' },
-                  { label: 'ARAMA GÖSTERİMLERİ', val: estimatedImpressions.toLocaleString(), desc: 'Arama sonuçlarında görünme sayısı', icon: '👁️', color: '#0085FF' },
-                  { label: 'ORTALAMA CTR (TIKLAMA ORANI)', val: '%' + estimatedCtr, desc: 'Gösterimlerin tıklamaya dönüşme oranı', icon: '📈', color: '#f59e0b' },
-                  { label: 'ORTALAMA POZİSYON', val: '12.4', desc: 'Arama sonuçlarındaki ortalama sıramız', icon: '📍', color: '#8b5cf6' }
+                  { label: 'ORGANİK TIKLAMALAR', val: organicClicks.toLocaleString('tr-TR'), desc: 'Google arama tıklama sayısı', icon: '🖱️', color: '#10b981' },
+                  { label: 'ARAMA GÖSTERİMLERİ', val: organicImpressions.toLocaleString('tr-TR'), desc: 'Arama sonuçlarında görünme sayısı', icon: '👁️', color: '#0085FF' },
+                  { label: 'ORTALAMA CTR (TIKLAMA ORANI)', val: '%' + organicCtr, desc: 'Gösterimlerin tıklamaya dönüşme oranı', icon: '📈', color: '#f59e0b' },
+                  { label: 'ORTALAMA POZİSYON', val: String(avgPosition), desc: 'Arama sonuçlarındaki ortalama sıramız', icon: '📍', color: '#8b5cf6' }
                 ].map((kpi, idx) => (
                   <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -995,15 +1004,15 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                 <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
                     <span style={{ color: '#10b981', fontWeight: 700 }}>•</span>
-                    <span>Organik aramalarda bu ay toplam <strong style={{ color: '#ffffff' }}>{estimatedClicks.toLocaleString()}</strong> kullanıcı doğrudan tıklama yaparak web sitemizi ziyaret etmiştir.</span>
+                    <span>Organik aramalarda bu ay toplam <strong style={{ color: '#ffffff' }}>{organicClicks.toLocaleString('tr-TR')}</strong> kullanıcı doğrudan tıklama yaparak web sitemizi ziyaret etmiştir.</span>
                   </li>
                   <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
                     <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                    <span>Google arama motoru dizinlerinde toplam <strong style={{ color: '#ffffff' }}>{estimatedImpressions.toLocaleString()}</strong> gösterim elde edilerek yüksek marka bilinirliği sağlanmıştır.</span>
+                    <span>Google arama motoru dizinlerinde toplam <strong style={{ color: '#ffffff' }}>{organicImpressions.toLocaleString('tr-TR')}</strong> gösterim elde edilerek yüksek marka bilinirliği sağlanmıştır.</span>
                   </li>
                   <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
                     <span style={{ color: '#f59e0b', fontWeight: 700 }}>•</span>
-                    <span>Ortalama tıklama oranımız <strong style={{ color: '#ffffff' }}>%{estimatedCtr}</strong> olup, hedef kitleye tam uyumlu başlık ve SEO açıklamaları kurgulandığını kanıtlamaktadır.</span>
+                    <span>Ortalama tıklama oranımız <strong style={{ color: '#ffffff' }}>%{organicCtr}</strong> olup, hedef kitleye tam uyumlu başlık ve SEO açıklamaları kurgulandığını kanıtlamaktadır.</span>
                   </li>
                 </ul>
               </div>
@@ -1152,26 +1161,30 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
           {headerDecoration}
           {slideHeader('Arama Görünürlüğü (Google Search Console)')}
           
-          {analytics.isMissing ? (
+          {gsc.isMissing ? (
             renderApiMissingNotice('Google Search Console')
           ) : (
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
               <div style={{ width: '60%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {(() => {
-                  const clickPoints = [
-                    { x: 50, y: 180, label: '1. Hafta', val: Math.round(estimatedClicks * 0.2) },
-                    { x: 172.5, y: 150, label: '2. Hafta', val: Math.round(estimatedClicks * 0.25) },
-                    { x: 295, y: 120, label: '3. Hafta', val: Math.round(estimatedClicks * 0.27) },
-                    { x: 417.5, y: 80, label: '4. Hafta', val: Math.round(estimatedClicks * 0.28) }
-                  ];
+                  const weeklyTrend = gsc.weeklyTrend || [];
+                  const buildPoints = (key, yTop, yBottom) => {
+                    const xStart = 50;
+                    const xEnd = 417.5;
+                    const maxVal = Math.max(...weeklyTrend.map((w) => w[key] || 0), 1);
+                    const xStep = weeklyTrend.length > 1 ? (xEnd - xStart) / (weeklyTrend.length - 1) : 0;
+                    return weeklyTrend.map((w, i) => ({
+                      x: xStart + i * xStep,
+                      y: yBottom - (((w[key] || 0) / maxVal) * (yBottom - yTop)),
+                      label: w.label,
+                      val: w[key] || 0,
+                    }));
+                  };
+
+                  const clickPoints = buildPoints('clicks', 50, 180);
                   const clickPath = clickPoints.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + p.x + ' ' + p.y).join(' ');
-                  
-                  const impPoints = [
-                    { x: 50, y: 120, label: '1. Hafta', val: Math.round(estimatedImpressions * 0.21) },
-                    { x: 172.5, y: 90, label: '2. Hafta', val: Math.round(estimatedImpressions * 0.24) },
-                    { x: 295, y: 70, label: '3. Hafta', val: Math.round(estimatedImpressions * 0.26) },
-                    { x: 417.5, y: 50, label: '4. Hafta', val: Math.round(estimatedImpressions * 0.29) }
-                  ];
+
+                  const impPoints = buildPoints('impressions', 50, 180);
                   const impPath = impPoints.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + p.x + ' ' + p.y).join(' ');
                   
                   return (
@@ -1238,7 +1251,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
           {headerDecoration}
           {slideHeader('En Çok Trafik Çeken Arama Sorguları')}
           
-          {analytics.isMissing ? (
+          {gsc.isMissing ? (
             renderApiMissingNotice('Google Search Console')
           ) : (
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
@@ -1254,19 +1267,13 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { query: client.companyName + ' web', clicks: Math.round(estimatedClicks * 0.32), imps: Math.round(estimatedImpressions * 0.15), ctr: '15.40%', pos: '1.2' },
-                      { query: client.companyName + ' iletişim', clicks: Math.round(estimatedClicks * 0.18), imps: Math.round(estimatedImpressions * 0.08), ctr: '12.80%', pos: '1.0' },
-                      { query: 'dijital hizmet sağlayıcıları', clicks: Math.round(estimatedClicks * 0.12), imps: Math.round(estimatedImpressions * 0.18), ctr: '4.80%', pos: '3.4' },
-                      { query: 'en yakın ' + client.companyName, clicks: Math.round(estimatedClicks * 0.08), imps: Math.round(estimatedImpressions * 0.11), ctr: '3.90%', pos: '4.8' },
-                      { query: 'profesyonel hizmet analizleri', clicks: Math.round(estimatedClicks * 0.05), imps: Math.round(estimatedImpressions * 0.09), ctr: '2.50%', pos: '6.2' }
-                    ].map((row, idx) => (
+                    {(gsc.keywords || []).slice(0, 5).map((row, idx) => (
                       <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
-                        <td style={{ padding: '12px', fontWeight: 700, color: '#ffffff' }}>{row.query}</td>
+                        <td style={{ padding: '12px', fontWeight: 700, color: '#ffffff' }}>{row.keyword}</td>
                         <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#0085FF' }}>{row.clicks} Tıklama</td>
-                        <td style={{ padding: '12px', textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>{row.imps.toLocaleString()}</td>
-                        <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#10b981' }}>{row.ctr}</td>
-                        <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#f59e0b' }}>{row.pos}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>{Number(row.impressions || 0).toLocaleString('tr-TR')}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#10b981' }}>%{row.ctr}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#f59e0b' }}>{row.positionExact ?? row.position}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -2004,14 +2011,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
       },
 
       tarayicilar: (index) => {
-        const sessionTotalVal = Number(analytics.summary.sessions || 0);
-        const browserList = [
-          { name: 'Chrome', percentage: 65, count: Math.round(sessionTotalVal * 0.65), color: '#10b981' },
-          { name: 'Safari', percentage: 22, count: Math.round(sessionTotalVal * 0.22), color: '#3b82f6' },
-          { name: 'Opera', percentage: 6, count: Math.round(sessionTotalVal * 0.06), color: '#f59e0b' },
-          { name: 'Edge', percentage: 4, count: Math.round(sessionTotalVal * 0.04), color: '#8b5cf6' },
-          { name: 'Firefox', percentage: 3, count: Math.round(sessionTotalVal * 0.03), color: '#ec4899' }
-        ];
+        const browserList = (analytics.browserBreakdown || []).slice(0, 5);
 
         return (
           <div className="pdf-slide" style={slideStyle} key="slide-tarayicilar">

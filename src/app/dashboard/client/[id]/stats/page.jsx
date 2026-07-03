@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import StatsContent from './stats-content';
 import { can, getRolePermissions } from '@/lib/permissions';
 import { getMetaAdsAction, getGoogleAdsAction, getGoogleAnalyticsAction } from '@/app/actions';
+import { getMonthDateRange } from '@/lib/report-date-range';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,11 +35,7 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
   const now = new Date();
   const month = searchParams.month !== undefined ? parseInt(searchParams.month) : now.getMonth();
   const year = searchParams.year !== undefined ? parseInt(searchParams.year) : now.getFullYear();
-
-  // Calculate start and end of month
-  const since = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const until = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  const { since, until } = getMonthDateRange(month, year);
   
   try {
     const client = await prisma.client.findUnique({
@@ -46,12 +43,11 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
       include: { 
         tasks: {
           where: {
-            OR: [
-              { date: { gte: new Date(`${year}-01-01`) } }, // Fetch enough tasks for context
-              { type: 'SOCIAL' },
-              { type: 'BLOG' }
-            ]
-          }
+            date: {
+              gte: new Date(`${since}T00:00:00`),
+              lte: new Date(`${until}T23:59:59`),
+            },
+          },
         } 
       }
     });
@@ -72,8 +68,8 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
     try {
       const results = await Promise.allSettled([
         getMetaAdsAction(id, null, since, until),
-        getGoogleAdsAction(id),
-        getGoogleAnalyticsAction(id)
+        getGoogleAdsAction(id, since, until),
+        getGoogleAnalyticsAction(id, since, until),
       ]);
 
       if (results[0].status === 'fulfilled') metaResult = results[0].value;
@@ -83,7 +79,6 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
       console.error('Ads & Analytics Data Fetching Failed:', adsError);
     }
 
-    // Fetch custom tab names
     let customTabNames = null;
     try {
       const tabNamesSetting = await prisma.setting.findUnique({
@@ -103,6 +98,8 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
         googleResult={googleResult} 
         analyticsResult={analyticsResult} 
         customTabNames={customTabNames}
+        reportMonth={month}
+        reportYear={year}
       />
     );
   } catch (error) {

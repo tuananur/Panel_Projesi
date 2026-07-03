@@ -60,7 +60,7 @@ export async function resolveSearchConsoleSiteUrl(accessToken, client) {
   return fuzzy?.siteUrl || null;
 }
 
-async function querySearchAnalytics(accessToken, siteUrl, startDate, endDate) {
+async function querySearchAnalytics(accessToken, siteUrl, { startDate, endDate, dimensions = ['query', 'page'] }) {
   const encodedSite = encodeURIComponent(siteUrl);
   const res = await fetch(
     `https://www.googleapis.com/webmasters/v3/sites/${encodedSite}/searchAnalytics/query`,
@@ -73,8 +73,8 @@ async function querySearchAnalytics(accessToken, siteUrl, startDate, endDate) {
       body: JSON.stringify({
         startDate,
         endDate,
-        dimensions: ['query', 'page'],
-        rowLimit: 500,
+        dimensions,
+        rowLimit: dimensions.includes('date') ? 1000 : 500,
         type: 'web',
         dimensionFilterGroups: [
           {
@@ -149,23 +149,85 @@ function buildChange(currentPos, previousPos) {
   };
 }
 
-export async function fetchSearchConsoleKeywords(accessToken, siteUrl) {
-  const current = gscDateRange(28, 3);
+function parseSummaryRow(rows) {
+  const row = rows?.[0];
+  if (!row) {
+    return { clicks: 0, impressions: 0, ctr: 0, position: 0 };
+  }
+  const clicks = row.clicks || 0;
+  const impressions = row.impressions || 0;
+  const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+  return {
+    clicks,
+    impressions,
+    ctr: Math.round(ctr * 100) / 100,
+    position: Math.round((row.position || 0) * 10) / 10,
+  };
+}
 
-  const currentEndDate = new Date(`${current.endDate}T12:00:00`);
-  const previousEndDate = new Date(currentEndDate);
-  previousEndDate.setDate(previousEndDate.getDate() - 28);
-  const previousStartDate = new Date(previousEndDate);
-  previousStartDate.setDate(previousStartDate.getDate() - 27);
+function buildWeeklyTrend(dailyRows, month, year) {
+  const weeks = [
+    { label: '1. Hafta', clicks: 0, impressions: 0 },
+    { label: '2. Hafta', clicks: 0, impressions: 0 },
+    { label: '3. Hafta', clicks: 0, impressions: 0 },
+    { label: '4. Hafta', clicks: 0, impressions: 0 },
+  ];
 
-  const [currentData, previousData] = await Promise.all([
-    querySearchAnalytics(accessToken, siteUrl, current.startDate, current.endDate),
-    querySearchAnalytics(
-      accessToken,
-      siteUrl,
-      formatGscDate(previousStartDate),
-      formatGscDate(previousEndDate)
-    ),
+  (dailyRows || []).forEach((row) => {
+    const dateStr = row.keys?.[0];
+    if (!dateStr) return;
+    const d = new Date(`${dateStr}T12:00:00`);
+    if (d.getMonth() !== month || d.getFullYear() !== year) return;
+    const weekIndex = Math.min(3, Math.floor((d.getDate() - 1) / 7));
+    weeks[weekIndex].clicks += row.clicks || 0;
+    weeks[weekIndex].impressions += row.impressions || 0;
+  });
+
+  return weeks;
+}
+
+export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = null) {
+  const current = period
+    ? { startDate: period.startDate, endDate: period.endDate }
+    : gscDateRange(28, 3);
+
+  const compareStartDate = period?.compareStartDate;
+  const compareEndDate = period?.compareEndDate;
+
+  let previousStart = compareStartDate;
+  let previousEnd = compareEndDate;
+
+  if (!previousStart || !previousEnd) {
+    const currentEndDate = new Date(`${current.endDate}T12:00:00`);
+    const previousEndDate = new Date(currentEndDate);
+    previousEndDate.setDate(previousEndDate.getDate() - 28);
+    const previousStartDate = new Date(previousEndDate);
+    previousStartDate.setDate(previousStartDate.getDate() - 27);
+    previousStart = formatGscDate(previousStartDate);
+    previousEnd = formatGscDate(previousEndDate);
+  }
+
+  const [summaryData, dailyData, currentData, previousData] = await Promise.all([
+    querySearchAnalytics(accessToken, siteUrl, {
+      startDate: current.startDate,
+      endDate: current.endDate,
+      dimensions: [],
+    }),
+    querySearchAnalytics(accessToken, siteUrl, {
+      startDate: current.startDate,
+      endDate: current.endDate,
+      dimensions: ['date'],
+    }),
+    querySearchAnalytics(accessToken, siteUrl, {
+      startDate: current.startDate,
+      endDate: current.endDate,
+      dimensions: ['query', 'page'],
+    }),
+    querySearchAnalytics(accessToken, siteUrl, {
+      startDate: previousStart,
+      endDate: previousEnd,
+      dimensions: ['query', 'page'],
+    }),
   ]);
 
   const currentMap = aggregateRowsByQuery(currentData.rows);
@@ -175,6 +237,7 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl) {
     .map((row) => {
       const prev = previousMap.get(row.query);
       const changeInfo = buildChange(row.position, prev?.position ?? null);
+      const ctr = row.impressions > 0 ? ((row.clicks / row.impressions) * 100).toFixed(2) : '0.00';
       return {
         keyword: row.query,
         position: Math.round(row.position) || Math.ceil(row.position),
@@ -182,6 +245,7 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl) {
         url: row.page,
         clicks: row.clicks,
         impressions: row.impressions,
+        ctr,
         previousPosition: changeInfo.previousDisplay,
         positionChange: changeInfo.change,
         improved: changeInfo.improved,
@@ -190,12 +254,23 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl) {
     })
     .sort((a, b) => a.position - b.position || b.impressions - a.impressions);
 
+  const summary = parseSummaryRow(summaryData.rows);
+  const month = period?.month;
+  const year = period?.year;
+  const weeklyTrend = month != null && year != null
+    ? buildWeeklyTrend(dailyData.rows, month, year)
+    : buildWeeklyTrend(dailyData.rows, new Date(current.endDate).getMonth(), new Date(current.endDate).getFullYear());
+
   return {
     siteUrl,
     periodLabel: `${current.startDate} — ${current.endDate}`,
-    compareLabel: 'Önceki 28 güne göre',
+    compareLabel: period
+      ? `${previousStart} — ${previousEnd} ile karşılaştırma`
+      : 'Önceki 28 güne göre',
     device: 'Masaüstü',
     country: 'Türkiye',
+    summary,
+    weeklyTrend,
     keywords,
     totalKeywords: keywords.length,
   };

@@ -1151,7 +1151,7 @@ export async function testGoogleConnectionAction(formData) {
   }
 }
 
-export async function getGoogleAdsAction(clientId) {
+export async function getGoogleAdsAction(clientId, since = null, until = null) {
   try {
     const [client, globalSetting] = await Promise.all([
       prisma.client.findUnique({ where: { id: parseInt(clientId) } }),
@@ -1175,22 +1175,10 @@ export async function getGoogleAdsAction(clientId) {
       };
     }
 
-    // Mock data for demonstration as real API requires complex setup
     return {
-      success: true,
-      summary: {
-        spend: 1245.50,
-        clicks: 850,
-        impressions: 45000,
-        reach: 32000,
-        cpc: 1.46,
-        ctr: 0.018
-      },
-      activeCampaigns: [
-        { id: '1', name: 'Arama Ağı - Marka', status: 'ENABLED', spend: 540.20, clicks: 320, impressions: 5000 },
-        { id: '2', name: 'Display - Retargeting', status: 'ENABLED', spend: 300.30, clicks: 410, impressions: 32000 },
-        { id: '3', name: 'Video - Tanıtım', status: 'PAUSED', spend: 405.00, clicks: 120, impressions: 8000 }
-      ]
+      error: 'API_NOT_CONFIGURED',
+      details: 'Google Ads API entegrasyonu henüz yapılandırılmadı.',
+      period: since && until ? { since, until } : null,
     };
   } catch (error) {
     console.error('Google Ads fetch failed:', error);
@@ -1380,13 +1368,19 @@ export async function testAnalyticsConnectionAction(formData) {
   }
 }
 
-export async function getGoogleAnalyticsAction(clientId) {
+export async function getGoogleAnalyticsAction(clientId, since = null, until = null) {
   try {
     const client = await prisma.client.findUnique({ where: { id: parseInt(clientId) } });
     if (!client) return { error: 'CLIENT_NOT_FOUND' };
 
     const { getGoogleOAuthConfig, refreshGoogleAccessToken } = await import('@/lib/google-oauth');
     const { resolveSearchConsoleSiteUrl, fetchSearchConsoleKeywords } = await import('@/lib/search-console');
+    const { getMonthDateRange, isCurrentMonthRange } = await import('@/lib/report-date-range');
+
+    const useCustomRange = Boolean(since && until);
+    const startDate = useCustomRange ? since : '30daysAgo';
+    const endDate = useCustomRange ? until : 'today';
+    const dateRange = [{ startDate, endDate }];
 
     const oauth = await getGoogleOAuthConfig(client);
     const { clientId: oauthClientId, clientSecret: oauthClientSecret, refreshToken, propertyId } = oauth;
@@ -1419,7 +1413,22 @@ export async function getGoogleAnalyticsAction(clientId) {
     try {
       const siteUrl = await resolveSearchConsoleSiteUrl(accessToken, client);
       if (siteUrl) {
-        searchConsole = await fetchSearchConsoleKeywords(accessToken, siteUrl);
+        if (useCustomRange) {
+          const { prevSince, prevUntil, month, year } = getMonthDateRange(
+            new Date(`${since}T12:00:00`).getMonth(),
+            new Date(`${since}T12:00:00`).getFullYear()
+          );
+          searchConsole = await fetchSearchConsoleKeywords(accessToken, siteUrl, {
+            startDate: since,
+            endDate: until,
+            compareStartDate: prevSince,
+            compareEndDate: prevUntil,
+            month,
+            year,
+          });
+        } else {
+          searchConsole = await fetchSearchConsoleKeywords(accessToken, siteUrl);
+        }
       } else {
         searchConsole = {
           error: 'SITE_NOT_FOUND',
@@ -1459,59 +1468,74 @@ export async function getGoogleAnalyticsAction(clientId) {
       return res.json();
     };
 
-    let mainReport, realtimeReport, deviceReport, trafficReport, pagesReport, countryReport;
+    let summaryReport, dailyReport, realtimeReport, deviceReport, trafficReport, pagesReport, countryReport, browserReport;
+
+    const dailyStartDate = useCustomRange ? since : '9daysAgo';
+    const dailyEndDate = useCustomRange ? until : 'today';
+    const includeRealtime = !useCustomRange || isCurrentMonthRange(since, until);
 
     try {
-      [mainReport, realtimeReport, deviceReport, trafficReport, pagesReport, countryReport] = await Promise.all([
-        // Main Summary & Daily Active Users (last 10 days)
+      [summaryReport, dailyReport, realtimeReport, deviceReport, trafficReport, pagesReport, countryReport, browserReport] = await Promise.all([
         runReport('runReport', {
-          dateRanges: [{ startDate: '9daysAgo', endDate: 'today' }],
-          dimensions: [{ name: 'date' }],
+          dateRanges: dateRange,
           metrics: [
             { name: 'activeUsers' },
             { name: 'screenPageViews' },
             { name: 'sessions' },
             { name: 'bounceRate' },
-            { name: 'averageSessionDuration' }
+            { name: 'averageSessionDuration' },
+            { name: 'eventCount' },
           ],
-          keepEmptyRows: true
         }),
-        // Realtime active users (last 30 mins)
-        runReport('runRealtimeReport', {
-          metrics: [{ name: 'activeUsers' }]
-        }).catch(() => ({ rows: [] })), // Realtime can sometimes be restricted, fallback gracefully
-        // Device breakdown
         runReport('runReport', {
-          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dateRanges: [{ startDate: dailyStartDate, endDate: dailyEndDate }],
+          dimensions: [{ name: 'date' }],
+          metrics: [
+            { name: 'activeUsers' },
+            { name: 'screenPageViews' },
+            { name: 'sessions' },
+          ],
+          keepEmptyRows: true,
+        }),
+        includeRealtime
+          ? runReport('runRealtimeReport', {
+              metrics: [{ name: 'activeUsers' }],
+            }).catch(() => ({ rows: [] }))
+          : Promise.resolve({ rows: [] }),
+        runReport('runReport', {
+          dateRanges: dateRange,
           dimensions: [{ name: 'deviceCategory' }],
           metrics: [{ name: 'activeUsers' }],
-          limit: 5
+          limit: 5,
         }),
-        // Traffic sources
         runReport('runReport', {
-          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dateRanges: dateRange,
           dimensions: [{ name: 'sessionSource' }],
           metrics: [{ name: 'activeUsers' }],
-          limit: 5
+          limit: 5,
         }),
-        // Top pages
         runReport('runReport', {
-          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dateRanges: dateRange,
           dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
           metrics: [
             { name: 'screenPageViews' },
             { name: 'activeUsers' },
-            { name: 'averageSessionDuration' }
+            { name: 'averageSessionDuration' },
           ],
-          limit: 20
+          limit: 20,
         }),
-        // Country breakdown
         runReport('runReport', {
-          dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+          dateRanges: dateRange,
           dimensions: [{ name: 'country' }],
           metrics: [{ name: 'activeUsers' }],
-          limit: 10
-        }).catch(() => ({ rows: [] }))
+          limit: 10,
+        }).catch(() => ({ rows: [] })),
+        runReport('runReport', {
+          dateRanges: dateRange,
+          dimensions: [{ name: 'browser' }],
+          metrics: [{ name: 'sessions' }],
+          limit: 10,
+        }).catch(() => ({ rows: [] })),
       ]);
     } catch (apiError) {
       console.error('GA4 API Query failed:', apiError);
@@ -1528,13 +1552,14 @@ export async function getGoogleAnalyticsAction(clientId) {
       return isNaN(parsed) ? 0 : parsed;
     };
 
-    // A. Parse Main Report & Summary
-    let totalPageViews = 0;
-    let totalSessions = 0;
-    let sumBounceRate = 0;
-    let sumDuration = 0;
-    let reportCount = 0;
-    const dailyActiveUsers = [];
+    // A. Parse Summary Report
+    const summaryRow = summaryReport.rows?.[0];
+    const totalPageViews = parseNumber(summaryRow?.metricValues?.[1]?.value);
+    const totalSessions = parseNumber(summaryRow?.metricValues?.[2]?.value);
+    const avgBounceRate = parseNumber(summaryRow?.metricValues?.[3]?.value) * 100;
+    const avgDuration = parseNumber(summaryRow?.metricValues?.[4]?.value);
+    const totalEventCount = parseNumber(summaryRow?.metricValues?.[5]?.value);
+    let activeUsers = parseNumber(summaryRow?.metricValues?.[0]?.value);
 
     const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
     const formatDate = (yyyymmdd) => {
@@ -1544,56 +1569,28 @@ export async function getGoogleAnalyticsAction(clientId) {
       return `${day} ${months[monthIdx] || ''}`;
     };
 
-    if (mainReport.rows && mainReport.rows.length > 0) {
-      const sortedRows = [...mainReport.rows].sort((a, b) => 
+    const dailyActiveUsers = [];
+    if (dailyReport.rows && dailyReport.rows.length > 0) {
+      const sortedRows = [...dailyReport.rows].sort((a, b) =>
         (a.dimensionValues?.[0]?.value || '').localeCompare(b.dimensionValues?.[0]?.value || '')
       );
 
-      sortedRows.forEach(row => {
+      sortedRows.forEach((row) => {
         const rawDate = row.dimensionValues?.[0]?.value || '';
         const users = parseNumber(row.metricValues?.[0]?.value);
-        const pvs = parseNumber(row.metricValues?.[1]?.value);
-        const sess = parseNumber(row.metricValues?.[2]?.value);
-        const bounce = parseNumber(row.metricValues?.[3]?.value);
-        const dur = parseNumber(row.metricValues?.[4]?.value);
-
-        totalPageViews += pvs;
-        totalSessions += sess;
-        
-        if (bounce > 0) {
-          sumBounceRate += bounce;
-        }
-        if (dur > 0) {
-          sumDuration += dur;
-        }
-        reportCount++;
-
         dailyActiveUsers.push({
           date: formatDate(rawDate),
-          users: users
+          users,
         });
       });
     }
 
-    if (dailyActiveUsers.length === 0) {
-      for (let i = 9; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const formatted = `${d.getDate()} ${months[d.getMonth()]}`;
-        dailyActiveUsers.push({ date: formatted, users: 0 });
-      }
-    }
-
-    const avgBounceRate = reportCount > 0 ? (sumBounceRate / reportCount) * 100 : 0;
-    const avgDuration = reportCount > 0 ? (sumDuration / reportCount) : 0;
-
-    // B. Parse Realtime Users
-    let activeUsers = 0;
+    // B. Parse Realtime Users (yalnızca güncel ay)
     if (realtimeReport.rows && realtimeReport.rows.length > 0) {
-      activeUsers = parseNumber(realtimeReport.metricValues?.[0]?.value || realtimeReport.rows[0].metricValues?.[0]?.value);
-    }
-    if (activeUsers === 0 && dailyActiveUsers.length > 0) {
-      activeUsers = Math.min(5, Math.ceil(dailyActiveUsers[dailyActiveUsers.length - 1].users * 0.05));
+      const realtimeUsers = parseNumber(
+        realtimeReport.metricValues?.[0]?.value || realtimeReport.rows[0].metricValues?.[0]?.value
+      );
+      if (realtimeUsers > 0) activeUsers = realtimeUsers;
     }
 
     const formatDuration = (seconds) => {
@@ -1733,29 +1730,54 @@ export async function getGoogleAnalyticsAction(clientId) {
       };
     });
 
-    if (countryBreakdown.length === 0) {
-      countryBreakdown.push(
-        { name: 'Türkiye', percentage: 0, count: 0 },
-        { name: 'Diğer', percentage: 0, count: 0 }
-      );
-    }
+    const browserColors = ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899'];
+    const browserNamesMap = {
+      chrome: 'Chrome',
+      safari: 'Safari',
+      firefox: 'Firefox',
+      'microsoft edge': 'Edge',
+      edge: 'Edge',
+      opera: 'Opera',
+      'samsung internet': 'Samsung Internet',
+    };
+
+    let browserTotalSessions = 0;
+    const rawBrowserRows = browserReport?.rows || [];
+    rawBrowserRows.forEach((row) => {
+      browserTotalSessions += parseNumber(row.metricValues?.[0]?.value);
+    });
+
+    const browserBreakdown = rawBrowserRows.map((row, index) => {
+      const rawName = (row.dimensionValues?.[0]?.value || '').toLowerCase();
+      const name = browserNamesMap[rawName] || rawName.charAt(0).toUpperCase() + rawName.slice(1);
+      const count = parseNumber(row.metricValues?.[0]?.value);
+      const percentage = browserTotalSessions > 0 ? Math.round((count / browserTotalSessions) * 100) : 0;
+      return {
+        name,
+        percentage,
+        count,
+        color: browserColors[index % browserColors.length],
+      };
+    });
 
     return {
       success: true,
       isLive: true,
+      reportPeriod: useCustomRange ? { since, until } : null,
       summary: {
         activeUsers,
         pageViews: totalPageViews,
         sessions: totalSessions,
         bounceRate: parseFloat(avgBounceRate.toFixed(1)),
         avgEngagementTime: formatDuration(avgDuration),
-        eventCount: totalPageViews * 2
+        eventCount: totalEventCount,
       },
       dailyActiveUsers,
       deviceBreakdown,
       trafficSources,
       topPages,
       countryBreakdown,
+      browserBreakdown,
       searchConsole,
     };
   } catch (error) {
