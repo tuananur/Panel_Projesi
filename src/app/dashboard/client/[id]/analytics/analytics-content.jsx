@@ -8,6 +8,24 @@ import {
   ChevronLeft, ChevronRight, BookOpen, ArrowUpDown
 } from 'lucide-react';
 
+function truncateLabel(text, max = 26) {
+  const s = String(text || '');
+  if (s.length <= max) return s;
+  return `${s.slice(0, max - 1)}…`;
+}
+
+function compareKeywordsPriority(a, b) {
+  const clicksDiff = Number(b.clicks || 0) - Number(a.clicks || 0);
+  if (clicksDiff !== 0) return clicksDiff;
+  const impDiff = Number(b.impressions || 0) - Number(a.impressions || 0);
+  if (impDiff !== 0) return impDiff;
+  const posDiff = Number(a.position || 999) - Number(b.position || 999);
+  if (posDiff !== 0) return posDiff;
+  const changeDiff = Number(b.positionChange || 0) - Number(a.positionChange || 0);
+  if (changeDiff !== 0) return changeDiff;
+  return a.keyword.localeCompare(b.keyword, 'tr');
+}
+
 function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }) {
   const total = data.reduce((sum, item) => sum + Number(item.count || 0), 0);
   const radius = 35;
@@ -125,23 +143,37 @@ export default function AnalyticsContent({ result, id }) {
         allowTaint: true,
         backgroundColor: '#0f172a',
         logging: false,
+        windowWidth: el.scrollWidth,
+        height: el.scrollHeight,
       });
-      const imgData = canvas.toDataURL('image/jpeg', 0.85);
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
+      const pageHeightPx = Math.floor((pdfHeight * canvas.width) / pdfWidth);
+      let renderedHeight = 0;
+      let pageIndex = 0;
+
+      while (renderedHeight < canvas.height) {
+        const sliceHeight = Math.min(pageHeightPx, canvas.height - renderedHeight);
+        if (sliceHeight < 8) break;
+
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = sliceHeight;
+        const ctx = pageCanvas.getContext('2d');
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(canvas, 0, renderedHeight, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+
+        const sliceData = pageCanvas.toDataURL('image/jpeg', 0.85);
+        const sliceImgHeight = (sliceHeight * pdfWidth) / canvas.width;
+        if (pageIndex > 0) pdf.addPage();
+        pdf.addImage(sliceData, 'JPEG', 0, 0, pdfWidth, sliceImgHeight);
+
+        renderedHeight += sliceHeight;
+        pageIndex += 1;
       }
+
       pdf.save(`analytics-rapor-${id}.pdf`);
     } catch (err) {
       console.error('Analytics PDF error:', err);
@@ -397,13 +429,26 @@ export default function AnalyticsContent({ result, id }) {
             <DonutChart data={trafficItems} totalLabel="Oturum" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem', flex: 1, minWidth: '180px' }}>
               {trafficItems.map((source, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <span style={{ width: '8px', height: '8px', background: source.color, borderRadius: '50%' }}></span>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 600 }}>{source.name}</span>
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0, flex: 1 }}>
+                    <span style={{ width: '8px', height: '8px', background: source.color, borderRadius: '50%', flexShrink: 0 }}></span>
+                    <span
+                      title={source.name}
+                      style={{
+                        fontSize: '0.85rem',
+                        color: 'var(--text-primary)',
+                        fontWeight: 600,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        minWidth: 0,
+                      }}
+                    >
+                      {truncateLabel(source.name, 28)}
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.85rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>{Number(source.count).toLocaleString()} Oturum</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', flexShrink: 0 }}>
+                    <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{Number(source.count).toLocaleString()} Oturum</span>
                     <span style={{ color: 'var(--text-primary)', fontWeight: 700, width: '40px', textAlign: 'right' }}>%{source.percentage}</span>
                   </div>
                 </div>
@@ -523,7 +568,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
   const sc = searchConsole;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sortKey, setSortKey] = useState('clicks');
+  const [sortKey, setSortKey] = useState('priority');
   const [sortDir, setSortDir] = useState('desc');
 
   useEffect(() => {
@@ -532,6 +577,10 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
 
   const sortedKeywords = useMemo(() => {
     const list = [...filteredKeywords];
+    if (sortKey === 'priority') {
+      list.sort(compareKeywordsPriority);
+      return list;
+    }
     const dir = sortDir === 'asc' ? 1 : -1;
     list.sort((a, b) => {
       let av = 0;
@@ -552,7 +601,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
         av = Number(a.positionChange || 0);
         bv = Number(b.positionChange || 0);
       }
-      if (av === bv) return a.keyword.localeCompare(b.keyword, 'tr');
+      if (av === bv) return compareKeywordsPriority(a, b);
       return av > bv ? dir : -dir;
     });
     return list;
@@ -568,7 +617,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
       setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'));
     } else {
       setSortKey(key);
-      setSortDir('desc');
+      setSortDir(key === 'position' ? 'asc' : 'desc');
     }
   };
 
@@ -628,7 +677,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
         </div>
       ) : (
         <>
-          <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
             <input
               type="text"
               className="input-field"
@@ -637,6 +686,28 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
               onChange={(e) => onKeywordFilterChange(e.target.value)}
               style={{ maxWidth: '320px' }}
             />
+            <button
+              type="button"
+              onClick={() => { setSortKey('priority'); setSortDir('desc'); }}
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                padding: '0.45rem 0.75rem',
+                borderRadius: '8px',
+                border: '1px solid',
+                cursor: 'pointer',
+                borderColor: sortKey === 'priority' ? '#4285F4' : 'var(--border-color)',
+                background: sortKey === 'priority' ? 'rgba(66,133,244,0.12)' : 'rgba(255,255,255,0.02)',
+                color: sortKey === 'priority' ? '#4285F4' : 'var(--text-secondary)',
+              }}
+            >
+              Öncelikli Sıralama
+            </button>
+            {sortKey === 'priority' && (
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                Tıklama → Gösterim → Pozisyon → Değişim
+              </span>
+            )}
           </div>
 
           {filteredKeywords.length === 0 ? (
