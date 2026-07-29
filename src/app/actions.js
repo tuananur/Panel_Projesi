@@ -1506,13 +1506,13 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
           dateRanges: dateRange,
           dimensions: [{ name: 'deviceCategory' }],
           metrics: [{ name: 'activeUsers' }],
-          limit: 5,
+          limit: 10,
         }),
         runReport('runReport', {
           dateRanges: dateRange,
           dimensions: [{ name: 'sessionSource' }],
           metrics: [{ name: 'activeUsers' }],
-          limit: 5,
+          limit: 10,
         }),
         runReport('runReport', {
           dateRanges: dateRange,
@@ -1691,7 +1691,7 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
         users,
         time: formatDuration(dur)
       };
-    });
+    }).sort((a, b) => b.views - a.views);
 
     if (topPages.length === 0) {
       topPages.push({ path: '/', title: 'Ana Sayfa', views: 0, users: 0, time: '0dk 0sn' });

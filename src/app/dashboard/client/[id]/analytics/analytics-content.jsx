@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   TrendingUp, Users, Eye, Clock, BarChart3, 
   Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe, HelpCircle,
   Search, ArrowUp, ArrowDown, Minus, AlertCircle,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, BookOpen, ArrowUpDown
 } from 'lucide-react';
-import { GSC_KEYWORDS_PAGE_SIZE } from '@/lib/search-console';
 
 function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }) {
   const total = data.reduce((sum, item) => sum + Number(item.count || 0), 0);
@@ -78,9 +77,17 @@ function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }
 
 export default function AnalyticsContent({ result, id }) {
   const [loading, setLoading] = useState(false);
-  const [visiblePagesCount, setVisiblePagesCount] = useState(5);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [keywordFilter, setKeywordFilter] = useState('');
+  const reportRef = useRef(null);
   const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown, searchConsole } = result;
+
+  const deviceItems = (deviceBreakdown || []).slice(0, 10);
+  const trafficItems = (trafficSources || []).slice(0, 10);
+  const sortedTopPages = useMemo(
+    () => [...(topPages || [])].sort((a, b) => b.views - a.views).slice(0, 20),
+    [topPages]
+  );
 
   const countryColors = ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#6366F1'];
   const enrichedCountryData = (countryBreakdown || [
@@ -105,8 +112,81 @@ export default function AnalyticsContent({ result, id }) {
     return row.keyword.toLowerCase().includes(keywordFilter.toLowerCase());
   });
 
+  const handleDownloadPDF = async () => {
+    const el = reportRef.current;
+    if (!el) return;
+    setIsGeneratingPDF(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+      const canvas = await html2canvas(el, {
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0f172a',
+        logging: false,
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+      pdf.save(`analytics-rapor-${id}.pdf`);
+    } catch (err) {
+      console.error('Analytics PDF error:', err);
+      alert('PDF oluşturulurken bir hata oluştu.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 className="heading-1" style={{ marginBottom: '0.5rem' }}>Google Analytics & Search Console</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Organik anahtar kelime sıralamaları (GSC) ve site trafik performansı (GA4).</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+            style={{
+              background: 'linear-gradient(135deg, #0085FF 0%, #8b5cf6 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '0.55rem 1rem',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              cursor: isGeneratingPDF ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              opacity: isGeneratingPDF ? 0.7 : 1,
+            }}
+          >
+            <BookOpen size={14} />
+            {isGeneratingPDF ? 'PDF Hazırlanıyor...' : 'Sayfayı PDF Kaydet'}
+          </button>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+            Canlı İzleme Aktif
+          </div>
+        </div>
+      </div>
+
+      <div ref={reportRef} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
       <SearchConsoleKeywordsSection
         searchConsole={searchConsole}
@@ -288,9 +368,9 @@ export default function AnalyticsContent({ result, id }) {
             Cihaz Dağılımı
           </h4>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1, flexWrap: 'wrap' }}>
-            <DonutChart data={deviceBreakdown} totalLabel="Cihaz" />
+            <DonutChart data={deviceItems} totalLabel="Cihaz" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1, minWidth: '180px' }}>
-              {deviceBreakdown.map((dev, idx) => (
+              {deviceItems.map((dev, idx) => (
                 <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-primary)', fontWeight: 600 }}>
@@ -314,9 +394,9 @@ export default function AnalyticsContent({ result, id }) {
         <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
           <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem' }}>Erişim Kanalları</h4>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1, flexWrap: 'wrap' }}>
-            <DonutChart data={trafficSources} totalLabel="Oturum" />
+            <DonutChart data={trafficItems} totalLabel="Oturum" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.95rem', flex: 1, minWidth: '180px' }}>
-              {trafficSources.map((source, idx) => (
+              {trafficItems.map((source, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <span style={{ width: '8px', height: '8px', background: source.color, borderRadius: '50%' }}></span>
@@ -379,7 +459,7 @@ export default function AnalyticsContent({ result, id }) {
             </tr>
           </thead>
           <tbody>
-            {topPages.slice(0, visiblePagesCount).map((page, idx, arr) => (
+            {sortedTopPages.map((page, idx, arr) => (
               <tr key={idx} style={{ 
                 borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.03)', 
                 fontSize: '0.85rem',
@@ -395,39 +475,6 @@ export default function AnalyticsContent({ result, id }) {
             ))}
           </tbody>
         </table>
-
-        {topPages.length > visiblePagesCount && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem', borderTop: '1px solid rgba(255, 255, 255, 0.03)', paddingTop: '1.25rem' }}>
-            <button 
-              onClick={() => setVisiblePagesCount(prev => prev === 5 ? 10 : 20)}
-              className="btn"
-              style={{
-                background: 'rgba(255, 255, 255, 0.015)',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                padding: '0.5rem 1.5rem',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.015)';
-                e.currentTarget.style.borderColor = 'var(--border-color)';
-              }}
-            >
-              {visiblePagesCount === 5 ? 'Daha Fazla Görüntüle (10)' : 'Daha Fazla Görüntüle (20)'}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Styled animation overrides */}
@@ -467,6 +514,7 @@ export default function AnalyticsContent({ result, id }) {
           opacity: 1 !important;
         }
       `}</style>
+      </div>
     </div>
   );
 }
@@ -474,15 +522,78 @@ export default function AnalyticsContent({ result, id }) {
 function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, onKeywordFilterChange, filteredKeywords }) {
   const sc = searchConsole;
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortKey, setSortKey] = useState('clicks');
+  const [sortDir, setSortDir] = useState('desc');
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [keywordFilter]);
+  }, [keywordFilter, pageSize, sortKey, sortDir]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredKeywords.length / GSC_KEYWORDS_PAGE_SIZE));
+  const sortedKeywords = useMemo(() => {
+    const list = [...filteredKeywords];
+    const dir = sortDir === 'asc' ? 1 : -1;
+    list.sort((a, b) => {
+      let av = 0;
+      let bv = 0;
+      if (sortKey === 'clicks') {
+        av = Number(a.clicks || 0);
+        bv = Number(b.clicks || 0);
+      } else if (sortKey === 'impressions') {
+        av = Number(a.impressions || 0);
+        bv = Number(b.impressions || 0);
+      } else if (sortKey === 'ctr') {
+        av = parseFloat(a.ctr || 0);
+        bv = parseFloat(b.ctr || 0);
+      } else if (sortKey === 'position') {
+        av = Number(a.position || 0);
+        bv = Number(b.position || 0);
+      } else if (sortKey === 'change') {
+        av = Number(a.positionChange || 0);
+        bv = Number(b.positionChange || 0);
+      }
+      if (av === bv) return a.keyword.localeCompare(b.keyword, 'tr');
+      return av > bv ? dir : -dir;
+    });
+    return list;
+  }, [filteredKeywords, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedKeywords.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
-  const pageStart = (safePage - 1) * GSC_KEYWORDS_PAGE_SIZE;
-  const paginatedKeywords = filteredKeywords.slice(pageStart, pageStart + GSC_KEYWORDS_PAGE_SIZE);
+  const pageStart = (safePage - 1) * pageSize;
+  const paginatedKeywords = sortedKeywords.slice(pageStart, pageStart + pageSize);
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'));
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
+
+  const sortThStyle = {
+    padding: '0.75rem 0.5rem',
+    cursor: 'pointer',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+  };
+
+  const SortLabel = ({ label, colKey, align = 'right' }) => {
+    const active = sortKey === colKey;
+    return (
+      <th
+        style={{ ...sortThStyle, textAlign: align, color: active ? '#4285F4' : 'var(--text-secondary)' }}
+        onClick={() => handleSort(colKey)}
+        title="Sıralamak için tıkla"
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', justifyContent: align === 'center' ? 'center' : 'flex-end' }}>
+          {label}
+          {active ? (sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : <ArrowUpDown size={11} style={{ opacity: 0.35 }} />}
+        </span>
+      </th>
+    );
+  };
 
   return (
     <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid #4285F4' }}>
@@ -540,11 +651,11 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
                   <tr style={{ borderBottom: '1px solid var(--border-color)', fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>
                     <th style={{ padding: '0.75rem 0.5rem', width: 56 }}>#</th>
                     <th style={{ padding: '0.75rem 0.5rem' }}>Anahtar Kelime</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: 100, textAlign: 'right' }}>Tıklama</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: 100, textAlign: 'right' }}>Gösterim</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: 72, textAlign: 'right' }}>CTR</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: 72, textAlign: 'center' }}>Poz.</th>
-                    <th style={{ padding: '0.75rem 0.5rem', width: 160 }}>Değişim</th>
+                    <SortLabel label="Tıklama" colKey="clicks" />
+                    <SortLabel label="Gösterim" colKey="impressions" />
+                    <SortLabel label="CTR" colKey="ctr" />
+                    <SortLabel label="Poz." colKey="position" align="center" />
+                    <SortLabel label="Değişim" colKey="change" align="left" />
                     <th style={{ padding: '0.75rem 0.5rem' }}>URL</th>
                   </tr>
                 </thead>
@@ -556,7 +667,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
               </table>
             </div>
 
-            {filteredKeywords.length > GSC_KEYWORDS_PAGE_SIZE && (
+            {sortedKeywords.length > 0 && (
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -567,9 +678,25 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
                 flexWrap: 'wrap',
                 gap: '0.75rem',
               }}>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  {pageStart + 1}–{Math.min(pageStart + GSC_KEYWORDS_PAGE_SIZE, filteredKeywords.length)} / {filteredKeywords.length} sorgu
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    {pageStart + 1}–{Math.min(pageStart + pageSize, sortedKeywords.length)} / {sortedKeywords.length} sorgu
+                  </span>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    Sayfa başına
+                    <select
+                      value={pageSize}
+                      onChange={(e) => setPageSize(Number(e.target.value))}
+                      className="input-field"
+                      style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', width: 'auto' }}
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={30}>30</option>
+                    </select>
+                  </label>
+                </div>
+                {sortedKeywords.length > pageSize && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <button
                     type="button"
@@ -605,6 +732,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
                     <ChevronRight size={16} />
                   </button>
                 </div>
+                )}
               </div>
             )}
             </>
