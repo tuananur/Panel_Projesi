@@ -213,6 +213,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   const [activeSlide, setActiveSlide] = useState(0);
   const [isTabModalOpen, setIsTabModalOpen] = useState(false);
   const [editTabNames, setEditTabNames] = useState(getInitialTabNamesObj);
+  const [hiddenSlides, setHiddenSlides] = useState({});
   const [isTabSaving, setIsTabSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
   const statsRef = useRef(null);
@@ -306,6 +307,10 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   ];
 
   const activeSlides = allPossibleSlides.filter(s => s.condition);
+  const visibleSlides = activeSlides.filter(s => !hiddenSlides[s.id]);
+  const coverTitle = (editTabNames.__cover_title || 'DİJİTAL VARLIKLAR VE').trim() || 'DİJİTAL VARLIKLAR VE';
+  const coverHighlight = (editTabNames.__cover_highlight || 'PERFORMANS ANALİZİ').trim() || 'PERFORMANS ANALİZİ';
+  const coverDescription = (editTabNames.__cover_description || `${client.companyName} markası için ${currentMonthName} ${displayYear} dönemine ait arama motoru, kullanıcı trafiği ve sosyal medya etkileşim değerlendirmesi.`).trim() || `${client.companyName} markası için ${currentMonthName} ${displayYear} dönemine ait arama motoru, kullanıcı trafiği ve sosyal medya etkileşim değerlendirmesi.`;
 
   useEffect(() => {
     if (activeSlide >= activeSlides.length) {
@@ -367,7 +372,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
           scale: 1.5,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: '#0f172a',
+          backgroundColor: '#f8fafc',
           logging: false,
           width: 1123,
           height: 794,
@@ -741,7 +746,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
     const slideStyle = {
       width: '1123px',
       height: '794px',
-      background: 'radial-gradient(circle at 80% 20%, #1e293b 0%, #0f172a 100%)',
+      background: 'radial-gradient(circle at 80% 20%, #f8fbff 0%, #eef3ff 100%)',
       color: '#ffffff',
       boxSizing: 'border-box',
       position: 'relative',
@@ -749,7 +754,8 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      filter: 'invert(1) hue-rotate(180deg)'
     };
 
     const headerDecoration = (
@@ -808,13 +814,13 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
               AYLIK PERFORMANS RAPORU
             </div>
             <h1 style={{ fontSize: '48px', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-2.5px', lineHeight: 1.1 }}>
-              DİJİTAL VARLIKLAR VE
+              {coverTitle}
               <span style={{ display: 'block', background: 'linear-gradient(90deg, #0085FF, #8b5cf6, #f43f5e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                PERFORMANS ANALİZİ
+                {coverHighlight}
               </span>
             </h1>
             <p style={{ fontSize: '16px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.6)', marginTop: '20px', maxWidth: '600px', lineHeight: 1.6 }}>
-              {client.companyName} markası için {currentMonthName} {displayYear} dönemine ait arama motoru, kullanıcı trafiği ve sosyal medya etkileşim değerlendirmesi.
+              {coverDescription}
             </p>
           </div>
 
@@ -842,15 +848,15 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
               <div style={{ width: '60%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 {[
-                  { label: 'SAYFA GÖRÜNTÜLEME', val: Number(analytics.summary.pageViews || 0).toLocaleString(), desc: 'Toplam sayfa ziyareti sayısı', icon: '📄', color: '#0085FF' },
-                  { label: 'TOPLAM OTURUMLAR', val: Number(analytics.summary.sessions || 0).toLocaleString(), desc: 'Web sitesinde başlatılan tekil oturumlar', icon: '⏱️', color: '#8b5cf6' },
-                  { label: 'HEMEN ÇIKMA ORANI', val: '%' + (analytics.summary.bounceRate || 0), desc: 'Tek sayfadan ayrılan ziyaretçi oranı', icon: '📉', color: '#f43f5e' },
-                  { label: 'ORT. ETKİLEŞİM SÜRESİ', val: analytics.summary.avgEngagementTime || '0dk 0sn', desc: 'Ortalama aktif gezinme süresi', icon: '⚡', color: '#10b981' }
+                  { label: 'SAYFA GÖRÜNTÜLEME', val: Number(analytics.summary.pageViews || 0).toLocaleString(), desc: 'Toplam sayfa ziyareti sayısı', icon: null, color: '#0085FF' },
+                  { label: 'TOPLAM OTURUMLAR', val: Number(analytics.summary.sessions || 0).toLocaleString(), desc: 'Web sitesinde başlatılan tekil oturumlar', icon: null, color: '#8b5cf6' },
+                  { label: 'HEMEN ÇIKMA ORANI', val: '%' + (analytics.summary.bounceRate || 0), desc: 'Tek sayfadan ayrılan ziyaretçi oranı', icon: null, color: '#f43f5e' },
+                  { label: 'ORT. ETKİLEŞİM SÜRESİ', val: analytics.summary.avgEngagementTime || '0dk 0sn', desc: 'Ortalama aktif gezinme süresi', icon: null, color: '#10b981' }
                 ].map((kpi, idx) => (
                   <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <span style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>{kpi.label}</span>
-                      <span style={{ fontSize: '18px' }}>{kpi.icon}</span>
+                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
                     </div>
                     <div style={{ margin: '12px 0 4px 0' }}>
                       <span style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', letterSpacing: '-1px' }}>{kpi.val}</span>
@@ -979,15 +985,15 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
               <div style={{ width: '60%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 {[
-                  { label: 'ORGANİK TIKLAMALAR', val: organicClicks.toLocaleString('tr-TR'), desc: 'Google arama tıklama sayısı', icon: '🖱️', color: '#10b981' },
-                  { label: 'ARAMA GÖSTERİMLERİ', val: organicImpressions.toLocaleString('tr-TR'), desc: 'Arama sonuçlarında görünme sayısı', icon: '👁️', color: '#0085FF' },
-                  { label: 'ORTALAMA CTR (TIKLAMA ORANI)', val: '%' + organicCtr, desc: 'Gösterimlerin tıklamaya dönüşme oranı', icon: '📈', color: '#f59e0b' },
-                  { label: 'ORTALAMA POZİSYON', val: String(avgPosition), desc: 'Arama sonuçlarındaki ortalama sıramız', icon: '📍', color: '#8b5cf6' }
+                  { label: 'ORGANİK TIKLAMALAR', val: organicClicks.toLocaleString('tr-TR'), desc: 'Google arama tıklama sayısı', icon: null, color: '#10b981' },
+                  { label: 'ARAMA GÖSTERİMLERİ', val: organicImpressions.toLocaleString('tr-TR'), desc: 'Arama sonuçlarında görünme sayısı', icon: null, color: '#0085FF' },
+                  { label: 'ORTALAMA CTR (TIKLAMA ORANI)', val: '%' + organicCtr, desc: 'Gösterimlerin tıklamaya dönüşme oranı', icon: null, color: '#f59e0b' },
+                  { label: 'ORTALAMA POZİSYON', val: String(avgPosition), desc: 'Arama sonuçlarındaki ortalama sıramız', icon: null, color: '#8b5cf6' }
                 ].map((kpi, idx) => (
                   <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <span style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>{kpi.label}</span>
-                      <span style={{ fontSize: '18px' }}>{kpi.icon}</span>
+                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
                     </div>
                     <div style={{ margin: '12px 0 4px 0' }}>
                       <span style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', letterSpacing: '-1px' }}>{kpi.val}</span>
@@ -1324,15 +1330,15 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                 {/* Blog Alt Metrikler */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                   {[
-                    { label: 'TOPLAM PLANLANAN', val: totalBlogs + ' Blog', desc: 'Aylık hedeflenen blog', icon: '📖', color: '#0085ff' },
-                    { label: 'YAYINLANAN İÇERİK', val: publishedBlogs + ' Blog', desc: 'Yayına alınan blog', icon: '✅', color: '#10b981' },
-                    { label: 'BEKLEYEN İÇERİK', val: pendingBlogs + ' Blog', desc: 'İçerik/onay bekleyen', icon: '⏱️', color: '#f59e0b' },
-                    { label: 'TAMAMLANMA ORANI', val: '%' + completionRate, desc: 'Plan başarı yüzdesi', icon: '📊', color: '#8b5cf6' }
+                    { label: 'TOPLAM PLANLANAN', val: totalBlogs + ' Blog', desc: 'Aylık hedeflenen blog', icon: null, color: '#0085ff' },
+                    { label: 'YAYINLANAN İÇERİK', val: publishedBlogs + ' Blog', desc: 'Yayına alınan blog', icon: null, color: '#10b981' },
+                    { label: 'BEKLEYEN İÇERİK', val: pendingBlogs + ' Blog', desc: 'İçerik/onay bekleyen', icon: null, color: '#f59e0b' },
+                    { label: 'TAMAMLANMA ORANI', val: '%' + completionRate, desc: 'Plan başarı yüzdesi', icon: null, color: '#8b5cf6' }
                   ].map((kpi, idx) => (
                     <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                         <span style={{ fontSize: '8.5px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px' }}>{kpi.label}</span>
-                        <span style={{ fontSize: '13px' }}>{kpi.icon}</span>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
                       </div>
                       <span style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff' }}>{kpi.val}</span>
                       <span style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
@@ -1734,15 +1740,15 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   {/* 4'lü Metrik Kart Grubu */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                     {[
-                      { label: 'TOPLAM HARCAMA', val: spend.toLocaleString() + ' TL', desc: 'Reklam Bütçesi', icon: '💰', color: '#a855f7' },
-                      { label: 'GÖSTERİM HACMİ', val: impressions.toLocaleString(), desc: 'Erişilen Toplam Kitle', icon: '👁️', color: '#0064e0' },
-                      { label: 'BAĞLANTI TIKLAMASI', val: clicks.toLocaleString(), desc: 'Web Trafiği Yönlendirme', icon: '🖱️', color: '#ec4899' },
-                      { label: 'TIKLAMA ORANI / CPC', val: '%' + (ctr * 100).toFixed(2) + ' / ' + cpc.toFixed(2) + ' TL', desc: 'Avg. CTR ve Tık Maliyeti', icon: '📈', color: '#10b981' }
+                      { label: 'TOPLAM HARCAMA', val: spend.toLocaleString() + ' TL', desc: 'Reklam Bütçesi', icon: null, color: '#a855f7' },
+                      { label: 'GÖSTERİM HACMİ', val: impressions.toLocaleString(), desc: 'Erişilen Toplam Kitle', icon: null, color: '#0064e0' },
+                      { label: 'BAĞLANTI TIKLAMASI', val: clicks.toLocaleString(), desc: 'Web Trafiği Yönlendirme', icon: null, color: '#ec4899' },
+                      { label: 'TIKLAMA ORANI / CPC', val: '%' + (ctr * 100).toFixed(2) + ' / ' + cpc.toFixed(2) + ' TL', desc: 'Avg. CTR ve Tık Maliyeti', icon: null, color: '#10b981' }
                     ].map((kpi, idx) => (
                       <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <span style={{ fontSize: '8.5px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px' }}>{kpi.label}</span>
-                          <span style={{ fontSize: '13px' }}>{kpi.icon}</span>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
                         </div>
                         <span style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px' }}>{kpi.val}</span>
                         <span style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
@@ -1853,15 +1859,15 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   {/* 4'lü Metrik Kart Grubu */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                     {[
-                      { label: 'TOPLAM BÜTÇE', val: spend.toLocaleString() + ' TL', desc: 'Google Ads Harcaması', icon: '💳', color: '#4285F4' },
-                      { label: 'ARAMA GÖSTERİMİ', val: impressions.toLocaleString(), desc: 'Kitle Görünürlüğü', icon: '👁️', color: '#EA4335' },
-                      { label: 'TIKLAMA / CTR', val: clicks.toLocaleString() + ' / %' + avgCtr, desc: 'Web Sitesi Trafiği', icon: '🖱️', color: '#FBBC05' },
-                      { label: 'DÖNÜŞÜM / ORT. CPA', val: conv + ' / ' + cpc.toFixed(2) + ' TL', desc: 'Edinme Başına Maliyet', icon: '🎯', color: '#34A853' }
+                      { label: 'TOPLAM BÜTÇE', val: spend.toLocaleString() + ' TL', desc: 'Google Ads Harcaması', icon: null, color: '#4285F4' },
+                      { label: 'ARAMA GÖSTERİMİ', val: impressions.toLocaleString(), desc: 'Kitle Görünürlüğü', icon: null, color: '#EA4335' },
+                      { label: 'TIKLAMA / CTR', val: clicks.toLocaleString() + ' / %' + avgCtr, desc: 'Web Sitesi Trafiği', icon: null, color: '#FBBC05' },
+                      { label: 'DÖNÜŞÜM / ORT. CPA', val: conv + ' / ' + cpc.toFixed(2) + ' TL', desc: 'Edinme Başına Maliyet', icon: null, color: '#34A853' }
                     ].map((kpi, idx) => (
                       <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <span style={{ fontSize: '8.5px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px' }}>{kpi.label}</span>
-                          <span style={{ fontSize: '13px' }}>{kpi.icon}</span>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
                         </div>
                         <span style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px' }}>{kpi.val}</span>
                         <span style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
@@ -2070,7 +2076,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
     if (showAll) {
       return (
         <>
-          {activeSlides.map((slide, index) => {
+          {visibleSlides.map((slide, index) => {
             const renderFn = slideTemplates[slide.id];
             return renderFn ? renderFn(index + 1) : null;
           })}
@@ -2717,26 +2723,52 @@ return (
             >
               {activeSlides.map((slide, index) => {
                 const slideTitle = editTabNames[slide.id] || slide.defaultTitle;
+                const isHidden = !!hiddenSlides[slide.id];
                 return (
-                  <button
-                    key={slide.id}
-                    onClick={() => setActiveSlide(index)}
-                    style={{
-                      flexShrink: 0,
-                      padding: '0.4rem 0.75rem',
-                      borderRadius: '8px',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      transition: 'all 0.2s',
-                      backgroundColor: activeSlide === index ? 'rgba(0, 133, 255, 0.15)' : 'rgba(255, 255, 255, 0.02)',
-                      borderColor: activeSlide === index ? '#0085FF' : 'var(--border-color)',
-                      color: activeSlide === index ? '#0085FF' : 'var(--text-secondary)'
-                    }}
-                  >
-                    {slideTitle}
-                  </button>
+                  <div key={slide.id} style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
+                    <button
+                      onClick={() => setActiveSlide(index)}
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        borderRadius: '8px 0 0 8px',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        border: '1px solid',
+                        borderRight: 'none',
+                        transition: 'all 0.2s',
+                        backgroundColor: activeSlide === index ? 'rgba(0, 133, 255, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+                        borderColor: activeSlide === index ? '#0085FF' : 'var(--border-color)',
+                        color: activeSlide === index ? '#0085FF' : 'var(--text-secondary)',
+                        opacity: isHidden ? 0.4 : 1,
+                        textDecoration: isHidden ? 'line-through' : 'none'
+                      }}
+                    >
+                      {slideTitle}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setHiddenSlides(prev => ({ ...prev, [slide.id]: !prev[slide.id] }));
+                      }}
+                      title={isHidden ? 'PDF\'e dahil et' : 'PDF\'den çıkar'}
+                      style={{
+                        padding: '0.4rem 0.35rem',
+                        borderRadius: '0 8px 8px 0',
+                        fontSize: '0.7rem',
+                        cursor: 'pointer',
+                        border: '1px solid',
+                        borderColor: activeSlide === index ? '#0085FF' : 'var(--border-color)',
+                        background: isHidden ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255, 255, 255, 0.02)',
+                        color: isHidden ? '#ef4444' : 'var(--text-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {isHidden ? <X size={12} /> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>}
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -2862,6 +2894,47 @@ return (
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
             Rapor slaytlarının sekme başlıklarını özelleştirebilirsiniz. Boş bırakılan alanlarda varsayılan başlıklar kullanılacaktır.
           </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem', marginBottom: '0.25rem' }}>
+            <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <label className="input-label" style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, marginBottom: 0 }}>
+                Kapak Ana Baslik
+              </label>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="DIJITAL VARLIKLAR VE"
+                value={editTabNames.__cover_title || ''}
+                onChange={(e) => setEditTabNames(prev => ({ ...prev, __cover_title: e.target.value }))}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+              />
+            </div>
+            <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <label className="input-label" style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, marginBottom: 0 }}>
+                Kapak Vurgulu Baslik
+              </label>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="PERFORMANS ANALIZI"
+                value={editTabNames.__cover_highlight || ''}
+                onChange={(e) => setEditTabNames(prev => ({ ...prev, __cover_highlight: e.target.value }))}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+              />
+            </div>
+            <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <label className="input-label" style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, marginBottom: 0 }}>
+                Kapak Aciklamasi
+              </label>
+              <textarea
+                className="input-field"
+                rows={3}
+                placeholder={`${client.companyName} markasi icin ${currentMonthName} ${displayYear} donemine ait...`}
+                value={editTabNames.__cover_description || ''}
+                onChange={(e) => setEditTabNames(prev => ({ ...prev, __cover_description: e.target.value }))}
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', resize: 'vertical' }}
+              />
+            </div>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             {activeSlides.map((slide) => {
               const defaultName = slide.defaultTitle;
@@ -2903,6 +2976,9 @@ return (
                 activeSlides.forEach(slide => {
                   defaults[slide.id] = '';
                 });
+                defaults.__cover_title = '';
+                defaults.__cover_highlight = '';
+                defaults.__cover_description = '';
                 setEditTabNames(defaults);
               }}
               style={{
