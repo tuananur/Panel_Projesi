@@ -308,9 +308,6 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
 
   const activeSlides = allPossibleSlides.filter(s => s.condition);
   const visibleSlides = activeSlides.filter(s => !hiddenSlides[s.id]);
-  const coverTitle = (editTabNames.__cover_title || 'DİJİTAL VARLIKLAR VE').trim() || 'DİJİTAL VARLIKLAR VE';
-  const coverHighlight = (editTabNames.__cover_highlight || 'PERFORMANS ANALİZİ').trim() || 'PERFORMANS ANALİZİ';
-  const coverDescription = (editTabNames.__cover_description || `${client.companyName} markası için ${currentMonthName} ${displayYear} dönemine ait arama motoru, kullanıcı trafiği ve sosyal medya etkileşim değerlendirmesi.`).trim() || `${client.companyName} markası için ${currentMonthName} ${displayYear} dönemine ait arama motoru, kullanıcı trafiği ve sosyal medya etkileşim değerlendirmesi.`;
 
   useEffect(() => {
     if (activeSlide >= activeSlides.length) {
@@ -414,6 +411,10 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
     'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
   ];
   const currentMonthName = turkishMonths[displayMonth];
+
+  const coverTitle = (editTabNames.__cover_title || 'DİJİTAL VARLIKLAR VE').trim() || 'DİJİTAL VARLIKLAR VE';
+  const coverHighlight = (editTabNames.__cover_highlight || 'PERFORMANS ANALİZİ').trim() || 'PERFORMANS ANALİZİ';
+  const coverDescription = (editTabNames.__cover_description || `${client.companyName} markası için ${currentMonthName} ${displayYear} dönemine ait arama motoru, kullanıcı trafiği ve sosyal medya etkileşim değerlendirmesi.`).trim() || `${client.companyName} markası için ${currentMonthName} ${displayYear} dönemine ait arama motoru, kullanıcı trafiği ve sosyal medya etkileşim değerlendirmesi.`;
 
   const getWeekOfMonth = (date) => {
     const d = new Date(date);
