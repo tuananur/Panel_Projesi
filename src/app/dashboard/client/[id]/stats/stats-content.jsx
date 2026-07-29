@@ -2913,8 +2913,8 @@ return (
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
               {/* Sol — Slayt Önizleme */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '16px' }}>
-                  <div style={{ transform: 'scale(0.58)', transformOrigin: 'center center', flexShrink: 0 }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '8px', position: 'relative' }}>
+                  <div style={{ transform: 'scale(0.5)', transformOrigin: 'center center', position: 'absolute' }}>
                     {renderSlides(activeSlide, false)}
                   </div>
                 </div>
