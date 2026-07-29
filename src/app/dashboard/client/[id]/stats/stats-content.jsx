@@ -254,35 +254,14 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   const avgPosition = gsc.summary?.position ?? 0;
 
   const renderApiMissingNotice = (platformName) => (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      flex: 1, 
-      margin: '40px 0', 
-      background: 'rgba(255, 255, 255, 0.02)', 
-      border: '1px dashed rgba(255, 255, 255, 0.1)', 
-      borderRadius: '24px', 
-      padding: '40px',
-      textAlign: 'center',
-      backdropFilter: 'blur(10px)',
-      zIndex: 10
-    }}>
-      <div style={{ 
-        background: 'rgba(239, 68, 68, 0.1)', 
-        border: '1px solid rgba(239, 68, 68, 0.2)', 
-        padding: '16px', 
-        borderRadius: '50%',
-        marginBottom: '20px',
-        color: '#ef4444'
-      }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, margin: '40px 0', background: '#fef2f2', border: '1px dashed #fca5a5', borderRadius: '24px', padding: '40px', textAlign: 'center', zIndex: 10 }}>
+      <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '16px', borderRadius: '50%', marginBottom: '20px', color: '#ef4444' }}>
         <AlertCircle size={40} />
       </div>
-      <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', marginBottom: '10px' }}>
+      <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#1e293b', marginBottom: '10px' }}>
         {platformName} API Bağlantısı Bulunmuyor
       </h3>
-      <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)', maxWidth: '450px', lineHeight: '1.6' }}>
+      <p style={{ fontSize: '13px', color: '#64748b', maxWidth: '450px', lineHeight: '1.6' }}>
         Bu rapora ait verilerin görüntülenebilmesi için entegrasyon ayarlarından {platformName} bağlantısının yapılması gerekmektedir. Entegrasyon sağlandığında veriler otomatik olarak güncellenecektir.
       </p>
     </div>
@@ -369,7 +348,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
           scale: 1.5,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: '#f8fafc',
+          backgroundColor: '#ffffff',
           logging: false,
           width: 1123,
           height: 794,
@@ -743,12 +722,24 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
     // 2. Resolve Search Console KPIs from outer scope
 
 
-    // Slide common styling utilities
+    // Light theme tokens — tek yerden kontrol
+    const T = {
+      bg:        '#ffffff',
+      bgCard:    '#f8fafc',
+      bgCard2:   '#f1f5f9',
+      border:    '#e2e8f0',
+      border2:   '#cbd5e1',
+      text:      '#0f172a',
+      textMid:   '#475569',
+      textMute:  '#94a3b8',
+      logoFilter: 'brightness(0)',
+    };
+
     const slideStyle = {
       width: '1123px',
       height: '794px',
-      background: 'radial-gradient(circle at 80% 20%, #f8fbff 0%, #eef3ff 100%)',
-      color: '#ffffff',
+      background: `linear-gradient(135deg, ${T.bg} 0%, #f0f6ff 100%)`,
+      color: T.text,
       boxSizing: 'border-box',
       position: 'relative',
       padding: '50px 60px',
@@ -756,7 +747,6 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
       flexDirection: 'column',
       justifyContent: 'space-between',
       overflow: 'hidden',
-      filter: 'invert(1) hue-rotate(180deg)'
     };
 
     const headerDecoration = (
@@ -764,46 +754,49 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
     );
 
     const slideHeader = (title) => (
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '15px', zIndex: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${T.border}`, paddingBottom: '15px', zIndex: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {client.logoUrl ? (
             <img src={client.logoUrl} alt={client.companyName} style={{ height: '28px', objectFit: 'contain' }} />
           ) : (
-            <span style={{ fontSize: '18px', fontWeight: 900, letterSpacing: '-0.5px' }}>{client.companyName}</span>
+            <span style={{ fontSize: '18px', fontWeight: 900, letterSpacing: '-0.5px', color: T.text }}>{client.companyName}</span>
           )}
-          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>|</span>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</span>
+          <span style={{ color: T.border2, fontSize: '14px' }}>|</span>
+          <span style={{ fontSize: '12px', fontWeight: 800, color: T.textMute, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <img src="/logo.png" alt="Beyin Atölyesi" style={{ height: '22px', filter: 'brightness(0) invert(1)', opacity: 0.8 }} />
-          <span style={{ width: '1px', height: '15px', background: 'rgba(255,255,255,0.2)' }}></span>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>{currentMonthName} {displayYear}</span>
+          <img src="/logo.png" alt="Beyin Atölyesi" style={{ height: '22px', filter: T.logoFilter, opacity: 0.7 }} />
+          <span style={{ width: '1px', height: '15px', background: T.border2 }}></span>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: T.textMute }}>{currentMonthName} {displayYear}</span>
         </div>
       </div>
     );
 
     const slideFooter = (index) => (
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '15px', zIndex: 10, fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${T.border}`, paddingTop: '15px', zIndex: 10, fontSize: '10px', color: T.textMute, fontWeight: 600 }}>
         <span>© {displayYear} BEYİN ATÖLYESİ - DİJİTAL PERFORMANS RAPORU</span>
         <span>SLAYT {index} / {activeSlides.length}</span>
       </div>
     );
 
+    // Slayt yorum metinleri — düzenlenebilir, varsayılan fallback ile
+    const txt = (key, fallback) => (editTabNames[key] && editTabNames[key].trim()) ? editTabNames[key] : fallback;
+
     const slideTemplates = {
       kapak: (index) => (
         <div className="pdf-slide" style={slideStyle} key="slide-kapak">
           {headerDecoration}
-          <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-          <div style={{ position: 'absolute', top: '150px', left: '-100px', width: '350px', height: '350px', background: '#0085FF', opacity: 0.08, filter: 'blur(80px)', borderRadius: '50%' }}></div>
-          <div style={{ position: 'absolute', bottom: '150px', right: '-100px', width: '350px', height: '350px', background: '#8b5cf6', opacity: 0.08, filter: 'blur(80px)', borderRadius: '50%' }}></div>
+          <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(#0085FF 1px, transparent 1px)', backgroundSize: '28px 28px' }}></div>
+          <div style={{ position: 'absolute', top: '150px', left: '-100px', width: '350px', height: '350px', background: '#0085FF', opacity: 0.07, filter: 'blur(80px)', borderRadius: '50%' }}></div>
+          <div style={{ position: 'absolute', bottom: '150px', right: '-100px', width: '350px', height: '350px', background: '#8b5cf6', opacity: 0.07, filter: 'blur(80px)', borderRadius: '50%' }}></div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div style={{ background: 'rgba(255, 255, 255, 0.04)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <img src="/logo.png" alt="Beyin Atölyesi" style={{ height: '32px', filter: 'brightness(0) invert(1)' }} />
+              <div style={{ background: T.bgCard, padding: '8px 16px', borderRadius: '12px', border: `1px solid ${T.border}` }}>
+                <img src="/logo.png" alt="Beyin Atölyesi" style={{ height: '32px', filter: T.logoFilter }} />
               </div>
-              <div style={{ width: '2px', height: '32px', background: 'rgba(255, 255, 255, 0.2)' }}></div>
-              <span style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', letterSpacing: '1px' }}>BEYİN ATÖLYESİ</span>
+              <div style={{ width: '2px', height: '32px', background: T.border2 }}></div>
+              <span style={{ fontSize: '16px', fontWeight: 800, color: T.text, letterSpacing: '1px' }}>BEYİN ATÖLYESİ</span>
             </div>
             {client.logoUrl && (
               <img src={client.logoUrl} alt={client.companyName} style={{ height: '32px', objectFit: 'contain' }} />
@@ -811,28 +804,28 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
           </div>
 
           <div style={{ margin: '80px 0', zIndex: 10 }}>
-            <div style={{ display: 'inline-block', padding: '6px 14px', background: 'rgba(0, 133, 255, 0.1)', color: '#0085FF', borderRadius: '30px', fontSize: '11px', fontWeight: 800, border: '1px solid rgba(0, 133, 255, 0.2)', marginBottom: '20px' }}>
+            <div style={{ display: 'inline-block', padding: '6px 14px', background: 'rgba(0, 133, 255, 0.08)', color: '#0085FF', borderRadius: '30px', fontSize: '11px', fontWeight: 800, border: '1px solid rgba(0, 133, 255, 0.2)', marginBottom: '20px' }}>
               AYLIK PERFORMANS RAPORU
             </div>
-            <h1 style={{ fontSize: '48px', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-2.5px', lineHeight: 1.1 }}>
+            <h1 style={{ fontSize: '48px', fontWeight: 900, color: T.text, margin: 0, letterSpacing: '-2.5px', lineHeight: 1.1 }}>
               {coverTitle}
               <span style={{ display: 'block', background: 'linear-gradient(90deg, #0085FF, #8b5cf6, #f43f5e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 {coverHighlight}
               </span>
             </h1>
-            <p style={{ fontSize: '16px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.6)', marginTop: '20px', maxWidth: '600px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '16px', fontWeight: 500, color: T.textMid, marginTop: '20px', maxWidth: '600px', lineHeight: 1.6 }}>
               {coverDescription}
             </p>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '24px', zIndex: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: `1px solid ${T.border}`, paddingTop: '24px', zIndex: 10 }}>
             <div>
-              <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>DİJİTAL İŞ ORTAĞI</span>
-              <span style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff' }}>{client.companyName}</span>
+              <span style={{ fontSize: '10px', color: T.textMute, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>DİJİTAL İŞ ORTAĞI</span>
+              <span style={{ fontSize: '15px', fontWeight: 800, color: T.text }}>{client.companyName}</span>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>RAPOR TARİHİ</span>
-              <span style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff' }}>{currentMonthName} {displayYear}</span>
+              <span style={{ fontSize: '10px', color: T.textMute, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '4px' }}>RAPOR TARİHİ</span>
+              <span style={{ fontSize: '15px', fontWeight: 800, color: T.text }}>{currentMonthName} {displayYear}</span>
             </div>
           </div>
         </div>
@@ -849,41 +842,41 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
               <div style={{ width: '60%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 {[
-                  { label: 'SAYFA GÖRÜNTÜLEME', val: Number(analytics.summary.pageViews || 0).toLocaleString(), desc: 'Toplam sayfa ziyareti sayısı', icon: null, color: '#0085FF' },
-                  { label: 'TOPLAM OTURUMLAR', val: Number(analytics.summary.sessions || 0).toLocaleString(), desc: 'Web sitesinde başlatılan tekil oturumlar', icon: null, color: '#8b5cf6' },
-                  { label: 'HEMEN ÇIKMA ORANI', val: '%' + (analytics.summary.bounceRate || 0), desc: 'Tek sayfadan ayrılan ziyaretçi oranı', icon: null, color: '#f43f5e' },
-                  { label: 'ORT. ETKİLEŞİM SÜRESİ', val: analytics.summary.avgEngagementTime || '0dk 0sn', desc: 'Ortalama aktif gezinme süresi', icon: null, color: '#10b981' }
+                  { label: 'SAYFA GÖRÜNTÜLEME', val: Number(analytics.summary.pageViews || 0).toLocaleString(), desc: 'Toplam sayfa ziyareti sayısı', color: '#0085FF' },
+                  { label: 'TOPLAM OTURUMLAR', val: Number(analytics.summary.sessions || 0).toLocaleString(), desc: 'Web sitesinde başlatılan tekil oturumlar', color: '#8b5cf6' },
+                  { label: 'HEMEN ÇIKMA ORANI', val: '%' + (analytics.summary.bounceRate || 0), desc: 'Tek sayfadan ayrılan ziyaretçi oranı', color: '#f43f5e' },
+                  { label: 'ORT. ETKİLEŞİM SÜRESİ', val: analytics.summary.avgEngagementTime || '0dk 0sn', desc: 'Ortalama aktif gezinme süresi', color: '#10b981' }
                 ].map((kpi, idx) => (
-                  <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div key={idx} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>{kpi.label}</span>
-                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
+                      <span style={{ fontSize: '10px', fontWeight: 800, color: T.textMute, letterSpacing: '1px' }}>{kpi.label}</span>
+                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: kpi.color, opacity: 0.8 }}></span>
                     </div>
                     <div style={{ margin: '12px 0 4px 0' }}>
-                      <span style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', letterSpacing: '-1px' }}>{kpi.val}</span>
+                      <span style={{ fontSize: '28px', fontWeight: 900, color: T.text, letterSpacing: '-1px' }}>{kpi.val}</span>
                     </div>
-                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{kpi.desc}</span>
+                    <span style={{ fontSize: '11px', color: T.textMid, fontWeight: 600 }}>{kpi.desc}</span>
                   </div>
                 ))}
               </div>
 
-              <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '16px', background: '#0085FF', borderRadius: '2px' }}></span>
                   Trafik Akışı Stratejik Yorumu
                 </h4>
                 <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                    <span>Web sitemiz bu ay toplam <strong style={{ color: '#ffffff' }}>{Number(analytics.summary.pageViews || 0).toLocaleString()}</strong> sayfa görüntüleme alarak organik erişimini kararlı şekilde sürdürmüştür.</span>
+                    <span>{txt('kullanici_1_yorum_1', `Web sitemiz bu ay toplam ${Number(analytics.summary.pageViews || 0).toLocaleString()} sayfa görüntüleme alarak organik erişimini kararlı şekilde sürdürmüştür.`)}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#8b5cf6', fontWeight: 700 }}>•</span>
-                    <span>Toplam oturum sayısı <strong style={{ color: '#ffffff' }}>{Number(analytics.summary.sessions || 0).toLocaleString()}</strong> seviyesine ulaşarak kullanıcıların düzenli geri dönüş sağladığını doğrulamaktadır.</span>
+                    <span>{txt('kullanici_1_yorum_2', `Toplam oturum sayısı ${Number(analytics.summary.sessions || 0).toLocaleString()} seviyesine ulaşarak kullanıcıların düzenli geri dönüş sağladığını doğrulamaktadır.`)}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#f43f5e', fontWeight: 700 }}>•</span>
-                    <span>Hemen çıkma oranımız <strong style={{ color: '#ffffff' }}>%{analytics.summary.bounceRate || 0}</strong> olup, sektör ortalamasının altında kalarak sitemize çekilen kitlenin yüksek alaka düzeyini kanıtlamaktadır.</span>
+                    <span>{txt('kullanici_1_yorum_3', `Hemen çıkma oranımız %${analytics.summary.bounceRate || 0} olup, sektör ortalamasının altında kalarak sitemize çekilen kitlenin yüksek alaka düzeyini kanıtlamaktadır.`)}</span>
                   </li>
                 </ul>
               </div>
@@ -903,7 +896,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             renderApiMissingNotice('Google Analytics')
           ) : (
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
-              <div style={{ width: '60%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '60%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {(() => {
                   const maxVal = Math.max(...analytics.dailyActiveUsers.map(d => d.users)) || 100;
                   const points = analytics.dailyActiveUsers.map((d, idx) => {
@@ -913,34 +906,30 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   });
                   const pathData = points.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + p.x + ' ' + p.y).join(' ');
                   const areaData = pathData + ' L ' + points[points.length-1].x + ' 240 L ' + points[0].x + ' 240 Z';
-                  
                   return (
                     <svg width="560" height="280" style={{ overflow: 'visible' }}>
                       <defs>
                         <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#0085FF" stopOpacity="0.4" />
+                          <stop offset="0%" stopColor="#0085FF" stopOpacity="0.25" />
                           <stop offset="100%" stopColor="#0085FF" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
-                      
                       {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
                         const y = 60 + ratio * 180;
                         const labelVal = Math.round(maxVal * (1 - ratio));
                         return (
                           <g key={idx}>
-                            <line x1="50" y1={y} x2="540" y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
-                            <text x="40" y={y + 4} fill="rgba(255,255,255,0.3)" fontSize="9" textAnchor="end">{labelVal}</text>
+                            <line x1="50" y1={y} x2="540" y2={y} stroke={T.border} strokeDasharray="4 4" />
+                            <text x="40" y={y + 4} fill={T.textMute} fontSize="9" textAnchor="end">{labelVal}</text>
                           </g>
                         );
                       })}
-                      
                       <path d={areaData} fill="url(#areaGrad)" />
                       <path d={pathData} fill="none" stroke="#0085FF" strokeWidth="3" />
-                      
                       {points.map((p, idx) => (
                         <g key={idx}>
-                          <circle cx={p.x} cy={p.y} r="5" fill="#0085FF" stroke="#0f172a" strokeWidth="2" />
-                          <text x={p.x} y="260" fill="rgba(255,255,255,0.4)" fontSize="8.5" textAnchor="middle">{p.label}</text>
+                          <circle cx={p.x} cy={p.y} r="5" fill="#0085FF" stroke={T.bg} strokeWidth="2" />
+                          <text x={p.x} y="260" fill={T.textMute} fontSize="8.5" textAnchor="middle">{p.label}</text>
                         </g>
                       ))}
                     </svg>
@@ -948,23 +937,23 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                 })()}
               </div>
 
-              <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '16px', background: '#8b5cf6', borderRadius: '2px' }}></span>
                   Kullanıcı Eğilim Analizi
                 </h4>
                 <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#8b5cf6', fontWeight: 700 }}>•</span>
-                    <span>Grafik, son 10 gündeki günlük aktif kullanıcı hareketlerindeki trendi görselleştirmektedir.</span>
+                    <span>{txt('kullanici_2_yorum_1', 'Grafik, son 10 gündeki günlük aktif kullanıcı hareketlerindeki trendi görselleştirmektedir.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                    <span>Hafta içi günlerde kullanıcı trafiğinde belirgin bir yükseliş yaşanmakta, özellikle iş saatlerinde etkileşim oranları zirve yapmaktadır.</span>
+                    <span>{txt('kullanici_2_yorum_2', 'Hafta içi günlerde kullanıcı trafiğinde belirgin bir yükseliş yaşanmakta, özellikle iş saatlerinde etkileşim oranları zirve yapmaktadır.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#f43f5e', fontWeight: 700 }}>•</span>
-                    <span>Blog paylaşımlarının yoğun olduğu günlerde site trafiğinde anlık ve kalıcı sıçramalar gözlemlenmiştir.</span>
+                    <span>{txt('kullanici_2_yorum_3', 'Blog paylaşımlarının yoğun olduğu günlerde site trafiğinde anlık ve kalıcı sıçramalar gözlemlenmiştir.')}</span>
                   </li>
                 </ul>
               </div>
@@ -986,41 +975,41 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
               <div style={{ width: '60%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 {[
-                  { label: 'ORGANİK TIKLAMALAR', val: organicClicks.toLocaleString('tr-TR'), desc: 'Google arama tıklama sayısı', icon: null, color: '#10b981' },
-                  { label: 'ARAMA GÖSTERİMLERİ', val: organicImpressions.toLocaleString('tr-TR'), desc: 'Arama sonuçlarında görünme sayısı', icon: null, color: '#0085FF' },
-                  { label: 'ORTALAMA CTR (TIKLAMA ORANI)', val: '%' + organicCtr, desc: 'Gösterimlerin tıklamaya dönüşme oranı', icon: null, color: '#f59e0b' },
-                  { label: 'ORTALAMA POZİSYON', val: String(avgPosition), desc: 'Arama sonuçlarındaki ortalama sıramız', icon: null, color: '#8b5cf6' }
+                  { label: 'ORGANİK TIKLAMALAR', val: organicClicks.toLocaleString('tr-TR'), desc: 'Google arama tıklama sayısı', color: '#10b981' },
+                  { label: 'ARAMA GÖSTERİMLERİ', val: organicImpressions.toLocaleString('tr-TR'), desc: 'Arama sonuçlarında görünme sayısı', color: '#0085FF' },
+                  { label: 'ORTALAMA CTR (TIKLAMA ORANI)', val: '%' + organicCtr, desc: 'Gösterimlerin tıklamaya dönüşme oranı', color: '#f59e0b' },
+                  { label: 'ORTALAMA POZİSYON', val: String(avgPosition), desc: 'Arama sonuçlarındaki ortalama sıramız', color: '#8b5cf6' }
                 ].map((kpi, idx) => (
-                  <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div key={idx} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '18px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>{kpi.label}</span>
-                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
+                      <span style={{ fontSize: '10px', fontWeight: 800, color: T.textMute, letterSpacing: '1px' }}>{kpi.label}</span>
+                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: kpi.color, opacity: 0.8 }}></span>
                     </div>
                     <div style={{ margin: '12px 0 4px 0' }}>
-                      <span style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', letterSpacing: '-1px' }}>{kpi.val}</span>
+                      <span style={{ fontSize: '28px', fontWeight: 900, color: T.text, letterSpacing: '-1px' }}>{kpi.val}</span>
                     </div>
-                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{kpi.desc}</span>
+                    <span style={{ fontSize: '11px', color: T.textMid, fontWeight: 600 }}>{kpi.desc}</span>
                   </div>
                 ))}
               </div>
 
-              <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '16px', background: '#10b981', borderRadius: '2px' }}></span>
                   SEO Stratejik Analizi
                 </h4>
                 <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#10b981', fontWeight: 700 }}>•</span>
-                    <span>Organik aramalarda bu ay toplam <strong style={{ color: '#ffffff' }}>{organicClicks.toLocaleString('tr-TR')}</strong> kullanıcı doğrudan tıklama yaparak web sitemizi ziyaret etmiştir.</span>
+                    <span>{txt('seo_yorum_1', `Organik aramalarda bu ay toplam ${organicClicks.toLocaleString('tr-TR')} kullanıcı doğrudan tıklama yaparak web sitemizi ziyaret etmiştir.`)}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                    <span>Google arama motoru dizinlerinde toplam <strong style={{ color: '#ffffff' }}>{organicImpressions.toLocaleString('tr-TR')}</strong> gösterim elde edilerek yüksek marka bilinirliği sağlanmıştır.</span>
+                    <span>{txt('seo_yorum_2', `Google arama motoru dizinlerinde toplam ${organicImpressions.toLocaleString('tr-TR')} gösterim elde edilerek yüksek marka bilinirliği sağlanmıştır.`)}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#f59e0b', fontWeight: 700 }}>•</span>
-                    <span>Ortalama tıklama oranımız <strong style={{ color: '#ffffff' }}>%{organicCtr}</strong> olup, hedef kitleye tam uyumlu başlık ve SEO açıklamaları kurgulandığını kanıtlamaktadır.</span>
+                    <span>{txt('seo_yorum_3', `Ortalama tıklama oranımız %${organicCtr} olup, hedef kitleye tam uyumlu başlık ve SEO açıklamaları kurgulandığını kanıtlamaktadır.`)}</span>
                   </li>
                 </ul>
               </div>
@@ -1040,38 +1029,38 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             renderApiMissingNotice('Google Analytics')
           ) : (
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
-              <div style={{ width: '60%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px' }}>
-                <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>En Çok Ziyaret Alan Ülkeler</h4>
+              <div style={{ width: '60%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 800, color: T.textMute, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>En Çok Ziyaret Alan Ülkeler</h4>
                 {analytics.countryBreakdown.slice(0, 5).map((country, idx) => (
                   <div key={idx}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px', fontWeight: 700 }}>
-                      <span style={{ color: '#ffffff' }}>{idx + 1}. {country.name}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.5)' }}>{Number(country.count || 0).toLocaleString()} Ziyaretçi (%{country.percentage}%)</span>
+                      <span style={{ color: T.text }}>{idx + 1}. {country.name}</span>
+                      <span style={{ color: T.textMid }}>{Number(country.count || 0).toLocaleString()} Ziyaretçi (%{country.percentage}%)</span>
                     </div>
-                    <div style={{ height: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ height: '8px', background: T.bgCard2, borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: country.percentage + '%', background: 'linear-gradient(90deg, #0085FF, #8b5cf6)', borderRadius: '4px' }}></div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '16px', background: '#8b5cf6', borderRadius: '2px' }}></span>
                   Lokasyon Odaklı Değerlendirme
                 </h4>
                 <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#8b5cf6', fontWeight: 700 }}>•</span>
-                    <span>Web sitesi trafiğimizin büyük çoğunluğu <strong style={{ color: '#ffffff' }}>%{analytics.countryBreakdown[0]?.percentage || 92}</strong> gibi ezici bir oranla <strong style={{ color: '#ffffff' }}>{analytics.countryBreakdown[0]?.name || 'Türkiye'}</strong> kaynaklıdır.</span>
+                    <span>{txt('lokasyon_yorum_1', `Web sitesi trafiğimizin büyük çoğunluğu %${analytics.countryBreakdown[0]?.percentage || 92} gibi ezici bir oranla ${analytics.countryBreakdown[0]?.name || 'Türkiye'} kaynaklıdır.`)}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                    <span>Uluslararası hedef pazar optimizasyonları ve yabancı dil odaklı çalışmalarımız doğrultusunda diğer ülkelerden gelen trafikte de istikrarlı bir ivme yakalanmıştır.</span>
+                    <span>{txt('lokasyon_yorum_2', 'Uluslararası hedef pazar optimizasyonları ve yabancı dil odaklı çalışmalarımız doğrultusunda diğer ülkelerden gelen trafikte de istikrarlı bir ivme yakalanmıştır.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#f43f5e', fontWeight: 700 }}>•</span>
-                    <span>Kullanıcıların coğrafi dağılımı, yürüttüğümüz bölgesel reklam ve arama motoru optimizasyonu (SEO) stratejileriyle tam paralellik göstermektedir.</span>
+                    <span>{txt('lokasyon_yorum_3', 'Kullanıcıların coğrafi dağılımı, yürüttüğümüz bölgesel reklam ve arama motoru optimizasyonu (SEO) stratejileriyle tam paralellik göstermektedir.')}</span>
                   </li>
                 </ul>
               </div>
@@ -1091,44 +1080,31 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             renderApiMissingNotice('Google Analytics')
           ) : (
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
-              <div style={{ width: '60%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+              <div style={{ width: '60%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                 {(() => {
                   const radius = 70;
-                  const circumference = 2 * Math.PI * radius; // 439.82
+                  const circumference = 2 * Math.PI * radius;
                   const center = 90;
                   let cumulativePercent = 0;
-                  
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
                       <svg width="180" height="180" viewBox="0 0 180 180" style={{ overflow: 'visible' }}>
-                        <circle cx={center} cy={center} r={radius} fill="transparent" stroke="rgba(255,255,255,0.03)" strokeWidth="18" />
+                        <circle cx={center} cy={center} r={radius} fill="transparent" stroke={T.bgCard2} strokeWidth="18" />
                         {analytics.trafficSources.map((source, idx) => {
                           const strokeDashoffset = circumference - (source.percentage / 100) * circumference;
                           const rotation = (cumulativePercent / 100) * 360;
                           cumulativePercent += source.percentage;
                           return (
-                            <circle
-                              key={idx}
-                              cx={center}
-                              cy={center}
-                              r={radius}
-                              fill="transparent"
-                              stroke={source.color}
-                              strokeWidth="18"
-                              strokeDasharray={circumference}
-                              strokeDashoffset={strokeDashoffset}
-                              transform={'rotate(' + (rotation - 90) + ' ' + center + ' ' + center + ')'}
-                            />
+                            <circle key={idx} cx={center} cy={center} r={radius} fill="transparent" stroke={source.color} strokeWidth="18" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} transform={'rotate(' + (rotation - 90) + ' ' + center + ' ' + center + ')'} />
                           );
                         })}
                       </svg>
-                      
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {analytics.trafficSources.map((source, idx) => (
                           <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div style={{ width: '12px', height: '12px', borderRadius: '4px', background: source.color }}></div>
-                            <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#ffffff' }}>{source.name}</span>
-                            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>%{source.percentage} ({source.count.toLocaleString()})</span>
+                            <span style={{ fontSize: '12.5px', fontWeight: 700, color: T.text }}>{source.name}</span>
+                            <span style={{ fontSize: '12px', color: T.textMid }}>%{source.percentage} ({source.count.toLocaleString()})</span>
                           </div>
                         ))}
                       </div>
@@ -1137,23 +1113,23 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                 })()}
               </div>
 
-              <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '16px', background: '#0085FF', borderRadius: '2px' }}></span>
                   Kanal Dağılım Değerlendirmesi
                 </h4>
                 <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                    <span><strong style={{ color: '#ffffff' }}>Organik Arama:</strong> Google arama motoru üzerinden organik olarak gelen nitelikli kitle, sitemizin SEO başarısının en güçlü kanıtıdır.</span>
+                    <span>{txt('kanallar_yorum_1', 'Organik Arama: Google arama motoru üzerinden organik olarak gelen nitelikli kitle, sitemizin SEO başarısının en güçlü kanıtıdır.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#8b5cf6', fontWeight: 700 }}>•</span>
-                    <span><strong style={{ color: '#ffffff' }}>Doğrudan Girişler:</strong> Marka sadakatimizin ve bilinirliğimizin bir göstergesi olarak site adını yazarak giren kitle stabil bir yapıdadır.</span>
+                    <span>{txt('kanallar_yorum_2', 'Doğrudan Girişler: Marka sadakatimizin ve bilinirliğimizin bir göstergesi olarak site adını yazarak giren kitle stabil bir yapıdadır.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#f43f5e', fontWeight: 700 }}>•</span>
-                    <span><strong style={{ color: '#ffffff' }}>Referans & Sosyal:</strong> Aktif paylaşımlar ve yönlendirme linkleri, sitemize ek ve dinamik dönüşüm fırsatları yaratmaktadır.</span>
+                    <span>{txt('kanallar_yorum_3', 'Referans & Sosyal: Aktif paylaşımlar ve yönlendirme linkleri, sitemize ek ve dinamik dönüşüm fırsatları yaratmaktadır.')}</span>
                   </li>
                 </ul>
               </div>
@@ -1173,77 +1149,57 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             renderApiMissingNotice('Google Search Console')
           ) : (
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
-              <div style={{ width: '60%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '60%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {(() => {
                   const weeklyTrend = gsc.weeklyTrend || [];
                   const buildPoints = (key, yTop, yBottom) => {
-                    const xStart = 50;
-                    const xEnd = 417.5;
+                    const xStart = 50; const xEnd = 417.5;
                     const maxVal = Math.max(...weeklyTrend.map((w) => w[key] || 0), 1);
                     const xStep = weeklyTrend.length > 1 ? (xEnd - xStart) / (weeklyTrend.length - 1) : 0;
-                    return weeklyTrend.map((w, i) => ({
-                      x: xStart + i * xStep,
-                      y: yBottom - (((w[key] || 0) / maxVal) * (yBottom - yTop)),
-                      label: w.label,
-                      val: w[key] || 0,
-                    }));
+                    return weeklyTrend.map((w, i) => ({ x: xStart + i * xStep, y: yBottom - (((w[key] || 0) / maxVal) * (yBottom - yTop)), label: w.label, val: w[key] || 0 }));
                   };
-
                   const clickPoints = buildPoints('clicks', 50, 180);
                   const clickPath = clickPoints.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + p.x + ' ' + p.y).join(' ');
-
                   const impPoints = buildPoints('impressions', 50, 180);
                   const impPath = impPoints.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + p.x + ' ' + p.y).join(' ');
-                  
                   return (
                     <svg width="480" height="260" style={{ overflow: 'visible' }}>
-                      <line x1="50" y1="50" x2="420" y2="50" stroke="rgba(255,255,255,0.06)" />
-                      <line x1="50" y1="120" x2="420" y2="120" stroke="rgba(255,255,255,0.06)" />
-                      <line x1="50" y1="195" x2="420" y2="195" stroke="rgba(255,255,255,0.06)" />
-                      
+                      <line x1="50" y1="50" x2="420" y2="50" stroke={T.border} />
+                      <line x1="50" y1="120" x2="420" y2="120" stroke={T.border} />
+                      <line x1="50" y1="195" x2="420" y2="195" stroke={T.border} />
                       <path d={clickPath} fill="none" stroke="#10b981" strokeWidth="3" />
                       <path d={impPath} fill="none" stroke="#0085FF" strokeWidth="3" strokeDasharray="4 4" />
-                      
-                      {clickPoints.map((p, idx) => (
-                        <circle key={'c-' + idx} cx={p.x} cy={p.y} r="5" fill="#10b981" stroke="#0f172a" strokeWidth="2" />
-                      ))}
-                      {impPoints.map((p, idx) => (
-                        <circle key={'i-' + idx} cx={p.x} cy={p.y} r="5" fill="#0085FF" stroke="#0f172a" strokeWidth="2" />
-                      ))}
-                      
-                      {clickPoints.map((p, idx) => (
-                        <text key={'l-' + idx} x={p.x} y="220" fill="rgba(255,255,255,0.4)" fontSize="9" textAnchor="middle">{p.label}</text>
-                      ))}
-                      
+                      {clickPoints.map((p, idx) => (<circle key={'c-' + idx} cx={p.x} cy={p.y} r="5" fill="#10b981" stroke={T.bg} strokeWidth="2" />))}
+                      {impPoints.map((p, idx) => (<circle key={'i-' + idx} cx={p.x} cy={p.y} r="5" fill="#0085FF" stroke={T.bg} strokeWidth="2" />))}
+                      {clickPoints.map((p, idx) => (<text key={'l-' + idx} x={p.x} y="220" fill={T.textMute} fontSize="9" textAnchor="middle">{p.label}</text>))}
                       <g transform="translate(120, 245)">
                         <line x1="0" y1="0" x2="20" y2="0" stroke="#10b981" strokeWidth="3" />
-                        <text x="25" y="4" fill="#ffffff" fontSize="10">Organik Tıklamalar</text>
-                        
+                        <text x="25" y="4" fill={T.text} fontSize="10">Organik Tıklamalar</text>
                         <line x1="150" y1="0" x2="170" y2="0" stroke="#0085FF" strokeWidth="3" strokeDasharray="4 4" />
-                        <text x="175" y="4" fill="#ffffff" fontSize="10">Gösterimler</text>
+                        <text x="175" y="4" fill={T.text} fontSize="10">Gösterimler</text>
                       </g>
                     </svg>
                   );
                 })()}
               </div>
 
-              <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '16px', background: '#10b981', borderRadius: '2px' }}></span>
                   Görünürlük Eğrisi Analizi
                 </h4>
                 <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#10b981', fontWeight: 700 }}>•</span>
-                    <span>Google Arama Görünürlüğü grafiği, sitemizin dizine eklenen sayfalarının arama hacmiyle uyumlu artışını göstermektedir.</span>
+                    <span>{txt('gorunurluk_yorum_1', 'Google Arama Görünürlüğü grafiği, sitemizin dizine eklenen sayfalarının arama hacmiyle uyumlu artışını göstermektedir.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                    <span>Teknik SEO optimizasyonları ve hızlı yükleme süreleri görünürlük eğrisini yukarı taşımıştır.</span>
+                    <span>{txt('gorunurluk_yorum_2', 'Teknik SEO optimizasyonları ve hızlı yükleme süreleri görünürlük eğrisini yukarı taşımıştır.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#f43f5e', fontWeight: 700 }}>•</span>
-                    <span>Yeni eklenen blog içerikleri arama sonuçlarında indeks alarak gösterimleri tetiklemiştir.</span>
+                    <span>{txt('gorunurluk_yorum_3', 'Yeni eklenen blog içerikleri arama sonuçlarında indeks alarak gösterimleri tetiklemiştir.')}</span>
                   </li>
                 </ul>
               </div>
@@ -1263,10 +1219,10 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
             renderApiMissingNotice('Google Search Console')
           ) : (
             <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
-              <div style={{ width: '60%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '24px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ width: '60%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}>
+                    <tr style={{ borderBottom: `1px solid ${T.border}`, color: T.textMute }}>
                       <th style={{ padding: '12px', textAlign: 'left', fontWeight: 800 }}>ANAHTAR KELİME (SORGULAR)</th>
                       <th style={{ padding: '12px', textAlign: 'center', fontWeight: 800 }}>TIKLAMA PAYI</th>
                       <th style={{ padding: '12px', textAlign: 'center', fontWeight: 800 }}>GÖSTERİM</th>
@@ -1276,10 +1232,10 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   </thead>
                   <tbody>
                     {(gsc.keywords || []).slice(0, GSC_TOP_KEYWORDS_LIMIT).map((row, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
-                        <td style={{ padding: '12px', fontWeight: 700, color: '#ffffff' }}>{row.keyword}</td>
+                      <tr key={idx} style={{ borderBottom: `1px solid ${T.border}`, background: idx % 2 === 0 ? T.bgCard2 : 'transparent' }}>
+                        <td style={{ padding: '12px', fontWeight: 700, color: T.text }}>{row.keyword}</td>
                         <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#0085FF' }}>{row.clicks} Tıklama</td>
-                        <td style={{ padding: '12px', textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>{Number(row.impressions || 0).toLocaleString('tr-TR')}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: T.textMid }}>{Number(row.impressions || 0).toLocaleString('tr-TR')}</td>
                         <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#10b981' }}>%{row.ctr}</td>
                         <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#f59e0b' }}>{row.positionExact ?? row.position}</td>
                       </tr>
@@ -1288,23 +1244,23 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                 </table>
               </div>
 
-              <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '16px', background: '#f59e0b', borderRadius: '2px' }}></span>
                   Kelime Odaklı SEO Analizi
                 </h4>
                 <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#f59e0b', fontWeight: 700 }}>•</span>
-                    <span>Marka adı içeren sorgularımızda (Navigational Queries) ilk sıradaki yerimiz ve tıklama oranımız kusursuzdur.</span>
+                    <span>{txt('sorgular_yorum_1', 'Marka adı içeren sorgularımızda (Navigational Queries) ilk sıradaki yerimiz ve tıklama oranımız kusursuzdur.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                    <span>Jenerik ve sektörel anahtar kelimelerde (Informational Queries) Google sıralamalarımızın yükselmesi sitemize ticari değeri yüksek trafik kazandırmaktadır.</span>
+                    <span>{txt('sorgular_yorum_2', 'Jenerik ve sektörel anahtar kelimelerde (Informational Queries) Google sıralamalarımızın yükselmesi sitemize ticari değeri yüksek trafik kazandırmaktadır.')}</span>
                   </li>
-                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                     <span style={{ color: '#10b981', fontWeight: 700 }}>•</span>
-                    <span>Anahtar kelime stratejimiz doğru arama niyetine sahip kullanıcıları çekmekte son derece etkilidir.</span>
+                    <span>{txt('sorgular_yorum_3', 'Anahtar kelime stratejimiz doğru arama niyetine sahip kullanıcıları çekmekte son derece etkilidir.')}</span>
                   </li>
                 </ul>
               </div>
@@ -1331,34 +1287,34 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                 {/* Blog Alt Metrikler */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                   {[
-                    { label: 'TOPLAM PLANLANAN', val: totalBlogs + ' Blog', desc: 'Aylık hedeflenen blog', icon: null, color: '#0085ff' },
-                    { label: 'YAYINLANAN İÇERİK', val: publishedBlogs + ' Blog', desc: 'Yayına alınan blog', icon: null, color: '#10b981' },
-                    { label: 'BEKLEYEN İÇERİK', val: pendingBlogs + ' Blog', desc: 'İçerik/onay bekleyen', icon: null, color: '#f59e0b' },
-                    { label: 'TAMAMLANMA ORANI', val: '%' + completionRate, desc: 'Plan başarı yüzdesi', icon: null, color: '#8b5cf6' }
+                    { label: 'TOPLAM PLANLANAN', val: totalBlogs + ' Blog', desc: 'Aylık hedeflenen blog', color: '#0085ff' },
+                    { label: 'YAYINLANAN İÇERİK', val: publishedBlogs + ' Blog', desc: 'Yayına alınan blog', color: '#10b981' },
+                    { label: 'BEKLEYEN İÇERİK', val: pendingBlogs + ' Blog', desc: 'İçerik/onay bekleyen', color: '#f59e0b' },
+                    { label: 'TAMAMLANMA ORANI', val: '%' + completionRate, desc: 'Plan başarı yüzdesi', color: '#8b5cf6' }
                   ].map((kpi, idx) => (
-                    <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div key={idx} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '8.5px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px' }}>{kpi.label}</span>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
+                        <span style={{ fontSize: '8.5px', fontWeight: 800, color: T.textMute, letterSpacing: '0.5px' }}>{kpi.label}</span>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.8 }}></span>
                       </div>
-                      <span style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff' }}>{kpi.val}</span>
-                      <span style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
+                      <span style={{ fontSize: '16px', fontWeight: 900, color: T.text }}>{kpi.val}</span>
+                      <span style={{ fontSize: '8.5px', color: T.textMid, fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Raporlanmış Blog Listesi ve Performansı */}
-                <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '16px', padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <h4 style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Yayınlanan İçerikler & SEO Performans Tablosu</h4>
+                <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '16px', padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <h4 style={{ fontSize: '11px', fontWeight: 800, color: T.textMute, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Yayınlanan İçerikler & SEO Performans Tablosu</h4>
                   {currentMonthBlogs.length === 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '20px 0', opacity: 0.5 }}>
-                      <BookOpen size={32} style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '10px' }} />
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>Bu dönemde planlanmış veya yayınlanmış blog içeriği bulunmamaktadır.</span>
+                      <BookOpen size={32} style={{ color: T.textMute, marginBottom: '10px' }} />
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: T.textMid }}>Bu dönemde planlanmış veya yayınlanmış blog içeriği bulunmamaktadır.</span>
                     </div>
                   ) : (
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', textAlign: 'left' }}>
                       <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>
+                        <tr style={{ borderBottom: `1px solid ${T.border}`, color: T.textMute }}>
                           <th style={{ paddingBottom: '6px', fontWeight: 800 }}>İÇERİK BAŞLIĞI</th>
                           <th style={{ paddingBottom: '6px', fontWeight: 800, textAlign: 'center' }}>PLANLANAN TARİH</th>
                           <th style={{ paddingBottom: '6px', fontWeight: 800, textAlign: 'center' }}>DURUM</th>
@@ -1367,19 +1323,11 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                       </thead>
                       <tbody>
                         {currentMonthBlogs.slice(0, 5).map((blog, idx) => (
-                          <tr key={idx} style={{ borderBottom: idx < currentMonthBlogs.slice(0, 5).length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
-                            <td style={{ padding: '8px 0', fontWeight: 700, color: '#ffffff', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.note || 'SEO Uyumlu Blog İçeriği'}</td>
-                            <td style={{ padding: '8px 0', color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>{safeFormatDate(blog.date)}</td>
+                          <tr key={idx} style={{ borderBottom: idx < currentMonthBlogs.slice(0, 5).length - 1 ? `1px solid ${T.border}` : 'none', background: idx % 2 === 0 ? T.bgCard2 : 'transparent' }}>
+                            <td style={{ padding: '8px 0', fontWeight: 700, color: T.text, maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blog.note || 'SEO Uyumlu Blog İçeriği'}</td>
+                            <td style={{ padding: '8px 0', color: T.textMid, textAlign: 'center' }}>{safeFormatDate(blog.date)}</td>
                             <td style={{ padding: '8px 0', textAlign: 'center' }}>
-                              <span style={{ 
-                                fontSize: '9px', 
-                                fontWeight: 800, 
-                                padding: '2px 8px', 
-                                borderRadius: '20px',
-                                background: blog.status ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                                color: blog.status ? '#10b981' : '#f59e0b',
-                                border: `1px solid ${blog.status ? '#10b98133' : '#f59e0b33'}`
-                              }}>
+                              <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 8px', borderRadius: '20px', background: blog.status ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: blog.status ? '#10b981' : '#f59e0b', border: `1px solid ${blog.status ? '#10b98133' : '#f59e0b33'}` }}>
                                 {blog.status ? 'YAYINLANDI' : 'BEKLİYOR'}
                               </span>
                             </td>
@@ -1389,7 +1337,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                                   Görüntüle <ExternalLink size={10} />
                                 </a>
                               ) : (
-                                <span style={{ color: 'rgba(255,255,255,0.2)' }}>Bağlantı Yok</span>
+                                <span style={{ color: T.textMute }}>Bağlantı Yok</span>
                               )}
                             </td>
                           </tr>
@@ -1400,55 +1348,45 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                 </div>
               </div>
 
-              <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', backdropFilter: 'blur(10px)' }}>
+              <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: T.text, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ width: '8px', height: '16px', background: '#10b981', borderRadius: '2px' }}></span>
                     İçerik Strateji & SEO Yorumu
                   </h4>
                   <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <li style={{ display: 'flex', gap: '8px', fontSize: '11.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.4 }}>
+                    <li style={{ display: 'flex', gap: '8px', fontSize: '11.5px', color: T.textMid, lineHeight: 1.4 }}>
                       <span style={{ color: '#10b981', fontWeight: 700 }}>•</span>
-                      <span>Planlanan tüm SEO uyumlu blog içerikleri belirlenen takvim doğrultusunda yayına alınarak dizine eklenmiştir.</span>
+                      <span>{txt('blog_yorum_1', 'Planlanan tüm SEO uyumlu blog içerikleri belirlenen takvim doğrultusunda yayına alınarak dizine eklenmiştir.')}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '8px', fontSize: '11.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.4 }}>
+                    <li style={{ display: 'flex', gap: '8px', fontSize: '11.5px', color: T.textMid, lineHeight: 1.4 }}>
                       <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                      <span>Blog içerikleri sayesinde web sitemizin anahtar kelime havuzu genişlemiş, organik trafik akışı desteklenmiştir.</span>
+                      <span>{txt('blog_yorum_2', 'Blog içerikleri sayesinde web sitemizin anahtar kelime havuzu genişlemiş, organik trafik akışı desteklenmiştir.')}</span>
                     </li>
                   </ul>
                 </div>
-
-                {/* Blog & Web Sitesi Entegrasyon Durumu */}
                 <div>
-                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: T.text, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ width: '8px', height: '16px', background: '#0085FF', borderRadius: '2px' }}></span>
                     Blog & Web Sitesi Durumu
                   </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '16px', padding: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', background: T.bgCard2, border: `1px solid ${T.border}`, borderRadius: '16px', padding: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
-                      <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Web Sitesi / Domain:</span>
-                      <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '10px' }}>{client.website || 'Eklenmemiş'}</span>
+                      <span style={{ color: T.textMid, fontWeight: 600 }}>Web Sitesi / Domain:</span>
+                      <span style={{ color: T.text, fontWeight: 700, fontSize: '10px' }}>{client.website || 'Eklenmemiş'}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
-                      <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Altyapı Entegrasyonu:</span>
-                      <span style={{ 
-                        fontSize: '9px', 
-                        fontWeight: 800, 
-                        padding: '1px 8px', 
-                        borderRadius: '12px',
-                        background: client.websiteType && client.websiteType !== 'OTHER' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)',
-                        color: client.websiteType && client.websiteType !== 'OTHER' ? '#10b981' : 'rgba(255,255,255,0.6)',
-                        border: `1px solid ${client.websiteType && client.websiteType !== 'OTHER' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.08)'}`
-                      }}>
+                      <span style={{ color: T.textMid, fontWeight: 600 }}>Altyapı Entegrasyonu:</span>
+                      <span style={{ fontSize: '9px', fontWeight: 800, padding: '1px 8px', borderRadius: '12px', background: client.websiteType && client.websiteType !== 'OTHER' ? 'rgba(16, 185, 129, 0.1)' : T.bgCard, color: client.websiteType && client.websiteType !== 'OTHER' ? '#10b981' : T.textMid, border: `1px solid ${client.websiteType && client.websiteType !== 'OTHER' ? 'rgba(16, 185, 129, 0.3)' : T.border}` }}>
                         {client.websiteType === 'BEYIN_ATOLYESI' ? 'BEYİN ATÖLYESİ' : (client.websiteType === 'IDEASOFT' ? 'IDEASOFT API' : 'MANUEL ENTEGRASYON')}
                       </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
-                      <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Haftalık İçerik Hedefi:</span>
-                      <span style={{ color: '#ffffff', fontWeight: 700 }}>{client.weeklyBlogTarget || 0} Adet Blog</span>
+                      <span style={{ color: T.textMid, fontWeight: 600 }}>Haftalık İçerik Hedefi:</span>
+                      <span style={{ color: T.text, fontWeight: 700 }}>{client.weeklyBlogTarget || 0} Adet Blog</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
-                      <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Aylık Planlanan / Tamamlanan:</span>
+                      <span style={{ color: T.textMid, fontWeight: 600 }}>Aylık Planlanan / Tamamlanan:</span>
                       <span style={{ color: '#10b981', fontWeight: 800 }}>{totalBlogs} / {publishedBlogs}</span>
                     </div>
                   </div>
@@ -1512,7 +1450,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
         const maxWeeklyTotal = Math.max(...weeklyBreakdown.map(w => w.total), 1);
 
         return (
-          <div className="pdf-slide" style={{ ...slideStyle, background: 'radial-gradient(circle at 80% 20%, #1e1b4b 0%, #090514 100%)' }} key="slide-sosyal-medya">
+          <div className="pdf-slide" style={slideStyle} key="slide-sosyal-medya">
             {headerDecoration}
             {slideHeader('Sosyal Medya Etkileşim & Paylaşım Özeti')}
             
@@ -1524,22 +1462,22 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                 {/* 4 KPI Cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                   {[
-                    { label: 'TOPLAM PLANLANAN', val: totalSocials, unit: 'Gönderi', color: '#8b5cf6', bg: 'rgba(139,92,246,0.08)', border: 'rgba(139,92,246,0.2)' },
-                    { label: 'PAYLAŞILAN', val: publishedSocials, unit: 'Gönderi', color: '#10b981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
-                    { label: 'BEKLEYEN', val: pendingSocials, unit: 'Gönderi', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)' },
-                    { label: 'TAMAMLANMA', val: completionRateSocials + '%', unit: 'Başarı Oranı', color: '#ec4899', bg: 'rgba(236,72,153,0.08)', border: 'rgba(236,72,153,0.2)' }
+                    { label: 'TOPLAM PLANLANAN', val: totalSocials, unit: 'Gönderi', color: '#8b5cf6' },
+                    { label: 'PAYLAŞILAN', val: publishedSocials, unit: 'Gönderi', color: '#10b981' },
+                    { label: 'BEKLEYEN', val: pendingSocials, unit: 'Gönderi', color: '#f59e0b' },
+                    { label: 'TAMAMLANMA', val: completionRateSocials + '%', unit: 'Başarı Oranı', color: '#ec4899' }
                   ].map((kpi, idx) => (
-                    <div key={idx} style={{ background: kpi.bg, border: `1px solid ${kpi.border}`, borderRadius: '14px', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span style={{ fontSize: '7.5px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{kpi.label}</span>
+                    <div key={idx} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '14px', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span style={{ fontSize: '7.5px', fontWeight: 800, color: T.textMute, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{kpi.label}</span>
                       <span style={{ fontSize: '22px', fontWeight: 900, color: kpi.color, lineHeight: 1, letterSpacing: '-1px' }}>{kpi.val}</span>
-                      <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>{kpi.unit}</span>
+                      <span style={{ fontSize: '8px', color: T.textMid, fontWeight: 600 }}>{kpi.unit}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Platform-by-Platform Progress Bars */}
-                <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '13px', flex: 1 }}>
-                  <h4 style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Platform Bazında Paylaşım & Tamamlanma Oranı</h4>
+                <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '16px', padding: '13px', flex: 1 }}>
+                  <h4 style={{ fontSize: '10px', fontWeight: 800, color: T.textMute, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Platform Bazında Paylaşım & Tamamlanma Oranı</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
                     {platformOverview.filter(po => po.planned > 0 || po.isConnected).map((po, idx) => {
                       const rate = po.planned > 0 ? Math.round((po.completed / po.planned) * 100) : 0;
@@ -1550,48 +1488,47 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                             <div style={{ padding: '3px', background: `${pColor}18`, borderRadius: '5px', color: pColor, display: 'flex', alignItems: 'center' }}>
                               {PLATFORM_ICONS[po.name]}
                             </div>
-                            <span style={{ fontSize: '10px', fontWeight: 800, color: '#ffffff' }}>{po.name}</span>
+                            <span style={{ fontSize: '10px', fontWeight: 800, color: T.text }}>{po.name}</span>
                           </div>
-                          <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ flex: 1, height: '6px', background: T.bgCard2, borderRadius: '4px', overflow: 'hidden' }}>
                             <div style={{ height: '100%', width: po.planned > 0 ? `${rate}%` : '0%', background: `linear-gradient(90deg, ${pColor}, ${pColor}99)`, borderRadius: '4px' }} />
                           </div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', minWidth: '90px', justifyContent: 'flex-end' }}>
                             {po.planned > 0 ? (
                               <>
                                 <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 800 }}>{po.completed}</span>
-                                <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)' }}>/</span>
-                                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>{po.planned}</span>
-                                <span style={{ fontSize: '8px', fontWeight: 800, padding: '1px 5px', borderRadius: '7px', background: rate === 100 ? 'rgba(16,185,129,0.15)' : rate > 0 ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)', color: rate === 100 ? '#10b981' : rate > 0 ? '#f59e0b' : 'rgba(255,255,255,0.3)' }}>%{rate}</span>
+                                <span style={{ fontSize: '9px', color: T.textMute }}>/</span>
+                                <span style={{ fontSize: '10px', color: T.textMid, fontWeight: 700 }}>{po.planned}</span>
+                                <span style={{ fontSize: '8px', fontWeight: 800, padding: '1px 5px', borderRadius: '7px', background: rate === 100 ? 'rgba(16,185,129,0.15)' : rate > 0 ? 'rgba(245,158,11,0.12)' : T.bgCard2, color: rate === 100 ? '#10b981' : rate > 0 ? '#f59e0b' : T.textMute }}>%{rate}</span>
                               </>
                             ) : (
-                              <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>Bu ay içerik yok</span>
+                              <span style={{ fontSize: '9px', color: T.textMute, fontStyle: 'italic' }}>Bu ay içerik yok</span>
                             )}
                           </div>
                         </div>
                       );
                     })}
                     {platformOverview.filter(po => po.planned > 0 || po.isConnected).length === 0 && (
-                      <div style={{ textAlign: 'center', padding: '20px', opacity: 0.4 }}>
-                        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Bu dönemde planlanmış sosyal medya içeriği bulunmamaktadır.</span>
+                      <div style={{ textAlign: 'center', padding: '20px', opacity: 0.5 }}>
+                        <span style={{ fontSize: '11px', color: T.textMid }}>Bu dönemde planlanmış sosyal medya içeriği bulunmamaktadır.</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Weekly Bar Chart */}
-                <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '12px' }}>
-                  <h4 style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Haftalık Paylaşım Dağılımı</h4>
+                <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '14px', padding: '12px' }}>
+                  <h4 style={{ fontSize: '10px', fontWeight: 800, color: T.textMute, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Haftalık Paylaşım Dağılımı</h4>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', height: '48px' }}>
                     {weeklyBreakdown.map((w, idx) => {
                       const totalH = maxWeeklyTotal > 0 ? (w.total / maxWeeklyTotal) * 38 : 0;
                       const compH = w.total > 0 ? (w.completed / w.total) * totalH : 0;
                       return (
                         <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
-                          <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.45)', fontWeight: 700 }}>{w.total > 0 ? w.total : '—'}</span>
-                          <div style={{ width: '100%', height: `${Math.max(totalH, 3)}px`, background: 'rgba(255,255,255,0.06)', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
+                          <span style={{ fontSize: '8px', color: T.textMute, fontWeight: 700 }}>{w.total > 0 ? w.total : '—'}</span>
+                          <div style={{ width: '100%', height: `${Math.max(totalH, 3)}px`, background: T.bgCard2, borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
                             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: `${compH}px`, background: 'linear-gradient(180deg, #10b981, #059669)', borderRadius: '2px' }} />
                           </div>
-                          <span style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>{idx + 1}. Hft</span>
+                          <span style={{ fontSize: '7.5px', color: T.textMute, fontWeight: 600 }}>{idx + 1}. Hft</span>
                         </div>
                       );
                     })}
@@ -1599,11 +1536,11 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   <div style={{ display: 'flex', gap: '10px', marginTop: '5px', justifyContent: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <div style={{ width: '7px', height: '7px', borderRadius: '2px', background: '#10b981' }} />
-                      <span style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>Tamamlanan</span>
+                      <span style={{ fontSize: '7.5px', color: T.textMute, fontWeight: 600 }}>Tamamlanan</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <div style={{ width: '7px', height: '7px', borderRadius: '2px', background: 'rgba(255,255,255,0.06)' }} />
-                      <span style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>Toplam Planlanan</span>
+                      <div style={{ width: '7px', height: '7px', borderRadius: '2px', background: T.bgCard2 }} />
+                      <span style={{ fontSize: '7.5px', color: T.textMute, fontWeight: 600 }}>Toplam Planlanan</span>
                     </div>
                   </div>
                 </div>
@@ -1613,8 +1550,8 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
               <div style={{ width: '38%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
                 {/* Detailed Platform Connection Status */}
-                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '14px', flex: 1 }}>
-                  <h4 style={{ fontSize: '10px', fontWeight: 800, color: '#ffffff', marginBottom: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '16px', padding: '14px', flex: 1 }}>
+                  <h4 style={{ fontSize: '10px', fontWeight: 800, color: T.text, marginBottom: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ width: '5px', height: '14px', background: '#ec4899', borderRadius: '2px' }} />
                     Mecra & Hesap Bağlantı Durumu
                   </h4>
@@ -1624,18 +1561,12 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                       const pColor = PLATFORM_COLORS[p] || '#8b5cf6';
                       const hasSchedule = po?.scheduleDays?.length > 0;
                       return (
-                        <div key={p} style={{
-                          background: po?.isConnected ? `${pColor}0a` : 'rgba(255,255,255,0.01)',
-                          border: `1px solid ${po?.isConnected ? `${pColor}22` : 'rgba(255,255,255,0.04)'}`,
-                          borderRadius: '10px', padding: '7px 9px'
-                        }}>
+                        <div key={p} style={{ background: po?.isConnected ? `${pColor}08` : T.bgCard2, border: `1px solid ${po?.isConnected ? `${pColor}25` : T.border}`, borderRadius: '10px', padding: '7px 9px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                              <div style={{ color: po?.isConnected ? pColor : 'rgba(255,255,255,0.2)', display: 'flex' }}>
-                                {PLATFORM_ICONS[p]}
-                              </div>
+                              <div style={{ color: po?.isConnected ? pColor : T.textMute, display: 'flex' }}>{PLATFORM_ICONS[p]}</div>
                               <div>
-                                <div style={{ fontSize: '10px', fontWeight: 800, color: po?.isConnected ? '#ffffff' : 'rgba(255,255,255,0.3)' }}>{p}</div>
+                                <div style={{ fontSize: '10px', fontWeight: 800, color: po?.isConnected ? T.text : T.textMute }}>{p}</div>
                                 {po?.isConnected && po?.handle && (
                                   <div style={{ fontSize: '8px', color: pColor, fontWeight: 600, marginTop: '1px', maxWidth: '95px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {po.handle.startsWith('http') ? po.handle.replace(/^https?:\/\/(www\.)?/, '') : po.handle}
@@ -1644,28 +1575,15 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                               </div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
-                              <span style={{
-                                fontSize: '7.5px', fontWeight: 800, padding: '2px 5px', borderRadius: '7px',
-                                background: po?.isConnected ? `${pColor}20` : 'rgba(255,255,255,0.04)',
-                                color: po?.isConnected ? pColor : 'rgba(255,255,255,0.25)',
-                                border: `1px solid ${po?.isConnected ? `${pColor}35` : 'rgba(255,255,255,0.07)'}`
-                              }}>
+                              <span style={{ fontSize: '7.5px', fontWeight: 800, padding: '2px 5px', borderRadius: '7px', background: po?.isConnected ? `${pColor}15` : T.bgCard, color: po?.isConnected ? pColor : T.textMute, border: `1px solid ${po?.isConnected ? `${pColor}30` : T.border}` }}>
                                 {po?.isConnected ? '● BAĞLI' : '○ PASİF'}
                               </span>
-                              {po?.isConnected && (
-                                <span style={{ fontSize: '7.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
-                                  {po.completed}/{po.planned} gönderi
-                                </span>
-                              )}
+                              {po?.isConnected && (<span style={{ fontSize: '7.5px', color: T.textMute, fontWeight: 600 }}>{po.completed}/{po.planned} gönderi</span>)}
                             </div>
                           </div>
                           {po?.isConnected && hasSchedule && (
                             <div style={{ marginTop: '5px', display: 'flex', gap: '3px', flexWrap: 'wrap' }}>
-                              {po.scheduleDays.map((day, i) => (
-                                <span key={i} style={{ fontSize: '6.5px', fontWeight: 700, padding: '1px 4px', borderRadius: '4px', background: `${pColor}18`, color: pColor }}>
-                                  {typeof day === 'string' ? day.substring(0, 3).toUpperCase() : day}
-                                </span>
-                              ))}
+                              {po.scheduleDays.map((day, i) => (<span key={i} style={{ fontSize: '6.5px', fontWeight: 700, padding: '1px 4px', borderRadius: '4px', background: `${pColor}15`, color: pColor }}>{typeof day === 'string' ? day.substring(0, 3).toUpperCase() : day}</span>))}
                             </div>
                           )}
                         </div>
@@ -1674,22 +1592,21 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   </div>
                 </div>
 
-                {/* Strateji Özeti */}
-                <div style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', borderRadius: '13px', padding: '12px' }}>
-                  <h4 style={{ fontSize: '10px', fontWeight: 800, color: '#8b5cf6', marginBottom: '7px' }}>Strateji Değerlendirmesi</h4>
+                <div style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: '13px', padding: '12px' }}>
+                  <h4 style={{ fontSize: '10px', fontWeight: 800, color: '#6d28d9', marginBottom: '7px' }}>Strateji Değerlendirmesi</h4>
                   <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <li style={{ display: 'flex', gap: '6px', fontSize: '10px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.45 }}>
+                    <li style={{ display: 'flex', gap: '6px', fontSize: '10px', color: T.textMid, lineHeight: 1.45 }}>
                       <span style={{ color: '#8b5cf6', fontWeight: 700, flexShrink: 0 }}>•</span>
-                      <span>Bu ay <strong style={{ color: '#ffffff' }}>{totalSocials}</strong> planlanandan <strong style={{ color: '#10b981' }}>{publishedSocials}</strong> gönderi paylaşıldı.</span>
+                      <span>{txt('sosyal_yorum_1', `Bu ay ${totalSocials} planlananadan ${publishedSocials} gönderi paylaşıldı.`)}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '6px', fontSize: '10px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.45 }}>
+                    <li style={{ display: 'flex', gap: '6px', fontSize: '10px', color: T.textMid, lineHeight: 1.45 }}>
                       <span style={{ color: '#ec4899', fontWeight: 700, flexShrink: 0 }}>•</span>
-                      <span>Aktif bağlı mecra: <strong style={{ color: '#ffffff' }}>{platformOverview.filter(p => p.isConnected).length}</strong> / 6</span>
+                      <span>{txt('sosyal_yorum_2', `Aktif bağlı mecra: ${platformOverview.filter(p => p.isConnected).length} / 6`)}</span>
                     </li>
                     {pendingSocials > 0 && (
-                      <li style={{ display: 'flex', gap: '6px', fontSize: '10px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.45 }}>
+                      <li style={{ display: 'flex', gap: '6px', fontSize: '10px', color: T.textMid, lineHeight: 1.45 }}>
                         <span style={{ color: '#f59e0b', fontWeight: 700, flexShrink: 0 }}>•</span>
-                        <span><strong style={{ color: '#f59e0b' }}>{pendingSocials}</strong> gönderi onay/içerik beklemekte.</span>
+                        <span>{txt('sosyal_yorum_3', `${pendingSocials} gönderi onay/içerik beklemekte.`)}</span>
                       </li>
                     )}
                   </ul>
@@ -1729,7 +1646,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
         });
 
         return (
-          <div className="pdf-slide" style={{ ...slideStyle, background: 'radial-gradient(circle at 80% 20%, #1e1b4b 0%, #090514 100%)' }} key="slide-meta-reklam">
+          <div className="pdf-slide" style={slideStyle} key="slide-meta-reklam">
             {headerDecoration}
             {slideHeader('Meta Ads Reklam Performans Özeti')}
             
@@ -1741,34 +1658,34 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   {/* 4'lü Metrik Kart Grubu */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                     {[
-                      { label: 'TOPLAM HARCAMA', val: spend.toLocaleString() + ' TL', desc: 'Reklam Bütçesi', icon: null, color: '#a855f7' },
-                      { label: 'GÖSTERİM HACMİ', val: impressions.toLocaleString(), desc: 'Erişilen Toplam Kitle', icon: null, color: '#0064e0' },
-                      { label: 'BAĞLANTI TIKLAMASI', val: clicks.toLocaleString(), desc: 'Web Trafiği Yönlendirme', icon: null, color: '#ec4899' },
-                      { label: 'TIKLAMA ORANI / CPC', val: '%' + (ctr * 100).toFixed(2) + ' / ' + cpc.toFixed(2) + ' TL', desc: 'Avg. CTR ve Tık Maliyeti', icon: null, color: '#10b981' }
+                      { label: 'TOPLAM HARCAMA', val: spend.toLocaleString() + ' TL', desc: 'Reklam Bütçesi', color: '#a855f7' },
+                      { label: 'GÖSTERİM HACMİ', val: impressions.toLocaleString(), desc: 'Erişilen Toplam Kitle', color: '#0064e0' },
+                      { label: 'BAĞLANTI TIKLAMASI', val: clicks.toLocaleString(), desc: 'Web Trafiği Yönlendirme', color: '#ec4899' },
+                      { label: 'TIKLAMA ORANI / CPC', val: '%' + (ctr * 100).toFixed(2) + ' / ' + cpc.toFixed(2) + ' TL', desc: 'Avg. CTR ve Tık Maliyeti', color: '#10b981' }
                     ].map((kpi, idx) => (
-                      <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div key={idx} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '8.5px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px' }}>{kpi.label}</span>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
+                          <span style={{ fontSize: '8.5px', fontWeight: 800, color: T.textMute, letterSpacing: '0.5px' }}>{kpi.label}</span>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.8 }}></span>
                         </div>
-                        <span style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px' }}>{kpi.val}</span>
-                        <span style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
+                        <span style={{ fontSize: '15px', fontWeight: 900, color: T.text, letterSpacing: '-0.5px' }}>{kpi.val}</span>
+                        <span style={{ fontSize: '8.5px', color: T.textMid, fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
                       </div>
                     ))}
                   </div>
                   
                   {/* Kampanya Detayları Tablosu */}
-                  <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '16px', padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <h4 style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Aktif Kampanyalar & ROAS Performans Analizi</h4>
+                  <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '16px', padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <h4 style={{ fontSize: '11px', fontWeight: 800, color: T.textMute, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Aktif Kampanyalar & ROAS Performans Analizi</h4>
                     {metaCampaigns.length === 0 ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '20px 0', opacity: 0.5 }}>
-                        <TrendingUp size={32} style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '10px' }} />
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>Bu dönemde aktif veya geçmiş bir Meta reklam kampanyası bulunmamaktadır.</span>
+                        <TrendingUp size={32} style={{ color: T.textMute, marginBottom: '10px' }} />
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: T.textMid }}>Bu dönemde aktif veya geçmiş bir Meta reklam kampanyası bulunmamaktadır.</span>
                       </div>
                     ) : (
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', textAlign: 'left' }}>
                         <thead>
-                          <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>
+                          <tr style={{ borderBottom: `1px solid ${T.border}`, color: T.textMute }}>
                             <th style={{ paddingBottom: '6px', fontWeight: 800 }}>KAMPANYA ADI</th>
                             <th style={{ paddingBottom: '6px', fontWeight: 800, textAlign: 'center' }}>HARCAMA</th>
                             <th style={{ paddingBottom: '6px', fontWeight: 800, textAlign: 'center' }}>TIKLAMA / CTR</th>
@@ -1778,10 +1695,10 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                         </thead>
                         <tbody>
                           {metaCampaigns.slice(0, 5).map((row, idx) => (
-                            <tr key={idx} style={{ borderBottom: idx < metaCampaigns.slice(0, 5).length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
-                              <td style={{ padding: '8px 0', fontWeight: 700, color: '#ffffff', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</td>
+                            <tr key={idx} style={{ borderBottom: idx < metaCampaigns.slice(0, 5).length - 1 ? `1px solid ${T.border}` : 'none', background: idx % 2 === 0 ? T.bgCard2 : 'transparent' }}>
+                              <td style={{ padding: '8px 0', fontWeight: 700, color: T.text, maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</td>
                               <td style={{ padding: '8px 0', fontWeight: 700, color: '#a855f7', textAlign: 'center' }}>{row.spend.toLocaleString()} TL</td>
-                              <td style={{ padding: '8px 0', textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>{row.clicks.toLocaleString()} ({row.ctr}%)</td>
+                              <td style={{ padding: '8px 0', textAlign: 'center', color: T.textMid }}>{row.clicks.toLocaleString()} ({row.ctr}%)</td>
                               <td style={{ padding: '8px 0', fontWeight: 800, color: '#f59e0b', textAlign: 'center' }}>{row.cpc > 0 ? row.cpc.toFixed(2) + ' TL' : '-'}</td>
                               <td style={{ padding: '8px 0', fontWeight: 800, color: '#10b981', textAlign: 'right' }}>{row.impressions.toLocaleString()}</td>
                             </tr>
@@ -1792,23 +1709,23 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   </div>
                 </div>
                 
-                <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '25px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '25px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: T.text, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ width: '8px', height: '16px', background: '#ec4899', borderRadius: '2px' }}></span>
                     Meta Ads Rapor Değerlendirmesi
                   </h4>
                   <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.45 }}>
+                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: T.textMid, lineHeight: 1.45 }}>
                       <span style={{ color: '#ec4899', fontWeight: 700 }}>•</span>
-                      <span>Hedef kitle optimizasyonları ve özel A/B test kurgularıyla reklam harcaması maksimum verimle yönetilmiştir.</span>
+                      <span>{txt('meta_yorum_1', 'Hedef kitle optimizasyonları ve özel A/B test kurgularıyla reklam harcaması maksimum verimle yönetilmiştir.')}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.45 }}>
+                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: T.textMid, lineHeight: 1.45 }}>
                       <span style={{ color: '#a855f7', fontWeight: 700 }}>•</span>
-                      <span>Ortalama CTR değerimiz <strong style={{ color: '#ffffff' }}>%{(ctr * 100).toFixed(2)}</strong> seviyesine ulaşarak, kreatif ve reklam metinlerinin hedef kitlenin ilgi alanlarıyla son derece uyumlu olduğunu teyit etmiştir.</span>
+                      <span>{txt('meta_yorum_2', `Ortalama CTR değerimiz %${(ctr * 100).toFixed(2)} seviyesine ulaşarak, kreatif ve reklam metinlerinin hedef kitlenin ilgi alanlarıyla son derece uyumlu olduğunu teyit etmiştir.`)}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.45 }}>
+                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: T.textMid, lineHeight: 1.45 }}>
                       <span style={{ color: '#0064e0', fontWeight: 700 }}>•</span>
-                      <span>Yeniden pazarlama (Remarketing) kampanyaları sayesinde, web sitesini daha önce ziyaret etmiş kitlelerde yüksek dönüşüm elde edilmiştir.</span>
+                      <span>{txt('meta_yorum_3', 'Yeniden pazarlama (Remarketing) kampanyaları sayesinde, web sitesini daha önce ziyaret etmiş kitlelerde yüksek dönüşüm elde edilmiştir.')}</span>
                     </li>
                   </ul>
                 </div>
@@ -1848,7 +1765,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
         });
 
         return (
-          <div className="pdf-slide" style={{ ...slideStyle, background: 'radial-gradient(circle at 80% 20%, #0c1a30 0%, #050b14 100%)' }} key="slide-google-reklam">
+          <div className="pdf-slide" style={slideStyle} key="slide-google-reklam">
             {headerDecoration}
             {slideHeader('Google Ads Reklam Performans Özeti')}
             
@@ -1860,34 +1777,34 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   {/* 4'lü Metrik Kart Grubu */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                     {[
-                      { label: 'TOPLAM BÜTÇE', val: spend.toLocaleString() + ' TL', desc: 'Google Ads Harcaması', icon: null, color: '#4285F4' },
-                      { label: 'ARAMA GÖSTERİMİ', val: impressions.toLocaleString(), desc: 'Kitle Görünürlüğü', icon: null, color: '#EA4335' },
-                      { label: 'TIKLAMA / CTR', val: clicks.toLocaleString() + ' / %' + avgCtr, desc: 'Web Sitesi Trafiği', icon: null, color: '#FBBC05' },
-                      { label: 'DÖNÜŞÜM / ORT. CPA', val: conv + ' / ' + cpc.toFixed(2) + ' TL', desc: 'Edinme Başına Maliyet', icon: null, color: '#34A853' }
+                      { label: 'TOPLAM BÜTÇE', val: spend.toLocaleString() + ' TL', desc: 'Google Ads Harcaması', color: '#4285F4' },
+                      { label: 'ARAMA GÖSTERİMİ', val: impressions.toLocaleString(), desc: 'Kitle Görünürlüğü', color: '#EA4335' },
+                      { label: 'TIKLAMA / CTR', val: clicks.toLocaleString() + ' / %' + avgCtr, desc: 'Web Sitesi Trafiği', color: '#FBBC05' },
+                      { label: 'DÖNÜŞÜM / ORT. CPA', val: conv + ' / ' + cpc.toFixed(2) + ' TL', desc: 'Edinme Başına Maliyet', color: '#34A853' }
                     ].map((kpi, idx) => (
-                      <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div key={idx} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '8.5px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.5px' }}>{kpi.label}</span>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.7 }}></span>
+                          <span style={{ fontSize: '8.5px', fontWeight: 800, color: T.textMute, letterSpacing: '0.5px' }}>{kpi.label}</span>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: kpi.color, opacity: 0.8 }}></span>
                         </div>
-                        <span style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.5px' }}>{kpi.val}</span>
-                        <span style={{ fontSize: '8.5px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
+                        <span style={{ fontSize: '15px', fontWeight: 900, color: T.text, letterSpacing: '-0.5px' }}>{kpi.val}</span>
+                        <span style={{ fontSize: '8.5px', color: T.textMid, fontWeight: 600, marginTop: '2px' }}>{kpi.desc}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Kampanya Detayları Tablosu */}
-                  <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '16px', padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <h4 style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Aktif Arama ve Akıllı Kampanya Detayları</h4>
+                  <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '16px', padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <h4 style={{ fontSize: '11px', fontWeight: 800, color: T.textMute, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Aktif Arama ve Akıllı Kampanya Detayları</h4>
                     {googleCampaigns.length === 0 ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '20px 0', opacity: 0.5 }}>
-                        <TrendingUp size={32} style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '10px' }} />
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>Bu dönemde aktif veya geçmiş bir Google reklam kampanyası bulunmamaktadır.</span>
+                        <TrendingUp size={32} style={{ color: T.textMute, marginBottom: '10px' }} />
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: T.textMid }}>Bu dönemde aktif veya geçmiş bir Google reklam kampanyası bulunmamaktadır.</span>
                       </div>
                     ) : (
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', textAlign: 'left' }}>
                         <thead>
-                          <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>
+                          <tr style={{ borderBottom: `1px solid ${T.border}`, color: T.textMute }}>
                             <th style={{ paddingBottom: '6px', fontWeight: 800 }}>KAMPANYA ADI</th>
                             <th style={{ paddingBottom: '6px', fontWeight: 800, textAlign: 'center' }}>HARCAMA</th>
                             <th style={{ paddingBottom: '6px', fontWeight: 800, textAlign: 'center' }}>TIKLAMA / CTR</th>
@@ -1897,10 +1814,10 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                         </thead>
                         <tbody>
                           {googleCampaigns.slice(0, 5).map((row, idx) => (
-                            <tr key={idx} style={{ borderBottom: idx < googleCampaigns.slice(0, 5).length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', background: idx % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
-                              <td style={{ padding: '8px 0', fontWeight: 700, color: '#ffffff', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</td>
+                            <tr key={idx} style={{ borderBottom: idx < googleCampaigns.slice(0, 5).length - 1 ? `1px solid ${T.border}` : 'none', background: idx % 2 === 0 ? T.bgCard2 : 'transparent' }}>
+                              <td style={{ padding: '8px 0', fontWeight: 700, color: T.text, maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</td>
                               <td style={{ padding: '8px 0', fontWeight: 700, color: '#4285F4', textAlign: 'center' }}>{row.spend.toLocaleString()} TL</td>
-                              <td style={{ padding: '8px 0', textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>{row.clicks.toLocaleString()} ({row.ctr}%)</td>
+                              <td style={{ padding: '8px 0', textAlign: 'center', color: T.textMid }}>{row.clicks.toLocaleString()} ({row.ctr}%)</td>
                               <td style={{ padding: '8px 0', fontWeight: 800, color: '#f59e0b', textAlign: 'center' }}>{row.cpc > 0 ? row.cpc.toFixed(2) + ' TL' : '-'}</td>
                               <td style={{ padding: '8px 0', fontWeight: 800, color: '#34A853', textAlign: 'right' }}>{row.impressions.toLocaleString()}</td>
                             </tr>
@@ -1911,23 +1828,23 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
                   </div>
                 </div>
                 
-                <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '25px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '25px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: T.text, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ width: '8px', height: '16px', background: '#4285F4', borderRadius: '2px' }}></span>
                     Google Ads Stratejik Yorumlar
                   </h4>
                   <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.45 }}>
+                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: T.textMid, lineHeight: 1.45 }}>
                       <span style={{ color: '#4285F4', fontWeight: 700 }}>•</span>
-                      <span>Arama Ağı & PMax bütçe dengesi optimize edilerek bütçe performansı maksimum verim seviyesine yükseltilmiştir.</span>
+                      <span>{txt('google_yorum_1', 'Arama Ağı & PMax bütçe dengesi optimize edilerek bütçe performansı maksimum verim seviyesine yükseltilmiştir.')}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.45 }}>
+                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: T.textMid, lineHeight: 1.45 }}>
                       <span style={{ color: '#EA4335', fontWeight: 700 }}>•</span>
-                      <span>Gereksiz bütçe tüketimini engellemek adına negatif anahtar kelime listesi haftalık olarak taranmış ve güncellenmiştir.</span>
+                      <span>{txt('google_yorum_2', 'Gereksiz bütçe tüketimini engellemek adına negatif anahtar kelime listesi haftalık olarak taranmış ve güncellenmiştir.')}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.45 }}>
+                    <li style={{ display: 'flex', gap: '8px', fontSize: '12px', color: T.textMid, lineHeight: 1.45 }}>
                       <span style={{ color: '#34A853', fontWeight: 700 }}>•</span>
-                      <span>Dönüşüm oranlarını artırmak amacıyla, reklamlardan yönlendirilen açılış sayfalarındaki (Landing Page) kullanıcı deneyimi iyileştirilmiştir.</span>
+                      <span>{txt('google_yorum_3', 'Dönüşüm oranlarını artırmak amacıyla, reklamlardan yönlendirilen açılış sayfalarındaki (Landing Page) kullanıcı deneyimi iyileştirilmiştir.')}</span>
                     </li>
                   </ul>
                 </div>
@@ -1953,60 +1870,46 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
               renderApiMissingNotice('Google Analytics')
             ) : (
               <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
-                <div style={{ width: '60%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+                <div style={{ width: '60%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
                     <svg width="180" height="180" viewBox="0 0 180 180" style={{ overflow: 'visible' }}>
-                      <circle cx={center} cy={center} r={radius} fill="transparent" stroke="rgba(255,255,255,0.03)" strokeWidth="18" />
+                      <circle cx={center} cy={center} r={radius} fill="transparent" stroke={T.bgCard2} strokeWidth="18" />
                       {analytics.deviceBreakdown.map((device, idx) => {
                         const strokeDashoffset = circumference - (device.percentage / 100) * circumference;
                         const rotation = (cumulativePercent / 100) * 360;
                         cumulativePercent += device.percentage;
-                        return (
-                          <circle
-                            key={idx}
-                            cx={center}
-                            cy={center}
-                            r={radius}
-                            fill="transparent"
-                            stroke={device.color}
-                            strokeWidth="18"
-                            strokeDasharray={circumference}
-                            strokeDashoffset={strokeDashoffset}
-                            transform={'rotate(' + (rotation - 90) + ' ' + center + ' ' + center + ')'}
-                          />
-                        );
+                        return (<circle key={idx} cx={center} cy={center} r={radius} fill="transparent" stroke={device.color} strokeWidth="18" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} transform={'rotate(' + (rotation - 90) + ' ' + center + ' ' + center + ')'} />);
                       })}
                     </svg>
-                    
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {analytics.deviceBreakdown.map((device, idx) => (
                         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div style={{ width: '12px', height: '12px', borderRadius: '4px', background: device.color }}></div>
-                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#ffffff' }}>{device.name}</span>
-                          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>%{device.percentage} ({device.count.toLocaleString()})</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: T.text }}>{device.name}</span>
+                          <span style={{ fontSize: '12px', color: T.textMid }}>%{device.percentage} ({device.count.toLocaleString()})</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ width: '8px', height: '16px', background: '#8b5cf6', borderRadius: '2px' }}></span>
                     Cihaz Odaklı Kullanıcı Analizi
                   </h4>
                   <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                       <span style={{ color: '#8b5cf6', fontWeight: 700 }}>•</span>
-                      <span>Web sitemiz en yoğun trafiği <strong style={{ color: '#ffffff' }}>%{analytics.deviceBreakdown[0]?.percentage || 68}</strong> ile <strong style={{ color: '#ffffff' }}>Mobil Cihazlar</strong> üzerinden almaktadır.</span>
+                      <span>{txt('cihazlar_yorum_1', `Web sitemiz en yoğun trafiği %${analytics.deviceBreakdown[0]?.percentage || 68} ile Mobil Cihazlar üzerinden almaktadır.`)}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                       <span style={{ color: '#0085FF', fontWeight: 700 }}>•</span>
-                      <span>Kullanıcı deneyimi (UX/UI) ve tasarım stratejilerimiz, tüm ekran boyutlarına kusursuz uyum sağlayacak şekilde (Responsive Design) kurgulanmıştır.</span>
+                      <span>{txt('cihazlar_yorum_2', 'Kullanıcı deneyimi (UX/UI) ve tasarım stratejilerimiz, tüm ekran boyutlarına kusursuz uyum sağlayacak şekilde (Responsive Design) kurgulanmıştır.')}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                       <span style={{ color: '#f43f5e', fontWeight: 700 }}>•</span>
-                      <span>Masaüstü kullanıcılarının sitede kalma süresi mobil kullanıcılara göre %35 daha fazladır.</span>
+                      <span>{txt('cihazlar_yorum_3', 'Masaüstü kullanıcılarının sitede kalma süresi mobil kullanıcılara göre %35 daha fazladır.')}</span>
                     </li>
                   </ul>
                 </div>
@@ -2030,38 +1933,38 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
               renderApiMissingNotice('Google Analytics')
             ) : (
               <div style={{ display: 'flex', gap: '30px', alignItems: 'stretch', flex: 1, margin: '20px 0', zIndex: 10 }}>
-                <div style={{ width: '60%', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '30px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px' }}>
-                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>En Çok Tercih Edilen Tarayıcılar</h4>
+                <div style={{ width: '60%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '30px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, color: T.textMute, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>En Çok Tercih Edilen Tarayıcılar</h4>
                   {browserList.map((browser, idx) => (
                     <div key={idx}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px', fontWeight: 700 }}>
-                        <span style={{ color: '#ffffff' }}>{idx + 1}. {browser.name}</span>
-                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>{browser.count.toLocaleString()} Oturum (%{browser.percentage}%)</span>
+                        <span style={{ color: T.text }}>{idx + 1}. {browser.name}</span>
+                        <span style={{ color: T.textMid }}>{browser.count.toLocaleString()} Oturum (%{browser.percentage}%)</span>
                       </div>
-                      <div style={{ height: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ height: '8px', background: T.bgCard2, borderRadius: '4px', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: browser.percentage + '%', background: browser.color, borderRadius: '4px' }}></div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div style={{ width: '40%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '40%', background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: '24px', padding: '30px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: T.text, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ width: '8px', height: '16px', background: '#10b981', borderRadius: '2px' }}></span>
                     Tarayıcı Deneyimi Değerlendirmesi
                   </h4>
                   <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                       <span style={{ color: '#10b981', fontWeight: 700 }}>•</span>
-                      <span>Ziyaretçilerimizin ezici çoğunluğu beklendiği üzere <strong style={{ color: '#ffffff' }}>Chrome</strong> ve <strong style={{ color: '#ffffff' }}>Safari</strong> tarayıcılarını tercih etmektedir.</span>
+                      <span>{txt('tarayici_yorum_1', 'Ziyaretçilerimizin ezici çoğunluğu beklendiği üzere Chrome ve Safari tarayıcılarını tercih etmektedir.')}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                       <span style={{ color: '#3b82f6', fontWeight: 700 }}>•</span>
-                      <span>Yazılım geliştirme ve tarayıcı uyumluluk (Cross-Browser Compatibility) testlerimiz, listelenen tüm güncel tarayıcılarda stabil çalışmaktadır.</span>
+                      <span>{txt('tarayici_yorum_2', 'Yazılım geliştirme ve tarayıcı uyumluluk (Cross-Browser Compatibility) testlerimiz, listelenen tüm güncel tarayıcılarda stabil çalışmaktadır.')}</span>
                     </li>
-                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                    <li style={{ display: 'flex', gap: '10px', fontSize: '12.5px', color: T.textMid, lineHeight: 1.5 }}>
                       <span style={{ color: '#8b5cf6', fontWeight: 700 }}>•</span>
-                      <span>Edge ve Firefox tarayıcılarındaki hızlı gezinme süreleri, sitemizin optimizasyon kalitesini yansıtmaktadır.</span>
+                      <span>{txt('tarayici_yorum_3', 'Edge ve Firefox tarayıcılarındaki hızlı gezinme süreleri, sitemizin optimizasyon kalitesini yansıtmaktadır.')}</span>
                     </li>
                   </ul>
                 </div>
@@ -2950,47 +2853,92 @@ return (
                     className="input-field" 
                     placeholder={defaultName} 
                     value={editTabNames[slideId] || ''}
-                    onChange={(e) => {
-                      setEditTabNames(prev => ({
-                        ...prev,
-                        [slideId]: e.target.value
-                      }));
-                    }}
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      fontSize: '0.8rem',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255,255,255,0.03)',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-primary)'
-                    }}
+                    onChange={(e) => setEditTabNames(prev => ({ ...prev, [slideId]: e.target.value }))}
+                    style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   />
                 </div>
               );
             })}
           </div>
+
+          {/* Slayt Yorum Metinleri */}
+          {(() => {
+            const commentFields = [
+              { key: 'kullanici_1_yorum_1', label: 'Kullanıcı 1 – Yorum 1' },
+              { key: 'kullanici_1_yorum_2', label: 'Kullanıcı 1 – Yorum 2' },
+              { key: 'kullanici_1_yorum_3', label: 'Kullanıcı 1 – Yorum 3' },
+              { key: 'kullanici_2_yorum_1', label: 'Kullanıcı 2 – Yorum 1' },
+              { key: 'kullanici_2_yorum_2', label: 'Kullanıcı 2 – Yorum 2' },
+              { key: 'kullanici_2_yorum_3', label: 'Kullanıcı 2 – Yorum 3' },
+              { key: 'seo_yorum_1', label: 'SEO – Yorum 1' },
+              { key: 'seo_yorum_2', label: 'SEO – Yorum 2' },
+              { key: 'seo_yorum_3', label: 'SEO – Yorum 3' },
+              { key: 'lokasyon_yorum_1', label: 'Lokasyon – Yorum 1' },
+              { key: 'lokasyon_yorum_2', label: 'Lokasyon – Yorum 2' },
+              { key: 'lokasyon_yorum_3', label: 'Lokasyon – Yorum 3' },
+              { key: 'kanallar_yorum_1', label: 'Kanallar – Yorum 1' },
+              { key: 'kanallar_yorum_2', label: 'Kanallar – Yorum 2' },
+              { key: 'kanallar_yorum_3', label: 'Kanallar – Yorum 3' },
+              { key: 'gorunurluk_yorum_1', label: 'Görünürlük – Yorum 1' },
+              { key: 'gorunurluk_yorum_2', label: 'Görünürlük – Yorum 2' },
+              { key: 'gorunurluk_yorum_3', label: 'Görünürlük – Yorum 3' },
+              { key: 'sorgular_yorum_1', label: 'Sorgular – Yorum 1' },
+              { key: 'sorgular_yorum_2', label: 'Sorgular – Yorum 2' },
+              { key: 'sorgular_yorum_3', label: 'Sorgular – Yorum 3' },
+              { key: 'blog_yorum_1', label: 'Blog – Yorum 1' },
+              { key: 'blog_yorum_2', label: 'Blog – Yorum 2' },
+              { key: 'sosyal_yorum_1', label: 'Sosyal Medya – Yorum 1' },
+              { key: 'sosyal_yorum_2', label: 'Sosyal Medya – Yorum 2' },
+              { key: 'sosyal_yorum_3', label: 'Sosyal Medya – Yorum 3' },
+              { key: 'meta_yorum_1', label: 'Meta Ads – Yorum 1' },
+              { key: 'meta_yorum_2', label: 'Meta Ads – Yorum 2' },
+              { key: 'meta_yorum_3', label: 'Meta Ads – Yorum 3' },
+              { key: 'google_yorum_1', label: 'Google Ads – Yorum 1' },
+              { key: 'google_yorum_2', label: 'Google Ads – Yorum 2' },
+              { key: 'google_yorum_3', label: 'Google Ads – Yorum 3' },
+              { key: 'cihazlar_yorum_1', label: 'Cihazlar – Yorum 1' },
+              { key: 'cihazlar_yorum_2', label: 'Cihazlar – Yorum 2' },
+              { key: 'cihazlar_yorum_3', label: 'Cihazlar – Yorum 3' },
+              { key: 'tarayici_yorum_1', label: 'Tarayıcılar – Yorum 1' },
+              { key: 'tarayici_yorum_2', label: 'Tarayıcılar – Yorum 2' },
+              { key: 'tarayici_yorum_3', label: 'Tarayıcılar – Yorum 3' },
+            ];
+            return (
+              <div style={{ marginTop: '0.5rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
+                  Slayt Yorum Metinleri
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {commentFields.map(({ key, label }) => (
+                    <div key={key} className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <label className="input-label" style={{ fontSize: '0.65rem', fontWeight: 700, opacity: 0.7, marginBottom: 0 }}>{label}</label>
+                      <textarea
+                        className="input-field"
+                        rows={2}
+                        placeholder="Boş bırakılırsa varsayılan metin kullanılır"
+                        value={editTabNames[key] || ''}
+                        onChange={(e) => setEditTabNames(prev => ({ ...prev, [key]: e.target.value }))}
+                        style={{ padding: '0.5rem 0.75rem', fontSize: '0.78rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', resize: 'vertical' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
             <button 
               type="button"
               onClick={() => {
                 const defaults = {};
-                activeSlides.forEach(slide => {
-                  defaults[slide.id] = '';
-                });
+                activeSlides.forEach(slide => { defaults[slide.id] = ''; });
                 defaults.__cover_title = '';
                 defaults.__cover_highlight = '';
                 defaults.__cover_description = '';
                 setEditTabNames(defaults);
               }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#f43f5e',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'opacity 0.2s'
-              }}
+              style={{ background: 'none', border: 'none', color: '#f43f5e', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: 'opacity 0.2s' }}
               className="hover-opacity"
             >
               Varsayılana Sıfırla
