@@ -216,7 +216,12 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   const [hiddenSlides, setHiddenSlides] = useState({});
   const [isTabSaving, setIsTabSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [editorPreviewScale, setEditorPreviewScale] = useState(0.5);
+  const EDITOR_SLIDE_WIDTH = 1123;
+  const EDITOR_SLIDE_HEIGHT = 794;
+  const EDITOR_RIGHT_PANEL_WIDTH = 400;
+  const EDITOR_TOP_BAR_HEIGHT = 52;
+  const EDITOR_NAV_BAR_HEIGHT = 44;
+  const [editorPreviewScale, setEditorPreviewScale] = useState(0.45);
 
   useEffect(() => {
     document.body.style.overflow = isTabModalOpen ? 'hidden' : '';
@@ -224,35 +229,27 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   }, [isTabModalOpen]);
   const statsRef = useRef(null);
   const tabContainerRef = useRef(null);
-  const editorPreviewViewportRef = useRef(null);
 
   useEffect(() => {
     if (!isTabModalOpen) return;
-    const viewport = editorPreviewViewportRef.current;
-    if (!viewport) return;
-
-    const BASE_WIDTH = 1123;
-    const BASE_HEIGHT = 794;
-    const EDGE_PADDING = 20;
 
     const updateScale = () => {
-      const rect = viewport.getBoundingClientRect();
-      const widthScale = (rect.width - EDGE_PADDING) / BASE_WIDTH;
-      const heightScale = (rect.height - EDGE_PADDING) / BASE_HEIGHT;
-      const nextScale = Math.min(widthScale, heightScale, 1);
-      const safeScale = Number.isFinite(nextScale) ? Math.max(0.2, nextScale) : 0.5;
-      setEditorPreviewScale(prev => (Math.abs(prev - safeScale) > 0.01 ? safeScale : prev));
+      const pad = 16;
+      const availW = window.innerWidth - EDITOR_RIGHT_PANEL_WIDTH - pad * 2;
+      const availH = window.innerHeight - EDITOR_TOP_BAR_HEIGHT - EDITOR_NAV_BAR_HEIGHT - pad * 2;
+      const nextScale = Math.min(availW / EDITOR_SLIDE_WIDTH, availH / EDITOR_SLIDE_HEIGHT, 1);
+      const safeScale = Number.isFinite(nextScale) ? Math.max(0.25, nextScale) : 0.45;
+      setEditorPreviewScale(safeScale);
     };
 
     updateScale();
-    const resizeObserver = new ResizeObserver(updateScale);
-    resizeObserver.observe(viewport);
+    const rafId = requestAnimationFrame(updateScale);
     window.addEventListener('resize', updateScale);
     return () => {
-      resizeObserver.disconnect();
+      cancelAnimationFrame(rafId);
       window.removeEventListener('resize', updateScale);
     };
-  }, [isTabModalOpen]);
+  }, [isTabModalOpen, activeSlide]);
 
   // 1. Resolve analytics data (with premium fallbacks)
   const analyticsIsValid = analyticsResult && !analyticsResult.error && analyticsResult.summary;
@@ -2903,8 +2900,11 @@ return (
         const inputStyle = { padding: '0.6rem 0.85rem', fontSize: '0.82rem', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', width: '100%', boxSizing: 'border-box' };
         const getVal = (key, fallback) => editTabNames[key] !== undefined && editTabNames[key] !== '' ? editTabNames[key] : fallback;
 
+        const scaledW = EDITOR_SLIDE_WIDTH * editorPreviewScale;
+        const scaledH = EDITOR_SLIDE_HEIGHT * editorPreviewScale;
+
         return (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, height: '100vh', maxHeight: '100vh', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Top Bar */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -2945,12 +2945,12 @@ return (
             </div>
 
             {/* Main — Sol: Önizleme + nav, Sağ: Slayt listesi + düzenleme */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
               {/* Sol — Slayt Önizleme */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
-                <div ref={editorPreviewViewportRef} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '8px' }}>
-                  <div style={{ width: `${1123 * editorPreviewScale}px`, height: `${794 * editorPreviewScale}px`, position: 'relative', flexShrink: 0 }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, transform: `scale(${editorPreviewScale})`, transformOrigin: 'top left' }}>
+              <div style={{ flex: 1, minHeight: 0, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
+                <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '8px' }}>
+                  <div style={{ width: scaledW, height: scaledH, overflow: 'hidden', flexShrink: 0 }}>
+                    <div style={{ width: EDITOR_SLIDE_WIDTH, height: EDITOR_SLIDE_HEIGHT, transform: `scale(${editorPreviewScale})`, transformOrigin: 'top left' }}>
                       {renderSlides(activeSlide, false)}
                     </div>
                   </div>
@@ -2967,7 +2967,7 @@ return (
               </div>
 
               {/* Sağ — Düzenleme Paneli */}
-              <div style={{ width: '400px', minWidth: '400px', borderLeft: '1px solid var(--border-color)', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ width: '400px', minWidth: '400px', minHeight: 0, borderLeft: '1px solid var(--border-color)', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 {/* Slayt Listesi - Üst */}
                 <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
