@@ -2788,87 +2788,92 @@ return (
 
       {/* Full-screen Slayt Düzenleme Editörü */}
       {isTabModalOpen && (() => {
+        const pv = Number(analytics.summary?.pageViews || 0).toLocaleString();
+        const sess = Number(analytics.summary?.sessions || 0).toLocaleString();
+        const br = analytics.summary?.bounceRate || 0;
+        const metaCtr = metaResult?.summary?.ctr ? (Number(metaResult.summary.ctr) * 100).toFixed(2) : '0.00';
         const SLIDE_COMMENTS = {
           kapak: [
-            { key: '__cover_title', label: 'Ana Başlık', type: 'input', placeholder: 'DİJİTAL VARLIKLAR VE' },
-            { key: '__cover_highlight', label: 'Vurgulu Başlık', type: 'input', placeholder: 'PERFORMANS ANALİZİ' },
-            { key: '__cover_description', label: 'Açıklama', type: 'textarea', placeholder: `${client.companyName} markası için...` },
+            { key: '__cover_title', label: 'Ana Başlık', fallback: 'DİJİTAL VARLIKLAR VE' },
+            { key: '__cover_highlight', label: 'Vurgulu Başlık', fallback: 'PERFORMANS ANALİZİ' },
+            { key: '__cover_description', label: 'Açıklama', fallback: `${client.companyName} markası için ${currentMonthName} ${displayYear} dönemine ait arama motoru, kullanıcı trafiği ve sosyal medya etkileşim değerlendirmesi.` },
           ],
           kullanici_1: [
-            { key: 'kullanici_1_yorum_1', label: 'Yorum 1' },
-            { key: 'kullanici_1_yorum_2', label: 'Yorum 2' },
-            { key: 'kullanici_1_yorum_3', label: 'Yorum 3' },
+            { key: 'kullanici_1_yorum_1', label: 'Yorum 1', fallback: `Web sitemiz bu ay toplam ${pv} sayfa görüntüleme alarak organik erişimini kararlı şekilde sürdürmüştür.` },
+            { key: 'kullanici_1_yorum_2', label: 'Yorum 2', fallback: `Toplam oturum sayısı ${sess} seviyesine ulaşarak kullanıcıların düzenli geri dönüş sağladığını doğrulamaktadır.` },
+            { key: 'kullanici_1_yorum_3', label: 'Yorum 3', fallback: `Hemen çıkma oranımız %${br} olup, sektör ortalamasının altında kalarak sitemize çekilen kitlenin yüksek alaka düzeyini kanıtlamaktadır.` },
           ],
           kullanici_2: [
-            { key: 'kullanici_2_yorum_1', label: 'Yorum 1' },
-            { key: 'kullanici_2_yorum_2', label: 'Yorum 2' },
-            { key: 'kullanici_2_yorum_3', label: 'Yorum 3' },
+            { key: 'kullanici_2_yorum_1', label: 'Yorum 1', fallback: 'Grafik, son 10 gündeki günlük aktif kullanıcı hareketlerindeki trendi görselleştirmektedir.' },
+            { key: 'kullanici_2_yorum_2', label: 'Yorum 2', fallback: 'Hafta içi günlerde kullanıcı trafiğinde belirgin bir yükseliş yaşanmakta, özellikle iş saatlerinde etkileşim oranları zirve yapmaktadır.' },
+            { key: 'kullanici_2_yorum_3', label: 'Yorum 3', fallback: 'Blog paylaşımlarının yoğun olduğu günlerde site trafiğinde anlık ve kalıcı sıçramalar gözlemlenmiştir.' },
           ],
           seo_performans: [
-            { key: 'seo_yorum_1', label: 'Yorum 1' },
-            { key: 'seo_yorum_2', label: 'Yorum 2' },
-            { key: 'seo_yorum_3', label: 'Yorum 3' },
+            { key: 'seo_yorum_1', label: 'Yorum 1', fallback: `Organik aramalarda bu ay toplam ${organicClicks.toLocaleString('tr-TR')} kullanıcı doğrudan tıklama yaparak web sitemizi ziyaret etmiştir.` },
+            { key: 'seo_yorum_2', label: 'Yorum 2', fallback: `Google arama motoru dizinlerinde toplam ${organicImpressions.toLocaleString('tr-TR')} gösterim elde edilerek yüksek marka bilinirliği sağlanmıştır.` },
+            { key: 'seo_yorum_3', label: 'Yorum 3', fallback: `Ortalama tıklama oranımız %${organicCtr} olup, hedef kitleye tam uyumlu başlık ve SEO açıklamaları kurgulandığını kanıtlamaktadır.` },
           ],
           lokasyon: [
-            { key: 'lokasyon_yorum_1', label: 'Yorum 1' },
-            { key: 'lokasyon_yorum_2', label: 'Yorum 2' },
-            { key: 'lokasyon_yorum_3', label: 'Yorum 3' },
+            { key: 'lokasyon_yorum_1', label: 'Yorum 1', fallback: `Web sitesi trafiğimizin büyük çoğunluğu %${analytics.countryBreakdown?.[0]?.percentage || 92} gibi ezici bir oranla ${analytics.countryBreakdown?.[0]?.name || 'Türkiye'} kaynaklıdır.` },
+            { key: 'lokasyon_yorum_2', label: 'Yorum 2', fallback: 'Uluslararası hedef pazar optimizasyonları ve yabancı dil odaklı çalışmalarımız doğrultusunda diğer ülkelerden gelen trafikte de istikrarlı bir ivme yakalanmıştır.' },
+            { key: 'lokasyon_yorum_3', label: 'Yorum 3', fallback: 'Kullanıcıların coğrafi dağılımı, yürüttüğümüz bölgesel reklam ve arama motoru optimizasyonu (SEO) stratejileriyle tam paralellik göstermektedir.' },
           ],
           kanallar: [
-            { key: 'kanallar_yorum_1', label: 'Yorum 1' },
-            { key: 'kanallar_yorum_2', label: 'Yorum 2' },
-            { key: 'kanallar_yorum_3', label: 'Yorum 3' },
+            { key: 'kanallar_yorum_1', label: 'Yorum 1', fallback: 'Organik Arama: Google arama motoru üzerinden organik olarak gelen nitelikli kitle, sitemizin SEO başarısının en güçlü kanıtıdır.' },
+            { key: 'kanallar_yorum_2', label: 'Yorum 2', fallback: 'Doğrudan Girişler: Marka sadakatimizin ve bilinirliğimizin bir göstergesi olarak site adını yazarak giren kitle stabil bir yapıdadır.' },
+            { key: 'kanallar_yorum_3', label: 'Yorum 3', fallback: 'Referans & Sosyal: Aktif paylaşımlar ve yönlendirme linkleri, sitemize ek ve dinamik dönüşüm fırsatları yaratmaktadır.' },
           ],
           arama_gorunurluk: [
-            { key: 'gorunurluk_yorum_1', label: 'Yorum 1' },
-            { key: 'gorunurluk_yorum_2', label: 'Yorum 2' },
-            { key: 'gorunurluk_yorum_3', label: 'Yorum 3' },
+            { key: 'gorunurluk_yorum_1', label: 'Yorum 1', fallback: 'Google Arama Görünürlüğü grafiği, sitemizin dizine eklenen sayfalarının arama hacmiyle uyumlu artışını göstermektedir.' },
+            { key: 'gorunurluk_yorum_2', label: 'Yorum 2', fallback: 'Teknik SEO optimizasyonları ve hızlı yükleme süreleri görünürlük eğrisini yukarı taşımıştır.' },
+            { key: 'gorunurluk_yorum_3', label: 'Yorum 3', fallback: 'Yeni eklenen blog içerikleri arama sonuçlarında indeks alarak gösterimleri tetiklemiştir.' },
           ],
           sorgular: [
-            { key: 'sorgular_yorum_1', label: 'Yorum 1' },
-            { key: 'sorgular_yorum_2', label: 'Yorum 2' },
-            { key: 'sorgular_yorum_3', label: 'Yorum 3' },
+            { key: 'sorgular_yorum_1', label: 'Yorum 1', fallback: 'Marka adı içeren sorgularımızda (Navigational Queries) ilk sıradaki yerimiz ve tıklama oranımız kusursuzdur.' },
+            { key: 'sorgular_yorum_2', label: 'Yorum 2', fallback: 'Jenerik ve sektörel anahtar kelimelerde (Informational Queries) Google sıralamalarımızın yükselmesi sitemize ticari değeri yüksek trafik kazandırmaktadır.' },
+            { key: 'sorgular_yorum_3', label: 'Yorum 3', fallback: 'Anahtar kelime stratejimiz doğru arama niyetine sahip kullanıcıları çekmekte son derece etkilidir.' },
           ],
           blog_performans: [
-            { key: 'blog_yorum_1', label: 'Yorum 1' },
-            { key: 'blog_yorum_2', label: 'Yorum 2' },
+            { key: 'blog_yorum_1', label: 'Yorum 1', fallback: 'Planlanan tüm SEO uyumlu blog içerikleri belirlenen takvim doğrultusunda yayına alınarak dizine eklenmiştir.' },
+            { key: 'blog_yorum_2', label: 'Yorum 2', fallback: 'Blog içerikleri sayesinde web sitemizin anahtar kelime havuzu genişlemiş, organik trafik akışı desteklenmiştir.' },
           ],
           sosyal_medya: [
-            { key: 'sosyal_yorum_1', label: 'Yorum 1' },
-            { key: 'sosyal_yorum_2', label: 'Yorum 2' },
-            { key: 'sosyal_yorum_3', label: 'Yorum 3' },
+            { key: 'sosyal_yorum_1', label: 'Yorum 1', fallback: 'Bu ay planlanan gönderiler başarıyla paylaşıldı.' },
+            { key: 'sosyal_yorum_2', label: 'Yorum 2', fallback: 'Aktif bağlı mecralarda düzenli paylaşım yapılmaktadır.' },
+            { key: 'sosyal_yorum_3', label: 'Yorum 3', fallback: 'Bekleyen gönderiler onay/içerik sürecindedir.' },
           ],
           meta_reklam: [
-            { key: 'meta_yorum_1', label: 'Yorum 1' },
-            { key: 'meta_yorum_2', label: 'Yorum 2' },
-            { key: 'meta_yorum_3', label: 'Yorum 3' },
+            { key: 'meta_yorum_1', label: 'Yorum 1', fallback: 'Hedef kitle optimizasyonları ve özel A/B test kurgularıyla reklam harcaması maksimum verimle yönetilmiştir.' },
+            { key: 'meta_yorum_2', label: 'Yorum 2', fallback: `Ortalama CTR değerimiz %${metaCtr} seviyesine ulaşarak, kreatif ve reklam metinlerinin hedef kitlenin ilgi alanlarıyla son derece uyumlu olduğunu teyit etmiştir.` },
+            { key: 'meta_yorum_3', label: 'Yorum 3', fallback: 'Yeniden pazarlama (Remarketing) kampanyaları sayesinde, web sitesini daha önce ziyaret etmiş kitlelerde yüksek dönüşüm elde edilmiştir.' },
           ],
           google_reklam: [
-            { key: 'google_yorum_1', label: 'Yorum 1' },
-            { key: 'google_yorum_2', label: 'Yorum 2' },
-            { key: 'google_yorum_3', label: 'Yorum 3' },
+            { key: 'google_yorum_1', label: 'Yorum 1', fallback: 'Arama Ağı & PMax bütçe dengesi optimize edilerek bütçe performansı maksimum verim seviyesine yükseltilmiştir.' },
+            { key: 'google_yorum_2', label: 'Yorum 2', fallback: 'Gereksiz bütçe tüketimini engellemek adına negatif anahtar kelime listesi haftalık olarak taranmış ve güncellenmiştir.' },
+            { key: 'google_yorum_3', label: 'Yorum 3', fallback: 'Dönüşüm oranlarını artırmak amacıyla, reklamlardan yönlendirilen açılış sayfalarındaki (Landing Page) kullanıcı deneyimi iyileştirilmiştir.' },
           ],
           cihazlar: [
-            { key: 'cihazlar_yorum_1', label: 'Yorum 1' },
-            { key: 'cihazlar_yorum_2', label: 'Yorum 2' },
-            { key: 'cihazlar_yorum_3', label: 'Yorum 3' },
+            { key: 'cihazlar_yorum_1', label: 'Yorum 1', fallback: `Web sitemiz en yoğun trafiği %${analytics.deviceBreakdown?.[0]?.percentage || 68} ile Mobil Cihazlar üzerinden almaktadır.` },
+            { key: 'cihazlar_yorum_2', label: 'Yorum 2', fallback: 'Kullanıcı deneyimi (UX/UI) ve tasarım stratejilerimiz, tüm ekran boyutlarına kusursuz uyum sağlayacak şekilde (Responsive Design) kurgulanmıştır.' },
+            { key: 'cihazlar_yorum_3', label: 'Yorum 3', fallback: 'Masaüstü kullanıcılarının sitede kalma süresi mobil kullanıcılara göre %35 daha fazladır.' },
           ],
           tarayicilar: [
-            { key: 'tarayici_yorum_1', label: 'Yorum 1' },
-            { key: 'tarayici_yorum_2', label: 'Yorum 2' },
-            { key: 'tarayici_yorum_3', label: 'Yorum 3' },
+            { key: 'tarayici_yorum_1', label: 'Yorum 1', fallback: 'Ziyaretçilerimizin ezici çoğunluğu beklendiği üzere Chrome ve Safari tarayıcılarını tercih etmektedir.' },
+            { key: 'tarayici_yorum_2', label: 'Yorum 2', fallback: 'Yazılım geliştirme ve tarayıcı uyumluluk (Cross-Browser Compatibility) testlerimiz, listelenen tüm güncel tarayıcılarda stabil çalışmaktadır.' },
+            { key: 'tarayici_yorum_3', label: 'Yorum 3', fallback: 'Edge ve Firefox tarayıcılarındaki hızlı gezinme süreleri, sitemizin optimizasyon kalitesini yansıtmaktadır.' },
           ],
         };
         const currentEditSlide = activeSlides[activeSlide];
         const fields = currentEditSlide ? (SLIDE_COMMENTS[currentEditSlide.id] || []) : [];
         const inputStyle = { padding: '0.6rem 0.85rem', fontSize: '0.82rem', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', width: '100%', boxSizing: 'border-box' };
+        const getVal = (key, fallback) => editTabNames[key] !== undefined && editTabNames[key] !== '' ? editTabNames[key] : fallback;
 
         return (
           <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column' }}>
             {/* Top Bar */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>Slayt Düzenleyici</h3>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>Slayt Düzenleyici</h3>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
                   {activeSlide + 1} / {activeSlides.length} — {currentEditSlide?.defaultTitle}
                 </span>
@@ -2881,6 +2886,7 @@ return (
                     defaults.__cover_title = '';
                     defaults.__cover_highlight = '';
                     defaults.__cover_description = '';
+                    Object.keys(SLIDE_COMMENTS).forEach(sid => { SLIDE_COMMENTS[sid].forEach(f => { defaults[f.key] = ''; }); });
                     setEditTabNames(defaults);
                   }}
                   style={{ background: 'none', border: '1px solid rgba(244,63,94,0.3)', color: '#f43f5e', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: '6px 14px', borderRadius: '8px' }}
@@ -2896,112 +2902,85 @@ return (
                 </button>
                 <button
                   onClick={() => setIsTabModalOpen(false)}
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 300 }}
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', width: '34px', height: '34px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 300 }}
                 >
                   ✕
                 </button>
               </div>
             </div>
 
-            {/* Main Content — Sol: Slayt Önizleme, Sağ: Düzenleme */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-              {/* Sol — Slayt Büyük Önizleme */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', overflow: 'auto', background: 'var(--bg-secondary)' }}>
-                <div style={{ transform: 'scale(0.62)', transformOrigin: 'center center', flexShrink: 0 }}>
-                  {renderSlides(activeSlide, false)}
+            {/* Main — Sol: Önizleme + nav, Sağ: Slayt listesi + düzenleme */}
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
+              {/* Sol — Slayt Önizleme */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '16px' }}>
+                  <div style={{ transform: 'scale(0.58)', transformOrigin: 'center center', flexShrink: 0 }}>
+                    {renderSlides(activeSlide, false)}
+                  </div>
                 </div>
-                {/* Slayt Navigasyon */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
-                  <button
-                    onClick={() => setActiveSlide(Math.max(0, activeSlide - 1))}
-                    disabled={activeSlide === 0}
-                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px 14px', borderRadius: '8px', cursor: activeSlide === 0 ? 'not-allowed' : 'pointer', fontSize: '0.8rem', fontWeight: 700, opacity: activeSlide === 0 ? 0.4 : 1 }}
-                  >
-                    ← Önceki
-                  </button>
-                  <div style={{ display: 'flex', gap: '5px' }}>
-                    {activeSlides.map((s, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => setActiveSlide(idx)}
-                        style={{ width: activeSlide === idx ? '24px' : '8px', height: '8px', borderRadius: '4px', cursor: 'pointer', background: activeSlide === idx ? '#0085FF' : 'var(--border-color)', transition: 'all 0.25s' }}
-                      />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '10px 16px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-primary)', flexShrink: 0 }}>
+                  <button onClick={() => setActiveSlide(Math.max(0, activeSlide - 1))} disabled={activeSlide === 0} style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '5px 12px', borderRadius: '8px', cursor: activeSlide === 0 ? 'not-allowed' : 'pointer', fontSize: '0.78rem', fontWeight: 700, opacity: activeSlide === 0 ? 0.4 : 1 }}>← Önceki</button>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    {activeSlides.map((_, idx) => (
+                      <div key={idx} onClick={() => setActiveSlide(idx)} style={{ width: activeSlide === idx ? '20px' : '7px', height: '7px', borderRadius: '4px', cursor: 'pointer', background: activeSlide === idx ? '#0085FF' : 'var(--border-color)', transition: 'all 0.2s' }} />
                     ))}
                   </div>
-                  <button
-                    onClick={() => setActiveSlide(Math.min(activeSlides.length - 1, activeSlide + 1))}
-                    disabled={activeSlide === activeSlides.length - 1}
-                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px 14px', borderRadius: '8px', cursor: activeSlide === activeSlides.length - 1 ? 'not-allowed' : 'pointer', fontSize: '0.8rem', fontWeight: 700, opacity: activeSlide === activeSlides.length - 1 ? 0.4 : 1 }}
-                  >
-                    Sonraki →
-                  </button>
+                  <button onClick={() => setActiveSlide(Math.min(activeSlides.length - 1, activeSlide + 1))} disabled={activeSlide === activeSlides.length - 1} style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '5px 12px', borderRadius: '8px', cursor: activeSlide === activeSlides.length - 1 ? 'not-allowed' : 'pointer', fontSize: '0.78rem', fontWeight: 700, opacity: activeSlide === activeSlides.length - 1 ? 0.4 : 1 }}>Sonraki →</button>
                 </div>
               </div>
 
               {/* Sağ — Düzenleme Paneli */}
-              <div style={{ width: '380px', minWidth: '380px', borderLeft: '1px solid var(--border-color)', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <div style={{ padding: '20px', borderBottom: '1px solid var(--border-color)' }}>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Sekme Başlığı</div>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder={currentEditSlide?.defaultTitle || ''}
-                    value={editTabNames[currentEditSlide?.id] || ''}
-                    onChange={(e) => setEditTabNames(prev => ({ ...prev, [currentEditSlide?.id]: e.target.value }))}
-                    style={inputStyle}
-                  />
+              <div style={{ width: '400px', minWidth: '400px', borderLeft: '1px solid var(--border-color)', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                {/* Slayt Listesi - Üst */}
+                <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    {activeSlides.map((slide, idx) => (
+                      <button key={slide.id} onClick={() => setActiveSlide(idx)} style={{
+                        padding: '4px 10px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: activeSlide === idx ? 800 : 600, cursor: 'pointer', border: 'none',
+                        background: activeSlide === idx ? '#0085FF' : 'rgba(255,255,255,0.06)',
+                        color: activeSlide === idx ? '#fff' : 'var(--text-secondary)',
+                        transition: 'all 0.15s'
+                      }}>
+                        {editTabNames[slide.id] || slide.defaultTitle}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-                  {fields.length === 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'center', opacity: 0.6 }}>
-                      Bu slayt için düzenlenebilir yorum alanı bulunmuyor.
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        {currentEditSlide?.id === 'kapak' ? 'Kapak İçerikleri' : 'Yorum Metinleri'}
+                {/* Düzenleme Alanı — Scroll */}
+                <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {/* Sekme Başlığı */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sekme Başlığı</label>
+                    <input
+                      type="text"
+                      className="input-field"
+                      placeholder={currentEditSlide?.defaultTitle || ''}
+                      value={editTabNames[currentEditSlide?.id] || ''}
+                      onChange={(e) => setEditTabNames(prev => ({ ...prev, [currentEditSlide?.id]: e.target.value }))}
+                      style={inputStyle}
+                    />
+                  </div>
+
+                  {fields.length > 0 && (
+                    <>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', paddingTop: '4px', borderTop: '1px solid var(--border-color)' }}>
+                        {currentEditSlide?.id === 'kapak' ? 'Kapak İçerikleri' : 'Slayt Yazıları'}
                       </div>
-                      {fields.map(({ key, label, type, placeholder }) => (
-                        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>{label}</label>
+                      {fields.map(({ key, label, fallback }) => (
+                        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          <label style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-secondary)' }}>{label}</label>
                           <textarea
                             className="input-field"
-                            rows={type === 'input' ? 1 : 3}
-                            placeholder={placeholder || 'Boş bırakılırsa varsayılan metin kullanılır'}
-                            value={editTabNames[key] || ''}
+                            rows={3}
+                            value={getVal(key, fallback)}
                             onChange={(e) => setEditTabNames(prev => ({ ...prev, [key]: e.target.value }))}
-                            style={{ ...inputStyle, resize: 'vertical', minHeight: type === 'input' ? '38px' : '70px' }}
+                            style={{ ...inputStyle, resize: 'vertical', minHeight: '60px' }}
                           />
                         </div>
                       ))}
-                    </div>
+                    </>
                   )}
-                </div>
-
-                {/* Slayt Listesi (Alt kısım) */}
-                <div style={{ borderTop: '1px solid var(--border-color)', padding: '12px 20px', maxHeight: '200px', overflowY: 'auto' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Tüm Slaytlar</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    {activeSlides.map((slide, idx) => (
-                      <div
-                        key={slide.id}
-                        onClick={() => setActiveSlide(idx)}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: activeSlide === idx ? 800 : 600,
-                          background: activeSlide === idx ? 'rgba(0,133,255,0.1)' : 'transparent',
-                          color: activeSlide === idx ? '#0085FF' : 'var(--text-primary)',
-                          border: activeSlide === idx ? '1px solid rgba(0,133,255,0.25)' : '1px solid transparent',
-                          transition: 'all 0.15s'
-                        }}
-                      >
-                        <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: activeSlide === idx ? '#0085FF' : 'var(--border-color)', color: activeSlide === idx ? '#fff' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 800, flexShrink: 0 }}>
-                          {idx + 1}
-                        </span>
-                        {editTabNames[slide.id] || slide.defaultTitle}
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
