@@ -216,6 +216,7 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   const [hiddenSlides, setHiddenSlides] = useState({});
   const [isTabSaving, setIsTabSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [editorPreviewScale, setEditorPreviewScale] = useState(0.5);
 
   useEffect(() => {
     document.body.style.overflow = isTabModalOpen ? 'hidden' : '';
@@ -223,6 +224,35 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   }, [isTabModalOpen]);
   const statsRef = useRef(null);
   const tabContainerRef = useRef(null);
+  const editorPreviewViewportRef = useRef(null);
+
+  useEffect(() => {
+    if (!isTabModalOpen) return;
+    const viewport = editorPreviewViewportRef.current;
+    if (!viewport) return;
+
+    const BASE_WIDTH = 1123;
+    const BASE_HEIGHT = 794;
+    const EDGE_PADDING = 20;
+
+    const updateScale = () => {
+      const rect = viewport.getBoundingClientRect();
+      const widthScale = (rect.width - EDGE_PADDING) / BASE_WIDTH;
+      const heightScale = (rect.height - EDGE_PADDING) / BASE_HEIGHT;
+      const nextScale = Math.min(widthScale, heightScale, 1);
+      const safeScale = Number.isFinite(nextScale) ? Math.max(0.2, nextScale) : 0.5;
+      setEditorPreviewScale(prev => (Math.abs(prev - safeScale) > 0.01 ? safeScale : prev));
+    };
+
+    updateScale();
+    const resizeObserver = new ResizeObserver(updateScale);
+    resizeObserver.observe(viewport);
+    window.addEventListener('resize', updateScale);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateScale);
+    };
+  }, [isTabModalOpen]);
 
   // 1. Resolve analytics data (with premium fallbacks)
   const analyticsIsValid = analyticsResult && !analyticsResult.error && analyticsResult.summary;
@@ -2918,9 +2948,11 @@ return (
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
               {/* Sol — Slayt Önizleme */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '8px', position: 'relative' }}>
-                  <div style={{ transform: 'scale(0.5)', transformOrigin: 'center center', position: 'absolute' }}>
-                    {renderSlides(activeSlide, false)}
+                <div ref={editorPreviewViewportRef} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '8px' }}>
+                  <div style={{ width: `${1123 * editorPreviewScale}px`, height: `${794 * editorPreviewScale}px`, position: 'relative', flexShrink: 0 }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, transform: `scale(${editorPreviewScale})`, transformOrigin: 'top left' }}>
+                      {renderSlides(activeSlide, false)}
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '10px 16px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-primary)', flexShrink: 0 }}>
