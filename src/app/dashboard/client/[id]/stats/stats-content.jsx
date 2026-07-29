@@ -2786,166 +2786,228 @@ return (
         </div>
       </div>
 
-      {/* Sekme Başlıklarını Düzenleme Modalı */}
-      <CustomDialog 
-        isOpen={isTabModalOpen} 
-        title="Sekme Başlıklarını Düzenle" 
-        onClose={() => setIsTabModalOpen(false)} 
-        onConfirm={handleSaveTabNames}
-        loading={isTabSaving}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-            Rapor slaytlarının sekme başlıklarını özelleştirebilirsiniz. Boş bırakılan alanlarda varsayılan başlıklar kullanılacaktır.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem', marginBottom: '0.25rem' }}>
-            <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-              <label className="input-label" style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, marginBottom: 0 }}>
-                Kapak Ana Baslik
-              </label>
-              <input
-                type="text"
-                className="input-field"
-                placeholder="DIJITAL VARLIKLAR VE"
-                value={editTabNames.__cover_title || ''}
-                onChange={(e) => setEditTabNames(prev => ({ ...prev, __cover_title: e.target.value }))}
-                style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-              />
-            </div>
-            <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-              <label className="input-label" style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, marginBottom: 0 }}>
-                Kapak Vurgulu Baslik
-              </label>
-              <input
-                type="text"
-                className="input-field"
-                placeholder="PERFORMANS ANALIZI"
-                value={editTabNames.__cover_highlight || ''}
-                onChange={(e) => setEditTabNames(prev => ({ ...prev, __cover_highlight: e.target.value }))}
-                style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-              />
-            </div>
-            <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-              <label className="input-label" style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, marginBottom: 0 }}>
-                Kapak Aciklamasi
-              </label>
-              <textarea
-                className="input-field"
-                rows={3}
-                placeholder={`${client.companyName} markasi icin ${currentMonthName} ${displayYear} donemine ait...`}
-                value={editTabNames.__cover_description || ''}
-                onChange={(e) => setEditTabNames(prev => ({ ...prev, __cover_description: e.target.value }))}
-                style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', resize: 'vertical' }}
-              />
-            </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            {activeSlides.map((slide) => {
-              const defaultName = slide.defaultTitle;
-              const slideId = slide.id;
-              return (
-                <div key={slideId} className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label className="input-label" style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, marginBottom: 0 }}>
-                    {defaultName}
-                  </label>
-                  <input 
-                    type="text" 
-                    className="input-field" 
-                    placeholder={defaultName} 
-                    value={editTabNames[slideId] || ''}
-                    onChange={(e) => setEditTabNames(prev => ({ ...prev, [slideId]: e.target.value }))}
-                    style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                  />
-                </div>
-              );
-            })}
-          </div>
+      {/* Full-screen Slayt Düzenleme Editörü */}
+      {isTabModalOpen && (() => {
+        const SLIDE_COMMENTS = {
+          kapak: [
+            { key: '__cover_title', label: 'Ana Başlık', type: 'input', placeholder: 'DİJİTAL VARLIKLAR VE' },
+            { key: '__cover_highlight', label: 'Vurgulu Başlık', type: 'input', placeholder: 'PERFORMANS ANALİZİ' },
+            { key: '__cover_description', label: 'Açıklama', type: 'textarea', placeholder: `${client.companyName} markası için...` },
+          ],
+          kullanici_1: [
+            { key: 'kullanici_1_yorum_1', label: 'Yorum 1' },
+            { key: 'kullanici_1_yorum_2', label: 'Yorum 2' },
+            { key: 'kullanici_1_yorum_3', label: 'Yorum 3' },
+          ],
+          kullanici_2: [
+            { key: 'kullanici_2_yorum_1', label: 'Yorum 1' },
+            { key: 'kullanici_2_yorum_2', label: 'Yorum 2' },
+            { key: 'kullanici_2_yorum_3', label: 'Yorum 3' },
+          ],
+          seo_performans: [
+            { key: 'seo_yorum_1', label: 'Yorum 1' },
+            { key: 'seo_yorum_2', label: 'Yorum 2' },
+            { key: 'seo_yorum_3', label: 'Yorum 3' },
+          ],
+          lokasyon: [
+            { key: 'lokasyon_yorum_1', label: 'Yorum 1' },
+            { key: 'lokasyon_yorum_2', label: 'Yorum 2' },
+            { key: 'lokasyon_yorum_3', label: 'Yorum 3' },
+          ],
+          kanallar: [
+            { key: 'kanallar_yorum_1', label: 'Yorum 1' },
+            { key: 'kanallar_yorum_2', label: 'Yorum 2' },
+            { key: 'kanallar_yorum_3', label: 'Yorum 3' },
+          ],
+          arama_gorunurluk: [
+            { key: 'gorunurluk_yorum_1', label: 'Yorum 1' },
+            { key: 'gorunurluk_yorum_2', label: 'Yorum 2' },
+            { key: 'gorunurluk_yorum_3', label: 'Yorum 3' },
+          ],
+          sorgular: [
+            { key: 'sorgular_yorum_1', label: 'Yorum 1' },
+            { key: 'sorgular_yorum_2', label: 'Yorum 2' },
+            { key: 'sorgular_yorum_3', label: 'Yorum 3' },
+          ],
+          blog_performans: [
+            { key: 'blog_yorum_1', label: 'Yorum 1' },
+            { key: 'blog_yorum_2', label: 'Yorum 2' },
+          ],
+          sosyal_medya: [
+            { key: 'sosyal_yorum_1', label: 'Yorum 1' },
+            { key: 'sosyal_yorum_2', label: 'Yorum 2' },
+            { key: 'sosyal_yorum_3', label: 'Yorum 3' },
+          ],
+          meta_reklam: [
+            { key: 'meta_yorum_1', label: 'Yorum 1' },
+            { key: 'meta_yorum_2', label: 'Yorum 2' },
+            { key: 'meta_yorum_3', label: 'Yorum 3' },
+          ],
+          google_reklam: [
+            { key: 'google_yorum_1', label: 'Yorum 1' },
+            { key: 'google_yorum_2', label: 'Yorum 2' },
+            { key: 'google_yorum_3', label: 'Yorum 3' },
+          ],
+          cihazlar: [
+            { key: 'cihazlar_yorum_1', label: 'Yorum 1' },
+            { key: 'cihazlar_yorum_2', label: 'Yorum 2' },
+            { key: 'cihazlar_yorum_3', label: 'Yorum 3' },
+          ],
+          tarayicilar: [
+            { key: 'tarayici_yorum_1', label: 'Yorum 1' },
+            { key: 'tarayici_yorum_2', label: 'Yorum 2' },
+            { key: 'tarayici_yorum_3', label: 'Yorum 3' },
+          ],
+        };
+        const currentEditSlide = activeSlides[activeSlide];
+        const fields = currentEditSlide ? (SLIDE_COMMENTS[currentEditSlide.id] || []) : [];
+        const inputStyle = { padding: '0.6rem 0.85rem', fontSize: '0.82rem', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', width: '100%', boxSizing: 'border-box' };
 
-          {/* Slayt Yorum Metinleri */}
-          {(() => {
-            const commentFields = [
-              { key: 'kullanici_1_yorum_1', label: 'Kullanıcı 1 – Yorum 1' },
-              { key: 'kullanici_1_yorum_2', label: 'Kullanıcı 1 – Yorum 2' },
-              { key: 'kullanici_1_yorum_3', label: 'Kullanıcı 1 – Yorum 3' },
-              { key: 'kullanici_2_yorum_1', label: 'Kullanıcı 2 – Yorum 1' },
-              { key: 'kullanici_2_yorum_2', label: 'Kullanıcı 2 – Yorum 2' },
-              { key: 'kullanici_2_yorum_3', label: 'Kullanıcı 2 – Yorum 3' },
-              { key: 'seo_yorum_1', label: 'SEO – Yorum 1' },
-              { key: 'seo_yorum_2', label: 'SEO – Yorum 2' },
-              { key: 'seo_yorum_3', label: 'SEO – Yorum 3' },
-              { key: 'lokasyon_yorum_1', label: 'Lokasyon – Yorum 1' },
-              { key: 'lokasyon_yorum_2', label: 'Lokasyon – Yorum 2' },
-              { key: 'lokasyon_yorum_3', label: 'Lokasyon – Yorum 3' },
-              { key: 'kanallar_yorum_1', label: 'Kanallar – Yorum 1' },
-              { key: 'kanallar_yorum_2', label: 'Kanallar – Yorum 2' },
-              { key: 'kanallar_yorum_3', label: 'Kanallar – Yorum 3' },
-              { key: 'gorunurluk_yorum_1', label: 'Görünürlük – Yorum 1' },
-              { key: 'gorunurluk_yorum_2', label: 'Görünürlük – Yorum 2' },
-              { key: 'gorunurluk_yorum_3', label: 'Görünürlük – Yorum 3' },
-              { key: 'sorgular_yorum_1', label: 'Sorgular – Yorum 1' },
-              { key: 'sorgular_yorum_2', label: 'Sorgular – Yorum 2' },
-              { key: 'sorgular_yorum_3', label: 'Sorgular – Yorum 3' },
-              { key: 'blog_yorum_1', label: 'Blog – Yorum 1' },
-              { key: 'blog_yorum_2', label: 'Blog – Yorum 2' },
-              { key: 'sosyal_yorum_1', label: 'Sosyal Medya – Yorum 1' },
-              { key: 'sosyal_yorum_2', label: 'Sosyal Medya – Yorum 2' },
-              { key: 'sosyal_yorum_3', label: 'Sosyal Medya – Yorum 3' },
-              { key: 'meta_yorum_1', label: 'Meta Ads – Yorum 1' },
-              { key: 'meta_yorum_2', label: 'Meta Ads – Yorum 2' },
-              { key: 'meta_yorum_3', label: 'Meta Ads – Yorum 3' },
-              { key: 'google_yorum_1', label: 'Google Ads – Yorum 1' },
-              { key: 'google_yorum_2', label: 'Google Ads – Yorum 2' },
-              { key: 'google_yorum_3', label: 'Google Ads – Yorum 3' },
-              { key: 'cihazlar_yorum_1', label: 'Cihazlar – Yorum 1' },
-              { key: 'cihazlar_yorum_2', label: 'Cihazlar – Yorum 2' },
-              { key: 'cihazlar_yorum_3', label: 'Cihazlar – Yorum 3' },
-              { key: 'tarayici_yorum_1', label: 'Tarayıcılar – Yorum 1' },
-              { key: 'tarayici_yorum_2', label: 'Tarayıcılar – Yorum 2' },
-              { key: 'tarayici_yorum_3', label: 'Tarayıcılar – Yorum 3' },
-            ];
-            return (
-              <div style={{ marginTop: '0.5rem' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
-                  Slayt Yorum Metinleri
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column' }}>
+            {/* Top Bar */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>Slayt Düzenleyici</h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                  {activeSlide + 1} / {activeSlides.length} — {currentEditSlide?.defaultTitle}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button
+                  onClick={() => {
+                    const defaults = {};
+                    activeSlides.forEach(slide => { defaults[slide.id] = ''; });
+                    defaults.__cover_title = '';
+                    defaults.__cover_highlight = '';
+                    defaults.__cover_description = '';
+                    setEditTabNames(defaults);
+                  }}
+                  style={{ background: 'none', border: '1px solid rgba(244,63,94,0.3)', color: '#f43f5e', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: '6px 14px', borderRadius: '8px' }}
+                >
+                  Sıfırla
+                </button>
+                <button
+                  onClick={async () => { await handleSaveTabNames(); setIsTabModalOpen(false); }}
+                  disabled={isTabSaving}
+                  style={{ background: 'linear-gradient(135deg, #0085FF, #8b5cf6)', color: '#fff', border: 'none', fontSize: '0.8rem', fontWeight: 800, cursor: isTabSaving ? 'not-allowed' : 'pointer', padding: '8px 20px', borderRadius: '10px', opacity: isTabSaving ? 0.6 : 1 }}
+                >
+                  {isTabSaving ? 'Kaydediliyor...' : 'Kaydet ve Kapat'}
+                </button>
+                <button
+                  onClick={() => setIsTabModalOpen(false)}
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 300 }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Main Content — Sol: Slayt Önizleme, Sağ: Düzenleme */}
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+              {/* Sol — Slayt Büyük Önizleme */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', overflow: 'auto', background: 'var(--bg-secondary)' }}>
+                <div style={{ transform: 'scale(0.62)', transformOrigin: 'center center', flexShrink: 0 }}>
+                  {renderSlides(activeSlide, false)}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  {commentFields.map(({ key, label }) => (
-                    <div key={key} className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <label className="input-label" style={{ fontSize: '0.65rem', fontWeight: 700, opacity: 0.7, marginBottom: 0 }}>{label}</label>
-                      <textarea
-                        className="input-field"
-                        rows={2}
-                        placeholder="Boş bırakılırsa varsayılan metin kullanılır"
-                        value={editTabNames[key] || ''}
-                        onChange={(e) => setEditTabNames(prev => ({ ...prev, [key]: e.target.value }))}
-                        style={{ padding: '0.5rem 0.75rem', fontSize: '0.78rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', resize: 'vertical' }}
+                {/* Slayt Navigasyon */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
+                  <button
+                    onClick={() => setActiveSlide(Math.max(0, activeSlide - 1))}
+                    disabled={activeSlide === 0}
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px 14px', borderRadius: '8px', cursor: activeSlide === 0 ? 'not-allowed' : 'pointer', fontSize: '0.8rem', fontWeight: 700, opacity: activeSlide === 0 ? 0.4 : 1 }}
+                  >
+                    ← Önceki
+                  </button>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    {activeSlides.map((s, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => setActiveSlide(idx)}
+                        style={{ width: activeSlide === idx ? '24px' : '8px', height: '8px', borderRadius: '4px', cursor: 'pointer', background: activeSlide === idx ? '#0085FF' : 'var(--border-color)', transition: 'all 0.25s' }}
                       />
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setActiveSlide(Math.min(activeSlides.length - 1, activeSlide + 1))}
+                    disabled={activeSlide === activeSlides.length - 1}
+                    style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px 14px', borderRadius: '8px', cursor: activeSlide === activeSlides.length - 1 ? 'not-allowed' : 'pointer', fontSize: '0.8rem', fontWeight: 700, opacity: activeSlide === activeSlides.length - 1 ? 0.4 : 1 }}
+                  >
+                    Sonraki →
+                  </button>
                 </div>
               </div>
-            );
-          })()}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-            <button 
-              type="button"
-              onClick={() => {
-                const defaults = {};
-                activeSlides.forEach(slide => { defaults[slide.id] = ''; });
-                defaults.__cover_title = '';
-                defaults.__cover_highlight = '';
-                defaults.__cover_description = '';
-                setEditTabNames(defaults);
-              }}
-              style={{ background: 'none', border: 'none', color: '#f43f5e', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: 'opacity 0.2s' }}
-              className="hover-opacity"
-            >
-              Varsayılana Sıfırla
-            </button>
+              {/* Sağ — Düzenleme Paneli */}
+              <div style={{ width: '380px', minWidth: '380px', borderLeft: '1px solid var(--border-color)', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ padding: '20px', borderBottom: '1px solid var(--border-color)' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Sekme Başlığı</div>
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder={currentEditSlide?.defaultTitle || ''}
+                    value={editTabNames[currentEditSlide?.id] || ''}
+                    onChange={(e) => setEditTabNames(prev => ({ ...prev, [currentEditSlide?.id]: e.target.value }))}
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+                  {fields.length === 0 ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'center', opacity: 0.6 }}>
+                      Bu slayt için düzenlenebilir yorum alanı bulunmuyor.
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {currentEditSlide?.id === 'kapak' ? 'Kapak İçerikleri' : 'Yorum Metinleri'}
+                      </div>
+                      {fields.map(({ key, label, type, placeholder }) => (
+                        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>{label}</label>
+                          <textarea
+                            className="input-field"
+                            rows={type === 'input' ? 1 : 3}
+                            placeholder={placeholder || 'Boş bırakılırsa varsayılan metin kullanılır'}
+                            value={editTabNames[key] || ''}
+                            onChange={(e) => setEditTabNames(prev => ({ ...prev, [key]: e.target.value }))}
+                            style={{ ...inputStyle, resize: 'vertical', minHeight: type === 'input' ? '38px' : '70px' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Slayt Listesi (Alt kısım) */}
+                <div style={{ borderTop: '1px solid var(--border-color)', padding: '12px 20px', maxHeight: '200px', overflowY: 'auto' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Tüm Slaytlar</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    {activeSlides.map((slide, idx) => (
+                      <div
+                        key={slide.id}
+                        onClick={() => setActiveSlide(idx)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: activeSlide === idx ? 800 : 600,
+                          background: activeSlide === idx ? 'rgba(0,133,255,0.1)' : 'transparent',
+                          color: activeSlide === idx ? '#0085FF' : 'var(--text-primary)',
+                          border: activeSlide === idx ? '1px solid rgba(0,133,255,0.25)' : '1px solid transparent',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        <span style={{ width: '18px', height: '18px', borderRadius: '5px', background: activeSlide === idx ? '#0085FF' : 'var(--border-color)', color: activeSlide === idx ? '#fff' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 800, flexShrink: 0 }}>
+                          {idx + 1}
+                        </span>
+                        {editTabNames[slide.id] || slide.defaultTitle}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </CustomDialog>
+        );
+      })()}
 
       {/* Görev Düzenleme Modalı */}
       <CustomDialog 
