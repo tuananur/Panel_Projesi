@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   TrendingUp, CheckCircle2, Clock, Play, 
@@ -216,12 +217,11 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   const [hiddenSlides, setHiddenSlides] = useState({});
   const [isTabSaving, setIsTabSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const EDITOR_SLIDE_WIDTH = 1123;
-  const EDITOR_SLIDE_HEIGHT = 794;
-  const EDITOR_RIGHT_PANEL_WIDTH = 400;
-  const EDITOR_TOP_BAR_HEIGHT = 52;
-  const EDITOR_NAV_BAR_HEIGHT = 44;
-  const [editorPreviewScale, setEditorPreviewScale] = useState(0.45);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = isTabModalOpen ? 'hidden' : '';
@@ -229,27 +229,6 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   }, [isTabModalOpen]);
   const statsRef = useRef(null);
   const tabContainerRef = useRef(null);
-
-  useEffect(() => {
-    if (!isTabModalOpen) return;
-
-    const updateScale = () => {
-      const pad = 16;
-      const availW = window.innerWidth - EDITOR_RIGHT_PANEL_WIDTH - pad * 2;
-      const availH = window.innerHeight - EDITOR_TOP_BAR_HEIGHT - EDITOR_NAV_BAR_HEIGHT - pad * 2;
-      const nextScale = Math.min(availW / EDITOR_SLIDE_WIDTH, availH / EDITOR_SLIDE_HEIGHT, 1);
-      const safeScale = Number.isFinite(nextScale) ? Math.max(0.25, nextScale) : 0.45;
-      setEditorPreviewScale(safeScale);
-    };
-
-    updateScale();
-    const rafId = requestAnimationFrame(updateScale);
-    window.addEventListener('resize', updateScale);
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', updateScale);
-    };
-  }, [isTabModalOpen, activeSlide]);
 
   // 1. Resolve analytics data (with premium fallbacks)
   const analyticsIsValid = analyticsResult && !analyticsResult.error && analyticsResult.summary;
@@ -2818,8 +2797,8 @@ return (
         </div>
       </div>
 
-      {/* Full-screen Slayt Düzenleme Editörü */}
-      {isTabModalOpen && (() => {
+      {/* Full-screen Slayt Düzenleme Editörü — portal: transform içinde fixed bozulmasın */}
+      {isTabModalOpen && portalReady && createPortal((() => {
         const pv = Number(analytics.summary?.pageViews || 0).toLocaleString();
         const sess = Number(analytics.summary?.sessions || 0).toLocaleString();
         const br = analytics.summary?.bounceRate || 0;
@@ -2900,11 +2879,8 @@ return (
         const inputStyle = { padding: '0.6rem 0.85rem', fontSize: '0.82rem', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', width: '100%', boxSizing: 'border-box' };
         const getVal = (key, fallback) => editTabNames[key] !== undefined && editTabNames[key] !== '' ? editTabNames[key] : fallback;
 
-        const scaledW = EDITOR_SLIDE_WIDTH * editorPreviewScale;
-        const scaledH = EDITOR_SLIDE_HEIGHT * editorPreviewScale;
-
         return (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, height: '100vh', maxHeight: '100vh', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 10001, height: '100vh', maxHeight: '100vh', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Top Bar */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -2948,12 +2924,10 @@ return (
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0, minWidth: 0 }}>
               {/* Sol — Slayt Önizleme */}
               <div style={{ flex: 1, minHeight: 0, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
-                <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '8px' }}>
-                  <div style={{ width: scaledW, height: scaledH, overflow: 'hidden', flexShrink: 0 }}>
-                    <div style={{ width: EDITOR_SLIDE_WIDTH, height: EDITOR_SLIDE_HEIGHT, transform: `scale(${editorPreviewScale})`, transformOrigin: 'top left' }}>
-                      {renderSlides(activeSlide, false)}
-                    </div>
-                  </div>
+                <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '8px' }}>
+                  <SlideWrapper>
+                    {renderSlides(activeSlide, false)}
+                  </SlideWrapper>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '10px 16px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-primary)', flexShrink: 0 }}>
                   <button onClick={() => setActiveSlide(Math.max(0, activeSlide - 1))} disabled={activeSlide === 0} style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '5px 12px', borderRadius: '8px', cursor: activeSlide === 0 ? 'not-allowed' : 'pointer', fontSize: '0.78rem', fontWeight: 700, opacity: activeSlide === 0 ? 0.4 : 1 }}>← Önceki</button>
@@ -3023,7 +2997,7 @@ return (
             </div>
           </div>
         );
-      })()}
+      })(), document.body)}
 
       {/* Görev Düzenleme Modalı */}
       <CustomDialog 
