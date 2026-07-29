@@ -216,6 +216,11 @@ export default function StatsContent({ client, metaResult, googleResult, analyti
   const [hiddenSlides, setHiddenSlides] = useState({});
   const [isTabSaving, setIsTabSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    document.body.style.overflow = isTabModalOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isTabModalOpen]);
   const statsRef = useRef(null);
   const tabContainerRef = useRef(null);
 
