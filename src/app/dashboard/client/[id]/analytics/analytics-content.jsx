@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { 
   TrendingUp, Users, Eye, Clock, BarChart3, 
   Tv, Smartphone, Laptop, Sparkles, RefreshCw, Globe, HelpCircle,
@@ -28,37 +28,52 @@ function compareKeywordsPriority(a, b) {
 
 const PDF_BG = '#0f172a';
 
-async function saveElementAsSinglePdfPage(el, fileName) {
+async function saveElementAsSinglePdfPage(el, fileName, { onClone } = {}) {
   const html2canvas = (await import('html2canvas')).default;
   const { jsPDF } = await import('jspdf');
+
+  const prevWidth = el.style.width;
+  const prevMaxWidth = el.style.maxWidth;
+  el.style.width = `${el.scrollWidth}px`;
+  el.style.maxWidth = `${el.scrollWidth}px`;
 
   const w = el.scrollWidth;
   const h = el.scrollHeight;
   const scale = Math.min(2, Math.max(1, 8192 / Math.max(w, h)));
 
-  const canvas = await html2canvas(el, {
-    scale,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: PDF_BG,
-    logging: false,
-    width: w,
-    height: h,
-    windowWidth: w,
-    windowHeight: h,
-  });
+  try {
+    const canvas = await html2canvas(el, {
+      scale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: PDF_BG,
+      logging: false,
+      width: w,
+      height: h,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: w,
+      windowHeight: h,
+      onclone: (doc, clonedEl) => {
+        doc.querySelectorAll('[data-pdf-hide]').forEach((n) => n.remove());
+        doc.querySelectorAll('.tooltip-content').forEach((n) => n.remove());
+        onClone?.(doc, clonedEl);
+      },
+    });
 
-  const imgData = canvas.toDataURL('image/jpeg', 0.92);
-  const pageW = 210;
-  const pageH = (canvas.height * pageW) / canvas.width;
-
-  const pdf = new jsPDF({
-    orientation: pageH > pageW ? 'p' : 'l',
-    unit: 'mm',
-    format: [pageW, pageH],
-  });
-  pdf.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
-  pdf.save(fileName);
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    const pdf = new jsPDF({
+      unit: 'px',
+      format: [canvas.width, canvas.height],
+      hotfixes: ['px_scaling'],
+      compress: true,
+    });
+    pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
+    pdf.save(fileName);
+  } finally {
+    el.style.width = prevWidth;
+    el.style.maxWidth = prevMaxWidth;
+  }
 }
 
 function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }) {
@@ -131,8 +146,10 @@ function DonutChart({ data, size = 130, strokeWidth = 9, totalLabel = 'Toplam' }
 export default function AnalyticsContent({ result, id }) {
   const [loading, setLoading] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfCaptureMode, setPdfCaptureMode] = useState(false);
   const [keywordFilter, setKeywordFilter] = useState('');
   const reportRef = useRef(null);
+  const keywordsRef = useRef(null);
   const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown, searchConsole } = result;
 
   const deviceItems = (deviceBreakdown || []).slice(0, 10);
@@ -168,25 +185,38 @@ export default function AnalyticsContent({ result, id }) {
   const handleDownloadPDF = async () => {
     const root = reportRef.current;
     if (!root) return;
+    const snap = keywordsRef.current?.getExportSnapshot?.();
     setIsGeneratingPDF(true);
+    setPdfCaptureMode(true);
     try {
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      await saveElementAsSinglePdfPage(root, `analytics-rapor-${id}.pdf`);
+      await new Promise((r) => setTimeout(r, 200));
+
+      await saveElementAsSinglePdfPage(root, `analytics-rapor-${id}.pdf`, {
+        onClone: (doc) => {
+          if (snap?.rows) {
+            doc.querySelectorAll('[data-keyword-row]').forEach((tr, i) => {
+              if (i >= snap.rows.length) tr.remove();
+            });
+          }
+          const topLimit = sortedTopPages.length;
+          doc.querySelectorAll('[data-top-page-row]').forEach((tr, i) => {
+            if (i >= topLimit) tr.remove();
+          });
+        },
+      });
     } catch (err) {
       console.error('Analytics PDF error:', err);
       alert('PDF oluşturulurken bir hata oluştu.');
     } finally {
+      setPdfCaptureMode(false);
       setIsGeneratingPDF(false);
     }
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1 className="heading-1" style={{ marginBottom: '0.5rem' }}>Google Analytics & Search Console</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Organik anahtar kelime sıralamaları (GSC) ve site trafik performansı (GA4).</p>
-        </div>
+      <div data-pdf-hide style={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button
             onClick={handleDownloadPDF}
@@ -216,13 +246,19 @@ export default function AnalyticsContent({ result, id }) {
       </div>
 
       <div ref={reportRef} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div>
+        <h1 className="heading-1" style={{ marginBottom: '0.5rem' }}>Google Analytics & Search Console</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>Organik anahtar kelime sıralamaları (GSC) ve site trafik performansı (GA4).</p>
+      </div>
 
       <SearchConsoleKeywordsSection
+        ref={keywordsRef}
         searchConsole={searchConsole}
         clientId={id}
         keywordFilter={keywordFilter}
         onKeywordFilterChange={setKeywordFilter}
         filteredKeywords={filteredKeywords}
+        pdfCaptureMode={pdfCaptureMode}
       />
       
       {/* Realtime & Refresh Header */}
@@ -250,6 +286,7 @@ export default function AnalyticsContent({ result, id }) {
           </span>
         </div>
         <button 
+          data-pdf-hide
           onClick={handleRefresh}
           disabled={loading}
           className="btn" 
@@ -502,7 +539,7 @@ export default function AnalyticsContent({ result, id }) {
           </thead>
           <tbody>
             {sortedTopPages.map((page, idx, arr) => (
-              <tr key={idx} style={{ 
+              <tr key={idx} data-top-page-row style={{ 
                 borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.03)', 
                 fontSize: '0.85rem',
                 color: 'var(--text-primary)',
@@ -561,7 +598,7 @@ export default function AnalyticsContent({ result, id }) {
   );
 }
 
-function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, onKeywordFilterChange, filteredKeywords }) {
+const SearchConsoleKeywordsSection = forwardRef(function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, onKeywordFilterChange, filteredKeywords, pdfCaptureMode = false }, ref) {
   const sc = searchConsole;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -608,6 +645,14 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
   const safePage = Math.min(currentPage, totalPages);
   const pageStart = (safePage - 1) * pageSize;
   const paginatedKeywords = sortedKeywords.slice(pageStart, pageStart + pageSize);
+
+  useImperativeHandle(ref, () => ({
+    getExportSnapshot: () => ({
+      rows: paginatedKeywords,
+      pageStart,
+      pageSize,
+    }),
+  }), [paginatedKeywords, pageStart, pageSize]);
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -674,7 +719,8 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
         </div>
       ) : (
         <>
-          <div style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
+          {!pdfCaptureMode && (
+          <div data-pdf-hide style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
             <input
               type="text"
               className="input-field"
@@ -706,6 +752,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
               </span>
             )}
           </div>
+          )}
 
           {filteredKeywords.length === 0 ? (
             <p className="text-muted" style={{ textAlign: 'center', padding: '2rem 0' }}>
@@ -735,8 +782,8 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
               </table>
             </div>
 
-            {sortedKeywords.length > 0 && (
-              <div style={{
+            {sortedKeywords.length > 0 && !pdfCaptureMode && (
+              <div data-pdf-hide style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -814,7 +861,7 @@ function SearchConsoleKeywordsSection({ searchConsole, clientId, keywordFilter, 
       )}
     </div>
   );
-}
+});
 
 function KeywordRankRow({ row, rank }) {
   const changeColor = row.improved ? '#10b981' : row.positionChange < 0 ? '#ef4444' : 'var(--text-secondary)';
@@ -832,7 +879,7 @@ function KeywordRankRow({ row, rank }) {
   }
 
   return (
-    <tr className="table-row-hover" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+    <tr data-keyword-row className="table-row-hover" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
       <td style={{ padding: '0.9rem 0.5rem', fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-secondary)', verticalAlign: 'middle' }}>
         {rank}
       </td>
