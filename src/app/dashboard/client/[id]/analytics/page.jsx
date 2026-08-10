@@ -23,9 +23,12 @@ export default async function GoogleAnalyticsPage({ params, searchParams }) {
   const datePreset = sParams.datePreset || 'last_30d';
   const sinceParam = sParams.since || null;
   const untilParam = sParams.until || null;
-  const { since, until, preset, label: periodLabel } = resolveAnalyticsDateRange(datePreset, sinceParam, untilParam);
+  const { since, until, preset, label: periodLabel, dayCount } = resolveAnalyticsDateRange(datePreset, sinceParam, untilParam);
 
   const result = await getGoogleAnalyticsAction(id, since, until);
+  const periodDisplay = dayCount > 1
+    ? `${periodLabel} (${since} → ${until}, ${dayCount} gün)`
+    : `${periodLabel} (${since})`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -72,7 +75,7 @@ export default async function GoogleAnalyticsPage({ params, searchParams }) {
           datePreset={sinceParam && untilParam ? 'custom' : preset}
           since={since}
           until={until}
-          periodLabel={periodLabel}
+          periodLabel={periodDisplay}
         />
       )}
     </div>

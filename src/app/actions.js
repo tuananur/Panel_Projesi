@@ -1376,7 +1376,7 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
     const { getGoogleOAuthConfig, refreshGoogleAccessToken } = await import('@/lib/google-oauth');
     const { resolveSearchConsoleSiteUrl, fetchSearchConsoleKeywords } = await import('@/lib/search-console');
     const { isCurrentMonthRange } = await import('@/lib/report-date-range');
-    const { getPreviousPeriod } = await import('@/lib/analytics-date-range');
+    const { getPreviousPeriod, enumerateDatesYmd } = await import('@/lib/analytics-date-range');
 
     if (!since || !until) {
       return { error: 'INVALID_DATE_RANGE', details: 'Tarih aralığı belirtilmedi.' };
@@ -1562,30 +1562,33 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
       return `${day} ${months[monthIdx] || ''}`;
     };
 
-    const dailyActiveUsers = [];
-    if (dailyReport.rows && dailyReport.rows.length > 0) {
-      const sortedRows = [...dailyReport.rows].sort((a, b) =>
-        (a.dimensionValues?.[0]?.value || '').localeCompare(b.dimensionValues?.[0]?.value || '')
-      );
-
-      sortedRows.forEach((row) => {
-        const rawDate = row.dimensionValues?.[0]?.value || '';
-        const users = parseNumber(row.metricValues?.[0]?.value);
-        const pageViews = parseNumber(row.metricValues?.[1]?.value);
-        const sessions = parseNumber(row.metricValues?.[2]?.value);
-        const bounceRate = parseNumber(row.metricValues?.[3]?.value) * 100;
-        const avgDuration = parseNumber(row.metricValues?.[4]?.value);
-        dailyActiveUsers.push({
-          date: formatDate(rawDate),
-          rawDate,
-          users,
-          pageViews,
-          sessions,
-          bounceRate,
-          avgDuration,
-        });
+    const dailyByDate = new Map();
+    (dailyReport.rows || []).forEach((row) => {
+      const rawDate = row.dimensionValues?.[0]?.value || '';
+      if (!rawDate) return;
+      dailyByDate.set(rawDate, {
+        date: formatDate(rawDate),
+        rawDate,
+        users: parseNumber(row.metricValues?.[0]?.value),
+        pageViews: parseNumber(row.metricValues?.[1]?.value),
+        sessions: parseNumber(row.metricValues?.[2]?.value),
+        bounceRate: parseNumber(row.metricValues?.[3]?.value) * 100,
+        avgDuration: parseNumber(row.metricValues?.[4]?.value),
       });
-    }
+    });
+
+    // Seçilen aralıktaki her günü doldur (GA boş günleri atlayabiliyor)
+    const dailyActiveUsers = enumerateDatesYmd(since, until).map((rawDate) => (
+      dailyByDate.get(rawDate) || {
+        date: formatDate(rawDate),
+        rawDate,
+        users: 0,
+        pageViews: 0,
+        sessions: 0,
+        bounceRate: 0,
+        avgDuration: 0,
+      }
+    ));
 
     // B. Parse Realtime Users (yalnızca güncel ay)
     if (realtimeReport.rows && realtimeReport.rows.length > 0) {
