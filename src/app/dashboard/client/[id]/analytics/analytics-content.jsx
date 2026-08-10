@@ -174,90 +174,56 @@ function buildLinePath(values, width = 1000, height = 200, padTop = 16) {
   }).join(' ');
 }
 
-function MiniAreaChart({ values, color, gradientId, height = 90 }) {
-  if (!values?.length) {
-    return (
-      <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-        Veri yok
-      </div>
-    );
-  }
-  return (
-    <svg viewBox="0 0 1000 200" width="100%" height={height} preserveAspectRatio="none" style={{ display: 'block' }}>
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={buildAreaPath(values)} fill={`url(#${gradientId})`} />
-      <path d={buildLinePath(values)} fill="none" stroke={color} strokeWidth="3" />
-    </svg>
-  );
+function formatChartNumber(v) {
+  const n = Number(v || 0);
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(Math.round(n));
 }
 
-function MetricTrendCard({ label, value, icon, color, values, description, gradientId }) {
-  return (
-    <div className="card" style={{
-      padding: '1.25rem',
-      background: 'rgba(255, 255, 255, 0.015)',
-      border: '1px solid var(--border-color)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '0.75rem',
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{label}</span>
-          {description && (
-            <div className="tooltip-container" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'help' }}>
-              <span className="tooltip-trigger" style={{ color: 'var(--text-secondary)', opacity: 0.7, display: 'flex' }}>
-                <HelpCircle size={13} />
-              </span>
-              <div className="tooltip-content" style={{
-                position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%) translateY(-8px)',
-                width: '230px', background: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(255,255,255,0.08)',
-                color: 'var(--text-primary)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.75rem',
-                opacity: 0, visibility: 'hidden', zIndex: 100, pointerEvents: 'none',
-              }}>
-                {description}
-              </div>
-            </div>
-          )}
-        </div>
-        <div style={{ background: `${color}18`, borderRadius: '8px', padding: '0.4rem' }}>{icon}</div>
-      </div>
-      <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{value}</div>
-      <MiniAreaChart values={values} color={color} gradientId={gradientId} />
-    </div>
-  );
+function formatDurationShort(seconds) {
+  const secs = Math.round(Number(seconds || 0));
+  if (secs < 60) return `${secs}sn`;
+  const mins = Math.floor(secs / 60);
+  const rem = secs % 60;
+  return rem ? `${mins}dk ${rem}sn` : `${mins}dk`;
 }
 
-function TrendAreaChart({ data, valueKey, color, gradientId, height = 220, labelKey = 'date' }) {
+function TrendAreaChart({ data, valueKey, color, gradientId, height = 220, labelKey = 'date', formatValue }) {
   const values = data.map((d) => Number(d[valueKey] || 0));
   const max = Math.max(...values, 1);
   const labels = data.map((d) => d[labelKey]);
   const showEvery = labels.length > 14 ? Math.ceil(labels.length / 12) : 1;
+  const fmt = formatValue || formatChartNumber;
 
   return (
     <>
       <div style={{ width: '100%', height, position: 'relative', marginTop: '1rem' }}>
-        <svg viewBox="0 0 1000 200" width="100%" height="100%" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+        <svg viewBox="0 0 1000 220" width="100%" height="100%" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={color} stopOpacity="0.25" />
               <stop offset="100%" stopColor={color} stopOpacity="0" />
             </linearGradient>
           </defs>
+          <line x1="0" y1="20" x2="1000" y2="20" stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
+          <line x1="0" y1="80" x2="1000" y2="80" stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
+          <line x1="0" y1="140" x2="1000" y2="140" stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
           <line x1="0" y1="200" x2="1000" y2="200" stroke="rgba(255,255,255,0.1)" />
-          <path d={buildAreaPath(values)} fill={`url(#${gradientId})`} />
-          <path d={buildLinePath(values)} fill="none" stroke={color} strokeWidth="3" />
+          <path d={buildAreaPath(values, 1000, 200, 24)} fill={`url(#${gradientId})`} />
+          <path d={buildLinePath(values, 1000, 200, 24)} fill="none" stroke={color} strokeWidth="3" />
           {values.map((v, index) => {
             const x = values.length === 1 ? 500 : (index / (values.length - 1)) * 1000;
-            const y = 200 - (v / max) * 184;
+            const y = 200 - (v / max) * 176;
+            const showLabel = showEvery === 1 || index % showEvery === 0 || index === values.length - 1;
             return (
               <g key={index} className="chart-dot">
-                <circle cx={x} cy={y} r="4" fill={color} stroke="var(--bg-primary)" strokeWidth="2" />
+                <circle cx={x} cy={y} r="5" fill={color} stroke="var(--bg-primary)" strokeWidth="2" />
+                {showLabel && (
+                  <text x={x} y={y - 12} fill="var(--text-primary)" fontSize="10" fontWeight="700" textAnchor="middle">
+                    {fmt(v)}
+                  </text>
+                )}
               </g>
             );
           })}
@@ -271,6 +237,25 @@ function TrendAreaChart({ data, valueKey, color, gradientId, height = 220, label
         ))}
       </div>
     </>
+  );
+}
+
+function MetricTrendSection({ title, totalValue, data, valueKey, color, gradientId, formatValue, legendLabel, subtitle }) {
+  return (
+    <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.25rem' }}>
+        <div>
+          <h4 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{title}</h4>
+          {subtitle && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>{subtitle}</p>}
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.5rem', lineHeight: 1 }}>{totalValue}</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+          <span style={{ width: '12px', height: '12px', background: color, borderRadius: '3px' }}></span>
+          {legendLabel}
+        </div>
+      </div>
+      <TrendAreaChart data={data} valueKey={valueKey} color={color} gradientId={gradientId} formatValue={formatValue} />
+    </div>
   );
 }
 
@@ -324,11 +309,8 @@ export default function AnalyticsContent({ result, id, datePreset = 'last_30d', 
     ? `${periodLabel} · ${trendDayCount} günlük trend`
     : `${trendDayCount} günlük trend`;
 
-  const dailyPageViews = useMemo(() => dailyTrend.map((d) => d.pageViews || 0), [dailyTrend]);
-  const dailySessions = useMemo(() => dailyTrend.map((d) => d.sessions || 0), [dailyTrend]);
-  const dailyUsers = useMemo(() => dailyTrend.map((d) => d.users || 0), [dailyTrend]);
-  const dailyBounce = useMemo(() => dailyTrend.map((d) => d.bounceRate || 0), [dailyTrend]);
-  const dailyDuration = useMemo(() => dailyTrend.map((d) => (d.avgDuration || 0) / 60), [dailyTrend]);
+  const fmtBounce = (v) => `%${Number(v).toFixed(1)}`;
+  const fmtDurationChart = (v) => formatDurationShort(v);
 
   const handleDatePreset = (preset) => {
     startTransition(() => {
@@ -539,62 +521,66 @@ export default function AnalyticsContent({ result, id, datePreset = 'last_30d', 
       </div>
       )}
 
-      {/* Core Metrics with Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-        <MetricTrendCard
-          label="Sayfa Görüntüleme"
-          value={Number(summary.pageViews).toLocaleString()}
-          icon={<Eye size={18} style={{ color: '#F59E0B' }} />}
+      {/* Metric Trend Charts */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <MetricTrendSection
+          title="Sayfa Görüntüleme"
+          subtitle={trendLabel}
+          totalValue={Number(summary.pageViews).toLocaleString('tr-TR')}
+          data={dailyTrend}
+          valueKey="pageViews"
           color="#F59E0B"
-          values={dailyPageViews}
           gradientId="metricPvGrad"
-          description="Web sitenizdeki sayfaların toplam görüntülenme sayısıdır."
+          legendLabel="Görüntülenme"
+          formatValue={(v) => Number(v).toLocaleString('tr-TR')}
         />
-        <MetricTrendCard
-          label="Oturumlar (Sessions)"
-          value={Number(summary.sessions).toLocaleString()}
-          icon={<Users size={18} style={{ color: '#3B82F6' }} />}
+        <MetricTrendSection
+          title="Oturumlar (Sessions)"
+          subtitle={trendLabel}
+          totalValue={Number(summary.sessions).toLocaleString('tr-TR')}
+          data={dailyTrend}
+          valueKey="sessions"
           color="#3B82F6"
-          values={dailySessions}
           gradientId="metricSessGrad"
-          description="Ziyaretçilerin web sitenizde başlattığı aktif oturum sayısıdır."
+          legendLabel="Oturum"
+          formatValue={(v) => Number(v).toLocaleString('tr-TR')}
         />
-        <MetricTrendCard
-          label="Hemen Çıkma Oranı"
-          value={`%${summary.bounceRate}`}
-          icon={<TrendingUp size={18} style={{ color: '#10B981' }} />}
+        <MetricTrendSection
+          title="Hemen Çıkma Oranı"
+          subtitle={trendLabel}
+          totalValue={`%${summary.bounceRate}`}
+          data={dailyTrend}
+          valueKey="bounceRate"
           color="#10B981"
-          values={dailyBounce}
           gradientId="metricBounceGrad"
-          description="Tek sayfa görüntüleyip ayrılan kullanıcı yüzdesidir."
+          legendLabel="Çıkma Oranı"
+          formatValue={fmtBounce}
         />
-        <MetricTrendCard
-          label="Ort. Etkileşim Süresi"
-          value={summary.avgEngagementTime}
-          icon={<Clock size={18} style={{ color: '#8B5CF6' }} />}
+        <MetricTrendSection
+          title="Ort. Etkileşim Süresi"
+          subtitle={trendLabel}
+          totalValue={summary.avgEngagementTime}
+          data={dailyTrend}
+          valueKey="avgDuration"
           color="#8B5CF6"
-          values={dailyDuration}
           gradientId="metricDurGrad"
-          description="Kullanıcıların sitede aktif kaldığı ortalama süredir (grafik: dakika)."
+          legendLabel="Ort. Süre"
+          formatValue={fmtDurationChart}
+        />
+        <MetricTrendSection
+          title="Günlük Aktif Kullanıcı Eğilimi"
+          subtitle={trendLabel}
+          totalValue={Number(summary.activeUsers).toLocaleString('tr-TR')}
+          data={dailyTrend}
+          valueKey="users"
+          color="#F59E0B"
+          gradientId="mainUsersGrad"
+          legendLabel="Kullanıcı Sayısı"
+          formatValue={(v) => Number(v).toLocaleString('tr-TR')}
         />
       </div>
 
-      {/* Main Chart Section */}
-      <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div>
-            <h4 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Günlük Aktif Kullanıcı Eğilimi</h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>{trendLabel}</p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            <span style={{ width: '12px', height: '12px', background: '#F59E0B', borderRadius: '3px' }}></span>
-            Kullanıcı Sayısı
-          </div>
-        </div>
-        <TrendAreaChart data={dailyTrend} valueKey="users" color="#F59E0B" gradientId="mainUsersGrad" />
-      </div>
-
-      {/* Breakdowns Grid */}
+      {/* Breakdowns Grid — moved below trends */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
         
         {/* Device Breakdown */}
@@ -738,13 +724,11 @@ export default function AnalyticsContent({ result, id, datePreset = 'last_30d', 
           r: 7;
         }
         .chart-dot text {
-          opacity: 0;
-          transition: opacity 0.15s ease, transform 0.15s ease;
-          transform: translateY(2px);
+          opacity: 1;
+          transition: opacity 0.15s ease;
         }
         .chart-dot:hover text {
           opacity: 1;
-          transform: translateY(0);
         }
         .table-row-hover:hover {
           background: rgba(255, 255, 255, 0.015);
