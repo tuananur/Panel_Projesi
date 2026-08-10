@@ -1375,12 +1375,14 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
 
     const { getGoogleOAuthConfig, refreshGoogleAccessToken } = await import('@/lib/google-oauth');
     const { resolveSearchConsoleSiteUrl, fetchSearchConsoleKeywords } = await import('@/lib/search-console');
-    const { getMonthDateRange, isCurrentMonthRange } = await import('@/lib/report-date-range');
+    const { isCurrentMonthRange } = await import('@/lib/report-date-range');
+    const { getPreviousPeriod } = await import('@/lib/analytics-date-range');
 
-    const useCustomRange = Boolean(since && until);
-    const startDate = useCustomRange ? since : '30daysAgo';
-    const endDate = useCustomRange ? until : 'today';
-    const dateRange = [{ startDate, endDate }];
+    if (!since || !until) {
+      return { error: 'INVALID_DATE_RANGE', details: 'Tarih aralığı belirtilmedi.' };
+    }
+
+    const dateRange = [{ startDate: since, endDate: until }];
 
     const oauth = await getGoogleOAuthConfig(client);
     const { clientId: oauthClientId, clientSecret: oauthClientSecret, refreshToken, propertyId } = oauth;
@@ -1413,22 +1415,13 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
     try {
       const siteUrl = await resolveSearchConsoleSiteUrl(accessToken, client);
       if (siteUrl) {
-        if (useCustomRange) {
-          const { prevSince, prevUntil, month, year } = getMonthDateRange(
-            new Date(`${since}T12:00:00`).getMonth(),
-            new Date(`${since}T12:00:00`).getFullYear()
-          );
-          searchConsole = await fetchSearchConsoleKeywords(accessToken, siteUrl, {
-            startDate: since,
-            endDate: until,
-            compareStartDate: prevSince,
-            compareEndDate: prevUntil,
-            month,
-            year,
-          });
-        } else {
-          searchConsole = await fetchSearchConsoleKeywords(accessToken, siteUrl);
-        }
+        const { prevSince, prevUntil } = getPreviousPeriod(since, until);
+        searchConsole = await fetchSearchConsoleKeywords(accessToken, siteUrl, {
+          startDate: since,
+          endDate: until,
+          compareStartDate: prevSince,
+          compareEndDate: prevUntil,
+        });
       } else {
         searchConsole = {
           error: 'SITE_NOT_FOUND',
@@ -1470,9 +1463,7 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
 
     let summaryReport, dailyReport, realtimeReport, deviceReport, trafficReport, pagesReport, countryReport, browserReport;
 
-    const dailyStartDate = useCustomRange ? since : '9daysAgo';
-    const dailyEndDate = useCustomRange ? until : 'today';
-    const includeRealtime = !useCustomRange || isCurrentMonthRange(since, until);
+    const includeRealtime = isCurrentMonthRange(since, until);
 
     try {
       [summaryReport, dailyReport, realtimeReport, deviceReport, trafficReport, pagesReport, countryReport, browserReport] = await Promise.all([
@@ -1488,12 +1479,14 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
           ],
         }),
         runReport('runReport', {
-          dateRanges: [{ startDate: dailyStartDate, endDate: dailyEndDate }],
+          dateRanges: dateRange,
           dimensions: [{ name: 'date' }],
           metrics: [
             { name: 'activeUsers' },
             { name: 'screenPageViews' },
             { name: 'sessions' },
+            { name: 'bounceRate' },
+            { name: 'averageSessionDuration' },
           ],
           keepEmptyRows: true,
         }),
@@ -1578,9 +1571,18 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
       sortedRows.forEach((row) => {
         const rawDate = row.dimensionValues?.[0]?.value || '';
         const users = parseNumber(row.metricValues?.[0]?.value);
+        const pageViews = parseNumber(row.metricValues?.[1]?.value);
+        const sessions = parseNumber(row.metricValues?.[2]?.value);
+        const bounceRate = parseNumber(row.metricValues?.[3]?.value) * 100;
+        const avgDuration = parseNumber(row.metricValues?.[4]?.value);
         dailyActiveUsers.push({
           date: formatDate(rawDate),
+          rawDate,
           users,
+          pageViews,
+          sessions,
+          bounceRate,
+          avgDuration,
         });
       });
     }
@@ -1763,7 +1765,7 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
     return {
       success: true,
       isLive: true,
-      reportPeriod: useCustomRange ? { since, until } : null,
+      reportPeriod: { since, until },
       summary: {
         activeUsers,
         pageViews: totalPageViews,

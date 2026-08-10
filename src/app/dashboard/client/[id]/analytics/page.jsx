@@ -5,9 +5,13 @@ import { redirect } from 'next/navigation';
 import AnalyticsContent from './analytics-content';
 import { getSession } from '@/lib/auth';
 import { can, getRolePermissions } from '@/lib/permissions';
+import { resolveAnalyticsDateRange } from '@/lib/analytics-date-range';
 
-export default async function GoogleAnalyticsPage({ params }) {
+export const dynamic = 'force-dynamic';
+
+export default async function GoogleAnalyticsPage({ params, searchParams }) {
   const { id } = await params;
+  const sParams = await searchParams;
   const session = await getSession();
   if (!session) redirect('/login');
 
@@ -16,7 +20,12 @@ export default async function GoogleAnalyticsPage({ params }) {
     redirect('/dashboard');
   }
 
-  const result = await getGoogleAnalyticsAction(id);
+  const datePreset = sParams.datePreset || 'last_30d';
+  const sinceParam = sParams.since || null;
+  const untilParam = sParams.until || null;
+  const { since, until, preset, label: periodLabel } = resolveAnalyticsDateRange(datePreset, sinceParam, untilParam);
+
+  const result = await getGoogleAnalyticsAction(id, since, until);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -57,7 +66,14 @@ export default async function GoogleAnalyticsPage({ params }) {
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>Sistem genelindeki refresh token süresi dolmuş veya müşterinin mülk kimliği hatalı olabilir.</p>
         </div>
       ) : (
-        <AnalyticsContent result={result} id={id} />
+        <AnalyticsContent
+          result={result}
+          id={id}
+          datePreset={sinceParam && untilParam ? 'custom' : preset}
+          since={since}
+          until={until}
+          periodLabel={periodLabel}
+        />
       )}
     </div>
   );
