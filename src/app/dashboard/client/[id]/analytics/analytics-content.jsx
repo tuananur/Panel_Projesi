@@ -189,38 +189,41 @@ function formatDurationShort(seconds) {
   return rem ? `${mins}dk ${rem}sn` : `${mins}dk`;
 }
 
-function TrendAreaChart({ data, valueKey, color, gradientId, height = 220, labelKey = 'date', formatValue }) {
+function TrendAreaChart({ data, valueKey, color, gradientId, height = 340, labelKey = 'date', formatValue }) {
   const values = data.map((d) => Number(d[valueKey] || 0));
   const max = Math.max(...values, 1);
   const labels = data.map((d) => d[labelKey]);
   const showEvery = labels.length > 14 ? Math.ceil(labels.length / 12) : 1;
   const fmt = formatValue || formatChartNumber;
+  const plotH = 300;
+  const padTop = 36;
+  const usable = plotH - padTop;
 
   return (
     <>
-      <div style={{ width: '100%', height, position: 'relative', marginTop: '1rem' }}>
-        <svg viewBox="0 0 1000 220" width="100%" height="100%" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+      <div style={{ width: '100%', height, position: 'relative', marginTop: '1.25rem' }}>
+        <svg viewBox={`0 0 1000 ${plotH + 16}`} width="100%" height="100%" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+              <stop offset="0%" stopColor={color} stopOpacity="0.28" />
               <stop offset="100%" stopColor={color} stopOpacity="0" />
             </linearGradient>
           </defs>
-          <line x1="0" y1="20" x2="1000" y2="20" stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
-          <line x1="0" y1="80" x2="1000" y2="80" stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
-          <line x1="0" y1="140" x2="1000" y2="140" stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
-          <line x1="0" y1="200" x2="1000" y2="200" stroke="rgba(255,255,255,0.1)" />
-          <path d={buildAreaPath(values, 1000, 200, 24)} fill={`url(#${gradientId})`} />
-          <path d={buildLinePath(values, 1000, 200, 24)} fill="none" stroke={color} strokeWidth="3" />
+          <line x1="0" y1={padTop} x2="1000" y2={padTop} stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
+          <line x1="0" y1={padTop + usable * 0.33} x2="1000" y2={padTop + usable * 0.33} stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
+          <line x1="0" y1={padTop + usable * 0.66} x2="1000" y2={padTop + usable * 0.66} stroke="rgba(255,255,255,0.05)" strokeDasharray="5,5" />
+          <line x1="0" y1={plotH} x2="1000" y2={plotH} stroke="rgba(255,255,255,0.12)" />
+          <path d={buildAreaPath(values, 1000, plotH, padTop)} fill={`url(#${gradientId})`} />
+          <path d={buildLinePath(values, 1000, plotH, padTop)} fill="none" stroke={color} strokeWidth="3.5" />
           {values.map((v, index) => {
             const x = values.length === 1 ? 500 : (index / (values.length - 1)) * 1000;
-            const y = 200 - (v / max) * 176;
+            const y = plotH - (v / max) * usable;
             const showLabel = showEvery === 1 || index % showEvery === 0 || index === values.length - 1;
             return (
               <g key={index} className="chart-dot">
-                <circle cx={x} cy={y} r="5" fill={color} stroke="var(--bg-primary)" strokeWidth="2" />
+                <circle cx={x} cy={y} r="5.5" fill={color} stroke="var(--bg-primary)" strokeWidth="2" />
                 {showLabel && (
-                  <text x={x} y={y - 12} fill="var(--text-primary)" fontSize="10" fontWeight="700" textAnchor="middle">
+                  <text x={x} y={y - 14} fill="var(--text-primary)" fontSize="11" fontWeight="700" textAnchor="middle">
                     {fmt(v)}
                   </text>
                 )}
@@ -229,7 +232,7 @@ function TrendAreaChart({ data, valueKey, color, gradientId, height = 220, label
           })}
         </svg>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.8rem', padding: '0 0.5rem', fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600, gap: '0.25rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', padding: '0 0.5rem', fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, gap: '0.25rem' }}>
         {labels.map((label, index) => (
           showEvery === 1 || index % showEvery === 0 || index === labels.length - 1 ? (
             <span key={index} style={{ flex: 1, textAlign: index === 0 ? 'left' : index === labels.length - 1 ? 'right' : 'center', whiteSpace: 'nowrap' }}>{label}</span>
@@ -242,12 +245,12 @@ function TrendAreaChart({ data, valueKey, color, gradientId, height = 220, label
 
 function MetricTrendSection({ title, totalValue, data, valueKey, color, gradientId, formatValue, legendLabel, subtitle }) {
   return (
-    <div className="card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.25rem' }}>
+    <div className="card" style={{ padding: '1.75rem 1.75rem 1.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.35rem' }}>
         <div>
-          <h4 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{title}</h4>
-          {subtitle && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>{subtitle}</p>}
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.5rem', lineHeight: 1 }}>{totalValue}</div>
+          <h4 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>{title}</h4>
+          {subtitle && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.3rem 0 0' }}>{subtitle}</p>}
+          <div style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.55rem', lineHeight: 1 }}>{totalValue}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
           <span style={{ width: '12px', height: '12px', background: color, borderRadius: '3px' }}></span>
