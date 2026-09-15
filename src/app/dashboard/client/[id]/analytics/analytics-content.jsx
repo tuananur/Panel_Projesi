@@ -189,20 +189,52 @@ function formatDurationShort(seconds) {
   return rem ? `${mins}dk ${rem}sn` : `${mins}dk`;
 }
 
-function TrendAreaChart({ data, valueKey, color, gradientId, height = 340, labelKey = 'date', formatValue }) {
+function estimateLabelWidthCh(text) {
+  return Math.max(3.2, String(text).length * 0.72);
+}
+
+function assignLabelLanes(points, minXGapPct = 4.2) {
+  const placed = [];
+  for (const p of points) {
+    let lane = 0;
+    while (placed.some((q) => Math.abs(q.xPct - p.xPct) < minXGapPct && q.lane === lane)) {
+      lane += 1;
+      if (lane > 6) break;
+    }
+    placed.push({ ...p, lane });
+  }
+  return placed;
+}
+
+function TrendAreaChart({ data, valueKey, color, gradientId, height = 380, labelKey = 'date', formatValue }) {
   const values = data.map((d) => Number(d[valueKey] || 0));
   const max = Math.max(...values, 1);
   const labels = data.map((d) => d[labelKey]);
-  const showEvery = labels.length > 14 ? Math.ceil(labels.length / 12) : 1;
+  const n = values.length;
   const fmt = formatValue || formatChartNumber;
   const plotH = 300;
-  const padTop = 36;
+  const padTop = 48;
   const usable = plotH - padTop;
+  const dateEvery = labels.length > 18 ? Math.ceil(labels.length / 14) : 1;
+
+  const rawPoints = values.map((v, index) => {
+    const xPct = n <= 1 ? 50 : (index / (n - 1)) * 100;
+    const y = plotH - (v / max) * usable;
+    const yPct = (y / (plotH + 16)) * 100;
+    const text = fmt(v);
+    return { index, v, xPct, yPct, text, wCh: estimateLabelWidthCh(text) };
+  });
+
+  const avgW = rawPoints.reduce((sum, p) => sum + p.wCh, 0) / Math.max(rawPoints.length, 1);
+  const minXGapPct = Math.min(7.5, Math.max(3.2, avgW * 0.55));
+  const labeledPoints = assignLabelLanes(rawPoints, minXGapPct);
+  const maxLane = labeledPoints.reduce((m, p) => Math.max(m, p.lane), 0);
+  const chartHeight = height + maxLane * 18;
 
   return (
     <>
-      <div style={{ width: '100%', height, position: 'relative', marginTop: '1.25rem' }}>
-        <svg viewBox={`0 0 1000 ${plotH + 16}`} width="100%" height="100%" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+      <div style={{ width: '100%', height: chartHeight, position: 'relative', marginTop: '1.25rem' }}>
+        <svg viewBox={`0 0 1000 ${plotH + 16}`} width="100%" height="100%" preserveAspectRatio="none" style={{ overflow: 'visible', display: 'block' }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={color} stopOpacity="0.28" />
@@ -216,28 +248,67 @@ function TrendAreaChart({ data, valueKey, color, gradientId, height = 340, label
           <path d={buildAreaPath(values, 1000, plotH, padTop)} fill={`url(#${gradientId})`} />
           <path d={buildLinePath(values, 1000, plotH, padTop)} fill="none" stroke={color} strokeWidth="3.5" />
           {values.map((v, index) => {
-            const x = values.length === 1 ? 500 : (index / (values.length - 1)) * 1000;
+            const x = n <= 1 ? 500 : (index / (n - 1)) * 1000;
             const y = plotH - (v / max) * usable;
-            const showLabel = showEvery === 1 || index % showEvery === 0 || index === values.length - 1;
             return (
-              <g key={index} className="chart-dot">
-                <circle cx={x} cy={y} r="5.5" fill={color} stroke="var(--bg-primary)" strokeWidth="2" />
-                {showLabel && (
-                  <text x={x} y={y - 14} fill="var(--text-primary)" fontSize="11" fontWeight="700" textAnchor="middle">
-                    {fmt(v)}
-                  </text>
-                )}
-              </g>
+              <circle
+                key={index}
+                className="chart-dot"
+                cx={x}
+                cy={y}
+                r="5"
+                fill={color}
+                stroke="var(--bg-primary)"
+                strokeWidth="2"
+              />
             );
           })}
         </svg>
+
+        {labeledPoints.map((p) => {
+          const lift = 14 + p.lane * 16;
+          return (
+            <span
+              key={`val-${p.index}`}
+              title={p.text}
+              style={{
+                position: 'absolute',
+                left: `${p.xPct}%`,
+                top: `${p.yPct}%`,
+                transform: `translate(-50%, calc(-100% - ${lift}px))`,
+                fontSize: n > 24 ? '0.62rem' : '0.72rem',
+                fontWeight: 800,
+                color: 'var(--text-primary)',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                lineHeight: 1,
+                textShadow: '0 1px 2px rgba(0,0,0,0.85)',
+                zIndex: 2 + p.lane,
+              }}
+            >
+              {p.text}
+            </span>
+          );
+        })}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', padding: '0 0.5rem', fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, gap: '0.25rem' }}>
-        {labels.map((label, index) => (
-          showEvery === 1 || index % showEvery === 0 || index === labels.length - 1 ? (
-            <span key={index} style={{ flex: 1, textAlign: index === 0 ? 'left' : index === labels.length - 1 ? 'right' : 'center', whiteSpace: 'nowrap' }}>{label}</span>
-          ) : null
-        ))}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.85rem', padding: '0 0.25rem', fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600, gap: '0.15rem', overflow: 'hidden' }}>
+        {labels.map((label, index) => {
+          const show = dateEvery === 1 || index % dateEvery === 0 || index === labels.length - 1;
+          if (!show) return <span key={index} style={{ flex: 1 }} />;
+          return (
+            <span
+              key={index}
+              style={{
+                flex: 1,
+                textAlign: index === 0 ? 'left' : index === labels.length - 1 ? 'right' : 'center',
+                whiteSpace: 'nowrap',
+                fontSize: labels.length > 20 ? '0.65rem' : '0.72rem',
+              }}
+            >
+              {label}
+            </span>
+          );
+        })}
       </div>
     </>
   );
