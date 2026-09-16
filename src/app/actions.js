@@ -1377,6 +1377,7 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
     const { resolveSearchConsoleSiteUrl, fetchSearchConsoleKeywords } = await import('@/lib/search-console');
     const { isCurrentMonthRange } = await import('@/lib/report-date-range');
     const { getPreviousPeriod, enumerateDatesYmd } = await import('@/lib/analytics-date-range');
+    const { countryNameFromCode, isUnknownCountryValue, UNKNOWN_COUNTRY_LABEL } = await import('@/lib/country-codes');
 
     if (!since || !until) {
       return { error: 'INVALID_DATE_RANGE', details: 'Tarih aralığı belirtilmedi.' };
@@ -1426,7 +1427,11 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
         searchConsole = {
           error: 'SITE_NOT_FOUND',
           details: 'Search Console mülkü bulunamadı. Hizmet Ayarlarından site URL girin veya müşteri web sitesini kontrol edin.',
-          keywords: [],
+          queries: [],
+          countries: [],
+          devices: [],
+          daily: [],
+          summary: null,
         };
       }
     } catch (gscError) {
@@ -1437,7 +1442,11 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
         details: msg.includes('API has not been used') || msg.includes('disabled')
           ? 'Google Search Console API Cloud Console\'da etkinleştirilmeli. OAuth token\'a webmasters.readonly yetkisi eklenmeli.'
           : msg,
-        keywords: [],
+        queries: [],
+        countries: [],
+        devices: [],
+        daily: [],
+        summary: null,
       };
     }
 
@@ -1498,14 +1507,16 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
         runReport('runReport', {
           dateRanges: dateRange,
           dimensions: [{ name: 'deviceCategory' }],
-          metrics: [{ name: 'activeUsers' }],
-          limit: 10,
+          metrics: [{ name: 'activeUsers' }, { name: 'sessions' }],
+          orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+          limit: 25,
         }),
         runReport('runReport', {
           dateRanges: dateRange,
           dimensions: [{ name: 'sessionSource' }],
-          metrics: [{ name: 'activeUsers' }],
-          limit: 10,
+          metrics: [{ name: 'activeUsers' }, { name: 'sessions' }],
+          orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+          limit: 50,
         }),
         runReport('runReport', {
           dateRanges: dateRange,
@@ -1515,19 +1526,28 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
             { name: 'activeUsers' },
             { name: 'averageSessionDuration' },
           ],
-          limit: 20,
+          orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+          limit: 50,
         }),
         runReport('runReport', {
           dateRanges: dateRange,
-          dimensions: [{ name: 'country' }],
-          metrics: [{ name: 'activeUsers' }],
-          limit: 10,
+          dimensions: [{ name: 'country' }, { name: 'countryId' }],
+          metrics: [
+            { name: 'activeUsers' },
+            { name: 'sessions' },
+            { name: 'screenPageViews' },
+            { name: 'engagedSessions' },
+            { name: 'engagementRate' },
+          ],
+          orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+          limit: 250,
         }).catch(() => ({ rows: [] })),
         runReport('runReport', {
           dateRanges: dateRange,
           dimensions: [{ name: 'browser' }],
-          metrics: [{ name: 'sessions' }],
-          limit: 10,
+          metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
+          orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+          limit: 25,
         }).catch(() => ({ rows: [] })),
       ]);
     } catch (apiError) {
@@ -1545,14 +1565,14 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
       return isNaN(parsed) ? 0 : parsed;
     };
 
-    // A. Parse Summary Report
+    // A. Parse Summary Report — dönemin global toplamı, hiçbir boyuta filtreli değil
     const summaryRow = summaryReport.rows?.[0];
+    const totalActiveUsers = parseNumber(summaryRow?.metricValues?.[0]?.value);
     const totalPageViews = parseNumber(summaryRow?.metricValues?.[1]?.value);
     const totalSessions = parseNumber(summaryRow?.metricValues?.[2]?.value);
     const avgBounceRate = parseNumber(summaryRow?.metricValues?.[3]?.value) * 100;
     const avgDuration = parseNumber(summaryRow?.metricValues?.[4]?.value);
     const totalEventCount = parseNumber(summaryRow?.metricValues?.[5]?.value);
-    let activeUsers = parseNumber(summaryRow?.metricValues?.[0]?.value);
 
     const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
     const formatDate = (yyyymmdd) => {
@@ -1562,40 +1582,50 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
       return `${day} ${months[monthIdx] || ''}`;
     };
 
+    const toIsoDate = (yyyymmdd) => (
+      yyyymmdd?.length === 8
+        ? `${yyyymmdd.substring(0, 4)}-${yyyymmdd.substring(4, 6)}-${yyyymmdd.substring(6, 8)}`
+        : yyyymmdd
+    );
+
     const dailyByDate = new Map();
     (dailyReport.rows || []).forEach((row) => {
       const rawDate = row.dimensionValues?.[0]?.value || '';
       if (!rawDate) return;
       dailyByDate.set(rawDate, {
-        date: formatDate(rawDate),
+        date: toIsoDate(rawDate),
+        label: formatDate(rawDate),
         rawDate,
-        users: parseNumber(row.metricValues?.[0]?.value),
+        activeUsers: parseNumber(row.metricValues?.[0]?.value),
         pageViews: parseNumber(row.metricValues?.[1]?.value),
         sessions: parseNumber(row.metricValues?.[2]?.value),
         bounceRate: parseNumber(row.metricValues?.[3]?.value) * 100,
-        avgDuration: parseNumber(row.metricValues?.[4]?.value),
+        avgSessionDuration: parseNumber(row.metricValues?.[4]?.value),
       });
     });
 
-    // Seçilen aralıktaki her günü doldur (GA boş günleri atlayabiliyor)
-    const dailyActiveUsers = enumerateDatesYmd(since, until).map((rawDate) => (
+    // Seçilen aralıktaki her günü doldur (GA veri olmayan günü hiç döndürmüyor).
+    // Bu uydurma veri değil: GA4 keepEmptyRows ile de atlanan günler gerçekten sıfırdır.
+    const daily = enumerateDatesYmd(since, until).map((rawDate) => (
       dailyByDate.get(rawDate) || {
-        date: formatDate(rawDate),
+        date: toIsoDate(rawDate),
+        label: formatDate(rawDate),
         rawDate,
-        users: 0,
+        activeUsers: 0,
         pageViews: 0,
         sessions: 0,
         bounceRate: 0,
-        avgDuration: 0,
+        avgSessionDuration: 0,
       }
     ));
 
-    // B. Parse Realtime Users (yalnızca güncel ay)
-    if (realtimeReport.rows && realtimeReport.rows.length > 0) {
-      const realtimeUsers = parseNumber(
-        realtimeReport.metricValues?.[0]?.value || realtimeReport.rows[0].metricValues?.[0]?.value
-      );
-      if (realtimeUsers > 0) activeUsers = realtimeUsers;
+    // B. Parse Realtime Users — dönem toplamını ASLA ezmez, ayrı alanda durur
+    let realtime = null;
+    if (includeRealtime && realtimeReport.rows && realtimeReport.rows.length > 0) {
+      realtime = {
+        activeUsers: parseNumber(realtimeReport.rows[0].metricValues?.[0]?.value),
+        fetchedAt: new Date().toISOString(),
+      };
     }
 
     const formatDuration = (seconds) => {
@@ -1606,49 +1636,33 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
       return `${mins}dk ${remainingSecs}sn`;
     };
 
+    // Paylar her zaman dönemin gerçek toplamına bölünür, dönen satırların toplamına değil.
+    // GA4 boyut kırılımlarında aynı kullanıcı birden fazla satırda sayılabildiği için
+    // yüzdeler %100'e tamamlanmayabilir; zorla normalize edilmiyor.
+    const shareOf = (value, total) => (total > 0 ? Math.round((value / total) * 10000) / 100 : 0);
+
     // D. Parse Device Breakdown
-    const deviceColors = ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899'];
     const deviceNamesMap = {
       'desktop': 'Masaüstü',
       'mobile': 'Mobil',
       'tablet': 'Tablet',
       'smarttv': 'TV'
     };
-    
-    let deviceTotalUsers = 0;
-    const rawDeviceRows = deviceReport.rows || [];
-    rawDeviceRows.forEach(row => {
-      deviceTotalUsers += parseNumber(row.metricValues?.[0]?.value);
-    });
 
-    const deviceBreakdown = rawDeviceRows.map((row, index) => {
+    const devices = (deviceReport.rows || []).map((row) => {
       const rawName = (row.dimensionValues?.[0]?.value || '').toLowerCase();
       const name = deviceNamesMap[rawName] || rawName.charAt(0).toUpperCase() + rawName.slice(1);
-      const count = parseNumber(row.metricValues?.[0]?.value);
-      const percentage = deviceTotalUsers > 0 ? Math.round((count / deviceTotalUsers) * 100) : 0;
+      const activeUsersValue = parseNumber(row.metricValues?.[0]?.value);
       return {
         name,
-        percentage,
-        count,
-        color: deviceColors[index % deviceColors.length]
+        rawName,
+        activeUsers: activeUsersValue,
+        sessions: parseNumber(row.metricValues?.[1]?.value),
+        percentage: shareOf(activeUsersValue, totalActiveUsers),
       };
     });
 
-    if (deviceBreakdown.length === 0) {
-      deviceBreakdown.push(
-        { name: 'Mobil', percentage: 0, count: 0, color: '#10B981' },
-        { name: 'Masaüstü', percentage: 0, count: 0, color: '#3B82F6' },
-        { name: 'Tablet', percentage: 0, count: 0, color: '#F59E0B' }
-      );
-    }
-
     // E. Parse Traffic Sources
-    let trafficTotalUsers = 0;
-    const rawTrafficRows = trafficReport.rows || [];
-    rawTrafficRows.forEach(row => {
-      trafficTotalUsers += parseNumber(row.metricValues?.[0]?.value);
-    });
-
     const sourceNamesMap = {
       '(direct)': 'Doğrudan',
       'google': 'Google Arama',
@@ -1662,80 +1676,49 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
       'youtube': 'YouTube'
     };
 
-    const trafficSources = rawTrafficRows.map((row, index) => {
+    const channels = (trafficReport.rows || []).map((row) => {
       const rawName = (row.dimensionValues?.[0]?.value || '').toLowerCase();
-      const name = sourceNamesMap[rawName] || (rawName === 'organic' ? 'Organik' : rawName);
-      const count = parseNumber(row.metricValues?.[0]?.value);
-      const percentage = trafficTotalUsers > 0 ? Math.round((count / trafficTotalUsers) * 100) : 0;
+      const mapped = sourceNamesMap[rawName] || (rawName === 'organic' ? 'Organik' : rawName);
+      const activeUsersValue = parseNumber(row.metricValues?.[0]?.value);
       return {
-        name: name.charAt(0).toUpperCase() + name.slice(1),
-        percentage,
-        count,
-        color: deviceColors[(index + 1) % deviceColors.length]
+        name: mapped.charAt(0).toUpperCase() + mapped.slice(1),
+        rawName,
+        activeUsers: activeUsersValue,
+        sessions: parseNumber(row.metricValues?.[1]?.value),
+        percentage: shareOf(activeUsersValue, totalActiveUsers),
       };
     });
 
-    if (trafficSources.length === 0) {
-      trafficSources.push(
-        { name: 'Doğrudan', percentage: 0, count: 0, color: '#10B981' },
-        { name: 'Organik Arama', percentage: 0, count: 0, color: '#3B82F6' }
-      );
-    }
-
     // F. Parse Top Pages
-    const topPages = (pagesReport.rows || []).map(row => {
-      const path = row.dimensionValues?.[0]?.value || '/';
-      const title = row.dimensionValues?.[1]?.value || 'Sayfa';
+    const pages = (pagesReport.rows || []).map((row) => {
       const views = parseNumber(row.metricValues?.[0]?.value);
-      const users = parseNumber(row.metricValues?.[1]?.value);
-      const dur = parseNumber(row.metricValues?.[2]?.value);
       return {
-        path,
-        title,
+        path: row.dimensionValues?.[0]?.value || '',
+        title: row.dimensionValues?.[1]?.value || '',
         views,
-        users,
-        time: formatDuration(dur)
+        activeUsers: parseNumber(row.metricValues?.[1]?.value),
+        avgSessionDuration: parseNumber(row.metricValues?.[2]?.value),
       };
     }).sort((a, b) => b.views - a.views);
 
-    if (topPages.length === 0) {
-      topPages.push({ path: '/', title: 'Ana Sayfa', views: 0, users: 0, time: '0dk 0sn' });
-    }
-
-    // G. Parse Country Breakdown
-    let countryTotalUsers = 0;
-    const rawCountryRows = countryReport ? (countryReport.rows || []) : [];
-    rawCountryRows.forEach(row => {
-      countryTotalUsers += parseNumber(row.metricValues?.[0]?.value);
-    });
-
-    const countryBreakdown = rawCountryRows.map((row, index) => {
-      const rawName = row.dimensionValues?.[0]?.value || 'Bilinmeyen';
-      const countryNamesMap = {
-        'turkey': 'Türkiye',
-        'china': 'Çin',
-        'united states': 'ABD',
-        'germany': 'Almanya',
-        'netherlands': 'Hollanda',
-        'united kingdom': 'İngiltere',
-        'france': 'Fransa',
-        'italy': 'İtalya',
-        'russia': 'Rusya',
-        'spain': 'İspanya',
-        'singapore': 'Singapur',
-        'ireland': 'İrlanda'
-      };
-      const name = countryNamesMap[rawName.toLowerCase()] || rawName;
-      const count = parseNumber(row.metricValues?.[0]?.value);
-      const percentage = countryTotalUsers > 0 ? Math.round((count / countryTotalUsers) * 100) : 0;
+    // G. Parse Country Breakdown — tüm ülkeler, (not set) ayrı kayıt olarak korunur
+    const countries = (countryReport?.rows || []).map((row) => {
+      const rawName = row.dimensionValues?.[0]?.value || '';
+      const rawCode = row.dimensionValues?.[1]?.value || '';
+      const unknown = isUnknownCountryValue(rawCode) && isUnknownCountryValue(rawName);
+      const activeUsersValue = parseNumber(row.metricValues?.[0]?.value);
       return {
-        name,
-        percentage,
-        count
+        country: unknown ? UNKNOWN_COUNTRY_LABEL : (countryNameFromCode(rawCode) || rawName || UNKNOWN_COUNTRY_LABEL),
+        countryCode: isUnknownCountryValue(rawCode) ? null : rawCode.toUpperCase(),
+        activeUsers: activeUsersValue,
+        sessions: parseNumber(row.metricValues?.[1]?.value),
+        views: parseNumber(row.metricValues?.[2]?.value),
+        engagedSessions: parseNumber(row.metricValues?.[3]?.value),
+        engagementRate: Math.round(parseNumber(row.metricValues?.[4]?.value) * 10000) / 100,
+        percentage: shareOf(activeUsersValue, totalActiveUsers),
       };
-    });
+    }).sort((a, b) => b.activeUsers - a.activeUsers);
 
-    const browserColors = ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899'];
     const browserNamesMap = {
       chrome: 'Chrome',
       safari: 'Safari',
@@ -1746,22 +1729,16 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
       'samsung internet': 'Samsung Internet',
     };
 
-    let browserTotalSessions = 0;
-    const rawBrowserRows = browserReport?.rows || [];
-    rawBrowserRows.forEach((row) => {
-      browserTotalSessions += parseNumber(row.metricValues?.[0]?.value);
-    });
-
-    const browserBreakdown = rawBrowserRows.map((row, index) => {
+    const browsers = (browserReport?.rows || []).map((row) => {
       const rawName = (row.dimensionValues?.[0]?.value || '').toLowerCase();
       const name = browserNamesMap[rawName] || rawName.charAt(0).toUpperCase() + rawName.slice(1);
-      const count = parseNumber(row.metricValues?.[0]?.value);
-      const percentage = browserTotalSessions > 0 ? Math.round((count / browserTotalSessions) * 100) : 0;
+      const sessionsValue = parseNumber(row.metricValues?.[0]?.value);
       return {
         name,
-        percentage,
-        count,
-        color: browserColors[index % browserColors.length],
+        rawName,
+        sessions: sessionsValue,
+        activeUsers: parseNumber(row.metricValues?.[1]?.value),
+        percentage: shareOf(sessionsValue, totalSessions),
       };
     });
 
@@ -1769,20 +1746,26 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
       success: true,
       isLive: true,
       reportPeriod: { since, until },
-      summary: {
-        activeUsers,
-        pageViews: totalPageViews,
-        sessions: totalSessions,
-        bounceRate: parseFloat(avgBounceRate.toFixed(1)),
-        avgEngagementTime: formatDuration(avgDuration),
-        eventCount: totalEventCount,
+      analytics: {
+        summary: summaryRow
+          ? {
+              activeUsers: totalActiveUsers,
+              pageViews: totalPageViews,
+              sessions: totalSessions,
+              bounceRate: parseFloat(avgBounceRate.toFixed(1)),
+              avgSessionDuration: avgDuration,
+              avgEngagementTime: formatDuration(avgDuration),
+              eventCount: totalEventCount,
+            }
+          : null,
+        realtime,
+        daily,
+        devices,
+        channels,
+        countries,
+        browsers,
+        pages,
       },
-      dailyActiveUsers,
-      deviceBreakdown,
-      trafficSources,
-      topPages,
-      countryBreakdown,
-      browserBreakdown,
       searchConsole,
     };
   } catch (error) {

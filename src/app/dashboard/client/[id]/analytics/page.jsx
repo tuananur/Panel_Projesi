@@ -6,6 +6,7 @@ import AnalyticsContent from './analytics-content';
 import { getSession } from '@/lib/auth';
 import { can, getRolePermissions } from '@/lib/permissions';
 import { resolveAnalyticsDateRange } from '@/lib/analytics-date-range';
+import { toLegacyAnalyticsShape } from '@/lib/analytics-legacy-shape';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export default async function GoogleAnalyticsPage({ params, searchParams }) {
   const untilParam = sParams.until || null;
   const { since, until, preset, label: periodLabel, dayCount } = resolveAnalyticsDateRange(datePreset, sinceParam, untilParam);
 
-  const result = await getGoogleAnalyticsAction(id, since, until);
+  const result = toLegacyAnalyticsShape(await getGoogleAnalyticsAction(id, since, until));
   const periodDisplay = dayCount > 1
     ? `${periodLabel} (${since} → ${until}, ${dayCount} gün)`
     : `${periodLabel} (${since})`;
@@ -67,6 +68,12 @@ export default async function GoogleAnalyticsPage({ params, searchParams }) {
           <h3 style={{ color: '#ef4444' }}>Google API Hatası</h3>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontWeight: 600 }}>{result.details || 'Google Analytics verileri alınırken bir hata oluştu.'}</p>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>Sistem genelindeki refresh token süresi dolmuş veya müşterinin mülk kimliği hatalı olabilir.</p>
+        </div>
+      ) : !result.summary ? (
+        <div className="card animate-fade-in" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
+          <AlertCircle size={32} style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }} />
+          <h3>Bu dönem için veri bulunamadı</h3>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>{periodDisplay}</p>
         </div>
       ) : (
         <AnalyticsContent

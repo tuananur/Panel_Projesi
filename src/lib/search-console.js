@@ -1,3 +1,9 @@
+import { countryNameFromCode, UNKNOWN_COUNTRY_LABEL } from '@/lib/country-codes';
+
+// Search Console API tek istekte en fazla 25.000 satır döner; fazlası startRow ile sayfalanır.
+const GSC_MAX_ROW_LIMIT = 25000;
+const GSC_MAX_PAGES = 20;
+
 function formatGscDate(date) {
   return date.toISOString().split('T')[0];
 }
@@ -60,7 +66,11 @@ export async function resolveSearchConsoleSiteUrl(accessToken, client) {
   return fuzzy?.siteUrl || null;
 }
 
-async function querySearchAnalytics(accessToken, siteUrl, { startDate, endDate, dimensions = ['query', 'page'] }) {
+/**
+ * Tek searchAnalytics isteği. Ülke/cihaz filtresi uygulanmaz: tüm trafik döner.
+ * searchType 'web' (Google Web Arama) olarak sabit; image/video/news ayrı raporlardır.
+ */
+async function querySearchAnalytics(accessToken, siteUrl, { startDate, endDate, dimensions = [], startRow = 0, rowLimit = GSC_MAX_ROW_LIMIT }) {
   const encodedSite = encodeURIComponent(siteUrl);
   const res = await fetch(
     `https://www.googleapis.com/webmasters/v3/sites/${encodedSite}/searchAnalytics/query`,
@@ -74,16 +84,9 @@ async function querySearchAnalytics(accessToken, siteUrl, { startDate, endDate, 
         startDate,
         endDate,
         dimensions,
-        rowLimit: dimensions.includes('date') ? 1000 : 500,
         type: 'web',
-        dimensionFilterGroups: [
-          {
-            filters: [
-              { dimension: 'country', expression: 'tur', operator: 'equals' },
-              { dimension: 'device', expression: 'DESKTOP', operator: 'equals' },
-            ],
-          },
-        ],
+        rowLimit,
+        startRow,
       }),
     }
   );
@@ -94,6 +97,36 @@ async function querySearchAnalytics(accessToken, siteUrl, { startDate, endDate, 
   }
 
   return res.json();
+}
+
+/** Sayfalama ile tüm satırları toplar. Sınıra dayanırsa truncated=true. */
+async function queryAllRows(accessToken, siteUrl, { startDate, endDate, dimensions }) {
+  const rows = [];
+  let truncated = false;
+
+  for (let page = 0; page < GSC_MAX_PAGES; page += 1) {
+    const data = await querySearchAnalytics(accessToken, siteUrl, {
+      startDate,
+      endDate,
+      dimensions,
+      startRow: page * GSC_MAX_ROW_LIMIT,
+      rowLimit: GSC_MAX_ROW_LIMIT,
+    });
+    const pageRows = data.rows || [];
+    rows.push(...pageRows);
+    if (pageRows.length < GSC_MAX_ROW_LIMIT) return { rows, truncated };
+    if (page === GSC_MAX_PAGES - 1) truncated = true;
+  }
+
+  return { rows, truncated };
+}
+
+function ratio(clicks, impressions) {
+  return impressions > 0 ? Math.round((clicks / impressions) * 10000) / 100 : 0;
+}
+
+function round1(value) {
+  return Math.round((value || 0) * 10) / 10;
 }
 
 function aggregateRowsByQuery(rows) {
@@ -136,9 +169,7 @@ function aggregateRowsByQuery(rows) {
     result.set(query, {
       query: data.query,
       page: data.page,
-      position: data.impressions > 0
-        ? Math.round((data.positionWeightedSum / data.impressions) * 10) / 10
-        : 0,
+      position: data.impressions > 0 ? round1(data.positionWeightedSum / data.impressions) : 0,
       impressions: data.impressions,
       clicks: data.clicks,
     });
@@ -148,41 +179,49 @@ function aggregateRowsByQuery(rows) {
 
 function buildChange(currentPos, previousPos) {
   if (previousPos == null || previousPos <= 0) {
-    return {
-      previousDisplay: 100,
-      change: currentPos > 0 ? Math.round(100 - currentPos) : 0,
-      improved: true,
-      isNew: true,
-    };
+    return { previousPosition: null, change: 0, improved: null, isNew: true };
   }
   const roundedPrev = Math.round(previousPos);
-  const roundedCurr = Math.round(currentPos);
-  const delta = roundedPrev - roundedCurr;
-  return {
-    previousDisplay: roundedPrev,
-    change: delta,
-    improved: delta > 0,
-    isNew: false,
-  };
+  const delta = roundedPrev - Math.round(currentPos);
+  return { previousPosition: roundedPrev, change: delta, improved: delta > 0, isNew: false };
 }
 
+/** Boyutsuz sorgu tek satır döner: dönemin gerçek toplamı. Satır yoksa null. */
 function parseSummaryRow(rows) {
   const row = rows?.[0];
-  if (!row) {
-    return { clicks: 0, impressions: 0, ctr: 0, position: 0 };
-  }
+  if (!row) return null;
   const clicks = row.clicks || 0;
   const impressions = row.impressions || 0;
-  const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
   return {
     clicks,
     impressions,
-    ctr: Math.round(ctr * 100) / 100,
-    position: Math.round((row.position || 0) * 10) / 10,
+    ctr: ratio(clicks, impressions),
+    position: round1(row.position),
   };
 }
 
-function buildWeeklyTrend(dailyRows, month, year) {
+function mapBreakdownRows(rows, keyMapper) {
+  return (rows || [])
+    .map((row) => {
+      const rawKey = row.keys?.[0] || '';
+      const clicks = row.clicks || 0;
+      const impressions = row.impressions || 0;
+      return {
+        ...keyMapper(rawKey),
+        clicks,
+        impressions,
+        ctr: ratio(clicks, impressions),
+        position: round1(row.position),
+      };
+    })
+    .sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions);
+}
+
+export const GSC_KEYWORDS_PAGE_SIZE = 10;
+export const GSC_TOP_KEYWORDS_LIMIT = 10;
+
+/** Aylık hafta kırılımı; normalize edilmiş daily listesinden üretilir. */
+export function weeklyTrendFromDaily(daily, month, year) {
   const weeks = [
     { label: '1. Hafta', clicks: 0, impressions: 0 },
     { label: '2. Hafta', clicks: 0, impressions: 0 },
@@ -190,10 +229,9 @@ function buildWeeklyTrend(dailyRows, month, year) {
     { label: '4. Hafta', clicks: 0, impressions: 0 },
   ];
 
-  (dailyRows || []).forEach((row) => {
-    const dateStr = row.keys?.[0];
-    if (!dateStr) return;
-    const d = new Date(`${dateStr}T12:00:00`);
+  (daily || []).forEach((row) => {
+    if (!row?.date) return;
+    const d = new Date(`${row.date}T12:00:00`);
     if (d.getMonth() !== month || d.getFullYear() !== year) return;
     const weekIndex = Math.min(3, Math.floor((d.getDate() - 1) / 7));
     weeks[weekIndex].clicks += row.clicks || 0;
@@ -203,19 +241,17 @@ function buildWeeklyTrend(dailyRows, month, year) {
   return weeks;
 }
 
-export const GSC_KEYWORDS_PAGE_SIZE = 10;
-export const GSC_TOP_KEYWORDS_LIMIT = 10;
-
+/**
+ * Seçilen dönemin tüm Search Console verisi: ülke/cihaz filtresi yok, sayfalama var.
+ * Dönen alanlar: summary, daily, queries, countries, devices.
+ */
 export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = null) {
   const current = period
     ? { startDate: period.startDate, endDate: period.endDate }
     : gscDateRange(28, 3);
 
-  const compareStartDate = period?.compareStartDate;
-  const compareEndDate = period?.compareEndDate;
-
-  let previousStart = compareStartDate;
-  let previousEnd = compareEndDate;
+  let previousStart = period?.compareStartDate;
+  let previousEnd = period?.compareEndDate;
 
   if (!previousStart || !previousEnd) {
     const currentEndDate = new Date(`${current.endDate}T12:00:00`);
@@ -227,46 +263,56 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = 
     previousEnd = formatGscDate(previousEndDate);
   }
 
-  const [summaryData, dailyData, currentData, previousData] = await Promise.all([
+  const [summaryData, dailyData, countryData, deviceData, currentQueries, previousQueries] = await Promise.all([
     querySearchAnalytics(accessToken, siteUrl, {
       startDate: current.startDate,
       endDate: current.endDate,
       dimensions: [],
+      rowLimit: 1,
     }),
-    querySearchAnalytics(accessToken, siteUrl, {
+    queryAllRows(accessToken, siteUrl, {
       startDate: current.startDate,
       endDate: current.endDate,
       dimensions: ['date'],
     }),
-    querySearchAnalytics(accessToken, siteUrl, {
+    queryAllRows(accessToken, siteUrl, {
+      startDate: current.startDate,
+      endDate: current.endDate,
+      dimensions: ['country'],
+    }),
+    queryAllRows(accessToken, siteUrl, {
+      startDate: current.startDate,
+      endDate: current.endDate,
+      dimensions: ['device'],
+    }),
+    queryAllRows(accessToken, siteUrl, {
       startDate: current.startDate,
       endDate: current.endDate,
       dimensions: ['query', 'page'],
     }),
-    querySearchAnalytics(accessToken, siteUrl, {
+    queryAllRows(accessToken, siteUrl, {
       startDate: previousStart,
       endDate: previousEnd,
       dimensions: ['query', 'page'],
     }),
   ]);
 
-  const currentMap = aggregateRowsByQuery(currentData.rows);
-  const previousMap = aggregateRowsByQuery(previousData.rows);
+  const currentMap = aggregateRowsByQuery(currentQueries.rows);
+  const previousMap = aggregateRowsByQuery(previousQueries.rows);
 
-  const keywords = [...currentMap.values()]
+  const queries = [...currentMap.values()]
     .map((row) => {
       const prev = previousMap.get(row.query);
       const changeInfo = buildChange(row.position, prev?.position ?? null);
-      const ctr = row.impressions > 0 ? ((row.clicks / row.impressions) * 100).toFixed(2) : '0.00';
       return {
         keyword: row.query,
-        position: Math.round(row.position) || Math.ceil(row.position),
-        positionExact: row.position,
         url: row.page,
         clicks: row.clicks,
         impressions: row.impressions,
-        ctr,
-        previousPosition: changeInfo.previousDisplay,
+        ctr: ratio(row.clicks, row.impressions),
+        position: Math.round(row.position) || Math.ceil(row.position),
+        positionExact: row.position,
+        previousPosition: changeInfo.previousPosition,
         positionChange: changeInfo.change,
         improved: changeInfo.improved,
         isNew: changeInfo.isNew,
@@ -274,24 +320,43 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = 
     })
     .sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions || a.position - b.position);
 
-  const summary = parseSummaryRow(summaryData.rows);
-  const month = period?.month;
-  const year = period?.year;
-  const weeklyTrend = month != null && year != null
-    ? buildWeeklyTrend(dailyData.rows, month, year)
-    : buildWeeklyTrend(dailyData.rows, new Date(current.endDate).getMonth(), new Date(current.endDate).getFullYear());
+  const daily = (dailyData.rows || [])
+    .map((row) => {
+      const clicks = row.clicks || 0;
+      const impressions = row.impressions || 0;
+      return {
+        date: row.keys?.[0] || '',
+        clicks,
+        impressions,
+        ctr: ratio(clicks, impressions),
+        position: round1(row.position),
+      };
+    })
+    .filter((row) => row.date)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const countries = mapBreakdownRows(countryData.rows, (code) => ({
+    countryCode: code || null,
+    countryName: countryNameFromCode(code) || UNKNOWN_COUNTRY_LABEL,
+  }));
+
+  const devices = mapBreakdownRows(deviceData.rows, (device) => ({
+    device: device || 'UNKNOWN',
+  }));
 
   return {
     siteUrl,
+    scope: 'ALL',
+    period: { since: current.startDate, until: current.endDate },
+    comparePeriod: { since: previousStart, until: previousEnd },
     periodLabel: `${current.startDate} — ${current.endDate}`,
-    compareLabel: period
-      ? `${previousStart} — ${previousEnd} ile karşılaştırma`
-      : 'Önceki 28 güne göre',
-    device: 'Masaüstü',
-    country: 'Türkiye',
-    summary,
-    weeklyTrend,
-    keywords,
-    totalKeywords: keywords.length,
+    compareLabel: `${previousStart} — ${previousEnd} ile karşılaştırma`,
+    summary: parseSummaryRow(summaryData.rows),
+    daily,
+    queries,
+    countries,
+    devices,
+    totalQueries: queries.length,
+    truncated: currentQueries.truncated || previousQueries.truncated,
   };
 }

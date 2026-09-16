@@ -5,6 +5,7 @@ import StatsContent from './stats-content';
 import { can, getRolePermissions } from '@/lib/permissions';
 import { getMetaAdsAction, getGoogleAdsAction, getGoogleAnalyticsAction } from '@/app/actions';
 import { getMonthDateRange } from '@/lib/report-date-range';
+import { toLegacyAnalyticsShape } from '@/lib/analytics-legacy-shape';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,7 +75,7 @@ export default async function StatsPage({ params, searchParams: searchParamsProm
 
       if (results[0].status === 'fulfilled') metaResult = results[0].value;
       if (results[1].status === 'fulfilled') googleResult = results[1].value;
-      if (results[2].status === 'fulfilled') analyticsResult = results[2].value;
+      if (results[2].status === 'fulfilled') analyticsResult = toLegacyAnalyticsShape(results[2].value);
     } catch (adsError) {
       console.error('Ads & Analytics Data Fetching Failed:', adsError);
     }

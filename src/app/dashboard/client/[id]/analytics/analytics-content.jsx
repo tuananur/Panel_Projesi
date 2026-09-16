@@ -9,8 +9,6 @@ import {
   ChevronLeft, ChevronRight, BookOpen, ArrowUpDown, Calendar
 } from 'lucide-react';
 import { ANALYTICS_DATE_PRESETS } from '@/lib/analytics-date-range';
-import { isCurrentMonthRange } from '@/lib/report-date-range';
-
 const CHART_COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EC4899', '#3B82F6', '#8B5CF6', '#14B8A6', '#F97316', '#06B6D4', '#A855F7'];
 
 function truncateLabel(text, max = 26) {
@@ -345,7 +343,7 @@ export default function AnalyticsContent({ result, id, datePreset = 'last_30d', 
   const [untilInput, setUntilInput] = useState(initUntil);
   const reportRef = useRef(null);
   const keywordsRef = useRef(null);
-  const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown, searchConsole, reportPeriod } = result;
+  const { summary, dailyActiveUsers, deviceBreakdown, trafficSources, topPages, countryBreakdown, searchConsole, reportPeriod, realtime } = result;
 
   useEffect(() => {
     setSinceInput(initSince);
@@ -353,7 +351,8 @@ export default function AnalyticsContent({ result, id, datePreset = 'last_30d', 
   }, [initSince, initUntil]);
 
   const isCustom = datePreset === 'custom';
-  const showRealtime = reportPeriod ? isCurrentMonthRange(reportPeriod.since, reportPeriod.until) : false;
+  // Realtime artık dönem toplamından bağımsız ayrı bir alan.
+  const showRealtime = Boolean(realtime);
 
   const deviceItems = useMemo(
     () => (deviceBreakdown || []).slice(0, 10).map((d, i) => ({ ...d, color: d.color || CHART_COLORS[i % CHART_COLORS.length] })),
@@ -369,10 +368,7 @@ export default function AnalyticsContent({ result, id, datePreset = 'last_30d', 
   );
 
   const countryColors = CHART_COLORS;
-  const enrichedCountryData = (countryBreakdown || [
-    { name: 'Türkiye', percentage: 0, count: 0 },
-    { name: 'Diğer', percentage: 0, count: 0 }
-  ]).map((country, idx) => ({
+  const enrichedCountryData = (countryBreakdown || []).map((country, idx) => ({
     ...country,
     color: country.color || countryColors[idx % countryColors.length]
   }));
@@ -570,7 +566,7 @@ export default function AnalyticsContent({ result, id, datePreset = 'last_30d', 
             animation: 'pulse 1.5s infinite alternate' 
           }}></div>
           <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            Şu Anda Sitede: <strong style={{ fontSize: '1.1rem', color: '#10b981', marginLeft: '0.2rem' }}>{summary.activeUsers}</strong> Aktif Kullanıcı
+            Şu Anda Sitede: <strong style={{ fontSize: '1.1rem', color: '#10b981', marginLeft: '0.2rem' }}>{realtime?.activeUsers ?? 0}</strong> Aktif Kullanıcı
           </span>
         </div>
         <button 

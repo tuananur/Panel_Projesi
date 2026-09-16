@@ -15,6 +15,18 @@ function num(value) {
   return nf.format(Math.round(Number(value) || 0));
 }
 
+function pct(value) {
+  return `${nf.format(Math.round((Number(value) || 0) * 100) / 100)}%`;
+}
+
+function duration(seconds) {
+  const secs = Math.round(Number(seconds) || 0);
+  if (secs < 60) return `0dk ${secs}sn`;
+  return `${Math.floor(secs / 60)}dk ${secs % 60}sn`;
+}
+
+const DEVICE_LABELS = { DESKTOP: 'Masaüstü', MOBILE: 'Mobil', TABLET: 'Tablet' };
+
 function Row({ label, value }) {
   return (
     <div
@@ -41,6 +53,17 @@ function Section({ title, note, children }) {
       {note && <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '1rem' }}>{note}</p>}
       {children}
     </div>
+  );
+}
+
+/** Veri yoksa sahte satır basmak yerine bölümü açık şekilde boş gösterir. */
+function ListSection({ title, note, items, render }) {
+  return (
+    <Section title={title} note={note}>
+      {items?.length > 0
+        ? items.map(render)
+        : <p className="text-muted" style={{ fontSize: '0.85rem' }}>Bu dönem için veri bulunamadı.</p>}
+    </Section>
   );
 }
 
@@ -88,9 +111,10 @@ export default async function ClientReportPage({ params, searchParams }) {
   const analyticsConfigured = client.analyticsEnabled && Boolean(client.analyticsPropertyId);
   const result = await getGoogleAnalyticsAction(id, since, until);
 
-  const gaOk = Boolean(result?.success);
+  const ga = result?.success ? result.analytics : null;
+  const gaOk = Boolean(ga?.summary);
   const gsc = result?.searchConsole || null;
-  const gscOk = Boolean(gsc && !gsc.error);
+  const gscOk = Boolean(gsc && !gsc.error && gsc.summary);
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '820px' }}>
@@ -131,7 +155,7 @@ export default async function ClientReportPage({ params, searchParams }) {
       </div>
 
       <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-        Dönem: {periodLabel} ({since} → {until}, {dayCount} gün)
+        Dönem: {periodLabel} ({since} → {until}, {dayCount} gün) · Tüm ülkeler ve tüm cihazlar
       </p>
 
       {!gaOk && (
@@ -139,109 +163,142 @@ export default async function ClientReportPage({ params, searchParams }) {
           <p style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem' }}>
             {!analyticsConfigured
               ? 'Analytics bağlantısı yapılandırılmamış (GA4 mülk kimliği eksik).'
-              : result?.details || 'Analytics verileri alınamadı.'}
+              : result?.details || (result?.success ? 'Bu dönem için veri bulunamadı.' : 'Analytics verileri alınamadı.')}
           </p>
         </Section>
       )}
 
       {gaOk && (
         <>
-          <Section title="Google Analytics — Özet">
-            <Row label="Tekil ziyaretçi (aktif kullanıcı)" value={num(result.summary.activeUsers)} />
-            <Row label="Sayfa görüntüleme" value={num(result.summary.pageViews)} />
-            <Row label="Oturum" value={num(result.summary.sessions)} />
-            <Row label="Hemen çıkma oranı" value={`${result.summary.bounceRate}%`} />
-            <Row label="Ort. etkileşim süresi" value={result.summary.avgEngagementTime} />
-            <Row label="Etkinlik sayısı" value={num(result.summary.eventCount)} />
+          <Section title="Google Analytics — Özet" note="Dönemin tamamı, ülke veya cihaz filtresi yok.">
+            <Row label="Tekil ziyaretçi (aktif kullanıcı)" value={num(ga.summary.activeUsers)} />
+            <Row label="Sayfa görüntüleme" value={num(ga.summary.pageViews)} />
+            <Row label="Oturum" value={num(ga.summary.sessions)} />
+            <Row label="Hemen çıkma oranı" value={pct(ga.summary.bounceRate)} />
+            <Row label="Ort. oturum süresi" value={ga.summary.avgEngagementTime} />
+            <Row label="Etkinlik sayısı" value={num(ga.summary.eventCount)} />
+            {ga.realtime && <Row label="Şu anda sitede (canlı)" value={num(ga.realtime.activeUsers)} />}
           </Section>
 
-          {result.deviceBreakdown?.length > 0 && (
-            <Section title="Cihaz Dağılımı">
-              {result.deviceBreakdown.map((item) => (
-                <Row key={item.name} label={item.name} value={`${num(item.count)} kullanıcı (%${item.percentage})`} />
-              ))}
-            </Section>
-          )}
+          <ListSection
+            title="Cihaz Dağılımı"
+            items={ga.devices}
+            render={(item) => (
+              <Row key={item.rawName || item.name} label={item.name} value={`${num(item.activeUsers)} kullanıcı · ${num(item.sessions)} oturum · ${pct(item.percentage)}`} />
+            )}
+          />
 
-          {result.trafficSources?.length > 0 && (
-            <Section title="Erişim Kanalları">
-              {result.trafficSources.map((item) => (
-                <Row key={item.name} label={item.name} value={`${num(item.count)} kullanıcı (%${item.percentage})`} />
-              ))}
-            </Section>
-          )}
+          <ListSection
+            title="Erişim Kanalları"
+            items={ga.channels}
+            render={(item) => (
+              <Row key={item.rawName || item.name} label={item.name} value={`${num(item.activeUsers)} kullanıcı · ${num(item.sessions)} oturum · ${pct(item.percentage)}`} />
+            )}
+          />
 
-          {result.countryBreakdown?.length > 0 && (
-            <Section title="Ülke Dağılımı">
-              {result.countryBreakdown.map((item) => (
-                <Row key={item.name} label={item.name} value={`${num(item.count)} kullanıcı (%${item.percentage})`} />
-              ))}
-            </Section>
-          )}
+          <ListSection
+            title="Ülke Dağılımı (site trafiği)"
+            note={`${ga.countries?.length || 0} ülke · pay dönemin toplam aktif kullanıcısına göre`}
+            items={ga.countries}
+            render={(item) => (
+              <Row
+                key={item.countryCode || item.country}
+                label={`${item.country}${item.countryCode ? ` (${item.countryCode})` : ''}`}
+                value={`${num(item.activeUsers)} kullanıcı · ${num(item.sessions)} oturum · ${num(item.views)} görüntüleme · etkileşim ${pct(item.engagementRate)} · pay ${pct(item.percentage)}`}
+              />
+            )}
+          />
 
-          {result.browserBreakdown?.length > 0 && (
-            <Section title="Tarayıcı Dağılımı">
-              {result.browserBreakdown.map((item) => (
-                <Row key={item.name} label={item.name} value={`${num(item.count)} oturum (%${item.percentage})`} />
-              ))}
-            </Section>
-          )}
+          <ListSection
+            title="Tarayıcı Dağılımı"
+            items={ga.browsers}
+            render={(item) => (
+              <Row key={item.rawName || item.name} label={item.name} value={`${num(item.sessions)} oturum · ${num(item.activeUsers)} kullanıcı · ${pct(item.percentage)}`} />
+            )}
+          />
 
-          {result.topPages?.length > 0 && (
-            <Section title="En Çok Ziyaret Edilen Sayfalar">
-              {result.topPages.map((page) => (
-                <Row
-                  key={page.path}
-                  label={`${page.title} — ${page.path}`}
-                  value={`${num(page.views)} görüntüleme · ${num(page.users)} kullanıcı · ${page.time}`}
-                />
-              ))}
-            </Section>
-          )}
+          <ListSection
+            title="En Çok Ziyaret Edilen Sayfalar"
+            items={ga.pages}
+            render={(page) => (
+              <Row
+                key={page.path}
+                label={`${page.title || 'Başlıksız'} — ${page.path || '/'}`}
+                value={`${num(page.views)} görüntüleme · ${num(page.activeUsers)} kullanıcı · ${duration(page.avgSessionDuration)}`}
+              />
+            )}
+          />
 
-          {result.dailyActiveUsers?.length > 0 && (
-            <Section title="Günlük Döküm">
-              {result.dailyActiveUsers.map((day) => (
-                <Row
-                  key={day.rawDate}
-                  label={day.date}
-                  value={`${num(day.users)} kullanıcı · ${num(day.pageViews)} görüntüleme · ${num(day.sessions)} oturum`}
-                />
-              ))}
-            </Section>
-          )}
+          <ListSection
+            title="Günlük Döküm"
+            items={ga.daily}
+            render={(day) => (
+              <Row
+                key={day.date}
+                label={day.label || day.date}
+                value={`${num(day.activeUsers)} kullanıcı · ${num(day.pageViews)} görüntüleme · ${num(day.sessions)} oturum`}
+              />
+            )}
+          />
         </>
       )}
 
       {!gscOk && (
         <Section title="Google Search Console">
           <p style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem' }}>
-            {gsc?.details || 'Search Console bağlantısı yapılandırılmamış.'}
+            {gsc?.details || (gsc && !gsc.error ? 'Bu dönem için veri bulunamadı.' : 'Search Console bağlantısı yapılandırılmamış.')}
           </p>
         </Section>
       )}
 
       {gscOk && (
         <>
-          <Section title="Google Search Console — Özet" note={`${gsc.siteUrl} · ${gsc.periodLabel}`}>
+          <Section title="Google Search Console — Özet" note={`${gsc.siteUrl} · ${gsc.periodLabel} · tüm ülkeler ve tüm cihazlar`}>
             <Row label="Toplam tıklama" value={num(gsc.summary.clicks)} />
             <Row label="Toplam gösterim" value={num(gsc.summary.impressions)} />
-            <Row label="Ortalama CTR" value={`${gsc.summary.ctr}%`} />
+            <Row label="Ortalama CTR" value={pct(gsc.summary.ctr)} />
             <Row label="Ortalama pozisyon" value={gsc.summary.position} />
-            <Row label="Anahtar kelime sayısı" value={num(gsc.totalKeywords)} />
+            <Row label="Anahtar kelime sayısı" value={num(gsc.totalQueries)} />
+            {gsc.truncated && <Row label="Uyarı" value="Sonuç sayısı sayfalama sınırına ulaştı" />}
           </Section>
 
-          {gsc.keywords?.length > 0 && (
-            <Section title="Anahtar Kelimeler">
-              {gsc.keywords.map((kw) => (
-                <Row
-                  key={kw.keyword}
-                  label={kw.keyword}
-                  value={`${num(kw.clicks)} tıklama · ${num(kw.impressions)} gösterim · ${kw.ctr}% CTR · ${kw.position}. sıra`}
-                />
-              ))}
-            </Section>
-          )}
+          <ListSection
+            title="Ülke Dağılımı (arama)"
+            note={`${gsc.countries?.length || 0} ülke`}
+            items={gsc.countries}
+            render={(item) => (
+              <Row
+                key={item.countryCode || item.countryName}
+                label={`${item.countryName}${item.countryCode ? ` (${item.countryCode})` : ''}`}
+                value={`${num(item.clicks)} tıklama · ${num(item.impressions)} gösterim · ${pct(item.ctr)} CTR · ${item.position}. sıra`}
+              />
+            )}
+          />
+
+          <ListSection
+            title="Cihaz Dağılımı (arama)"
+            items={gsc.devices}
+            render={(item) => (
+              <Row
+                key={item.device}
+                label={DEVICE_LABELS[item.device] || item.device}
+                value={`${num(item.clicks)} tıklama · ${num(item.impressions)} gösterim · ${pct(item.ctr)} CTR · ${item.position}. sıra`}
+              />
+            )}
+          />
+
+          <ListSection
+            title="Anahtar Kelimeler"
+            note="Filtresiz ham liste"
+            items={gsc.queries}
+            render={(kw) => (
+              <Row
+                key={kw.keyword}
+                label={kw.keyword}
+                value={`${num(kw.clicks)} tıklama · ${num(kw.impressions)} gösterim · ${pct(kw.ctr)} CTR · ${kw.position}. sıra`}
+              />
+            )}
+          />
         </>
       )}
     </div>
