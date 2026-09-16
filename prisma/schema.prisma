@@ -59,6 +59,8 @@ model Client {
   metaArmyRuns            MetaArmyRun[]
   metaArmyFindings        MetaArmyFinding[]
   metaArmyRecommendations MetaArmyRecommendation[]
+  ubersuggestSnapshots    SeoUbersuggestSnapshot[]
+  ubersuggestProjects     SeoUbersuggestProject[]
 
   // Meta Ads Integration
   metaEnabled     Boolean @default(false)
@@ -177,22 +179,22 @@ model ActivityLog {
 }
 
 model Note {
-  id              Int      @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   clientId        Int? // Null = Genel Not
-  client          Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client          Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   userId          Int
-  user            User     @relation("NoteAssignee", fields: [userId], references: [id], onDelete: Cascade)
+  user            User      @relation("NoteAssignee", fields: [userId], references: [id], onDelete: Cascade)
   createdByUserId Int?
-  createdByUser   User?    @relation("NoteCreator", fields: [createdByUserId], references: [id])
+  createdByUser   User?     @relation("NoteCreator", fields: [createdByUserId], references: [id])
   title           String?
-  content         String   @default("") @db.Text
-  category        String   @default("TASK") // "TASK" (iş takibi) | "DEV" (yazılım)
-  isDone          Boolean  @default(false)
+  content         String    @default("") @db.Text
+  category        String    @default("TASK") // "TASK" (iş takibi) | "DEV" (yazılım)
+  isDone          Boolean   @default(false)
   remindAt        DateTime?
   reminderSentAt  DateTime?
   reminderUserId  Int?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([reminderUserId, remindAt, reminderSentAt])
 }
@@ -324,4 +326,513 @@ model Setting {
   key       String   @id
   value     String   @db.Text
   updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// Ubersuggest SEO snapshot'ları.
+// Tablo adları istenen snake_case biçiminde @@map ile sabitlendi;
+// kolonlar proje genelindeki camelCase düzenini korur.
+// Metrikler bilinçli olarak nullable: veri gelmezse 0 yazılmaz, null kalır.
+// GA4 / Search Console verileriyle hiçbir tablo paylaşılmaz.
+// ============================================================
+
+model SeoUbersuggestSnapshot {
+  id                   Int      @id @default(autoincrement())
+  clientId             Int
+  client               Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  domain               String
+  ubersuggestProjectId String?
+  snapshotDate         DateTime @db.Date
+  source               String   @default("ubersuggest")
+
+  // Domain overview
+  organicKeywordsCount    Int?
+  estimatedOrganicTraffic Float?
+  paidKeywordsCount       Int?
+  estimatedPaidTraffic    Float?
+  domainAuthority         Int?
+  totalBacklinks          Int?
+  referringDomains        Int?
+  followBacklinks         Int?
+  nofollowBacklinks       Int?
+
+  // Site audit summary
+  siteHealthScore         Float?
+  previousSiteHealthScore Float?
+  crawledPagesCount       Int?
+  successfulPagesCount    Int?
+  redirectedPagesCount    Int?
+  brokenPagesCount        Int?
+  blockedPagesCount       Int?
+  totalIssuesCount        Int?
+  auditLastCrawledAt      DateTime?
+
+  // Rank tracking summary
+  trackedKeywordsCount   Int?
+  keywordsUpCount        Int?
+  keywordsDownCount      Int?
+  keywordsUnchangedCount Int?
+  top3Old                Int?
+  top3New                Int?
+  top10Old               Int?
+  top10New               Int?
+  top100Old              Int?
+  top100New              Int?
+  notRankingOld          Int?
+  notRankingNew          Int?
+
+  // SEO opportunity summary
+  newContentOpportunityCount      Int?
+  existingContentOpportunityCount Int?
+  quickWinOpportunityCount        Int?
+
+  // AI search summary
+  aiVisibilityPercentage Float?
+  aiVisibilityChange     Float?
+  aiAverageRank          Float?
+  aiAverageRankChange    Float?
+  aiTotalMentions        Int?
+  aiShareOfVoice         Float?
+  aiSentimentScore       Float?
+  aiSentimentLabel       String?
+  aiTotalAnswers         Int?
+  aiTotalPrompts         Int?
+  aiTotalCompetitors     Int?
+
+  rawResponseJson Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  domainHistory         SeoUbersuggestDomainHistory[]
+  keywords              SeoUbersuggestKeyword[]
+  rankTracking          SeoUbersuggestRankTracking[]
+  averagePositions      SeoUbersuggestAveragePosition[]
+  topPages              SeoUbersuggestTopPage[]
+  competitors           SeoUbersuggestCompetitor[]
+  backlinks             SeoUbersuggestBacklink[]
+  anchorTexts           SeoUbersuggestAnchorText[]
+  linkingDomains        SeoUbersuggestLinkingDomain[]
+  backlinkOpportunities SeoUbersuggestBacklinkOpportunity[]
+  auditIssues           SeoUbersuggestAuditIssue[]
+  opportunities         SeoUbersuggestOpportunity[]
+  pagespeed             SeoUbersuggestPagespeed[]
+  aiProviders           SeoUbersuggestAiProvider[]
+  aiCompetitors         SeoUbersuggestAiCompetitor[]
+  aiIntents             SeoUbersuggestAiIntent[]
+
+  @@unique([clientId, domain, snapshotDate, source])
+  @@index([clientId, snapshotDate])
+  @@index([domain])
+  @@map("seo_ubersuggest_snapshots")
+}
+
+model SeoUbersuggestDomainHistory {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  yearMonth               String
+  estimatedOrganicTraffic Float?
+  organicKeywordsCount    Int?
+  estimatedPaidTraffic    Float?
+  paidKeywordsCount       Int?
+  topTierKeywords         Int?
+  secondTierKeywords      Int?
+  thirdTierKeywords       Int?
+  fourthTierKeywords      Int?
+
+  @@unique([snapshotId, yearMonth])
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_domain_history")
+}
+
+model SeoUbersuggestKeyword {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  keyword          String
+  searchIntent     String?
+  currentPosition  Int?
+  searchVolume     Int?
+  seoDifficulty    Float?
+  paidDifficulty   Float?
+  competition      Float?
+  cpc              Float?
+  estimatedTraffic Float?
+  rankingUrl       String?
+  rankingPath      String?
+  positionGroup    String?
+  sourceUpdatedAt  DateTime?
+
+  // rankingUrl null olabildiği için Postgres bu kısıtı tek başına yeterli tutmaz;
+  // ingest servisi ayrıca aynı anahtarı uygulama tarafında da tekilleştirir.
+  @@unique([snapshotId, keyword, rankingUrl])
+  @@index([snapshotId])
+  @@index([snapshotId, keyword])
+  @@map("seo_ubersuggest_keywords")
+}
+
+model SeoUbersuggestRankTracking {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  keyword       String
+  language      String?
+  locationId    String?
+  device        String?
+  searchVolume  Int?
+  seoDifficulty Float?
+  competition   Float?
+
+  // null pozisyon = ilk 100'de değil. Sahte 100/101 değeri yazılmaz.
+  oldPosition     Int?
+  oldPositionDate DateTime?
+  oldRankingUrl   String?
+
+  newPosition     Int?
+  newPositionDate DateTime?
+  newRankingUrl   String?
+
+  positionChange  Int?
+  rankingStatus   String?
+  isRankingTop100 Boolean?
+  isUnstable      Boolean?
+  sourceUpdatedAt DateTime?
+
+  @@index([snapshotId])
+  @@index([snapshotId, keyword])
+  @@map("seo_ubersuggest_rank_tracking")
+}
+
+model SeoUbersuggestAveragePosition {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  date            DateTime @db.Date
+  averagePosition Float?
+
+  @@unique([snapshotId, date])
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_average_positions")
+}
+
+model SeoUbersuggestTopPage {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  url                     String
+  path                    String?
+  pageTitle               String?
+  estimatedOrganicTraffic Float?
+  backlinks               Int?
+  referringDomains        Int?
+  facebookShares          Int?
+  pinterestShares         Int?
+  redditShares            Int?
+
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_top_pages")
+}
+
+model SeoUbersuggestCompetitor {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  competitorDomain                  String
+  commonKeywordCount                Int?
+  competitorOrganicKeywordsCount    Int?
+  keywordGapCount                   Int?
+  competitorEstimatedOrganicTraffic Float?
+  competitorBacklinks               Int?
+  competitorDomainAuthority         Int?
+
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_competitors")
+}
+
+model SeoUbersuggestBacklink {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  sourceUrl        String
+  sourceDomain     String?
+  targetUrl        String?
+  anchorText       String?
+  firstSeen        DateTime?
+  lastSeen         DateTime?
+  sourceDomainRank Int?
+  sourcePageRank   Int?
+  backlinkType     String?
+  followStatus     String?
+
+  @@index([snapshotId])
+  @@index([snapshotId, sourceDomain])
+  @@map("seo_ubersuggest_backlinks")
+}
+
+model SeoUbersuggestAnchorText {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  anchorText          String
+  externalRootDomains Int?
+  externalPages       Int?
+
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_anchor_texts")
+}
+
+model SeoUbersuggestLinkingDomain {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  referringDomain String
+  detectedDate    DateTime?
+  status          String // "new" | "lost"
+
+  @@index([snapshotId])
+  @@index([snapshotId, status])
+  @@map("seo_ubersuggest_linking_domains")
+}
+
+model SeoUbersuggestBacklinkOpportunity {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  referringDomain   String
+  competitorDomain  String?
+  ourDomain         String?
+  linksToCompetitor Int?
+  linksToUs         Int?
+  opportunityStatus String?
+
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_backlink_opportunities")
+}
+
+model SeoUbersuggestAuditIssue {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  issueId       String
+  issueCategory String? // "error" | "warning" | "recommendation"
+  issueLevel    String? // "domain" | "page"
+  issueCount    Int?
+  seoImpact     String? // "high" | "medium" | "low"
+  difficulty    String? // "easy" | "moderate" | "hard"
+
+  affectedUrls SeoUbersuggestAuditIssueUrl[]
+
+  @@index([snapshotId])
+  @@index([snapshotId, issueCategory])
+  @@map("seo_ubersuggest_audit_issues")
+}
+
+model SeoUbersuggestAuditIssueUrl {
+  id           Int                      @id @default(autoincrement())
+  auditIssueId Int
+  auditIssue   SeoUbersuggestAuditIssue @relation(fields: [auditIssueId], references: [id], onDelete: Cascade)
+
+  url            String
+  httpStatus     Int?
+  issueStatus    String?
+  recommendation String?
+  ignored        Boolean?
+  diffStatus     String?
+
+  @@index([auditIssueId])
+  @@map("seo_ubersuggest_audit_issue_urls")
+}
+
+model SeoUbersuggestOpportunity {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  opportunityType    String // "SITE_AUDIT" | "KEYWORD_OPPORTUNITY"
+  opportunitySubtype String?
+
+  keyword          String?
+  currentPosition  Int?
+  searchVolume     Int?
+  seoDifficulty    Float?
+  paidDifficulty   Float?
+  competition      Float?
+  cpc              Float?
+  rankingUrl       String?
+  estimatedTraffic Float?
+
+  impact            String?
+  effort            String?
+  approved          Boolean?
+  opportunityStatus String?
+
+  @@index([snapshotId])
+  @@index([snapshotId, opportunityType])
+  @@map("seo_ubersuggest_opportunities")
+}
+
+model SeoUbersuggestPagespeed {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  device String // "DESKTOP" | "MOBILE"
+  status String? // "pending" durumunda metrikler null kalır
+
+  performanceScore    Float?
+  seoScore            Float?
+  accessibilityScore  Float?
+  bestPracticesScore  Float?
+  coreWebVitalsStatus String?
+  lcp                 Float?
+  inp                 Float?
+  cls                 Float?
+  fcp                 Float?
+  ttfb                Float?
+  speedIndex          Float?
+  checkedAt           DateTime?
+
+  @@unique([snapshotId, device])
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_pagespeed")
+}
+
+model SeoUbersuggestAiProvider {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  provider String // "openai" | "gemini" | "google_aio"
+
+  visibilityPercentage Float?
+  visibilityChange     Float?
+  averageRank          Float?
+  averageRankChange    Float?
+  totalMentions        Int?
+  sentimentScore       Float?
+  sentimentLabel       String?
+
+  positiveKeywordsJson Json?
+  negativeKeywordsJson Json?
+
+  @@unique([snapshotId, provider])
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_ai_providers")
+}
+
+model SeoUbersuggestAiCompetitor {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  brandName   String
+  isUserBrand Boolean?
+  isTracked   Boolean?
+  isPinned    Boolean?
+
+  averageRank                 Float?
+  totalMentions               Int?
+  visibilityPercentage        Float?
+  sentimentScore              Float?
+  sentimentPositivePercentage Float?
+  sentimentNegativePercentage Float?
+  sentimentNeutralPercentage  Float?
+  sentimentLabel              String?
+
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_ai_competitors")
+}
+
+model SeoUbersuggestAiIntent {
+  id         Int                    @id @default(autoincrement())
+  snapshotId Int
+  snapshot   SeoUbersuggestSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  informationalCount Int?
+  navigationalCount  Int?
+  commercialCount    Int?
+  transactionalCount Int?
+
+  @@index([snapshotId])
+  @@map("seo_ubersuggest_ai_intents")
+}
+
+model SeoUbersuggestProject {
+  id                   Int     @id @default(autoincrement())
+  clientId             Int
+  client               Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  ubersuggestProjectId String
+  domain               String
+  projectTitle         String?
+  projectStatus        String?
+  projectType          String?
+  updateFrequency      String?
+
+  mobileRankTrackingEnabled Boolean?
+  pixelRankTrackingEnabled  Boolean?
+  alertsEnabled             Boolean?
+  hasAiBrandTracking        Boolean?
+
+  trackedKeywordCount    Int?
+  trackedCompetitorCount Int?
+  trackedLocationCount   Int?
+
+  keywordsLastUpdatedAt     DateTime?
+  auditLastUpdatedAt        DateTime?
+  trafficValueLastUpdatedAt DateTime?
+
+  keywordLimit    Int?
+  keywordUsed     Int?
+  competitorLimit Int?
+  competitorUsed  Int?
+  locationLimit   Int?
+  locationUsed    Int?
+  aiPromptLimit   Int?
+  aiPromptUsed    Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locations   SeoUbersuggestProjectLocation[]
+  competitors SeoUbersuggestProjectCompetitor[]
+
+  @@unique([clientId, ubersuggestProjectId])
+  @@index([clientId])
+  @@map("seo_ubersuggest_projects")
+}
+
+model SeoUbersuggestProjectLocation {
+  id        Int                   @id @default(autoincrement())
+  projectId Int
+  project   SeoUbersuggestProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  language   String?
+  locationId String?
+
+  @@index([projectId])
+  @@map("seo_ubersuggest_project_locations")
+}
+
+model SeoUbersuggestProjectCompetitor {
+  id        Int                   @id @default(autoincrement())
+  projectId Int
+  project   SeoUbersuggestProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  competitorDomain String
+  language         String?
+  locationId       String?
+
+  @@index([projectId])
+  @@map("seo_ubersuggest_project_competitors")
 }
