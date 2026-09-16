@@ -407,6 +407,18 @@ input, button, select, textarea {
   background: var(--bg-hover, rgba(127, 127, 127, 0.08));
 }
 
+/* Tıklanan müşteri satırı, hedef sayfa yüklenene kadar işaretlenir. */
+.report-row.is-pending {
+  background: var(--bg-hover, rgba(127, 127, 127, 0.08));
+  animation: pulse-text 1.4s ease-in-out infinite;
+}
+
+.report-skeleton {
+  border-radius: 6px;
+  background: var(--bg-hover, rgba(127, 127, 127, 0.12));
+  animation: pulse-text 1.6s ease-in-out infinite;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
