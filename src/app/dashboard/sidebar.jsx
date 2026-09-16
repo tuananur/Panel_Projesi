@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare, Bell, Megaphone, UtensilsCrossed, UsersRound } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare, Bell, Megaphone, UtensilsCrossed, UsersRound, FileBarChart2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction, getWorkItemBadgeCountAction, getNotificationUnreadCountAction } from '@/app/actions';
 import { can } from '@/lib/permissions';
@@ -33,6 +33,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
   const canGroups = can(permissions, role, 'page.groups');
   const canSendNotifications = can(permissions, role, 'page.send_notifications');
   const canNotifications = can(permissions, role, 'page.notifications');
+  const canReports = can(permissions, role, 'page.reports');
   const [hasNewLogs, setHasNewLogs] = useState(false);
   const [hasNewNotes, setHasNewNotes] = useState(false);
   const [unreadMailCount, setUnreadMailCount] = useState(0);
@@ -165,6 +166,9 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
     ] : []),
     ...(canSendNotifications ? [
       { href: '/dashboard/send-notification', label: 'Bildirim Gönder', icon: <Megaphone size={20} /> },
+    ] : []),
+    ...(canReports ? [
+      { href: '/dashboard/reports', label: 'Raporlar', icon: <FileBarChart2 size={20} /> },
     ] : []),
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];

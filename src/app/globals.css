@@ -399,6 +399,14 @@ input, button, select, textarea {
   color: var(--text-secondary);
 }
 
+.report-row {
+  transition: background 0.2s;
+}
+
+.report-row:hover {
+  background: var(--bg-hover, rgba(127, 127, 127, 0.08));
+}
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
