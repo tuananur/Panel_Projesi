@@ -54,16 +54,10 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
         }
       };
       checkLogs();
-      
+
       const handleStorage = () => checkLogs();
       window.addEventListener('storage', handleStorage);
-
-      // Check every 30 seconds
-      const interval = setInterval(checkLogs, 30000);
-      return () => {
-        clearInterval(interval);
-        window.removeEventListener('storage', handleStorage);
-      };
+      return () => window.removeEventListener('storage', handleStorage);
     }
   }, [isAdmin, pathname]);
 
@@ -82,9 +76,6 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
       }
     };
     checkNotes();
-    
-    const interval = setInterval(checkNotes, 30000);
-    return () => clearInterval(interval);
   }, [pathname]);
 
   useEffect(() => {
@@ -94,9 +85,6 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
       setWorkItemCount(result?.count || 0);
     };
     checkWorkItems();
-
-    const interval = setInterval(checkWorkItems, 30000);
-    return () => clearInterval(interval);
   }, [pathname, canWorkItems]);
 
   useEffect(() => {
@@ -109,9 +97,6 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
       setUnreadMailCount(result?.count || 0);
     };
     checkUnreadMail();
-
-    const interval = setInterval(checkUnreadMail, 60000);
-    return () => clearInterval(interval);
   }, [pathname, mailEnabled]);
 
   useEffect(() => {
@@ -124,9 +109,6 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
       setNotificationCount(result?.count || 0);
     };
     checkNotifications();
-
-    const interval = setInterval(checkNotifications, 30000);
-    return () => clearInterval(interval);
   }, [pathname, canNotifications]);
 
   const navItems = [

@@ -22,8 +22,7 @@ import {
   deleteNotificationAction, 
   toggleNotificationReadAction, 
   deleteAllNotificationsAction, 
-  markAllNotificationsReadAction,
-  getNotificationsAction
+  markAllNotificationsReadAction
 } from '@/app/actions';
 
 export default function NotificationsInbox({ initialNotifications = [], session }) {
@@ -33,23 +32,10 @@ export default function NotificationsInbox({ initialNotifications = [], session 
   const [filter, setFilter] = useState('all');
   const [isPending, startTransition] = useTransition();
 
-  // Keep state in sync with real-time polling (polls every 4 seconds)
+  // Periyodik polling yok: liste sunucudan gelen veriyle açılır, tazelemek için sayfa yenilenir.
   useEffect(() => {
-    const poll = async () => {
-      const result = await getNotificationsAction(200);
-      if (result?.success && result?.notifications) {
-        // Only update if there's actually a change (e.g. length, or status changes)
-        const currentIdsAndReads = notifications.map(n => `${n.id}-${n.readAt}`).join(',');
-        const newIdsAndReads = result.notifications.map(n => `${n.id}-${n.readAt}`).join(',');
-        if (currentIdsAndReads !== newIdsAndReads) {
-          setNotifications(result.notifications);
-        }
-      }
-    };
-
-    const interval = setInterval(poll, 4000);
-    return () => clearInterval(interval);
-  }, [notifications]);
+    setNotifications(initialNotifications);
+  }, [initialNotifications]);
 
   // Handle single notification click / redirection
   const handleNotificationClick = (notification) => {

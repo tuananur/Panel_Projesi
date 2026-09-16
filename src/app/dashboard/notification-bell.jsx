@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Bell, CheckCircle2 } from 'lucide-react';
 import { getNotificationsAction, markNotificationReadAction, markAllNotificationsReadAction } from '@/app/actions';
 import { getStoredNotificationSound, playNotificationSound, storeNotificationSound } from './notification-sound';
 
 export default function NotificationBell({ initialSound = 'soft' }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [count, setCount] = useState(0);
@@ -24,40 +25,44 @@ export default function NotificationBell({ initialSound = 'soft' }) {
     }
   }, [initialSound]);
 
+  const soundRef = useRef(sound);
+  useEffect(() => {
+    soundRef.current = sound;
+  }, [sound]);
+
+  const load = useCallback(async () => {
+    const result = await getNotificationsAction(50);
+    if (!result?.success) return;
+    setNotifications(result.notifications || []);
+    setCount(result.count || 0);
+    if (previousCount.current !== null && result.count > previousCount.current) {
+      playNotificationSound(getStoredNotificationSound(soundRef.current));
+    }
+    previousCount.current = result.count || 0;
+  }, []);
+
+  // Periyodik polling yok: bildirimler yalnızca sayfa geçişlerinde ve zil açılınca tazelenir.
   useEffect(() => {
     if (typeof document !== 'undefined') originalTitle.current = document.title;
-
-    const load = async () => {
-      const result = await getNotificationsAction(50);
-      if (!result?.success) return;
-      setNotifications(result.notifications || []);
-      setCount(result.count || 0);
-      const currentSound = getStoredNotificationSound(sound);
-      if (previousCount.current !== null && result.count > previousCount.current) {
-        playNotificationSound(currentSound);
-      }
-      previousCount.current = result.count || 0;
-    };
-
     load();
-    const interval = setInterval(load, 3000);
+  }, [pathname, load]);
+
+  useEffect(() => {
+    if (open) load();
+  }, [open, load]);
+
+  useEffect(() => {
     const onStorage = (event) => {
       if (event.key === 'notification-sound') setSound(event.newValue || 'soft');
     };
     const onSoundChange = (event) => setSound(event.detail?.sound || getStoredNotificationSound('soft'));
-    const onFocus = () => load();
     window.addEventListener('storage', onStorage);
     window.addEventListener('notification-sound-change', onSoundChange);
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', onFocus);
     return () => {
-      clearInterval(interval);
       window.removeEventListener('storage', onStorage);
       window.removeEventListener('notification-sound-change', onSoundChange);
-      window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onFocus);
     };
-  }, [sound]);
+  }, []);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
