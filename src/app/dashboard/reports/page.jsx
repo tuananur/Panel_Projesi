@@ -50,20 +50,27 @@ export default async function ReportsPage() {
   const ubersuggestByClient = new Map(ubersuggestGroups.map((group) => [group.clientId, group]));
   const dateFmt = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-  const rows = clients.map((client) => {
-    const hasToken = hasOAuthApp && Boolean(client.analyticsRefreshToken || globalConfig.refreshToken);
-    const ubersuggest = ubersuggestByClient.get(client.id);
-    return {
-      id: client.id,
-      companyName: client.companyName,
-      analyticsConnected: hasToken && client.analyticsEnabled && Boolean(client.analyticsPropertyId),
-      searchConsoleConnected: hasToken && Boolean(client.searchConsoleSiteUrl || client.website),
-      ubersuggestConnected: Boolean(ubersuggest),
-      ubersuggestNote: ubersuggest
-        ? `${ubersuggest._count._all} snapshot · son ${dateFmt.format(new Date(ubersuggest._max.snapshotDate))}`
-        : null,
-    };
-  });
+  const rows = clients
+    .map((client) => {
+      const hasToken = hasOAuthApp && Boolean(client.analyticsRefreshToken || globalConfig.refreshToken);
+      const ubersuggest = ubersuggestByClient.get(client.id);
+      const analyticsConnected = hasToken && client.analyticsEnabled && Boolean(client.analyticsPropertyId);
+      const searchConsoleConnected = hasToken && Boolean(client.searchConsoleSiteUrl || client.website);
+      const ubersuggestConnected = Boolean(ubersuggest);
+      return {
+        id: client.id,
+        companyName: client.companyName,
+        analyticsConnected,
+        searchConsoleConnected,
+        ubersuggestConnected,
+        connectedCount: [analyticsConnected, searchConsoleConnected, ubersuggestConnected].filter(Boolean).length,
+        ubersuggestNote: ubersuggest
+          ? `${ubersuggest._count._all} snapshot · son ${dateFmt.format(new Date(ubersuggest._max.snapshotDate))}`
+          : null,
+      };
+    })
+    // Önce 3 servisi bağlı olanlar, sonra 2, 1 ve hiç bağlı olmayanlar; eşitlikte alfabetik.
+    .sort((a, b) => b.connectedCount - a.connectedCount || a.companyName.localeCompare(b.companyName, 'tr'));
 
   return (
     <div className="animate-fade-in">
