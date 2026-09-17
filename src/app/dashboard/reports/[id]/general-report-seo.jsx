@@ -2,8 +2,8 @@
 // Tüm değerler araç verisidir; GA4 ve Search Console metrikleriyle aynı satırda toplanmaz.
 
 import { num, pct, EMPTY_VALUE } from '../report-ui';
-import { ReportSection, DataTable, MetricGrid } from './general-report-ui';
-import { LineChart, BarList } from './report-charts';
+import { ReportSection, DataTable, MetricGrid, ScoreCard, SubHeading } from './general-report-ui';
+import { LineChart, BarList, GaugeChart, TwoCol } from './report-charts';
 
 const UBER = 'Ubersuggest';
 const nf = new Intl.NumberFormat('tr-TR');
@@ -181,32 +181,36 @@ export function buildSeoSections(ubersuggest) {
   if (newDomains.length > 0 || lostDomains.length > 0) {
     add(
       <ReportSection key="s36" no={36} title="Yeni / Kaybedilen Referans Domainler" sources={[UBER]}>
-        {newDomains.length > 0 && (
-          <>
-            <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Yeni ({nf.format(newDomains.length)})</h3>
-            <DataTable
-              columns={[
-                { key: 'referringDomain', label: 'Domain', type: 'text' },
-                { key: 'detectedDate', label: 'Tespit', type: 'date' },
-              ]}
-              rows={newDomains}
-              limit={25}
-            />
-          </>
-        )}
-        {lostDomains.length > 0 && (
-          <>
-            <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.4rem' }}>Kaybedilen ({nf.format(lostDomains.length)})</h3>
-            <DataTable
-              columns={[
-                { key: 'referringDomain', label: 'Domain', type: 'text' },
-                { key: 'detectedDate', label: 'Tespit', type: 'date' },
-              ]}
-              rows={lostDomains}
-              limit={25}
-            />
-          </>
-        )}
+        <TwoCol
+          left={(
+            <>
+              <SubHeading><span style={{ color: '#34A853' }}>Yeni ({nf.format(newDomains.length)})</span></SubHeading>
+              <DataTable
+                columns={[
+                  { key: 'referringDomain', label: 'Domain', type: 'text' },
+                  { key: 'detectedDate', label: 'Tespit', type: 'date' },
+                ]}
+                rows={newDomains}
+                limit={25}
+                emptyNote="Yeni domain yok"
+              />
+            </>
+          )}
+          right={(
+            <>
+              <SubHeading><span style={{ color: '#EA4335' }}>Kaybedilen ({nf.format(lostDomains.length)})</span></SubHeading>
+              <DataTable
+                columns={[
+                  { key: 'referringDomain', label: 'Domain', type: 'text' },
+                  { key: 'detectedDate', label: 'Tespit', type: 'date' },
+                ]}
+                rows={lostDomains}
+                limit={25}
+                emptyNote="Kaybedilen domain yok"
+              />
+            </>
+          )}
+        />
       </ReportSection>,
     );
   } else {
@@ -271,7 +275,19 @@ export function buildSeoSections(ubersuggest) {
         sources={[UBER]}
         note={snapshot.auditLastCrawledAt ? `Son tarama: ${new Date(snapshot.auditLastCrawledAt).toLocaleDateString('tr-TR')}` : undefined}
       >
+        <GaugeChart
+          value={snapshot.siteHealthScore}
+          label="Site Health"
+          legend={[
+            { label: 'Başarılı', value: snapshot.successfulPagesCount, color: '#34A853' },
+            { label: 'Yönlendirilen', value: snapshot.redirectedPagesCount, color: '#FBBC05' },
+            { label: 'Kırık', value: snapshot.brokenPagesCount, color: '#EA4335' },
+            { label: 'Engellenen', value: snapshot.blockedPagesCount, color: '#4285F4' },
+            { label: 'Toplam sorun', value: snapshot.totalIssuesCount, color: '#94a3b8' },
+          ].filter((item) => item.value !== null && item.value !== undefined)}
+        />
         <MetricGrid
+          compact
           items={[
             {
               label: 'Site sağlık puanı',
@@ -280,11 +296,6 @@ export function buildSeoSections(ubersuggest) {
               hint: snapshot.previousSiteHealthScore !== null ? `Önceki: ${nf.format(snapshot.previousSiteHealthScore)}` : null,
             },
             { label: 'Taranan sayfa', source: UBER, value: num(snapshot.crawledPagesCount) },
-            { label: 'Başarılı', source: UBER, value: num(snapshot.successfulPagesCount) },
-            { label: 'Yönlendirilen', source: UBER, value: num(snapshot.redirectedPagesCount) },
-            { label: 'Kırık', source: UBER, value: num(snapshot.brokenPagesCount) },
-            { label: 'Engellenen', source: UBER, value: num(snapshot.blockedPagesCount) },
-            { label: 'Toplam sorun', source: UBER, value: num(snapshot.totalIssuesCount) },
           ]}
         />
       </ReportSection>,
@@ -303,7 +314,7 @@ export function buildSeoSections(ubersuggest) {
             { key: 'issueCategory', label: 'Kategori', type: 'text' },
             { key: 'issueLevel', label: 'Seviye', type: 'text' },
             { key: 'issueCount', label: 'Adet', type: 'int' },
-            { key: 'seoImpact', label: 'Etki', type: 'text' },
+            { key: 'seoImpact', label: 'Etki', badge: true },
             { key: 'difficulty', label: 'Zorluk', type: 'text' },
           ]}
           rows={snapshot.auditIssues}
@@ -343,7 +354,7 @@ export function buildSeoSections(ubersuggest) {
             { key: 'url', label: 'URL', type: 'text' },
             { key: 'httpStatus', label: 'HTTP', type: 'int' },
             { key: 'issueStatus', label: 'Durum', type: 'text' },
-            { key: 'seoImpact', label: 'Etki', type: 'text' },
+            { key: 'seoImpact', label: 'Etki', badge: true },
             { key: 'difficulty', label: 'Zorluk', type: 'text' },
             { key: 'recommendation', label: 'Öneri', type: 'text' },
           ]}
@@ -360,21 +371,23 @@ export function buildSeoSections(ubersuggest) {
   if (hasRows(snapshot.pagespeed)) {
     add(
       <ReportSection key="s42" no={42} title="PageSpeed / Core Web Vitals" sources={[UBER]}>
-        <DataTable
-          columns={[
-            { key: 'deviceLabel', label: 'Cihaz', type: 'text' },
-            { key: 'performanceScore', label: 'Performans', type: 'float' },
-            { key: 'seoScore', label: 'SEO', type: 'float' },
-            { key: 'coreWebVitalsStatus', label: 'CWV', type: 'text' },
-            { key: 'lcp', label: 'LCP', type: 'float' },
-            { key: 'inp', label: 'INP', type: 'float' },
-            { key: 'cls', label: 'CLS', type: 'float' },
-            { key: 'fcp', label: 'FCP', type: 'float' },
-            { key: 'ttfb', label: 'TTFB', type: 'float' },
-          ]}
-          rows={snapshot.pagespeed.map((row) => ({ ...row, deviceLabel: DEVICE_LABELS[row.device] || row.device }))}
-          limit={5}
-        />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+          {snapshot.pagespeed.map((row) => (
+            <ScoreCard
+              key={row.device}
+              title={DEVICE_LABELS[row.device] || row.device}
+              score={row.performanceScore}
+              rows={[
+                { label: 'LCP', value: row.lcp == null ? null : nf.format(row.lcp) },
+                { label: 'INP', value: row.inp == null ? null : nf.format(row.inp) },
+                { label: 'CLS', value: row.cls == null ? null : nf.format(row.cls) },
+                { label: 'FCP', value: row.fcp == null ? null : nf.format(row.fcp) },
+                { label: 'TTFB', value: row.ttfb == null ? null : nf.format(row.ttfb) },
+                { label: 'CWV', value: row.coreWebVitalsStatus },
+              ]}
+            />
+          ))}
+        </div>
       </ReportSection>,
     );
   } else {
@@ -406,7 +419,7 @@ export function buildSeoSections(ubersuggest) {
               { key: 'currentPosition', label: 'Pozisyon', type: 'int' },
               { key: 'searchVolume', label: 'Hacim', type: 'int' },
               { key: 'seoDifficulty', label: 'SD', type: 'float' },
-              { key: 'impact', label: 'Etki', type: 'text' },
+              { key: 'impact', label: 'Etki', badge: true },
               { key: 'effort', label: 'Efor', type: 'text' },
             ]}
             rows={snapshot.opportunities}
@@ -458,11 +471,19 @@ export function buildSeoSections(ubersuggest) {
   if (hasRows(snapshot.aiProviders)) {
     add(
       <ReportSection key="s45" no={45} title="AI Platform Kırılımı" sources={[UBER]}>
+        <BarList
+          rows={snapshot.aiProviders.map((row) => ({
+            label: row.provider,
+            value: row.visibilityPercentage,
+          }))}
+          suffix="%"
+          limit={10}
+        />
         <DataTable
           columns={[
             { key: 'provider', label: 'Platform', type: 'text' },
             { key: 'visibilityPercentage', label: 'Görünürlük', type: 'pct' },
-            { key: 'visibilityChange', label: 'Değişim', type: 'delta' },
+            { key: 'visibilityChange', label: 'Değişim', type: 'delta', colorize: 'up-good' },
             { key: 'totalMentions', label: 'Bahsedilme', type: 'int' },
             { key: 'averageRank', label: 'Ort. sıra', type: 'float' },
             { key: 'sentimentLabel', label: 'Duygu', type: 'text' },

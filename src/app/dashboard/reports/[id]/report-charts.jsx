@@ -1,7 +1,6 @@
-// Genel rapor grafikleri. Etkileşim gerektirmediği için sunucu tarafında SVG olarak
-// üretilir; ekstra JS paketi yüklenmez.
+// Genel rapor grafikleri — sunucu tarafı SVG; ekstra paket yok.
 
-const PALETTE = ['#4285F4', '#34A853', '#FBBC05', '#EA4335', '#A142F4', '#00ACC1', '#FF7043', '#9E9D24'];
+export const PALETTE = ['#4285F4', '#34A853', '#FBBC05', '#EA4335', '#A142F4', '#00ACC1', '#FF7043', '#9E9D24'];
 
 const numberFmt = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 1 });
 
@@ -10,23 +9,22 @@ function fmt(value) {
   return numberFmt.format(value);
 }
 
-/**
- * Çok serili çizgi grafik.
- * series: [{ key, label, color? }], data: [{ label, [key]: number }]
- */
-export function LineChart({ data, series, height = 190, valueSuffix = '' }) {
+function seriesPath(rows, seriesKey, x, y) {
+  return rows.map((row, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(row[seriesKey])}`).join(' ');
+}
+
+/** Çok serili çizgi grafik. */
+export function LineChart({ data, series, height = 190, valueSuffix = '', showRange = true }) {
   const rows = (data || []).filter(Boolean);
   if (rows.length < 2 || !series?.length) return null;
 
-  const width = 100; // yüzde tabanlı viewBox: kart genişliğine uyum sağlar
+  const width = 100;
   const values = rows.flatMap((row) => series.map((s) => Number(row[s.key]) || 0));
   const max = Math.max(...values);
   const min = Math.min(0, ...values);
   const span = max - min || 1;
-
   const x = (index) => (rows.length === 1 ? 0 : (index / (rows.length - 1)) * width);
   const y = (value) => height - 24 - ((Number(value) || 0) - min) / span * (height - 44);
-
   const labelStep = Math.ceil(rows.length / 8);
 
   return (
@@ -39,56 +37,85 @@ export function LineChart({ data, series, height = 190, valueSuffix = '' }) {
           </span>
         ))}
       </div>
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        preserveAspectRatio="none"
-        style={{ width: '100%', height: `${height}px`, overflow: 'visible' }}
-      >
+      <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: `${height}px`, overflow: 'visible' }}>
         {[0, 0.5, 1].map((ratio) => (
-          <line
-            key={ratio}
-            x1="0"
-            x2={width}
-            y1={y(min + span * ratio)}
-            y2={y(min + span * ratio)}
-            stroke="var(--border-color)"
-            strokeWidth="0.3"
-            strokeDasharray="1 1"
-            vectorEffect="non-scaling-stroke"
-          />
+          <line key={ratio} x1="0" x2={width} y1={y(min + span * ratio)} y2={y(min + span * ratio)} stroke="var(--border-color)" strokeWidth="0.3" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
         ))}
-        {series.map((s, seriesIndex) => {
-          const color = s.color || PALETTE[seriesIndex % PALETTE.length];
-          const path = rows.map((row, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(row[s.key])}`).join(' ');
-          // viewBox yatayda gerildiği için nokta işaretçisi kullanılmaz (oval görünürdü);
-          // tam değerler bölümün tablosunda yer alıyor.
-          return <path key={s.key} d={path} fill="none" stroke={color} strokeWidth="1.6" vectorEffect="non-scaling-stroke" />;
-        })}
+        {series.map((s, seriesIndex) => (
+          <path key={s.key} d={seriesPath(rows, s.key, x, y)} fill="none" stroke={s.color || PALETTE[seriesIndex % PALETTE.length]} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
+        ))}
       </svg>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-        {rows
-          .filter((_, index) => index % labelStep === 0 || index === rows.length - 1)
-          .map((row, index) => (
-            <span key={`${row.label}-${index}`}>{row.label}</span>
-          ))}
+        {rows.filter((_, index) => index % labelStep === 0 || index === rows.length - 1).map((row, index) => (
+          <span key={`${row.label}-${index}`}>{row.label}</span>
+        ))}
       </div>
-      <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
-        En yüksek: {fmt(max)}{valueSuffix} · En düşük: {fmt(Math.min(...values))}{valueSuffix}
+      {showRange && (
+        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
+          En yüksek: {fmt(max)}{valueSuffix} · En düşük: {fmt(Math.min(...values))}{valueSuffix}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Tek serili alan (area) grafik — organik trafik gibi trendler için. */
+export function AreaChart({ data, valueKey = 'value', labelKey = 'label', color = '#34A853', height = 160 }) {
+  const rows = (data || []).filter(Boolean);
+  if (rows.length < 2) return null;
+
+  const width = 100;
+  const values = rows.map((row) => Number(row[valueKey]) || 0);
+  const max = Math.max(...values) || 1;
+  const x = (index) => (index / (rows.length - 1)) * width;
+  const y = (value) => height - 20 - (value / max) * (height - 36);
+  const line = rows.map((row, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(Number(row[valueKey]) || 0)}`).join(' ');
+  const area = `${line} L ${width} ${height - 20} L 0 ${height - 20} Z`;
+  const labelStep = Math.ceil(rows.length / 6);
+
+  return (
+    <div style={{ marginTop: '0.75rem' }}>
+      <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: `${height}px` }}>
+        <path d={area} fill={color} opacity="0.18" />
+        <path d={line} fill="none" stroke={color} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
+        {rows.filter((_, index) => index % labelStep === 0 || index === rows.length - 1).map((row, index) => (
+          <span key={`${row[labelKey]}-${index}`}>{row[labelKey]}</span>
+        ))}
       </div>
     </div>
   );
 }
 
-/** Yatay bar listesi: kategori dağılımları için (kaynak, cihaz, ülke, gün, saat). */
-export function BarList({ rows, valueKey = 'value', labelKey = 'label', suffix = '', limit = 12, secondary = null }) {
+/** Mini sparkline — KPI kartı içi. */
+export function Sparkline({ values = [], color = '#4285F4', width = 80, height = 28 }) {
+  const nums = values.map(Number).filter((v) => Number.isFinite(v));
+  if (nums.length < 2) return null;
+  const max = Math.max(...nums);
+  const min = Math.min(...nums);
+  const span = max - min || 1;
+  const x = (index) => (index / (nums.length - 1)) * width;
+  const y = (value) => height - 2 - ((value - min) / span) * (height - 4);
+  const d = nums.map((value, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(value)}`).join(' ');
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+      <path d={d} fill="none" stroke={color} strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+/** Yatay bar listesi. */
+export function BarList({ rows, valueKey = 'value', labelKey = 'label', suffix = '', limit = 12, secondary = null, color = null }) {
   const items = (rows || []).slice(0, limit);
   if (items.length === 0) return null;
   const max = Math.max(...items.map((row) => Number(row[valueKey]) || 0)) || 1;
 
   return (
-    <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
       {items.map((row, index) => {
         const value = Number(row[valueKey]) || 0;
+        const barColor = color || row.color || PALETTE[index % PALETTE.length];
         return (
           <div key={`${row[labelKey]}-${index}`}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '0.2rem', gap: '1rem' }}>
@@ -100,15 +127,8 @@ export function BarList({ rows, valueKey = 'value', labelKey = 'label', suffix =
                 )}
               </span>
             </div>
-            <div style={{ height: '7px', borderRadius: '4px', background: 'var(--border-color)', overflow: 'hidden' }}>
-              <div
-                style={{
-                  width: `${(value / max) * 100}%`,
-                  height: '100%',
-                  borderRadius: '4px',
-                  background: PALETTE[index % PALETTE.length],
-                }}
-              />
+            <div style={{ height: '8px', borderRadius: '4px', background: 'var(--border-color)', overflow: 'hidden' }}>
+              <div style={{ width: `${(value / max) * 100}%`, height: '100%', borderRadius: '4px', background: barColor }} />
             </div>
           </div>
         );
@@ -117,16 +137,53 @@ export function BarList({ rows, valueKey = 'value', labelKey = 'label', suffix =
   );
 }
 
-/** Donut: yalnızca birkaç kategorili dağılımlar için (cihaz, yeni/geri dönen). */
-export function DonutChart({ rows, valueKey = 'value', labelKey = 'label', size = 150 }) {
+/**
+ * Rank tracking tarzı sabit hedefli progress barlar.
+ * items: [{ label, value, max?, changePct?, color? }]
+ */
+export function RankProgressBars({ items }) {
+  const rows = (items || []).filter((row) => row.value !== null && row.value !== undefined);
+  if (rows.length === 0) return null;
+  const max = Math.max(...rows.map((row) => Number(row.max ?? row.value) || 0), 1);
+
+  return (
+    <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {rows.map((row) => {
+        const value = Number(row.value) || 0;
+        const barMax = Number(row.max) || max;
+        const pct = Math.min(100, (value / barMax) * 100);
+        const improved = row.changePct === null || row.changePct === undefined ? null : row.changePct >= 0;
+        return (
+          <div key={row.label}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.25rem', fontSize: '0.8rem' }}>
+              <span style={{ fontWeight: 600 }}>{row.label}</span>
+              <span style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                <strong>{fmt(value)}</strong>
+                {row.changePct !== null && row.changePct !== undefined && (
+                  <span style={{ fontWeight: 700, color: improved ? '#34A853' : '#EA4335', fontSize: '0.75rem' }}>
+                    {row.changePct >= 0 ? '↑' : '↓'} {Math.abs(row.changePct).toFixed(0)}%
+                  </span>
+                )}
+              </span>
+            </div>
+            <div style={{ height: '10px', borderRadius: '999px', background: 'var(--border-color)', overflow: 'hidden' }}>
+              <div style={{ width: `${pct}%`, height: '100%', borderRadius: '999px', background: row.color || '#4285F4' }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Donut; centerLabel/centerValue ile ortada toplam gösterilebilir. */
+export function DonutChart({ rows, valueKey = 'value', labelKey = 'label', size = 160, centerLabel = null, centerValue = null }) {
   const items = (rows || []).filter((row) => (Number(row[valueKey]) || 0) > 0);
   if (items.length === 0) return null;
 
   const total = items.reduce((acc, row) => acc + Number(row[valueKey]), 0);
-  const radius = 60;
+  const radius = 58;
   const circumference = 2 * Math.PI * radius;
-
-  // Dilim başlangıçları önceden hesaplanır: render sırasında dışarıdaki değişken değişmez.
   const slices = [];
   items.reduce((start, row) => {
     const length = (Number(row[valueKey]) / total) * circumference;
@@ -136,35 +193,41 @@ export function DonutChart({ rows, valueKey = 'value', labelKey = 'label', size 
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
-      <svg width={size} height={size} viewBox="0 0 160 160">
-        <g transform="rotate(-90 80 80)">
-          {items.map((row, index) => {
-            const { length, start } = slices[index];
-            return (
-              <circle
-                key={`${row[labelKey]}-${index}`}
-                cx="80"
-                cy="80"
-                r={radius}
-                fill="none"
-                stroke={PALETTE[index % PALETTE.length]}
-                strokeWidth="26"
-                strokeDasharray={`${length} ${circumference - length}`}
-                strokeDashoffset={-start}
-              />
-            );
-          })}
-        </g>
-      </svg>
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg width={size} height={size} viewBox="0 0 160 160">
+          <g transform="rotate(-90 80 80)">
+            {items.map((row, index) => {
+              const { length, start } = slices[index];
+              return (
+                <circle
+                  key={`${row[labelKey]}-${index}`}
+                  cx="80"
+                  cy="80"
+                  r={radius}
+                  fill="none"
+                  stroke={row.color || PALETTE[index % PALETTE.length]}
+                  strokeWidth="24"
+                  strokeDasharray={`${length} ${circumference - length}`}
+                  strokeDashoffset={-start}
+                />
+              );
+            })}
+          </g>
+        </svg>
+        {(centerLabel || centerValue !== null) && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+            {centerValue !== null && <strong style={{ fontSize: '1.05rem' }}>{typeof centerValue === 'number' ? fmt(centerValue) : centerValue}</strong>}
+            {centerLabel && <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>{centerLabel}</span>}
+          </div>
+        )}
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '160px' }}>
         {items.map((row, index) => (
           <span key={`${row[labelKey]}-legend-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: PALETTE[index % PALETTE.length], flexShrink: 0 }} />
+            <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: row.color || PALETTE[index % PALETTE.length], flexShrink: 0 }} />
             <span style={{ flex: 1 }}>{row[labelKey]}</span>
             <strong>{fmt(Number(row[valueKey]))}</strong>
-            <span style={{ color: 'var(--text-secondary)' }}>
-              %{((Number(row[valueKey]) / total) * 100).toFixed(1)}
-            </span>
+            <span style={{ color: 'var(--text-secondary)' }}>%{((Number(row[valueKey]) / total) * 100).toFixed(1)}</span>
           </span>
         ))}
       </div>
@@ -172,7 +235,46 @@ export function DonutChart({ rows, valueKey = 'value', labelKey = 'label', size 
   );
 }
 
-/** Değişim kartı: bu dönem / önceki dönem ve yüzde fark. */
+/** Site health tarzı radial gauge (0-100). */
+export function GaugeChart({ value, max = 100, label = 'Skor', size = 150, legend = null }) {
+  if (value === null || value === undefined) return null;
+  const score = Math.max(0, Math.min(max, Number(value)));
+  const ratio = score / max;
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const length = ratio * circumference * 0.75; // 270° yay
+  const color = ratio >= 0.8 ? '#34A853' : ratio >= 0.6 ? '#FBBC05' : '#EA4335';
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg width={size} height={size} viewBox="0 0 160 160">
+          <g transform="rotate(135 80 80)">
+            <circle cx="80" cy="80" r={radius} fill="none" stroke="var(--border-color)" strokeWidth="12" strokeDasharray={`${circumference * 0.75} ${circumference}`} strokeLinecap="round" />
+            <circle cx="80" cy="80" r={radius} fill="none" stroke={color} strokeWidth="12" strokeDasharray={`${length} ${circumference}`} strokeLinecap="round" />
+          </g>
+        </svg>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <strong style={{ fontSize: '1.6rem', lineHeight: 1 }}>{Math.round(score)}</strong>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{label}</span>
+        </div>
+      </div>
+      {legend && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.8rem' }}>
+          {legend.map((item) => (
+            <span key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color }} />
+              <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{item.label}</span>
+              <strong>{fmt(item.value)}</strong>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Değişim kartları — dönem karşılaştırması. */
 export function ChangeCards({ rows }) {
   const items = (rows || []).filter((row) => row.current !== null && row.current !== undefined);
   if (items.length === 0) return null;
@@ -185,40 +287,18 @@ export function ChangeCards({ rows }) {
   };
 
   return (
-    <div
-      style={{
-        marginTop: '0.75rem',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
-        gap: '0.75rem',
-      }}
-    >
+    <div style={{ marginTop: '0.75rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '0.75rem' }}>
       {items.map((row) => {
         const improved = row.changePct === null ? null : row.lowerIsBetter ? row.changePct < 0 : row.changePct > 0;
         const color = improved === null ? 'var(--text-secondary)' : improved ? '#34A853' : '#EA4335';
         return (
-          <div
-            key={`${row.source}-${row.label}`}
-            style={{
-              border: '1px solid var(--border-color)',
-              borderRadius: '10px',
-              padding: '0.75rem 0.85rem',
-            }}
-          >
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-              {row.source}
-            </div>
+          <div key={`${row.source}-${row.label}`} style={{ border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.75rem 0.85rem' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{row.source}</div>
             <div style={{ fontSize: '0.82rem', marginTop: '0.15rem' }}>{row.label}</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700, marginTop: '0.35rem' }}>
-              {formatValue(row.current, row.unit)}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              Önceki: {formatValue(row.previous, row.unit)}
-            </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color, marginTop: '0.25rem' }}>
-              {row.changePct === null
-                ? 'Değişim hesaplanamadı'
-                : `${row.changePct >= 0 ? '+' : ''}${numberFmt.format(row.changePct)}%`}
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, marginTop: '0.35rem' }}>{formatValue(row.current, row.unit)}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Önceki: {formatValue(row.previous, row.unit)}</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color, marginTop: '0.25rem' }}>
+              {row.changePct === null ? '—' : `${improved ? '↑' : '↓'} ${row.changePct >= 0 ? '+' : ''}${numberFmt.format(row.changePct)}%`}
             </div>
           </div>
         );
@@ -227,21 +307,14 @@ export function ChangeCards({ rows }) {
   );
 }
 
-/** Gün/saat yoğunluğu: renk tonu ile ısı haritası. */
+/** Gün/saat heat strip. */
 export function HeatStrip({ rows, labelKey = 'label', valueKey = 'sessions' }) {
   const items = rows || [];
   if (items.length === 0) return null;
   const max = Math.max(...items.map((row) => Number(row[valueKey]) || 0)) || 1;
 
   return (
-    <div
-      style={{
-        marginTop: '0.75rem',
-        display: 'grid',
-        gridTemplateColumns: `repeat(${Math.min(items.length, 12)}, minmax(0, 1fr))`,
-        gap: '0.3rem',
-      }}
-    >
+    <div style={{ marginTop: '0.75rem', display: 'grid', gridTemplateColumns: `repeat(${Math.min(items.length, 12)}, minmax(0, 1fr))`, gap: '0.3rem' }}>
       {items.map((row, index) => {
         const value = Number(row[valueKey]) || 0;
         const intensity = value / max;
@@ -261,6 +334,16 @@ export function HeatStrip({ rows, labelKey = 'label', valueKey = 'sessions' }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** Yan yana iki kolon — kazanan/kaybeden için. */
+export function TwoCol({ left, right }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
+      <div>{left}</div>
+      <div>{right}</div>
     </div>
   );
 }

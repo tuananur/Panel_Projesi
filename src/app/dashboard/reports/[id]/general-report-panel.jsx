@@ -8,8 +8,8 @@
 // Verisi olmayan bölüm render edilmez; en sonda neden gizlendiği listelenir.
 
 import { num, pct, EMPTY_VALUE } from '../report-ui';
-import { ReportSection, DataTable, MetricGrid, SourceTag } from './general-report-ui';
-import { LineChart, BarList, DonutChart, ChangeCards, HeatStrip } from './report-charts';
+import { ReportSection, DataTable, MetricGrid, SourceTag, StatCallout, SubHeading } from './general-report-ui';
+import { LineChart, AreaChart, BarList, DonutChart, ChangeCards, HeatStrip, RankProgressBars, TwoCol } from './report-charts';
 import { buildSeoSections } from './general-report-seo';
 import { buildInsightSections } from './general-report-insights';
 
@@ -25,6 +25,10 @@ const GENDER_LABELS = { male: 'Erkek', female: 'Kadın' };
 
 function hasRows(value) {
   return Array.isArray(value) && value.length > 0;
+}
+
+function changeOf(comparison, label) {
+  return (comparison || []).find((row) => row.label === label)?.changePct ?? null;
 }
 
 export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, report, periodLabel }) {
@@ -48,16 +52,17 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         note={`Dönem: ${periodLabel}. GA4 ve Search Console metrikleri bu döneme aittir; Ubersuggest değerleri en güncel snapshot'tan gelir.`}
       >
         <MetricGrid
+          compact
           items={[
-            gaOk && { label: 'Toplam kullanıcı', source: GA4, value: num(ga.summary.activeUsers) },
-            gaOk && { label: 'Oturum', source: GA4, value: num(ga.summary.sessions) },
-            gaOk && { label: 'Sayfa görüntüleme', source: GA4, value: num(ga.summary.pageViews) },
-            gscOk && { label: 'Organik tıklama', source: GSC, value: num(gsc.summary.clicks), hint: 'Google aramadan gelen gerçek tıklama' },
-            gscOk && { label: 'Organik gösterim', source: GSC, value: num(gsc.summary.impressions) },
-            gscOk && { label: 'CTR', source: GSC, value: pct(gsc.summary.ctr) },
-            gscOk && { label: 'Ortalama pozisyon', source: GSC, value: gsc.summary.position?.toFixed(1) ?? EMPTY_VALUE },
-            snapshot && { label: 'Organik keyword sayısı', source: UBER, value: num(snapshot.organicKeywordsCount) },
-            snapshot && { label: 'Tahmini organik trafik', source: UBER, value: num(snapshot.estimatedOrganicTraffic), hint: 'Araç tahmini, GA4 trafiğiyle aynı şey değil' },
+            gaOk && { label: 'Kullanıcı', source: GA4, value: num(ga.summary.activeUsers), changePct: changeOf(report.comparison, 'Aktif kullanıcı') },
+            gaOk && { label: 'Oturum', source: GA4, value: num(ga.summary.sessions), changePct: changeOf(report.comparison, 'Oturum') },
+            gaOk && { label: 'Sayfa görüntüleme', source: GA4, value: num(ga.summary.pageViews), changePct: changeOf(report.comparison, 'Sayfa görüntüleme') },
+            gscOk && { label: 'Organik tıklama', source: GSC, value: num(gsc.summary.clicks), changePct: changeOf(report.comparison, 'Organik tıklama'), hint: 'Gerçek Google tıklaması' },
+            gscOk && { label: 'Gösterim', source: GSC, value: num(gsc.summary.impressions), changePct: changeOf(report.comparison, 'Organik gösterim') },
+            gscOk && { label: 'CTR', source: GSC, value: pct(gsc.summary.ctr), changePct: changeOf(report.comparison, 'CTR') },
+            gscOk && { label: 'Ort. pozisyon', source: GSC, value: gsc.summary.position?.toFixed(1) ?? EMPTY_VALUE, changePct: changeOf(report.comparison, 'Ortalama pozisyon'), lowerIsBetter: true },
+            snapshot && { label: 'Organik keyword', source: UBER, value: num(snapshot.organicKeywordsCount) },
+            snapshot && { label: 'Tahmini trafik', source: UBER, value: num(snapshot.estimatedOrganicTraffic), hint: 'Araç tahmini' },
             snapshot && { label: 'Domain Authority', source: UBER, value: num(snapshot.domainAuthority) },
             snapshot && { label: 'Backlink', source: UBER, value: num(snapshot.totalBacklinks) },
             snapshot && { label: 'Site Health', source: UBER, value: num(snapshot.siteHealthScore) },
@@ -131,7 +136,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       >
         {hasRows(extras?.channelGroups) && (
           <>
-            <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.25rem' }}>Kanal grubu</h3>
+            <SubHeading>Kanal grubu</SubHeading>
             <BarList
               rows={extras.channelGroups.map((row) => ({ label: row.channel, value: row.sessions, users: row.activeUsers }))}
               secondary="users"
@@ -141,17 +146,11 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         )}
         {hasRows(ga?.channels) && (
           <>
-            <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.25rem' }}>Kaynak (referrer)</h3>
-            <DonutChart rows={ga.channels.slice(0, 7).map((row) => ({ label: row.name, value: row.sessions }))} />
-            <DataTable
-              columns={[
-                { key: 'name', label: 'Kaynak', type: 'text' },
-                { key: 'activeUsers', label: 'Kullanıcı', type: 'int' },
-                { key: 'sessions', label: 'Oturum', type: 'int' },
-                { key: 'percentage', label: 'Pay', type: 'pct' },
-              ]}
-              rows={ga.channels}
-              limit={20}
+            <SubHeading>Kaynak (referrer)</SubHeading>
+            <DonutChart
+              rows={ga.channels.slice(0, 7).map((row) => ({ label: row.name, value: row.sessions }))}
+              centerLabel="Oturum"
+              centerValue={ga.channels.slice(0, 7).reduce((acc, row) => acc + (row.sessions || 0), 0)}
             />
           </>
         )}
@@ -182,12 +181,9 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
           ]}
         />
         {hasRows(organic.daily) && (
-          <LineChart
-            data={organic.daily.map((row) => ({ ...row, label: row.date?.slice(5) }))}
-            series={[
-              { key: 'sessions', label: 'Organik oturum', color: '#34A853' },
-              { key: 'activeUsers', label: 'Organik kullanıcı' },
-            ]}
+          <AreaChart
+            data={organic.daily.map((row) => ({ label: row.date?.slice(5), value: row.sessions }))}
+            color="#34A853"
           />
         )}
       </ReportSection>,
@@ -201,12 +197,13 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
     add(
       <ReportSection key="s6" no={6} title="Search Console Genel Performans" sources={[GSC]} note="Google aramada gerçekleşen gerçek performans.">
         <MetricGrid
+          compact
           items={[
-            { label: 'Toplam tıklama', source: GSC, value: num(gsc.summary.clicks) },
-            { label: 'Toplam gösterim', source: GSC, value: num(gsc.summary.impressions) },
-            { label: 'CTR', source: GSC, value: pct(gsc.summary.ctr) },
-            { label: 'Ortalama pozisyon', source: GSC, value: gsc.summary.position?.toFixed(1) ?? EMPTY_VALUE },
-            { label: 'Toplam sorgu sayısı', source: GSC, value: num(gsc.totalQueries) },
+            { label: 'Toplam tıklama', source: GSC, value: num(gsc.summary.clicks), changePct: changeOf(report.comparison, 'Organik tıklama') },
+            { label: 'Toplam gösterim', source: GSC, value: num(gsc.summary.impressions), changePct: changeOf(report.comparison, 'Organik gösterim') },
+            { label: 'CTR', source: GSC, value: pct(gsc.summary.ctr), changePct: changeOf(report.comparison, 'CTR') },
+            { label: 'Ortalama pozisyon', source: GSC, value: gsc.summary.position?.toFixed(1) ?? EMPTY_VALUE, changePct: changeOf(report.comparison, 'Ortalama pozisyon'), lowerIsBetter: true },
+            { label: 'Toplam sorgu', source: GSC, value: num(gsc.totalQueries) },
           ]}
         />
       </ReportSection>,
@@ -259,7 +256,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             { key: 'ctr', label: 'CTR', type: 'pct' },
             { key: 'position', label: 'Pozisyon', type: 'float' },
             { key: 'previousPosition', label: 'Önceki', type: 'float' },
-            { key: 'positionChange', label: 'Değişim', type: 'delta' },
+            { key: 'positionChange', label: 'Değişim', type: 'delta', colorize: 'up-good' },
             { key: 'url', label: 'Sıralanan URL', type: 'text' },
           ]}
           rows={gsc.queries}
@@ -312,13 +309,42 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         sources={[UBER]}
         note="Ubersuggest rank tracker ölçümü. Pozisyonu boş olan kelime ilk 100'de değildir."
       >
-        <MetricGrid
+        <RankProgressBars
           items={[
-            { label: 'Takip edilen kelime', source: UBER, value: num(snapshot.trackedKeywordsCount) },
-            { label: 'Top 3', source: UBER, value: num(snapshot.top3New), hint: snapshot.top3Old !== null ? `Önceki: ${nf.format(snapshot.top3Old)}` : null },
-            { label: 'Top 10', source: UBER, value: num(snapshot.top10New), hint: snapshot.top10Old !== null ? `Önceki: ${nf.format(snapshot.top10Old)}` : null },
-            { label: 'Top 100', source: UBER, value: num(snapshot.top100New), hint: snapshot.top100Old !== null ? `Önceki: ${nf.format(snapshot.top100Old)}` : null },
-            { label: 'Sıralanmayan', source: UBER, value: num(snapshot.notRankingNew), hint: snapshot.notRankingOld !== null ? `Önceki: ${nf.format(snapshot.notRankingOld)}` : null },
+            snapshot.top3New !== null && {
+              label: 'Top 3',
+              value: snapshot.top3New,
+              max: snapshot.trackedKeywordsCount || snapshot.top3New,
+              color: '#34A853',
+              changePct: snapshot.top3Old ? ((snapshot.top3New - snapshot.top3Old) / snapshot.top3Old) * 100 : null,
+            },
+            snapshot.top10New !== null && {
+              label: 'Top 10',
+              value: snapshot.top10New,
+              max: snapshot.trackedKeywordsCount || snapshot.top10New,
+              color: '#4285F4',
+              changePct: snapshot.top10Old ? ((snapshot.top10New - snapshot.top10Old) / snapshot.top10Old) * 100 : null,
+            },
+            snapshot.top100New !== null && {
+              label: 'Top 100',
+              value: snapshot.top100New,
+              max: snapshot.trackedKeywordsCount || snapshot.top100New,
+              color: '#FBBC05',
+              changePct: snapshot.top100Old ? ((snapshot.top100New - snapshot.top100Old) / snapshot.top100Old) * 100 : null,
+            },
+            snapshot.notRankingNew !== null && {
+              label: 'Sıralanmayan',
+              value: snapshot.notRankingNew,
+              max: snapshot.trackedKeywordsCount || snapshot.notRankingNew,
+              color: '#EA4335',
+              changePct: snapshot.notRankingOld ? ((snapshot.notRankingNew - snapshot.notRankingOld) / snapshot.notRankingOld) * 100 : null,
+            },
+          ].filter(Boolean)}
+        />
+        <MetricGrid
+          compact
+          items={[
+            { label: 'Takip edilen', source: UBER, value: num(snapshot.trackedKeywordsCount) },
             { label: 'Yükselen', source: UBER, value: num(snapshot.keywordsUpCount) },
             { label: 'Düşen', source: UBER, value: num(snapshot.keywordsDownCount) },
             { label: 'Sabit', source: UBER, value: num(snapshot.keywordsUnchangedCount) },
@@ -345,7 +371,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
     { key: 'keyword', label: 'Keyword', type: 'text' },
     { key: 'oldPosition', label: 'Eski sıra', type: 'int' },
     { key: 'newPosition', label: 'Yeni sıra', type: 'int' },
-    { key: 'change', label: 'Değişim', type: 'delta' },
+    { key: 'change', label: 'Değişim', type: 'delta', colorize: 'up-good' },
     ...(source === UBER
       ? [{ key: 'searchVolume', label: 'Hacim', type: 'int' }]
       : [{ key: 'clicks', label: 'Tıklama', type: 'int' }, { key: 'impressions', label: 'Gösterim', type: 'int' }]),
@@ -594,60 +620,70 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         note="Her iki kaynak da önceki dönemle karşılaştırılır. Yalnızca iki dönemde de veri bulunan sayfalar listelenir."
       >
         {moves.views && (
-          <>
-            <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Görüntüleme artan sayfalar <SourceTag source={GA4} /></h3>
-            <DataTable
-              columns={[
-                { key: 'path', label: 'Sayfa', type: 'text' },
-                { key: 'previous', label: 'Önceki', type: 'int' },
-                { key: 'current', label: 'Bu dönem', type: 'int' },
-                { key: 'change', label: 'Fark', type: 'delta' },
-                { key: 'changePct', label: 'Değişim', type: 'pct' },
-              ]}
-              rows={moves.views.winners}
-              limit={15}
-            />
-            <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.4rem' }}>Görüntüleme düşen sayfalar <SourceTag source={GA4} /></h3>
-            <DataTable
-              columns={[
-                { key: 'path', label: 'Sayfa', type: 'text' },
-                { key: 'previous', label: 'Önceki', type: 'int' },
-                { key: 'current', label: 'Bu dönem', type: 'int' },
-                { key: 'change', label: 'Fark', type: 'delta' },
-                { key: 'changePct', label: 'Değişim', type: 'pct' },
-              ]}
-              rows={moves.views.losers}
-              limit={15}
-            />
-          </>
+          <TwoCol
+            left={(
+              <>
+                <SubHeading>Kazananlar <SourceTag source={GA4} /></SubHeading>
+                <DataTable
+                  columns={[
+                    { key: 'path', label: 'Sayfa', type: 'text' },
+                    { key: 'previous', label: 'Önceki', type: 'int' },
+                    { key: 'current', label: 'Bu dönem', type: 'int' },
+                    { key: 'change', label: 'Fark', type: 'delta', colorize: 'up-good' },
+                  ]}
+                  rows={moves.views.winners}
+                  limit={12}
+                />
+              </>
+            )}
+            right={(
+              <>
+                <SubHeading>Kaybedenler <SourceTag source={GA4} /></SubHeading>
+                <DataTable
+                  columns={[
+                    { key: 'path', label: 'Sayfa', type: 'text' },
+                    { key: 'previous', label: 'Önceki', type: 'int' },
+                    { key: 'current', label: 'Bu dönem', type: 'int' },
+                    { key: 'change', label: 'Fark', type: 'delta', colorize: 'up-good' },
+                  ]}
+                  rows={moves.views.losers}
+                  limit={12}
+                />
+              </>
+            )}
+          />
         )}
         {moves.clicks && (
-          <>
-            <h3 style={{ fontSize: '0.85rem', margin: '1.5rem 0 0.4rem' }}>Organik tıklama artan sayfalar <SourceTag source={GSC} /></h3>
-            <DataTable
-              columns={[
-                { key: 'path', label: 'Sayfa', type: 'text' },
-                { key: 'previous', label: 'Önceki tıklama', type: 'int' },
-                { key: 'current', label: 'Bu dönem', type: 'int' },
-                { key: 'change', label: 'Fark', type: 'delta' },
-                { key: 'positionChange', label: 'Pozisyon değişimi', type: 'delta' },
-              ]}
-              rows={moves.clicks.winners}
-              limit={15}
-            />
-            <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.4rem' }}>Organik tıklama düşen sayfalar <SourceTag source={GSC} /></h3>
-            <DataTable
-              columns={[
-                { key: 'path', label: 'Sayfa', type: 'text' },
-                { key: 'previous', label: 'Önceki tıklama', type: 'int' },
-                { key: 'current', label: 'Bu dönem', type: 'int' },
-                { key: 'change', label: 'Fark', type: 'delta' },
-                { key: 'positionChange', label: 'Pozisyon değişimi', type: 'delta' },
-              ]}
-              rows={moves.clicks.losers}
-              limit={15}
-            />
-          </>
+          <TwoCol
+            left={(
+              <>
+                <SubHeading>Tıklama artan <SourceTag source={GSC} /></SubHeading>
+                <DataTable
+                  columns={[
+                    { key: 'path', label: 'Sayfa', type: 'text' },
+                    { key: 'change', label: 'Fark', type: 'delta', colorize: 'up-good' },
+                    { key: 'positionChange', label: 'Pozisyon', type: 'delta', colorize: 'up-good' },
+                  ]}
+                  rows={moves.clicks.winners}
+                  limit={12}
+                />
+              </>
+            )}
+            right={(
+              <>
+                <SubHeading>Tıklama düşen <SourceTag source={GSC} /></SubHeading>
+                <DataTable
+                  columns={[
+                    { key: 'path', label: 'Sayfa', type: 'text' },
+                    { key: 'change', label: 'Fark', type: 'delta', colorize: 'up-good' },
+                    { key: 'positionChange', label: 'Pozisyon', type: 'delta', colorize: 'up-good' },
+                  ]}
+                  rows={moves.clicks.losers}
+                  limit={12}
+                />
+              </>
+            )}
+          />
         )}
       </ReportSection>,
     );
@@ -662,20 +698,18 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       label: VISITOR_LABELS[row.type] || row.type,
     }));
     const total = rows.reduce((acc, row) => acc + row.activeUsers, 0);
+    const returning = rows.find((row) => row.type === 'returning');
+    const returningRate = total > 0 && returning ? (returning.activeUsers / total) * 100 : null;
     add(
       <ReportSection key="s19" no={19} title="Yeni vs Geri Dönen Kullanıcılar" sources={[GA4]}>
-        <DonutChart rows={rows.map((row) => ({ label: row.label, value: row.activeUsers }))} />
-        <DataTable
-          columns={[
-            { key: 'label', label: 'Tür', type: 'text' },
-            { key: 'activeUsers', label: 'Kullanıcı', type: 'int' },
-            { key: 'sessions', label: 'Oturum', type: 'int' },
-            { key: 'engagementRate', label: 'Etkileşim', type: 'pct' },
-            { key: 'share', label: 'Pay', type: 'pct' },
-          ]}
-          rows={rows.map((row) => ({ ...row, share: total > 0 ? (row.activeUsers / total) * 100 : null }))}
-          limit={5}
+        <DonutChart
+          rows={rows.map((row) => ({ label: row.label, value: row.activeUsers }))}
+          centerLabel="Kullanıcı"
+          centerValue={total}
         />
+        {returningRate !== null && (
+          <StatCallout label="Geri dönüş oranı" value={pct(returningRate)} tone="neutral" />
+        )}
       </ReportSection>,
     );
   } else {
@@ -698,7 +732,11 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(ga?.devices) && (
           <>
             <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.25rem' }}>Site kullanımı <SourceTag source={GA4} /></h3>
-            <DonutChart rows={ga.devices.map((row) => ({ label: row.name, value: row.activeUsers }))} />
+            <DonutChart
+              rows={ga.devices.map((row) => ({ label: row.name, value: row.activeUsers }))}
+              centerLabel="Kullanıcı"
+              centerValue={ga.devices.reduce((acc, row) => acc + (row.activeUsers || 0), 0)}
+            />
             <DataTable
               columns={[
                 { key: 'name', label: 'Cihaz', type: 'text' },
