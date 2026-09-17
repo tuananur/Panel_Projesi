@@ -13,6 +13,7 @@ import { ErrorNote, ListSection, Row, Section, StatusBadge, duration, num, pct }
 import ReportTabs from './report-tabs';
 import UbersuggestPanel from './ubersuggest-panel';
 import GeneralReportPanel from './general-report-panel';
+import GeneralReportControls from './general-report-controls';
 import ReportPdfButton from './report-pdf-button';
 
 export const dynamic = 'force-dynamic';
@@ -273,14 +274,16 @@ export default async function ClientReportPage({ params, searchParams }) {
       label: 'Genel Rapor',
       hasData: gaOk || gscOk || ubersuggestOk,
       content: (
-        <GeneralReportPanel
-          ga={ga}
-          gsc={gscOk ? gsc : null}
-          extras={extras}
-          ubersuggest={ubersuggest}
-          report={generalReport}
-          periodLabel={`${periodLabel} (${since} → ${until})`}
-        />
+        <GeneralReportControls>
+          <GeneralReportPanel
+            ga={ga}
+            gsc={gscOk ? gsc : null}
+            extras={extras}
+            ubersuggest={ubersuggest}
+            report={generalReport}
+            periodLabel={`${periodLabel} (${since} → ${until})`}
+          />
+        </GeneralReportControls>
       ),
     },
   ];

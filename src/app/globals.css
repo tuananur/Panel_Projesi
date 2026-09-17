@@ -938,18 +938,32 @@ input, button, select, textarea {
 }
 
 
+/* Tema-bağımsız scrollbar renkleri: koyuda açık thumb, aydınlıkta koyu thumb.
+   Eski beyaz thumb aydınlık arka planda kayboluyordu. */
+:root {
+  --scrollbar-track: rgba(255, 255, 255, 0.08);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.35);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.55);
+}
+
+[data-theme='light'] {
+  --scrollbar-track: rgba(15, 23, 42, 0.08);
+  --scrollbar-thumb: rgba(15, 23, 42, 0.35);
+  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.55);
+}
+
 /* display: block şart: yukarıdaki `*` kuralı scrollbar'ı tüm panelde gizliyor,
    bu sınıf olmadan yatay kaydırma çubuğu hiç çizilmiyordu. */
-.custom-scrollbar::-webkit-scrollbar { display: block; height: 8px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+.custom-scrollbar::-webkit-scrollbar { display: block; height: 8px; width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
 /* Rapor detay sayfası çok uzun olduğu için dikey scrollbar görünür olsun:
    konumun nerede olduğu takip edilebilsin. Yalnızca bu sayfayı etkiler. */
 .content-area:has(.report-detail-page) {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.06);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   -ms-overflow-style: auto;
 }
 
@@ -959,23 +973,23 @@ input, button, select, textarea {
 }
 
 .content-area:has(.report-detail-page)::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--scrollbar-track);
 }
 
 .content-area:has(.report-detail-page)::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--scrollbar-thumb);
   border-radius: 5px;
 }
 
 .content-area:has(.report-detail-page)::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Mobilde sayfa gövdesi kaydırılıyor; scrollbar orada görünür olmalı. */
 @media (max-width: 991px) {
   body:has(.report-detail-page) {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.06);
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
     -ms-overflow-style: auto;
   }
 
@@ -985,7 +999,7 @@ input, button, select, textarea {
   }
 
   body:has(.report-detail-page)::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.28);
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
   }
 }

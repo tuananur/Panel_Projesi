@@ -38,7 +38,8 @@ export function SourceTag({ source }) {
 export function ReportSection({ no, title, sources = [], note, children }) {
   return (
     // data-pdf-break: PDF sayfa kesmeleri bölüm başlarına hizalanır, kart ortadan kesilmez.
-    <div className="card" data-pdf-break style={{ marginBottom: '1.25rem' }}>
+    // data-section-no: bölüm ayarları paneli görünürlüğü buradan yönetir.
+    <div className="card" data-pdf-break data-section-no={no} style={{ marginBottom: '1.25rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: note ? '0.3rem' : '0.85rem' }}>
         <span
           style={{

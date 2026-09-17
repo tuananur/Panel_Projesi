@@ -999,6 +999,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             .map((item) => (
               <div
                 key={item.no}
+                data-section-no={item.no}
                 style={{
                   display: 'flex',
                   gap: '0.75rem',
