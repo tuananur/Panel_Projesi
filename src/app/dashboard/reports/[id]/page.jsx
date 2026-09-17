@@ -5,11 +5,14 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { can, getRolePermissions } from '@/lib/permissions';
 import { getGoogleAnalyticsAction } from '@/app/actions';
-import { ANALYTICS_DATE_PRESETS, resolveAnalyticsDateRange } from '@/lib/analytics-date-range';
+import { ANALYTICS_DATE_PRESETS, getPreviousPeriod, resolveAnalyticsDateRange } from '@/lib/analytics-date-range';
 import { getUbersuggestReport } from '@/lib/ubersuggest/report-view';
+import { fetchGeneralReportGa4 } from '@/lib/general-report/ga4-report';
+import { buildGeneralReport } from '@/lib/general-report/build';
 import { ErrorNote, ListSection, Row, Section, StatusBadge, duration, num, pct } from '../report-ui';
 import ReportTabs from './report-tabs';
 import UbersuggestPanel from './ubersuggest-panel';
+import GeneralReportPanel from './general-report-panel';
 
 export const dynamic = 'force-dynamic';
 
@@ -203,19 +206,31 @@ export default async function ClientReportPage({ params, searchParams }) {
 
   const client = await prisma.client.findUnique({
     where: { id: parseInt(id) },
-    select: { id: true, companyName: true, website: true, analyticsEnabled: true, analyticsPropertyId: true, searchConsoleSiteUrl: true },
+    select: {
+      id: true,
+      companyName: true,
+      website: true,
+      analyticsEnabled: true,
+      analyticsPropertyId: true,
+      analyticsRefreshToken: true,
+      searchConsoleSiteUrl: true,
+    },
   });
   if (!client) notFound();
 
   const datePreset = sParams.datePreset || 'last_30d';
   const { since, until, preset, label: periodLabel, dayCount } = resolveAnalyticsDateRange(datePreset);
+  const { prevSince, prevUntil } = getPreviousPeriod(since, until);
 
   const analyticsConfigured = client.analyticsEnabled && Boolean(client.analyticsPropertyId);
 
-  // Google sorguları ile Ubersuggest DB okuması paralel yürür.
-  const [result, ubersuggest] = await Promise.all([
-    getGoogleAnalyticsAction(id, since, until),
+  // Google sorguları, genel rapora özel GA4 boyutları ve Ubersuggest DB okuması paralel yürür.
+  const [result, ubersuggest, extrasResult] = await Promise.all([
+    getGoogleAnalyticsAction(id, since, until, { includeSearchConsolePages: true }),
     getUbersuggestReport(client.id),
+    analyticsConfigured
+      ? fetchGeneralReportGa4(client, { since, until, prevSince, prevUntil }).catch(() => null)
+      : Promise.resolve(null),
   ]);
 
   const ga = result?.success ? result.analytics : null;
@@ -223,6 +238,15 @@ export default async function ClientReportPage({ params, searchParams }) {
   const gsc = result?.searchConsole || null;
   const gscOk = Boolean(gsc && !gsc.error && gsc.summary);
   const ubersuggestOk = Boolean(ubersuggest.snapshot);
+  const extras = extrasResult && !extrasResult.error ? extrasResult : null;
+
+  const generalReport = buildGeneralReport({
+    ga,
+    gsc: gscOk ? gsc : null,
+    extras,
+    ubersuggest,
+    period: { since, until, prevSince, prevUntil, label: periodLabel },
+  });
 
   const tabs = [
     {
@@ -243,10 +267,25 @@ export default async function ClientReportPage({ params, searchParams }) {
       hasData: ubersuggestOk,
       content: <UbersuggestPanel report={ubersuggest} />,
     },
+    {
+      id: 'general',
+      label: 'Genel Rapor',
+      hasData: gaOk || gscOk || ubersuggestOk,
+      content: (
+        <GeneralReportPanel
+          ga={ga}
+          gsc={gscOk ? gsc : null}
+          extras={extras}
+          ubersuggest={ubersuggest}
+          report={generalReport}
+          periodLabel={`${periodLabel} (${since} → ${until})`}
+        />
+      ),
+    },
   ];
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: '820px' }}>
+    <div className="animate-fade-in" style={{ maxWidth: '1080px' }}>
       <Link
         href="/dashboard/reports"
         className="text-muted"

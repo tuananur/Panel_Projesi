@@ -246,6 +246,9 @@ export function weeklyTrendFromDaily(daily, month, year) {
  * Dönen alanlar: summary, daily, queries, countries, devices.
  */
 export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = null) {
+  // Sayfa boyutlu sorgular yalnızca genel rapor için gerekli; analitik ekranını yavaşlatmamak
+  // adına varsayılan olarak çalıştırılmaz.
+  const includePages = Boolean(period?.includePages);
   const current = period
     ? { startDate: period.startDate, endDate: period.endDate }
     : gscDateRange(28, 3);
@@ -263,10 +266,27 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = 
     previousEnd = formatGscDate(previousEndDate);
   }
 
-  const [summaryData, dailyData, countryData, deviceData, currentQueries, previousQueries] = await Promise.all([
+  const [
+    summaryData,
+    compareSummaryData,
+    dailyData,
+    countryData,
+    deviceData,
+    currentQueries,
+    previousQueries,
+    currentPages,
+    previousPages,
+  ] = await Promise.all([
     querySearchAnalytics(accessToken, siteUrl, {
       startDate: current.startDate,
       endDate: current.endDate,
+      dimensions: [],
+      rowLimit: 1,
+    }),
+    // Önceki dönemin toplamı: genel rapordaki değişim yüzdeleri için.
+    querySearchAnalytics(accessToken, siteUrl, {
+      startDate: previousStart,
+      endDate: previousEnd,
       dimensions: [],
       rowLimit: 1,
     }),
@@ -295,6 +315,21 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = 
       endDate: previousEnd,
       dimensions: ['query', 'page'],
     }),
+    // Sayfa bazlı performans ve kazanan/kaybeden sayfa karşılaştırması için.
+    includePages
+      ? queryAllRows(accessToken, siteUrl, {
+          startDate: current.startDate,
+          endDate: current.endDate,
+          dimensions: ['page'],
+        })
+      : Promise.resolve({ rows: [] }),
+    includePages
+      ? queryAllRows(accessToken, siteUrl, {
+          startDate: previousStart,
+          endDate: previousEnd,
+          dimensions: ['page'],
+        })
+      : Promise.resolve({ rows: [] }),
   ]);
 
   const currentMap = aggregateRowsByQuery(currentQueries.rows);
@@ -344,6 +379,11 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = 
     device: device || 'UNKNOWN',
   }));
 
+  const pages = includePages ? mapBreakdownRows(currentPages.rows, (page) => ({ page: page || '' })) : null;
+  const comparePages = includePages
+    ? mapBreakdownRows(previousPages.rows, (page) => ({ page: page || '' }))
+    : null;
+
   return {
     siteUrl,
     scope: 'ALL',
@@ -352,10 +392,14 @@ export async function fetchSearchConsoleKeywords(accessToken, siteUrl, period = 
     periodLabel: `${current.startDate} — ${current.endDate}`,
     compareLabel: `${previousStart} — ${previousEnd} ile karşılaştırma`,
     summary: parseSummaryRow(summaryData.rows),
+    compareSummary: parseSummaryRow(compareSummaryData.rows),
     daily,
     queries,
     countries,
     devices,
+    // includePages verilmediğinde bu iki alan null kalır: boş dizi ile "veri yok" karışmasın.
+    pages,
+    comparePages,
     totalQueries: queries.length,
     truncated: currentQueries.truncated || previousQueries.truncated,
   };

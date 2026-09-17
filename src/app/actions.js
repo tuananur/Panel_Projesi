@@ -1368,7 +1368,11 @@ export async function testAnalyticsConnectionAction(formData) {
   }
 }
 
-export async function getGoogleAnalyticsAction(clientId, since = null, until = null) {
+/**
+ * @param options.includeSearchConsolePages Sayfa boyutlu GSC sorgularını da çalıştırır.
+ *   Yalnızca genel rapor kullanır; analitik ekranı bu ek sorguların maliyetini ödemez.
+ */
+export async function getGoogleAnalyticsAction(clientId, since = null, until = null, options = {}) {
   try {
     const client = await prisma.client.findUnique({ where: { id: parseInt(clientId) } });
     if (!client) return { error: 'CLIENT_NOT_FOUND' };
@@ -1422,6 +1426,7 @@ export async function getGoogleAnalyticsAction(clientId, since = null, until = n
           endDate: until,
           compareStartDate: prevSince,
           compareEndDate: prevUntil,
+          includePages: Boolean(options.includeSearchConsolePages),
         });
       } else {
         searchConsole = {
