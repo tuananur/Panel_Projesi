@@ -57,6 +57,7 @@ export const GENERAL_REPORT_SECTIONS = [
 export const ALL_SECTION_NOS = GENERAL_REPORT_SECTIONS.map((section) => section.no);
 
 export const STORAGE_KEY = 'general-report-visible-sections';
+export const CHARTS_ONLY_KEY = 'general-report-charts-only';
 
 export function defaultVisibleSet() {
   return new Set(ALL_SECTION_NOS);
