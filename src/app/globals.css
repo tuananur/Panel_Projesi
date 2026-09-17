@@ -565,7 +565,9 @@ input, button, select, textarea {
   flex: 1;
   padding: 1.5rem; /* Reduced from 2rem */
   overflow-y: auto;
-  background-color: rgba(15, 23, 42, 0.5);
+  /* Tema değişkeni: koyu modda slate, aydınlıkta soft gri (#f8fafc).
+     Eski sabit rgba(15,23,42,0.5) aydınlıkta kirli gri bırakıyordu. */
+  background-color: var(--bg-primary);
 }
 
 /* Card utility */
