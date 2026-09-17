@@ -2,15 +2,17 @@
 
 import { useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
-import { saveElementAsSinglePdfPage } from '@/lib/pdf-export';
+import { saveElementAsLongPdf } from '@/lib/pdf-export';
 
 /**
- * Açık olan sekme dahil tüm rapor gövdesini tek uzun PDF sayfası olarak indirir.
- * Kaydedilecek alan `targetId` ile verilir; butonun kendisi PDF'e girmez.
+ * Açık olan sekme dahil tüm rapor gövdesini uzun PDF olarak indirir.
+ * İçerik PDF'in sayfa boyutu limitini aşarsa bölüm sınırlarından birden fazla
+ * uzun sayfaya bölünür; kaç sayfa çıktığı kullanıcıya bildirilir.
  */
 export default function ReportPdfButton({ targetId, fileName }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [info, setInfo] = useState(null);
 
   const handleClick = async () => {
     const el = document.getElementById(targetId);
@@ -18,8 +20,10 @@ export default function ReportPdfButton({ targetId, fileName }) {
 
     setBusy(true);
     setError(null);
+    setInfo(null);
     try {
-      await saveElementAsSinglePdfPage(el, fileName);
+      const { pageCount } = await saveElementAsLongPdf(el, fileName);
+      setInfo(pageCount > 1 ? `${pageCount} uzun sayfa olarak kaydedildi` : 'Tek sayfa olarak kaydedildi');
     } catch (err) {
       console.error('Rapor PDF üretimi başarısız:', err);
       setError('PDF oluşturulamadı');
@@ -53,6 +57,7 @@ export default function ReportPdfButton({ targetId, fileName }) {
         {busy ? 'PDF hazırlanıyor…' : 'PDF olarak kaydet'}
       </button>
       {error && <span style={{ fontSize: '0.72rem', color: '#ef4444' }}>{error}</span>}
+      {!error && info && <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{info}</span>}
     </div>
   );
 }

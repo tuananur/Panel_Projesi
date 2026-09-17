@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight, BookOpen, ArrowUpDown, Calendar
 } from 'lucide-react';
 import { ANALYTICS_DATE_PRESETS } from '@/lib/analytics-date-range';
-import { PDF_BG, saveElementAsSinglePdfPage } from '@/lib/pdf-export';
+import { PDF_BG, saveElementAsLongPdf } from '@/lib/pdf-export';
 const CHART_COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EC4899', '#3B82F6', '#8B5CF6', '#14B8A6', '#F97316', '#06B6D4', '#A855F7'];
 
 function truncateLabel(text, max = 26) {
@@ -380,7 +380,7 @@ export default function AnalyticsContent({ result, id, datePreset = 'last_30d', 
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       await new Promise((r) => setTimeout(r, 200));
 
-      await saveElementAsSinglePdfPage(root, `analytics-rapor-${id}.pdf`, {
+      await saveElementAsLongPdf(root, `analytics-rapor-${id}.pdf`, {
         onClone: (doc) => {
           if (snap?.rows) {
             doc.querySelectorAll('[data-keyword-row]').forEach((tr, i) => {

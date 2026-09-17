@@ -286,57 +286,59 @@ export default async function ClientReportPage({ params, searchParams }) {
   ];
 
   return (
-    <div className="animate-fade-in report-detail-page" id="report-pdf-root" style={{ maxWidth: '1080px' }}>
-      <Link
-        href="/dashboard/reports"
-        className="text-muted"
-        data-pdf-hide
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', marginBottom: '1rem', fontSize: '0.85rem' }}
-      >
-        <ArrowLeft size={16} /> Raporlar
-      </Link>
-
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem' }}>
-        <h1 className="heading-1" style={{ fontSize: '1.75rem', margin: 0 }}>{client.companyName}</h1>
+    <div className="animate-fade-in report-detail-page" style={{ maxWidth: '1080px' }}>
+      {/* Bu satır PDF kökünün dışında: kökten eleman silinmesi sayfa kesme hesabını kaydırır. */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}>
+        <Link
+          href="/dashboard/reports"
+          className="text-muted"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontSize: '0.85rem' }}
+        >
+          <ArrowLeft size={16} /> Raporlar
+        </Link>
         <ReportPdfButton
           targetId="report-pdf-root"
           fileName={`${client.companyName.replace(/[^\p{L}\p{N}]+/gu, '-').toLowerCase()}-rapor-${since}_${until}.pdf`}
         />
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
-        <StatusBadge label="Analytics" connected={gaOk} />
-        <StatusBadge label="Search Console" connected={gscOk} />
-        <StatusBadge label="Ubersuggest" connected={ubersuggestOk} />
+      <div id="report-pdf-root">
+        <h1 className="heading-1" style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{client.companyName}</h1>
+
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          <StatusBadge label="Analytics" connected={gaOk} />
+          <StatusBadge label="Search Console" connected={gscOk} />
+          <StatusBadge label="Ubersuggest" connected={ubersuggestOk} />
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          {ANALYTICS_DATE_PRESETS.map((item) => (
+            <Link
+              key={item.id}
+              href={`/dashboard/reports/${client.id}?datePreset=${item.id}`}
+              style={{
+                padding: '0.4rem 0.75rem',
+                fontSize: '0.75rem',
+                borderRadius: '6px',
+                border: '1px solid var(--border-color)',
+                background: preset === item.id ? '#4285F4' : 'transparent',
+                color: preset === item.id ? '#fff' : 'var(--text-secondary)',
+                fontWeight: preset === item.id ? 800 : 500,
+                textDecoration: 'none',
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+          Dönem: {periodLabel} ({since} → {until}, {dayCount} gün) · Tüm ülkeler ve tüm cihazlar ·
+          Tarih aralığı yalnızca Analytics ve Search Console için geçerlidir; Ubersuggest snapshot bazlı çalışır.
+        </p>
+
+        <ReportTabs tabs={tabs} />
       </div>
-
-      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-        {ANALYTICS_DATE_PRESETS.map((item) => (
-          <Link
-            key={item.id}
-            href={`/dashboard/reports/${client.id}?datePreset=${item.id}`}
-            style={{
-              padding: '0.4rem 0.75rem',
-              fontSize: '0.75rem',
-              borderRadius: '6px',
-              border: '1px solid var(--border-color)',
-              background: preset === item.id ? '#4285F4' : 'transparent',
-              color: preset === item.id ? '#fff' : 'var(--text-secondary)',
-              fontWeight: preset === item.id ? 800 : 500,
-              textDecoration: 'none',
-            }}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </div>
-
-      <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-        Dönem: {periodLabel} ({since} → {until}, {dayCount} gün) · Tüm ülkeler ve tüm cihazlar ·
-        Tarih aralığı yalnızca Analytics ve Search Console için geçerlidir; Ubersuggest snapshot bazlı çalışır.
-      </p>
-
-      <ReportTabs tabs={tabs} />
     </div>
   );
 }

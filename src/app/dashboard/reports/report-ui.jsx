@@ -59,7 +59,8 @@ export function Row({ label, value }) {
 
 export function Section({ title, note, children }) {
   return (
-    <div className="card" style={{ marginBottom: '1.5rem' }}>
+    // data-pdf-break: PDF sayfa kesmeleri bölüm başlarına hizalanır.
+    <div className="card" data-pdf-break style={{ marginBottom: '1.5rem' }}>
       <h2 className="heading-2" style={{ fontSize: '1.1rem', marginBottom: note ? '0.25rem' : '1rem' }}>{title}</h2>
       {note && <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '1rem' }}>{note}</p>}
       {children}
