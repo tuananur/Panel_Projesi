@@ -289,7 +289,7 @@ export default async function ClientReportPage({ params, searchParams }) {
   ];
 
   return (
-    <div className="animate-fade-in report-detail-page" style={{ maxWidth: '1080px' }}>
+    <div className="animate-fade-in report-detail-page" style={{ maxWidth: '100%', width: '100%' }}>
       {/* Bu satır PDF kökünün dışında: kökten eleman silinmesi sayfa kesme hesabını kaydırır. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}>
         <Link

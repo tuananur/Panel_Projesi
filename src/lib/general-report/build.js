@@ -56,8 +56,8 @@ function buildComparison(ga, gsc, extras) {
   if (ga?.summary && prev) {
     rows.push(
       { label: 'Aktif kullanıcı', source: SOURCE_GA4, current: ga.summary.activeUsers, previous: prev.activeUsers, unit: 'count' },
-      { label: 'Oturum', source: SOURCE_GA4, current: ga.summary.sessions, previous: prev.sessions, unit: 'count' },
-      { label: 'Sayfa görüntüleme', source: SOURCE_GA4, current: ga.summary.pageViews, previous: prev.pageViews, unit: 'count' },
+      { label: 'Oturum (Sessions)', source: SOURCE_GA4, current: ga.summary.sessions, previous: prev.sessions, unit: 'count' },
+      { label: 'Sayfa görüntüleme (Views)', source: SOURCE_GA4, current: ga.summary.pageViews, previous: prev.pageViews, unit: 'count' },
       { label: 'Hemen çıkma oranı', source: SOURCE_GA4, current: ga.summary.bounceRate, previous: prev.bounceRate, unit: 'pct', lowerIsBetter: true },
     );
   }
@@ -67,7 +67,7 @@ function buildComparison(ga, gsc, extras) {
     rows.push(
       { label: 'Organik tıklama', source: SOURCE_GSC, current: gsc.summary.clicks, previous: gscPrev.clicks, unit: 'count' },
       { label: 'Organik gösterim', source: SOURCE_GSC, current: gsc.summary.impressions, previous: gscPrev.impressions, unit: 'count' },
-      { label: 'CTR', source: SOURCE_GSC, current: gsc.summary.ctr, previous: gscPrev.ctr, unit: 'pct' },
+      { label: 'CTR (tıklama oranı)', source: SOURCE_GSC, current: gsc.summary.ctr, previous: gscPrev.ctr, unit: 'pct' },
       { label: 'Ortalama pozisyon', source: SOURCE_GSC, current: gsc.summary.position, previous: gscPrev.position, unit: 'position', lowerIsBetter: true },
     );
   }

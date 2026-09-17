@@ -8,9 +8,10 @@ import {
   defaultVisibleSet,
   loadVisibleSections,
   saveVisibleSections,
+  loadChartsOnly,
+  saveChartsOnly,
 } from './general-report-sections';
 
-// Aynı sekmede localStorage değişimini dinlemek için (storage eventi yalnızca diğer sekmelerde ateşlenir).
 const listeners = new Set();
 function emit() {
   listeners.forEach((listener) => listener());
@@ -40,22 +41,33 @@ function getServerSnapshot() {
   return snapshotFromSet(defaultVisibleSet());
 }
 
+function getChartsSnapshot() {
+  return loadChartsOnly() ? '1' : '0';
+}
+
+function getChartsServerSnapshot() {
+  return '0';
+}
+
 function persist(next) {
   saveVisibleSections(next);
   emit();
 }
 
-/**
- * Genel Rapor üzerinde bölüm görünürlüğü.
- * Kapalı bölümler CSS ile gizlenir (PDF'e de girmez); tercih localStorage'da saklanır.
- */
+function persistChartsOnly(value) {
+  saveChartsOnly(value);
+  emit();
+}
+
 export default function GeneralReportControls({ children }) {
   const [open, setOpen] = useState(false);
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const chartsOnlySnap = useSyncExternalStore(subscribe, getChartsSnapshot, getChartsServerSnapshot);
   const visible = useMemo(
     () => new Set(snapshot.split(',').map(Number).filter(Boolean)),
     [snapshot],
   );
+  const chartsOnly = chartsOnlySnap === '1';
 
   const update = (next) => {
     const set = next instanceof Set ? next : new Set(next);
@@ -73,15 +85,17 @@ export default function GeneralReportControls({ children }) {
   const selectAll = () => update(defaultVisibleSet());
   const selectNone = () => update(new Set([1]));
 
-  const hideCss = ALL_SECTION_NOS
-    .filter((no) => !visible.has(no))
-    .map((no) => `.general-report-root [data-section-no="${no}"]{display:none!important}`)
-    .join('');
+  const hideCss = [
+    ...ALL_SECTION_NOS
+      .filter((no) => !visible.has(no))
+      .map((no) => `.general-report-root [data-section-no="${no}"]{display:none!important}`),
+    chartsOnly ? '.general-report-root[data-charts-only="1"] [data-report-table]{display:none!important}' : '',
+  ].filter(Boolean).join('');
 
   const selectedCount = visible.size;
 
   return (
-    <div className="general-report-root">
+    <div className="general-report-root" data-charts-only={chartsOnly ? '1' : '0'}>
       {hideCss && <style>{hideCss}</style>}
 
       <div
@@ -97,6 +111,7 @@ export default function GeneralReportControls({ children }) {
       >
         <p className="text-muted" style={{ fontSize: '0.8rem', margin: 0 }}>
           {selectedCount}/{ALL_SECTION_NOS.length} bölüm seçili
+          {chartsOnly ? ' · sadece grafikler' : ''}
         </p>
         <button
           type="button"
@@ -136,6 +151,52 @@ export default function GeneralReportControls({ children }) {
               </button>
             </div>
           </div>
+
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              marginBottom: '0.85rem',
+              padding: '0.55rem 0.7rem',
+              borderRadius: '8px',
+              border: `1px solid ${chartsOnly ? 'rgba(66, 133, 244, 0.4)' : 'var(--border-color)'}`,
+              background: chartsOnly ? 'rgba(66, 133, 244, 0.08)' : 'transparent',
+              cursor: 'pointer',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+            }}
+          >
+            <span
+              aria-hidden
+              style={{
+                width: '18px',
+                height: '18px',
+                borderRadius: '4px',
+                border: `1.5px solid ${chartsOnly ? '#4285F4' : 'var(--border-color)'}`,
+                background: chartsOnly ? '#4285F4' : 'transparent',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                flexShrink: 0,
+              }}
+            >
+              {chartsOnly && <Check size={12} strokeWidth={3} />}
+            </span>
+            <input
+              type="checkbox"
+              checked={chartsOnly}
+              onChange={() => persistChartsOnly(!chartsOnly)}
+              style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+            />
+            <span>
+              Sadece grafikleri göster
+              <span className="text-muted" style={{ display: 'block', fontSize: '0.72rem', fontWeight: 500, marginTop: '0.15rem' }}>
+                Tablolar gizlenir; çizgi, donut, area ve gauge grafikleri kalır.
+              </span>
+            </span>
+          </label>
 
           <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.75rem' }}>
             İşaretlediğin bölümler raporda ve PDF&apos;te görünür. Tercih bu tarayıcıda saklanır.

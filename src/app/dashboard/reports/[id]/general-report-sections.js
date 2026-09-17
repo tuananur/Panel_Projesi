@@ -10,18 +10,18 @@ export const GENERAL_REPORT_SECTIONS = [
   { no: 6, title: 'Search Console Genel Performans' },
   { no: 7, title: 'Search Console Günlük Performans' },
   { no: 8, title: 'Google Arama Sorguları' },
-  { no: 9, title: 'SEO Keyword Performansı' },
-  { no: 10, title: 'Takip Edilen Keyword / Rank Tracking' },
-  { no: 11, title: 'En Çok Yükselen Keywordler' },
-  { no: 12, title: 'En Çok Düşen Keywordler' },
-  { no: 13, title: 'SEO Fırsat Keywordleri' },
-  { no: 14, title: 'CTR Fırsatları' },
-  { no: 15, title: 'Organik Landing Pages' },
-  { no: 16, title: 'Top SEO Sayfaları' },
+  { no: 9, title: 'SEO Anahtar Kelime Performansı' },
+  { no: 10, title: 'Takip Edilen Anahtar Kelimeler' },
+  { no: 11, title: 'En Çok Yükselen Anahtar Kelimeler' },
+  { no: 12, title: 'En Çok Düşen Anahtar Kelimeler' },
+  { no: 13, title: 'SEO Fırsat Anahtar Kelimeleri' },
+  { no: 14, title: 'CTR (tıklama oranı) Fırsatları' },
+  { no: 15, title: 'Organik İniş Sayfaları' },
+  { no: 16, title: 'En İyi SEO Sayfaları' },
   { no: 17, title: 'En Çok Ziyaret Edilen Sayfalar' },
   { no: 18, title: 'Kazanan / Kaybeden Sayfalar' },
   { no: 19, title: 'Yeni vs Geri Dönen Kullanıcılar' },
-  { no: 20, title: 'Retention / Cohort' },
+  { no: 20, title: 'Elde Tutma / Cohort' },
   { no: 21, title: 'Cihaz Dağılımı' },
   { no: 22, title: 'Ülke Dağılımı' },
   { no: 23, title: 'Search Console Ülke Performansı' },
@@ -29,21 +29,21 @@ export const GENERAL_REPORT_SECTIONS = [
   { no: 25, title: 'Tarayıcı Dağılımı' },
   { no: 26, title: 'Yaş / Cinsiyet' },
   { no: 27, title: 'Gün ve Saat Analizi' },
-  { no: 28, title: 'Dönüşümler / Key Events' },
+  { no: 28, title: 'Dönüşümler / Önemli Olaylar' },
   { no: 29, title: 'E-Ticaret Performansı' },
   { no: 30, title: 'İç Arama Verileri' },
-  { no: 31, title: 'Domain Overview' },
-  { no: 32, title: 'Organik Trafik / Keyword Tarihçesi' },
+  { no: 31, title: 'Domain Genel Bakış' },
+  { no: 32, title: 'Organik Trafik / Anahtar Kelime Tarihçesi' },
   { no: 33, title: 'Rakip Analizi' },
-  { no: 34, title: 'Keyword Gap' },
-  { no: 35, title: 'Backlink Overview' },
+  { no: 34, title: 'Kelime Boşluğu (Keyword Gap)' },
+  { no: 35, title: 'Geri Bağlantı Özeti' },
   { no: 36, title: 'Yeni / Kaybedilen Referans Domainler' },
-  { no: 37, title: 'Anchor Text Analizi' },
-  { no: 38, title: 'Backlink Fırsatları' },
+  { no: 37, title: 'Çapa Metni (Anchor) Analizi' },
+  { no: 38, title: 'Geri Bağlantı Fırsatları' },
   { no: 39, title: 'Teknik SEO Sağlığı' },
   { no: 40, title: 'Teknik SEO Sorunları' },
   { no: 41, title: 'Sorunlu URL Listesi' },
-  { no: 42, title: 'PageSpeed / Core Web Vitals' },
+  { no: 42, title: 'Sayfa Hızı / Temel Web Vitals' },
   { no: 43, title: 'SEO Fırsatları' },
   { no: 44, title: 'AI Arama Görünürlüğü' },
   { no: 45, title: 'AI Platform Kırılımı' },
@@ -80,4 +80,14 @@ export function loadVisibleSections() {
 export function saveVisibleSections(visible) {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...visible].sort((a, b) => a - b)));
+}
+
+export function loadChartsOnly() {
+  if (typeof window === 'undefined') return false;
+  return window.localStorage.getItem(CHARTS_ONLY_KEY) === '1';
+}
+
+export function saveChartsOnly(value) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(CHARTS_ONLY_KEY, value ? '1' : '0');
 }

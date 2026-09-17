@@ -1,6 +1,6 @@
 // Ubersuggest snapshot'ının veritabanındaki tüm alanlarını filtresiz listeler.
 // Boş alanlar "Veri yok" olarak görünür; hiçbir değer türetilmez.
-import { ROW_LIMIT, SNAPSHOT_FIELD_GROUPS } from '@/lib/ubersuggest/report-view';
+import { SNAPSHOT_FIELD_GROUPS } from '@/lib/ubersuggest/report-view';
 import { EMPTY_VALUE, ErrorNote, ListSection, Row, Section, num, parts, pct } from '../report-ui';
 
 const dateFmt = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -503,7 +503,7 @@ export default function UbersuggestPanel({ report }) {
       />
 
       <p className="text-muted" style={{ fontSize: '0.75rem', marginTop: '-0.75rem' }}>
-        Uzun listelerde satır sayısı {num(ROW_LIMIT)} ile sınırlıdır; toplam kayıt sayısı bölüm başlıklarında yazar.
+        Listeler tam kayıt setidir; toplam kayıt sayısı bölüm başlıklarında yazar.
       </p>
     </>
   );

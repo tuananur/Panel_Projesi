@@ -2,7 +2,8 @@
 // Tüm değerler araç verisidir; GA4 ve Search Console metrikleriyle aynı satırda toplanmaz.
 
 import { num, pct, EMPTY_VALUE } from '../report-ui';
-import { ReportSection, DataTable, MetricGrid, ScoreCard, SubHeading } from './general-report-ui';
+import { ReportSection, MetricGrid, ScoreCard, SubHeading } from './general-report-ui';
+import { DataTable } from './report-data-table';
 import { LineChart, BarList, GaugeChart, TwoCol } from './report-charts';
 
 const UBER = 'Ubersuggest';
@@ -51,15 +52,15 @@ export function buildSeoSections(ubersuggest) {
 
   // ------------------------------------------------------------------ 31
   add(
-    <ReportSection key="s31" no={31} title="Domain Overview" sources={[UBER]} note={`${snapshotNote}. Trafik değerleri araç tahminidir.`}>
+    <ReportSection key="s31" no={31} title="Domain Genel Bakış" sources={[UBER]} note={snapshotNote}>
       <MetricGrid
         items={[
-          { label: 'Organik keyword', source: UBER, value: num(snapshot.organicKeywordsCount) },
+          { label: 'Organik anahtar kelime', source: UBER, value: num(snapshot.organicKeywordsCount) },
           { label: 'Tahmini organik trafik', source: UBER, value: num(snapshot.estimatedOrganicTraffic) },
-          { label: 'Paid keyword', source: UBER, value: num(snapshot.paidKeywordsCount) },
-          { label: 'Tahmini paid trafik', source: UBER, value: num(snapshot.estimatedPaidTraffic) },
-          { label: 'Domain Authority', source: UBER, value: num(snapshot.domainAuthority) },
-          { label: 'Backlink', source: UBER, value: num(snapshot.totalBacklinks) },
+          { label: 'Ücretli anahtar kelime', source: UBER, value: num(snapshot.paidKeywordsCount) },
+          { label: 'Tahmini ücretli trafik', source: UBER, value: num(snapshot.estimatedPaidTraffic) },
+          { label: 'DA (alan otoritesi)', source: UBER, value: num(snapshot.domainAuthority) },
+          { label: 'Geri bağlantı (Backlink)', source: UBER, value: num(snapshot.totalBacklinks) },
           { label: 'Referans domain', source: UBER, value: num(snapshot.referringDomains) },
         ]}
       />
@@ -69,27 +70,26 @@ export function buildSeoSections(ubersuggest) {
   // ------------------------------------------------------------------ 32
   if (hasRows(snapshot.domainHistory)) {
     add(
-      <ReportSection key="s32" no={32} title="Organik Trafik / Keyword Tarihçesi" sources={[UBER]} note="Aylık araç tahmini geçmişi.">
+      <ReportSection key="s32" no={32} title="Organik Trafik / Anahtar Kelime Tarihçesi" sources={[UBER]}>
         <LineChart
           data={snapshot.domainHistory.map((row) => ({ label: row.yearMonth, ...row }))}
           series={[
             { key: 'estimatedOrganicTraffic', label: 'Tahmini organik trafik', color: '#A142F4' },
-            { key: 'organicKeywordsCount', label: 'Organik keyword sayısı' },
+            { key: 'organicKeywordsCount', label: 'Organik anahtar kelime sayısı' },
           ]}
         />
         <DataTable
           columns={[
             { key: 'yearMonth', label: 'Ay', type: 'text' },
             { key: 'estimatedOrganicTraffic', label: 'Tahmini trafik', type: 'float' },
-            { key: 'organicKeywordsCount', label: 'Organik KW', type: 'int' },
-            { key: 'paidKeywordsCount', label: 'Paid KW', type: 'int' },
+            { key: 'organicKeywordsCount', label: 'Organik anahtar kelime', type: 'int' },
+            { key: 'paidKeywordsCount', label: 'Ücretli anahtar kelime', type: 'int' },
             { key: 'topTierKeywords', label: '1-3', type: 'int' },
             { key: 'secondTierKeywords', label: '4-10', type: 'int' },
             { key: 'thirdTierKeywords', label: '11-50', type: 'int' },
             { key: 'fourthTierKeywords', label: '51+', type: 'int' },
           ]}
-          rows={[...snapshot.domainHistory].reverse()}
-          limit={24}
+          rows={[...snapshot.domainHistory].reverse()}
         />
       </ReportSection>,
     );
@@ -104,15 +104,14 @@ export function buildSeoSections(ubersuggest) {
         <DataTable
           columns={[
             { key: 'competitorDomain', label: 'Rakip', type: 'text' },
-            { key: 'commonKeywordCount', label: 'Ortak KW', type: 'int' },
-            { key: 'competitorOrganicKeywordsCount', label: 'Organik KW', type: 'int' },
-            { key: 'keywordGapCount', label: 'KW gap', type: 'int' },
+            { key: 'commonKeywordCount', label: 'Ortak anahtar kelime', type: 'int' },
+            { key: 'competitorOrganicKeywordsCount', label: 'Organik anahtar kelime', type: 'int' },
+            { key: 'keywordGapCount', label: 'Kelime boşluğu (KW Gap)', type: 'int' },
             { key: 'competitorEstimatedOrganicTraffic', label: 'Tahmini trafik', type: 'float' },
-            { key: 'competitorBacklinks', label: 'Backlink', type: 'int' },
-            { key: 'competitorDomainAuthority', label: 'DA', type: 'int' },
+            { key: 'competitorBacklinks', label: 'Geri bağlantı (Backlink)', type: 'int' },
+            { key: 'competitorDomainAuthority', label: 'DA (alan otoritesi)', type: 'int' },
           ]}
-          rows={snapshot.competitors}
-          limit={25}
+          rows={snapshot.competitors}
         />
       </ReportSection>,
     );
@@ -127,9 +126,8 @@ export function buildSeoSections(ubersuggest) {
       <ReportSection
         key="s34"
         no={34}
-        title="Keyword Gap"
-        sources={[UBER]}
-        note="Rakibin sıralandığı, bizim sıralanmadığımız kelime sayısı. Kelime listesi Ubersuggest verisinde yer almadığı için yalnızca sayılar gösterilir."
+        title="Kelime Boşluğu (Keyword Gap)"
+        sources={[UBER]}
       >
         <BarList
           rows={gapRows.map((row) => ({ label: row.competitorDomain, value: row.keywordGapCount, common: row.commonKeywordCount }))}
@@ -145,14 +143,14 @@ export function buildSeoSections(ubersuggest) {
   // ------------------------------------------------------------------ 35
   if (snapshot.totalBacklinks !== null || snapshot.referringDomains !== null) {
     add(
-      <ReportSection key="s35" no={35} title="Backlink Overview" sources={[UBER]}>
+      <ReportSection key="s35" no={35} title="Geri Bağlantı Özeti" sources={[UBER]}>
         <MetricGrid
           items={[
             { label: 'Toplam backlink', source: UBER, value: num(snapshot.totalBacklinks) },
             { label: 'Referans domain', source: UBER, value: num(snapshot.referringDomains) },
-            { label: 'Follow', source: UBER, value: num(snapshot.followBacklinks) },
-            { label: 'Nofollow', source: UBER, value: num(snapshot.nofollowBacklinks) },
-            { label: 'Domain Authority', source: UBER, value: num(snapshot.domainAuthority) },
+            { label: 'Follow (takip et)', source: UBER, value: num(snapshot.followBacklinks) },
+            { label: 'Nofollow (takip etme)', source: UBER, value: num(snapshot.nofollowBacklinks) },
+            { label: 'DA (alan otoritesi)', source: UBER, value: num(snapshot.domainAuthority) },
           ]}
         />
         {hasRows(snapshot.backlinks) && (
@@ -160,13 +158,11 @@ export function buildSeoSections(ubersuggest) {
             columns={[
               { key: 'sourceDomain', label: 'Kaynak domain', type: 'text' },
               { key: 'sourceUrl', label: 'Kaynak URL', type: 'text' },
-              { key: 'anchorText', label: 'Anchor', type: 'text' },
-              { key: 'sourceDomainRank', label: 'DR', type: 'int' },
+              { key: 'anchorText', label: 'Çapa metni (Anchor)', type: 'text' },
+              { key: 'sourceDomainRank', label: 'DR (alan puanı)', type: 'int' },
               { key: 'followStatus', label: 'Durum', type: 'text' },
             ]}
-            rows={snapshot.backlinks}
-            limit={25}
-            totalCount={counts.backlinks}
+            rows={snapshot.backlinks}
           />
         )}
       </ReportSection>,
@@ -190,8 +186,7 @@ export function buildSeoSections(ubersuggest) {
                   { key: 'referringDomain', label: 'Domain', type: 'text' },
                   { key: 'detectedDate', label: 'Tespit', type: 'date' },
                 ]}
-                rows={newDomains}
-                limit={25}
+                rows={newDomains}
                 emptyNote="Yeni domain yok"
               />
             </>
@@ -204,8 +199,7 @@ export function buildSeoSections(ubersuggest) {
                   { key: 'referringDomain', label: 'Domain', type: 'text' },
                   { key: 'detectedDate', label: 'Tespit', type: 'date' },
                 ]}
-                rows={lostDomains}
-                limit={25}
+                rows={lostDomains}
                 emptyNote="Kaybedilen domain yok"
               />
             </>
@@ -220,16 +214,14 @@ export function buildSeoSections(ubersuggest) {
   // ------------------------------------------------------------------ 37
   if (hasRows(snapshot.anchorTexts)) {
     add(
-      <ReportSection key="s37" no={37} title="Anchor Text Analizi" sources={[UBER]}>
+      <ReportSection key="s37" no={37} title="Çapa Metni (Anchor) Analizi" sources={[UBER]}>
         <DataTable
           columns={[
-            { key: 'anchorText', label: 'Anchor', type: 'text' },
+            { key: 'anchorText', label: 'Çapa metni (Anchor)', type: 'text' },
             { key: 'externalRootDomains', label: 'Domain', type: 'int' },
             { key: 'externalPages', label: 'Sayfa', type: 'int' },
           ]}
-          rows={snapshot.anchorTexts}
-          limit={25}
-          totalCount={counts.anchorTexts}
+          rows={snapshot.anchorTexts}
         />
       </ReportSection>,
     );
@@ -243,9 +235,8 @@ export function buildSeoSections(ubersuggest) {
       <ReportSection
         key="s38"
         no={38}
-        title="Backlink Fırsatları"
-        sources={[UBER]}
-        note="Rakibe link veren, size vermeyen siteler."
+        title="Geri Bağlantı Fırsatları"
+        sources={[UBER]}
       >
         <DataTable
           columns={[
@@ -255,9 +246,7 @@ export function buildSeoSections(ubersuggest) {
             { key: 'linksToUs', label: 'Bize link', type: 'int' },
             { key: 'opportunityStatus', label: 'Durum', type: 'text' },
           ]}
-          rows={snapshot.backlinkOpportunities}
-          limit={25}
-          totalCount={counts.backlinkOpportunities}
+          rows={snapshot.backlinkOpportunities}
         />
       </ReportSection>,
     );
@@ -307,7 +296,7 @@ export function buildSeoSections(ubersuggest) {
   // ------------------------------------------------------------------ 40
   if (hasRows(snapshot.auditIssues)) {
     add(
-      <ReportSection key="s40" no={40} title="Teknik SEO Sorunları" sources={[UBER]} note="Etki ve zorluk değerleri Ubersuggest sınıflandırmasıdır.">
+      <ReportSection key="s40" no={40} title="Teknik SEO Sorunları" sources={[UBER]}>
         <DataTable
           columns={[
             { key: 'issueId', label: 'Sorun', type: 'text' },
@@ -317,9 +306,7 @@ export function buildSeoSections(ubersuggest) {
             { key: 'seoImpact', label: 'Etki', badge: true },
             { key: 'difficulty', label: 'Zorluk', type: 'text' },
           ]}
-          rows={snapshot.auditIssues}
-          limit={40}
-          totalCount={counts.auditIssues}
+          rows={snapshot.auditIssues}
         />
       </ReportSection>,
     );
@@ -345,21 +332,19 @@ export function buildSeoSections(ubersuggest) {
         key="s41"
         no={41}
         title="Sorunlu URL Listesi"
-        sources={[UBER]}
-        note="Her sorun için ilk 50 URL saklanır; tam liste Ubersuggest tarafındadır."
+        sources={[UBER]}
       >
         <DataTable
           columns={[
             { key: 'issueId', label: 'Sorun', type: 'text' },
             { key: 'url', label: 'URL', type: 'text' },
-            { key: 'httpStatus', label: 'HTTP', type: 'int' },
+            { key: 'httpStatus', label: 'HTTP (yanıt kodu)', type: 'int' },
             { key: 'issueStatus', label: 'Durum', type: 'text' },
             { key: 'seoImpact', label: 'Etki', badge: true },
             { key: 'difficulty', label: 'Zorluk', type: 'text' },
             { key: 'recommendation', label: 'Öneri', type: 'text' },
           ]}
-          rows={affectedUrls}
-          limit={50}
+          rows={affectedUrls}
         />
       </ReportSection>,
     );
@@ -370,7 +355,7 @@ export function buildSeoSections(ubersuggest) {
   // ------------------------------------------------------------------ 42
   if (hasRows(snapshot.pagespeed)) {
     add(
-      <ReportSection key="s42" no={42} title="PageSpeed / Core Web Vitals" sources={[UBER]}>
+      <ReportSection key="s42" no={42} title="Sayfa Hızı / Temel Web Vitals" sources={[UBER]}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
           {snapshot.pagespeed.map((row) => (
             <ScoreCard
@@ -378,12 +363,12 @@ export function buildSeoSections(ubersuggest) {
               title={DEVICE_LABELS[row.device] || row.device}
               score={row.performanceScore}
               rows={[
-                { label: 'LCP', value: row.lcp == null ? null : nf.format(row.lcp) },
-                { label: 'INP', value: row.inp == null ? null : nf.format(row.inp) },
-                { label: 'CLS', value: row.cls == null ? null : nf.format(row.cls) },
-                { label: 'FCP', value: row.fcp == null ? null : nf.format(row.fcp) },
-                { label: 'TTFB', value: row.ttfb == null ? null : nf.format(row.ttfb) },
-                { label: 'CWV', value: row.coreWebVitalsStatus },
+                { label: 'LCP (en büyük içerik boyaması)', value: row.lcp == null ? null : nf.format(row.lcp) },
+                { label: 'INP (etkileşim gecikmesi)', value: row.inp == null ? null : nf.format(row.inp) },
+                { label: 'CLS (düzen kayması)', value: row.cls == null ? null : nf.format(row.cls) },
+                { label: 'FCP (ilk içerik boyaması)', value: row.fcp == null ? null : nf.format(row.fcp) },
+                { label: 'TTFB (ilk bayt süresi)', value: row.ttfb == null ? null : nf.format(row.ttfb) },
+                { label: 'CWV (temel web vitals)', value: row.coreWebVitalsStatus },
               ]}
             />
           ))}
@@ -415,16 +400,14 @@ export function buildSeoSections(ubersuggest) {
             columns={[
               { key: 'opportunityType', label: 'Tür', type: 'text' },
               { key: 'opportunitySubtype', label: 'Alt tür', type: 'text' },
-              { key: 'keyword', label: 'Keyword', type: 'text' },
+              { key: 'keyword', label: 'Anahtar kelime', type: 'text' },
               { key: 'currentPosition', label: 'Pozisyon', type: 'int' },
               { key: 'searchVolume', label: 'Hacim', type: 'int' },
-              { key: 'seoDifficulty', label: 'SD', type: 'float' },
+              { key: 'seoDifficulty', label: 'SD (SEO zorluğu)', type: 'float' },
               { key: 'impact', label: 'Etki', badge: true },
               { key: 'effort', label: 'Efor', type: 'text' },
             ]}
-            rows={snapshot.opportunities}
-            limit={30}
-            totalCount={counts.opportunities}
+            rows={snapshot.opportunities}
           />
         )}
       </ReportSection>,
@@ -436,7 +419,7 @@ export function buildSeoSections(ubersuggest) {
   // ------------------------------------------------------------------ 44
   if (snapshot.aiVisibilityPercentage !== null || snapshot.aiTotalMentions !== null) {
     add(
-      <ReportSection key="s44" no={44} title="AI Arama Görünürlüğü" sources={[UBER]} note="AI asistanlarındaki marka görünürlüğü; Google organik verisinden bağımsızdır.">
+      <ReportSection key="s44" no={44} title="AI Arama Görünürlüğü" sources={[UBER]}>
         <MetricGrid
           items={[
             {
@@ -446,7 +429,7 @@ export function buildSeoSections(ubersuggest) {
               hint: snapshot.aiVisibilityChange !== null ? `Değişim: ${snapshot.aiVisibilityChange > 0 ? '+' : ''}${nf.format(snapshot.aiVisibilityChange)}` : null,
             },
             { label: 'Toplam bahsedilme', source: UBER, value: num(snapshot.aiTotalMentions) },
-            { label: 'Share of Voice', source: UBER, value: snapshot.aiShareOfVoice === null ? EMPTY_VALUE : pct(snapshot.aiShareOfVoice) },
+            { label: 'Ses payı (Share of Voice)', source: UBER, value: snapshot.aiShareOfVoice === null ? EMPTY_VALUE : pct(snapshot.aiShareOfVoice) },
             {
               label: 'Ortalama sıra',
               source: UBER,
@@ -488,8 +471,7 @@ export function buildSeoSections(ubersuggest) {
             { key: 'averageRank', label: 'Ort. sıra', type: 'float' },
             { key: 'sentimentLabel', label: 'Duygu', type: 'text' },
           ]}
-          rows={snapshot.aiProviders}
-          limit={10}
+          rows={snapshot.aiProviders}
         />
       </ReportSection>,
     );
@@ -511,8 +493,7 @@ export function buildSeoSections(ubersuggest) {
             { key: 'sentimentPositivePercentage', label: 'Pozitif', type: 'pct' },
             { key: 'sentimentNegativePercentage', label: 'Negatif', type: 'pct' },
           ]}
-          rows={snapshot.aiCompetitors}
-          limit={20}
+          rows={snapshot.aiCompetitors}
         />
       </ReportSection>,
     );

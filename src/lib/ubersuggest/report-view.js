@@ -4,8 +4,8 @@
 
 import prisma from '../prisma.js';
 
-// Backlink/keyword listeleri çok büyük olabilir; sayfayı kilitlememek için üst sınır.
-export const ROW_LIMIT = 1000;
+// Liste satırları UI'da sayfalanır; DB'den tam set çekilir.
+export const ROW_LIMIT = null;
 
 const desc = (field) => ({ [field]: { sort: 'desc', nulls: 'last' } });
 const asc = (field) => ({ [field]: { sort: 'asc', nulls: 'last' } });
@@ -20,20 +20,20 @@ export async function getUbersuggestReport(clientId) {
       orderBy: [{ snapshotDate: 'desc' }, { id: 'desc' }],
       include: {
         domainHistory: { orderBy: { yearMonth: 'asc' } },
-        keywords: { orderBy: asc('currentPosition'), take: ROW_LIMIT },
-        rankTracking: { orderBy: asc('newPosition'), take: ROW_LIMIT },
+        keywords: { orderBy: asc('currentPosition') },
+        rankTracking: { orderBy: asc('newPosition') },
         averagePositions: { orderBy: { date: 'asc' } },
-        topPages: { orderBy: desc('estimatedOrganicTraffic'), take: ROW_LIMIT },
+        topPages: { orderBy: desc('estimatedOrganicTraffic') },
         competitors: { orderBy: desc('commonKeywordCount') },
-        backlinks: { orderBy: desc('sourceDomainRank'), take: ROW_LIMIT },
-        anchorTexts: { orderBy: desc('externalRootDomains'), take: ROW_LIMIT },
-        linkingDomains: { orderBy: desc('detectedDate'), take: ROW_LIMIT },
-        backlinkOpportunities: { orderBy: desc('linksToCompetitor'), take: ROW_LIMIT },
+        backlinks: { orderBy: desc('sourceDomainRank') },
+        anchorTexts: { orderBy: desc('externalRootDomains') },
+        linkingDomains: { orderBy: desc('detectedDate') },
+        backlinkOpportunities: { orderBy: desc('linksToCompetitor') },
         auditIssues: {
           orderBy: desc('issueCount'),
-          include: { affectedUrls: { take: 50 }, _count: { select: { affectedUrls: true } } },
+          include: { affectedUrls: true, _count: { select: { affectedUrls: true } } },
         },
-        opportunities: { orderBy: desc('searchVolume'), take: ROW_LIMIT },
+        opportunities: { orderBy: desc('searchVolume') },
         pagespeed: { orderBy: { device: 'asc' } },
         aiProviders: { orderBy: { provider: 'asc' } },
         aiCompetitors: { orderBy: desc('visibilityPercentage') },

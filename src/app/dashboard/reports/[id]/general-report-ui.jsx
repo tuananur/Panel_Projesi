@@ -1,6 +1,8 @@
 // Genel rapor bölümlerinin ortak kabuğu: numaralı başlık, kaynak etiketi, KPI ve tablo.
 
 import { EMPTY_VALUE } from '../report-ui';
+import { trLabel } from './report-labels';
+import { SECTION_NOTES } from './section-notes';
 
 const nf = new Intl.NumberFormat('tr-TR');
 
@@ -90,9 +92,11 @@ export function TrendText({ changePct, lowerIsBetter = false, absolute = null })
 }
 
 export function ReportSection({ no, title, sources = [], note, children, compact = false }) {
+  const catalog = SECTION_NOTES[no];
+  const resolvedNote = [note, catalog].filter(Boolean).join('\n\n') || null;
   return (
     <div className="card" data-pdf-break data-section-no={no} style={{ marginBottom: compact ? '1rem' : '1.25rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: note ? '0.3rem' : '0.85rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: resolvedNote ? '0.3rem' : '0.85rem' }}>
         <span
           style={{
             fontSize: '0.72rem',
@@ -108,7 +112,20 @@ export function ReportSection({ no, title, sources = [], note, children, compact
         <h2 className="heading-2" style={{ fontSize: '1.05rem', margin: 0, flex: 1, minWidth: '200px' }}>{title}</h2>
         {sources.map((source) => <SourceTag key={source} source={source} />)}
       </div>
-      {note && <p className="text-muted" style={{ fontSize: '0.78rem', marginBottom: '0.85rem' }}>{note}</p>}
+      {resolvedNote && (
+        <p
+          className="text-muted"
+          style={{
+            fontSize: '0.78rem',
+            marginBottom: '0.85rem',
+            whiteSpace: 'pre-line',
+            lineHeight: 1.55,
+            maxWidth: '1100px',
+          }}
+        >
+          {resolvedNote}
+        </p>
+      )}
       {children}
     </div>
   );
@@ -131,94 +148,11 @@ export function formatCell(value, type) {
     }
     case 'date':
       return value instanceof Date ? value.toLocaleDateString('tr-TR') : String(value);
+    case 'code':
+      return trLabel(String(value));
     default:
-      return String(value);
+      return trLabel(String(value));
   }
-}
-
-function cellColor(value, colorize) {
-  if (value === null || value === undefined || value === '') return undefined;
-  const number = Number(value);
-  if (!Number.isFinite(number) || number === 0) return 'var(--text-secondary)';
-  if (colorize === 'up-good') return number > 0 ? '#34A853' : '#EA4335';
-  if (colorize === 'down-good') return number < 0 ? '#34A853' : '#EA4335';
-  return undefined;
-}
-
-/**
- * Tablo. columns: [{ key, label, type, width, colorize: 'up-good'|'down-good', badge: true }]
- */
-export function DataTable({ columns, rows, limit = 25, totalCount = null, emptyNote = null }) {
-  const items = (rows || []).slice(0, limit);
-  if (items.length === 0) {
-    return emptyNote ? <p className="text-muted" style={{ fontSize: '0.85rem' }}>{emptyNote}</p> : null;
-  }
-
-  const total = totalCount ?? (rows || []).length;
-
-  return (
-    <>
-      <div data-pdf-expand className="custom-scrollbar" style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-          <thead>
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  style={{
-                    textAlign: column.type && column.type !== 'text' && column.type !== 'date' && !column.badge ? 'right' : 'left',
-                    padding: '0.45rem 0.5rem',
-                    borderBottom: '1px solid var(--border-color)',
-                    color: 'var(--text-secondary)',
-                    fontWeight: 600,
-                    fontSize: '0.74rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.02em',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {column.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((row, index) => (
-              <tr key={index}>
-                {columns.map((column) => {
-                  const raw = row[column.key];
-                  const isNumeric = column.type && column.type !== 'text' && column.type !== 'date' && !column.badge;
-                  const color = column.colorize ? cellColor(raw, column.colorize) : undefined;
-                  return (
-                    <td
-                      key={column.key}
-                      style={{
-                        textAlign: isNumeric ? 'right' : 'left',
-                        padding: '0.45rem 0.5rem',
-                        borderBottom: '1px dashed var(--border-color)',
-                        whiteSpace: isNumeric ? 'nowrap' : 'normal',
-                        maxWidth: column.width || (isNumeric ? undefined : '320px'),
-                        overflowWrap: 'anywhere',
-                        fontWeight: color ? 700 : undefined,
-                        color,
-                      }}
-                    >
-                      {column.badge ? <ImpactBadge value={raw} /> : formatCell(raw, column.type)}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {total > items.length && (
-        <p className="text-muted" style={{ fontSize: '0.75rem', marginTop: '0.5rem' }}>
-          Toplam {nf.format(total)} kayıttan ilk {nf.format(items.length)} tanesi gösteriliyor.
-        </p>
-      )}
-    </>
-  );
 }
 
 /**
@@ -234,8 +168,8 @@ export function MetricGrid({ items, compact = false }) {
       style={{
         display: 'grid',
         gridTemplateColumns: compact
-          ? 'repeat(auto-fill, minmax(140px, 1fr))'
-          : 'repeat(auto-fill, minmax(170px, 1fr))',
+          ? 'repeat(auto-fill, minmax(150px, 1fr))'
+          : 'repeat(auto-fill, minmax(180px, 1fr))',
         gap: '0.65rem',
       }}
     >

@@ -1,4 +1,9 @@
-// Genel rapor grafikleri — sunucu tarafı SVG; ekstra paket yok.
+'use client';
+
+// Genel rapor grafikleri — client: hover ile değer gösterimi için.
+
+import { useState } from 'react';
+import { trLabel } from './report-labels';
 
 export const PALETTE = ['#4285F4', '#34A853', '#FBBC05', '#EA4335', '#A142F4', '#00ACC1', '#FF7043', '#9E9D24'];
 
@@ -13,9 +18,43 @@ function seriesPath(rows, seriesKey, x, y) {
   return rows.map((row, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(row[seriesKey])}`).join(' ');
 }
 
-/** Çok serili çizgi grafik. */
+function ChartTooltip({ hover, series, valueSuffix = '' }) {
+  if (!hover) return null;
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: `clamp(8px, ${hover.ratio * 100}%, calc(100% - 180px))`,
+        top: 8,
+        zIndex: 5,
+        pointerEvents: 'none',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '8px',
+        padding: '0.45rem 0.6rem',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+        fontSize: '0.75rem',
+        minWidth: '140px',
+      }}
+    >
+      <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{hover.label}</div>
+      {series.map((s, index) => (
+        <div key={s.key} style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', color: 'var(--text-secondary)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: s.color || PALETTE[index % PALETTE.length] }} />
+            {s.label}
+          </span>
+          <strong style={{ color: 'var(--text-primary)' }}>{fmt(hover.values[s.key])}{valueSuffix}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Çok serili çizgi grafik — hover'da nokta değerleri. */
 export function LineChart({ data, series, height = 190, valueSuffix = '', showRange = true }) {
   const rows = (data || []).filter(Boolean);
+  const [hover, setHover] = useState(null);
   if (rows.length < 2 || !series?.length) return null;
 
   const width = 100;
@@ -27,8 +66,18 @@ export function LineChart({ data, series, height = 190, valueSuffix = '', showRa
   const y = (value) => height - 24 - ((Number(value) || 0) - min) / span * (height - 44);
   const labelStep = Math.ceil(rows.length / 8);
 
+  const onMove = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const index = Math.round(ratio * (rows.length - 1));
+    const row = rows[index];
+    const pointValues = {};
+    series.forEach((s) => { pointValues[s.key] = Number(row[s.key]) || 0; });
+    setHover({ index, ratio, label: row.label || row.date || `#${index + 1}`, values: pointValues });
+  };
+
   return (
-    <div style={{ marginTop: '0.75rem' }}>
+    <div style={{ marginTop: '0.75rem' }} data-report-chart>
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
         {series.map((s, index) => (
           <span key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
@@ -37,14 +86,23 @@ export function LineChart({ data, series, height = 190, valueSuffix = '', showRa
           </span>
         ))}
       </div>
-      <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: `${height}px`, overflow: 'visible' }}>
-        {[0, 0.5, 1].map((ratio) => (
-          <line key={ratio} x1="0" x2={width} y1={y(min + span * ratio)} y2={y(min + span * ratio)} stroke="var(--border-color)" strokeWidth="0.3" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
-        ))}
-        {series.map((s, seriesIndex) => (
-          <path key={s.key} d={seriesPath(rows, s.key, x, y)} fill="none" stroke={s.color || PALETTE[seriesIndex % PALETTE.length]} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
-        ))}
-      </svg>
+      <div style={{ position: 'relative' }} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
+        <ChartTooltip hover={hover} series={series} valueSuffix={valueSuffix} />
+        <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: `${height}px`, overflow: 'visible', display: 'block' }}>
+          {[0, 0.5, 1].map((ratio) => (
+            <line key={ratio} x1="0" x2={width} y1={y(min + span * ratio)} y2={y(min + span * ratio)} stroke="var(--border-color)" strokeWidth="0.3" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
+          ))}
+          {series.map((s, seriesIndex) => (
+            <path key={s.key} d={seriesPath(rows, s.key, x, y)} fill="none" stroke={s.color || PALETTE[seriesIndex % PALETTE.length]} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
+          ))}
+          {hover && (
+            <line x1={x(hover.index)} x2={x(hover.index)} y1={12} y2={height - 20} stroke="var(--text-secondary)" strokeWidth="0.4" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
+          )}
+          {hover && series.map((s, seriesIndex) => (
+            <circle key={`dot-${s.key}`} cx={x(hover.index)} cy={y(hover.values[s.key])} r="1.6" fill={s.color || PALETTE[seriesIndex % PALETTE.length]} />
+          ))}
+        </svg>
+      </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
         {rows.filter((_, index) => index % labelStep === 0 || index === rows.length - 1).map((row, index) => (
           <span key={`${row.label}-${index}`}>{row.label}</span>
@@ -59,9 +117,10 @@ export function LineChart({ data, series, height = 190, valueSuffix = '', showRa
   );
 }
 
-/** Tek serili alan (area) grafik — organik trafik gibi trendler için. */
+/** Tek serili alan (area) grafik — hover destekli. */
 export function AreaChart({ data, valueKey = 'value', labelKey = 'label', color = '#34A853', height = 160 }) {
   const rows = (data || []).filter(Boolean);
+  const [hover, setHover] = useState(null);
   if (rows.length < 2) return null;
 
   const width = 100;
@@ -72,13 +131,31 @@ export function AreaChart({ data, valueKey = 'value', labelKey = 'label', color 
   const line = rows.map((row, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(Number(row[valueKey]) || 0)}`).join(' ');
   const area = `${line} L ${width} ${height - 20} L 0 ${height - 20} Z`;
   const labelStep = Math.ceil(rows.length / 6);
+  const series = [{ key: valueKey, label: 'Değer', color }];
+
+  const onMove = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const index = Math.round(ratio * (rows.length - 1));
+    const row = rows[index];
+    setHover({ index, ratio, label: row[labelKey], values: { [valueKey]: Number(row[valueKey]) || 0 } });
+  };
 
   return (
-    <div style={{ marginTop: '0.75rem' }}>
-      <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: `${height}px` }}>
-        <path d={area} fill={color} opacity="0.18" />
-        <path d={line} fill="none" stroke={color} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
-      </svg>
+    <div style={{ marginTop: '0.75rem' }} data-report-chart>
+      <div style={{ position: 'relative' }} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
+        <ChartTooltip hover={hover} series={series} />
+        <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: `${height}px`, display: 'block' }}>
+          <path d={area} fill={color} opacity="0.18" />
+          <path d={line} fill="none" stroke={color} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
+          {hover && (
+            <>
+              <line x1={x(hover.index)} x2={x(hover.index)} y1={8} y2={height - 20} stroke="var(--text-secondary)" strokeWidth="0.4" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
+              <circle cx={x(hover.index)} cy={y(hover.values[valueKey])} r="1.5" fill={color} />
+            </>
+          )}
+        </svg>
+      </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
         {rows.filter((_, index) => index % labelStep === 0 || index === rows.length - 1).map((row, index) => (
           <span key={`${row[labelKey]}-${index}`}>{row[labelKey]}</span>
@@ -119,7 +196,7 @@ export function BarList({ rows, valueKey = 'value', labelKey = 'label', suffix =
         return (
           <div key={`${row[labelKey]}-${index}`}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '0.2rem', gap: '1rem' }}>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row[labelKey]}</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trLabel(row[labelKey])}</span>
               <span style={{ fontWeight: 600, flexShrink: 0 }}>
                 {fmt(value)}{suffix}
                 {secondary && row[secondary] !== null && row[secondary] !== undefined && (
@@ -225,7 +302,7 @@ export function DonutChart({ rows, valueKey = 'value', labelKey = 'label', size 
         {items.map((row, index) => (
           <span key={`${row[labelKey]}-legend-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: row.color || PALETTE[index % PALETTE.length], flexShrink: 0 }} />
-            <span style={{ flex: 1 }}>{row[labelKey]}</span>
+            <span style={{ flex: 1 }}>{trLabel(row[labelKey])}</span>
             <strong>{fmt(Number(row[valueKey]))}</strong>
             <span style={{ color: 'var(--text-secondary)' }}>%{((Number(row[valueKey]) / total) * 100).toFixed(1)}</span>
           </span>

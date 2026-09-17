@@ -32,7 +32,7 @@ export function buildInsightSections(report) {
         no={48}
         title="Beyin Atölyesi Analizi"
         sources={['Beyin']}
-        note="Her madde yukarıdaki gerçek ölçümlerden üretilir: ne oldu, neden önemli, ne yapılmalı."
+       
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           {report.analysis.map((item, index) => (
@@ -66,7 +66,7 @@ export function buildInsightSections(report) {
         no={49}
         title="Önceliklendirilmiş Aksiyon Planı"
         sources={['Beyin']}
-        note="Öncelik, ölçülen etkiye göre atanır."
+       
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
           {report.actions.map((action, index) => (
@@ -103,7 +103,7 @@ export function buildInsightSections(report) {
     conclusion.good.length > 0 || conclusion.bad.length > 0 || conclusion.opportunities.length > 0 || conclusion.next.length > 0;
   if (hasConclusion) {
     sections.push(
-      <ReportSection key="s50" no={50} title="Yönetici Özeti" sources={['Beyin']} note="Dönemin özeti ve önümüzdeki dönem için ilk işler.">
+      <ReportSection key="s50" no={50} title="Yönetici Özeti" sources={['Beyin']}>
         <SummaryCard title="İyi giden" items={conclusion.good} tone="good" />
         <SummaryCard title="Kötü giden" items={conclusion.bad} tone="bad" />
         <SummaryCard title="Fırsatlar" items={conclusion.opportunities} tone="opportunity" />
