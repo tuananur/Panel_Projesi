@@ -9,6 +9,7 @@ import {
   ChevronLeft, ChevronRight, BookOpen, ArrowUpDown, Calendar
 } from 'lucide-react';
 import { ANALYTICS_DATE_PRESETS } from '@/lib/analytics-date-range';
+import { PDF_BG, saveElementAsSinglePdfPage } from '@/lib/pdf-export';
 const CHART_COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EC4899', '#3B82F6', '#8B5CF6', '#14B8A6', '#F97316', '#06B6D4', '#A855F7'];
 
 function truncateLabel(text, max = 26) {
@@ -29,55 +30,8 @@ function compareKeywordsPriority(a, b) {
   return a.keyword.localeCompare(b.keyword, 'tr');
 }
 
-const PDF_BG = '#0f172a';
+// Tek uzun sayfa PDF üretimi raporlar ekranıyla paylaşılıyor.
 
-async function saveElementAsSinglePdfPage(el, fileName, { onClone } = {}) {
-  const html2canvas = (await import('html2canvas')).default;
-  const { jsPDF } = await import('jspdf');
-
-  const prevWidth = el.style.width;
-  const prevMaxWidth = el.style.maxWidth;
-  el.style.width = `${el.scrollWidth}px`;
-  el.style.maxWidth = `${el.scrollWidth}px`;
-
-  const w = el.scrollWidth;
-  const h = el.scrollHeight;
-  const scale = Math.min(2, Math.max(1, 8192 / Math.max(w, h)));
-
-  try {
-    const canvas = await html2canvas(el, {
-      scale,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: PDF_BG,
-      logging: false,
-      width: w,
-      height: h,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: w,
-      windowHeight: h,
-      onclone: (doc, clonedEl) => {
-        doc.querySelectorAll('[data-pdf-hide]').forEach((n) => n.remove());
-        doc.querySelectorAll('.tooltip-content').forEach((n) => n.remove());
-        onClone?.(doc, clonedEl);
-      },
-    });
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.92);
-    const pdf = new jsPDF({
-      unit: 'px',
-      format: [canvas.width, canvas.height],
-      hotfixes: ['px_scaling'],
-      compress: true,
-    });
-    pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
-    pdf.save(fileName);
-  } finally {
-    el.style.width = prevWidth;
-    el.style.maxWidth = prevMaxWidth;
-  }
-}
 
 function polarToCartesian(cx, cy, r, angle) {
   return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };

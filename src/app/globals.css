@@ -936,7 +936,54 @@ input, button, select, textarea {
 }
 
 
-.custom-scrollbar::-webkit-scrollbar { height: 8px; }
+/* display: block şart: yukarıdaki `*` kuralı scrollbar'ı tüm panelde gizliyor,
+   bu sınıf olmadan yatay kaydırma çubuğu hiç çizilmiyordu. */
+.custom-scrollbar::-webkit-scrollbar { display: block; height: 8px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+/* Rapor detay sayfası çok uzun olduğu için dikey scrollbar görünür olsun:
+   konumun nerede olduğu takip edilebilsin. Yalnızca bu sayfayı etkiler. */
+.content-area:has(.report-detail-page) {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.06);
+  -ms-overflow-style: auto;
+}
+
+.content-area:has(.report-detail-page)::-webkit-scrollbar {
+  display: block;
+  width: 10px;
+}
+
+.content-area:has(.report-detail-page)::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.content-area:has(.report-detail-page)::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 5px;
+}
+
+.content-area:has(.report-detail-page)::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+/* Mobilde sayfa gövdesi kaydırılıyor; scrollbar orada görünür olmalı. */
+@media (max-width: 991px) {
+  body:has(.report-detail-page) {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.06);
+    -ms-overflow-style: auto;
+  }
+
+  body:has(.report-detail-page)::-webkit-scrollbar {
+    display: block;
+    width: 8px;
+  }
+
+  body:has(.report-detail-page)::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 4px;
+  }
+}

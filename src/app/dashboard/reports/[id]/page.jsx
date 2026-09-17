@@ -13,6 +13,7 @@ import { ErrorNote, ListSection, Row, Section, StatusBadge, duration, num, pct }
 import ReportTabs from './report-tabs';
 import UbersuggestPanel from './ubersuggest-panel';
 import GeneralReportPanel from './general-report-panel';
+import ReportPdfButton from './report-pdf-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -285,16 +286,23 @@ export default async function ClientReportPage({ params, searchParams }) {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: '1080px' }}>
+    <div className="animate-fade-in report-detail-page" id="report-pdf-root" style={{ maxWidth: '1080px' }}>
       <Link
         href="/dashboard/reports"
         className="text-muted"
+        data-pdf-hide
         style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', marginBottom: '1rem', fontSize: '0.85rem' }}
       >
         <ArrowLeft size={16} /> Raporlar
       </Link>
 
-      <h1 className="heading-1" style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{client.companyName}</h1>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.75rem' }}>
+        <h1 className="heading-1" style={{ fontSize: '1.75rem', margin: 0 }}>{client.companyName}</h1>
+        <ReportPdfButton
+          targetId="report-pdf-root"
+          fileName={`${client.companyName.replace(/[^\p{L}\p{N}]+/gu, '-').toLowerCase()}-rapor-${since}_${until}.pdf`}
+        />
+      </div>
 
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
         <StatusBadge label="Analytics" connected={gaOk} />

@@ -96,7 +96,8 @@ export function DataTable({ columns, rows, limit = 25, totalCount = null, emptyN
 
   return (
     <>
-      <div style={{ overflowX: 'auto' }}>
+      {/* data-pdf-expand: PDF'e alınırken yatay kaydırma açılır, geniş tablolar kırpılmaz. */}
+      <div data-pdf-expand className="custom-scrollbar" style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
           <thead>
             <tr>
