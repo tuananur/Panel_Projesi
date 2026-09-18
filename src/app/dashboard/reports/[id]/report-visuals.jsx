@@ -3,17 +3,13 @@
 import { cloneElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Monitor, Smartphone, Tablet } from 'lucide-react';
 import TurkeyMap from 'turkey-map-react';
-import WorldMap, { regions as WORLD_REGIONS } from 'react-svg-worldmap';
+import WorldMap from 'react-svg-worldmap';
 import * as SimpleIcons from 'simple-icons';
 import { DonutChart, BarList, PALETTE } from './report-charts';
 import { trLabel } from './report-labels';
 import { alpha3ToAlpha2 } from '@/lib/country-codes';
 
 const nf = new Intl.NumberFormat('tr-TR');
-
-const WORLD_NAME_BY_CODE = Object.fromEntries(
-  (WORLD_REGIONS || []).map((row) => [String(row.code).toLowerCase(), row.name]),
-);
 
 /** SVG path yaklaşık merkez noktası — şehir adı etiketi için. */
 function pathCentroid(path) {
@@ -288,11 +284,10 @@ export function BrowserSplit({ rows = [], limit = 10 }) {
   );
 }
 
-/** Ülke dünya haritası — Türkiye paneli gibi sol liste + sağ harita (≈25/75). */
+/** Ülke dünya haritası — sol liste + sağ harita; sadece ilk 12 ülke boyalı, harita üstü etiket yok. */
 export function CountryWorldPanel({ countries = [] }) {
   const wrapRef = useRef(null);
   const [mapWidth, setMapWidth] = useState(720);
-  const [labels, setLabels] = useState([]);
 
   const sorted = useMemo(() => {
     return (countries || [])
@@ -302,27 +297,22 @@ export function CountryWorldPanel({ countries = [] }) {
         if (!alpha2 || alpha2.length !== 2) return null;
         const value = Number(row.sessions || row.activeUsers || row.clicks || 0) || 0;
         if (value <= 0) return null;
-        const code = alpha2.toLowerCase();
         return {
-          country: code,
+          country: alpha2.toLowerCase(),
           value,
           name: row.country || row.countryName || alpha2,
-          enName: WORLD_NAME_BY_CODE[code] || alpha2.toUpperCase(),
-          sessions: Number(row.sessions) || 0,
-          activeUsers: Number(row.activeUsers) || 0,
         };
       })
       .filter(Boolean)
       .sort((a, b) => b.value - a.value);
   }, [countries]);
 
-  const mapData = useMemo(
-    () => sorted.map(({ country, value }) => ({ country, value })),
-    [sorted],
-  );
-
-  const top10 = useMemo(() => sorted.slice(0, 10), [sorted]);
   const listRows = useMemo(() => sorted.slice(0, 12), [sorted]);
+  // Haritada yalnızca listedeki ilk 12 ülke boyanır.
+  const mapData = useMemo(
+    () => listRows.map(({ country, value }) => ({ country, value })),
+    [listRows],
+  );
 
   useEffect(() => {
     const node = wrapRef.current;
@@ -336,49 +326,6 @@ export function CountryWorldPanel({ countries = [] }) {
     ro.observe(node);
     return () => ro.disconnect();
   }, []);
-
-  useEffect(() => {
-    const node = wrapRef.current;
-    if (!node || top10.length === 0) {
-      setLabels([]);
-      return undefined;
-    }
-
-    const place = () => {
-      const svg = node.querySelector('svg');
-      if (!svg) return;
-      const wrapRect = node.getBoundingClientRect();
-      const paths = [...svg.querySelectorAll('path')];
-      const next = [];
-
-      top10.forEach((row) => {
-        const path = paths.find((el) => {
-          const title = el.querySelector('title')?.textContent || '';
-          const hay = title.toLowerCase();
-          const en = row.enName.toLowerCase();
-          return hay === en || hay.startsWith(`${en}:`) || hay.startsWith(`${en} `) || hay.includes(en);
-        });
-        if (!path) return;
-        const box = path.getBoundingClientRect();
-        if (box.width < 2 && box.height < 2) return;
-        next.push({
-          key: row.country,
-          name: row.name,
-          value: row.value,
-          left: box.left - wrapRect.left + box.width / 2,
-          top: box.top - wrapRect.top + box.height / 2,
-        });
-      });
-      setLabels(next);
-    };
-
-    const timer = window.setTimeout(place, 80);
-    window.addEventListener('resize', place);
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('resize', place);
-    };
-  }, [top10, mapWidth, mapData]);
 
   if (mapData.length === 0) return null;
 
@@ -461,7 +408,7 @@ export function CountryWorldPanel({ countries = [] }) {
               return { fill: '#eef2f7', stroke: '#cbd5e1', strokeWidth: 0.5, cursor: 'pointer' };
             }
             const span = (maxValue - minValue) || 1;
-            const intensity = 0.22 + ((Number(countryValue) - minValue) / span) * 0.78;
+            const intensity = 0.28 + ((Number(countryValue) - minValue) / span) * 0.72;
             return {
               fill: `rgba(66, 133, 244, ${intensity})`,
               stroke: '#94a3b8',
@@ -475,44 +422,6 @@ export function CountryWorldPanel({ countries = [] }) {
               : `${countryName}: ${nf.format(Number(countryValue) || 0)} oturum`
           )}
         />
-        {labels.map((item) => (
-          <div
-            key={item.key}
-            style={{
-              position: 'absolute',
-              left: item.left,
-              top: item.top,
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none',
-              textAlign: 'center',
-              lineHeight: 1.15,
-              zIndex: 2,
-            }}
-          >
-            <div
-              style={{
-                fontSize: mapWidth > 700 ? '0.7rem' : '0.6rem',
-                fontWeight: 800,
-                color: '#0f172a',
-                textShadow: '0 0 4px #fff, 0 0 4px #fff, 0 0 6px #fff',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {item.name}
-            </div>
-            <div
-              style={{
-                fontSize: mapWidth > 700 ? '0.65rem' : '0.55rem',
-                fontWeight: 700,
-                color: '#1d4ed8',
-                textShadow: '0 0 4px #fff, 0 0 4px #fff',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {nf.format(item.value)}
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
