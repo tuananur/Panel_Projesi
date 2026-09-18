@@ -264,6 +264,7 @@ export default async function ClientReportPage({ params, searchParams }) {
             ubersuggest={ubersuggest}
             report={generalReport}
             periodLabel={`${periodLabel} (${since} → ${until})`}
+            siteBaseUrl={client.website || gsc?.siteUrl || null}
           />
         </GeneralReportControls>
       ),

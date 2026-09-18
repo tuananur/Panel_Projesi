@@ -156,18 +156,37 @@ function looksLikeUrl(value) {
   const text = String(value || '').trim();
   if (!text) return false;
   if (/^https?:\/\//i.test(text)) return true;
-  if (text.startsWith('/') && text.length > 1) return true;
+  if (text.startsWith('/') && text.length >= 1) return true;
   return /^[\w.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(text);
 }
 
-function hrefFor(value) {
+function normalizeSiteBase(siteBaseUrl) {
+  if (!siteBaseUrl) return null;
+  const raw = String(siteBaseUrl).trim().replace(/\/+$/, '');
+  if (!raw) return null;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `https://${raw}`;
+}
+
+export function hrefFor(value, siteBaseUrl = null) {
   const text = String(value).trim();
   if (/^https?:\/\//i.test(text)) return text;
-  if (text.startsWith('/')) return text;
+  if (text.startsWith('/')) {
+    const base = normalizeSiteBase(siteBaseUrl);
+    return base ? `${base}${text === '/' ? '' : text}` : text;
+  }
   return `https://${text}`;
 }
 
-export function formatCell(value, type) {
+function linkNode(text, siteBaseUrl) {
+  return (
+    <a href={hrefFor(text, siteBaseUrl)} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+      {trLabel(text)}
+    </a>
+  );
+}
+
+export function formatCell(value, type, siteBaseUrl = null) {
   if (value === null || value === undefined || value === '') return EMPTY_VALUE;
   switch (type) {
     case 'int':
@@ -187,23 +206,11 @@ export function formatCell(value, type) {
     case 'code':
       return trLabel(String(value));
     case 'url':
-    case 'link': {
-      const text = String(value);
-      return (
-        <a href={hrefFor(text)} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-          {trLabel(text)}
-        </a>
-      );
-    }
+    case 'link':
+      return linkNode(String(value), siteBaseUrl);
     default: {
       const text = String(value);
-      if (looksLikeUrl(text)) {
-        return (
-          <a href={hrefFor(text)} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-            {trLabel(text)}
-          </a>
-        );
-      }
+      if (looksLikeUrl(text)) return linkNode(text, siteBaseUrl);
       return trLabel(text);
     }
   }
@@ -216,14 +223,19 @@ export function formatCell(value, type) {
 export function MetricGrid({ items, compact = false }) {
   const filled = (items || []).filter(Boolean);
   if (filled.length === 0) return null;
-  // 10+ kartta min genişliği büyüt: satırda ~5–6 kart, alt satırda kalanlar da aynı boyutta kalır.
-  const minCol = compact ? 160 : filled.length >= 10 ? 220 : 200;
+  // Özet gibi 10–12 kartta 4 sütun: satırlar dengeli dolar, sağda boşluk kalmaz.
+  const columns = compact
+    ? `repeat(auto-fill, minmax(160px, 1fr))`
+    : filled.length >= 8
+      ? 'repeat(4, minmax(0, 1fr))'
+      : `repeat(auto-fill, minmax(200px, 1fr))`;
 
   return (
     <div
+      className={filled.length >= 8 && !compact ? 'report-metric-grid-dense' : undefined}
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(auto-fill, minmax(${minCol}px, 1fr))`,
+        gridTemplateColumns: columns,
         gap: compact ? '0.75rem' : '0.85rem',
       }}
     >
@@ -235,20 +247,23 @@ export function MetricGrid({ items, compact = false }) {
             style={{
               border: '1px solid var(--border-color)',
               borderRadius: '12px',
-              padding: compact ? '0.75rem 0.85rem' : '0.95rem 1.05rem',
+              padding: compact ? '0.75rem 0.85rem' : '1rem 1.1rem',
               background: 'var(--bg-secondary)',
-              minHeight: compact ? undefined : '5.5rem',
+              minHeight: compact ? undefined : '6rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.35rem' }}>
-              <span style={{ fontSize: compact ? '0.72rem' : '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{item.label}</span>
+              <span style={{ fontSize: compact ? '0.72rem' : '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, lineHeight: 1.25 }}>{item.label}</span>
               {item.source && <SourceTag source={item.source} />}
             </div>
             <div
               style={{
-                fontSize: compact ? '1.1rem' : '1.45rem',
+                fontSize: compact ? '1.1rem' : '1.5rem',
                 fontWeight: 800,
-                marginTop: '0.4rem',
+                marginTop: '0.45rem',
                 color: empty ? 'var(--text-secondary)' : undefined,
                 opacity: empty ? 0.6 : 1,
                 letterSpacing: '-0.02em',
@@ -266,6 +281,16 @@ export function MetricGrid({ items, compact = false }) {
           </div>
         );
       })}
+      {filled.length >= 8 && !compact && (
+        <style>{`
+          @media (max-width: 1100px) {
+            .report-metric-grid-dense { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+          }
+          @media (max-width: 640px) {
+            .report-metric-grid-dense { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
+      )}
     </div>
   );
 }

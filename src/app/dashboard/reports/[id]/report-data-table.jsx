@@ -51,6 +51,7 @@ export function DataTable({
   emptyNote = null,
   defaultPageSize = 100,
   pageSizeOptions = PAGE_SIZE_OPTIONS,
+  siteBaseUrl = null,
 }) {
   const allRows = rows || [];
   const [pageSize, setPageSize] = useState(defaultPageSize);
@@ -163,7 +164,7 @@ export function DataTable({
                           color,
                         }}
                       >
-                        {column.badge ? <ImpactBadge value={raw} /> : formatCell(raw, column.type)}
+                        {column.badge ? <ImpactBadge value={raw} /> : formatCell(raw, column.type, siteBaseUrl)}
                       </td>
                     );
                   })}

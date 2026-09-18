@@ -14,6 +14,7 @@ import { LineChart, AreaChart, BarList, DonutChart, ChangeCards, HeatStrip, Rank
 import { SplitBarDonut, DevicePodium, VisitorSplit, BrowserSplit, CityTurkeyPanel, DayHourHeatmap, CountryWorldPanel } from './report-visuals';
 import { buildSeoSections } from './general-report-seo';
 import { buildInsightSections } from './general-report-insights';
+import { alpha3ToAlpha2 } from '@/lib/country-codes';
 
 const nf = new Intl.NumberFormat('tr-TR');
 
@@ -33,11 +34,19 @@ function changeOf(comparison, label) {
   return (comparison || []).find((row) => row.label === label)?.changePct ?? null;
 }
 
-export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, report, periodLabel }) {
+function toAlpha2(code) {
+  if (!code) return null;
+  const raw = String(code).trim();
+  if (raw.length === 3) return alpha3ToAlpha2(raw);
+  return raw.toUpperCase();
+}
+
+export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, report, periodLabel, siteBaseUrl = null }) {
   const sections = [];
   const hidden = [];
   const add = (node) => sections.push(node);
   const skip = (no, title, reason) => hidden.push({ no, title, reason });
+  const Table = (props) => <DataTable {...props} siteBaseUrl={siteBaseUrl} />;
 
   const snapshot = ubersuggest?.snapshot || null;
   const gscOk = Boolean(gsc?.summary);
@@ -54,7 +63,6 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         note={`Dönem: ${periodLabel}.`}
       >
         <MetricGrid
-          compact
           items={[
             gaOk && { label: 'Kullanıcı (Users)', source: GA4, value: num(ga.summary.activeUsers), changePct: changeOf(report.comparison, 'Aktif kullanıcı') },
             gaOk && { label: 'Oturum (Sessions)', source: GA4, value: num(ga.summary.sessions), changePct: changeOf(report.comparison, 'Oturum') },
@@ -245,7 +253,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         title="Google Arama Sorguları"
         sources={[GSC]}
       >
-        <DataTable
+        <Table
           columns={[
             { key: 'keyword', label: 'Sorgu', type: 'text' },
             { key: 'clicks', label: 'Tıklama', type: 'int' },
@@ -274,7 +282,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         title="SEO Anahtar Kelime Performansı"
         sources={[UBER]}
       >
-        <DataTable
+        <Table
           columns={[
             { key: 'keyword', label: 'Anahtar kelime', type: 'text' },
             { key: 'currentPosition', label: 'Pozisyon', type: 'int' },
@@ -390,7 +398,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         sources={[risingSource]}
         note={risingSource === UBER ? 'Kaynak: SEO araç rank tracker.' : 'Kaynak: Google arama pozisyon değişimi.'}
       >
-        <DataTable columns={movementColumns(risingSource)} rows={rising} />
+        <Table columns={movementColumns(risingSource)} rows={rising} />
       </ReportSection>,
     );
   } else {
@@ -408,7 +416,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         sources={[fallingSource]}
         note={fallingSource === UBER ? 'Kaynak: SEO araç rank tracker.' : 'Kaynak: Google arama pozisyon değişimi.'}
       >
-        <DataTable columns={movementColumns(fallingSource)} rows={falling} />
+        <Table columns={movementColumns(fallingSource)} rows={falling} />
       </ReportSection>,
     );
   } else {
@@ -429,7 +437,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(opportunities.strikingDistance) && (
           <>
             <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Google arama — ilk sayfaya yakın sorgular</h3>
-            <DataTable
+            <Table
               columns={[
                 { key: 'keyword', label: 'Sorgu', type: 'text' },
                 { key: 'position', label: 'Pozisyon', type: 'float' },
@@ -445,7 +453,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(opportunities.uberStriking) && (
           <>
             <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.4rem' }}>SEO araç — hacimli ve yakın kelimeler</h3>
-            <DataTable
+            <Table
               columns={[
                 { key: 'keyword', label: 'Anahtar kelime', type: 'text' },
                 { key: 'currentPosition', label: 'Pozisyon', type: 'int' },
@@ -460,7 +468,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(opportunities.uberOpportunities) && (
           <>
             <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.4rem' }}>SEO araç — işaretli fırsatlar</h3>
-            <DataTable
+            <Table
               columns={[
                 { key: 'opportunityType', label: 'Tür', type: 'text' },
                 { key: 'opportunitySubtype', label: 'Alt tür', type: 'text' },
@@ -491,7 +499,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         sources={[GSC]}
         note={`İlk 10'da olup CTR'ı site ortalamasının (${pct(opportunities.siteCtr)}) altında kalan sorgular. Sabit sektör ortalaması değil, sitenin kendi gerçek ortalaması ölçüt alınır.`}
       >
-        <DataTable
+        <Table
           columns={[
             { key: 'keyword', label: 'Sorgu', type: 'text' },
             { key: 'position', label: 'Pozisyon', type: 'float' },
@@ -524,7 +532,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         }
       >
         {hasRows(landing.merged) ? (
-          <DataTable
+          <Table
             columns={[
               { key: 'path', label: 'İniş sayfası', type: 'url' },
               { key: 'activeUsers', label: 'Organik kullanıcı', type: 'int' },
@@ -538,9 +546,9 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             rows={landing.merged}
           />
         ) : (
-          <DataTable
+          <Table
             columns={[
-              { key: 'path', label: 'Sayfa', type: 'text' },
+              { key: 'path', label: 'Sayfa', type: 'url' },
               { key: 'clicks', label: 'Tıklama', type: 'int' },
               { key: 'impressions', label: 'Gösterim', type: 'int' },
               { key: 'ctr', label: 'CTR (tıklama oranı)', type: 'pct' },
@@ -564,7 +572,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         title="En Çok Organik Trafik Getiren Sayfalar"
         sources={[UBER]}
       >
-        <DataTable
+        <Table
           columns={[
             { key: 'url', label: 'URL', type: 'text' },
             { key: 'pageTitle', label: 'Başlık', type: 'text' },
@@ -585,10 +593,10 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
   if (hasRows(ga?.pages)) {
     add(
       <ReportSection key="s17" no={17} title="Sitede En Çok Açılan Sayfalar" sources={[GA4]}>
-        <DataTable
+        <Table
           columns={[
             { key: 'title', label: 'Sayfa başlığı', type: 'text' },
-            { key: 'path', label: 'Yol', type: 'text' },
+            { key: 'path', label: 'Yol', type: 'url' },
             { key: 'views', label: 'Görüntüleme', type: 'int' },
             { key: 'activeUsers', label: 'Kullanıcı (Users)', type: 'int' },
             { key: 'avgSessionDuration', label: 'Ort. süre (sn)', type: 'float' },
@@ -616,9 +624,9 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             left={(
               <>
                 <SubHeading>Kazananlar <SourceTag source={GA4} /></SubHeading>
-                <DataTable
+                <Table
                   columns={[
-                    { key: 'path', label: 'Sayfa', type: 'text' },
+                    { key: 'path', label: 'Sayfa', type: 'url' },
                     { key: 'previous', label: 'Önceki', type: 'int' },
                     { key: 'current', label: 'Bu dönem', type: 'int' },
                     { key: 'change', label: 'Fark', type: 'delta', colorize: 'up-good' },
@@ -630,9 +638,9 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             right={(
               <>
                 <SubHeading>Kaybedenler <SourceTag source={GA4} /></SubHeading>
-                <DataTable
+                <Table
                   columns={[
-                    { key: 'path', label: 'Sayfa', type: 'text' },
+                    { key: 'path', label: 'Sayfa', type: 'url' },
                     { key: 'previous', label: 'Önceki', type: 'int' },
                     { key: 'current', label: 'Bu dönem', type: 'int' },
                     { key: 'change', label: 'Fark', type: 'delta', colorize: 'up-good' },
@@ -648,9 +656,9 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             left={(
               <>
                 <SubHeading>Tıklama artan <SourceTag source={GSC} /></SubHeading>
-                <DataTable
+                <Table
                   columns={[
-                    { key: 'path', label: 'Sayfa', type: 'text' },
+                    { key: 'path', label: 'Sayfa', type: 'url' },
                     { key: 'change', label: 'Fark', type: 'delta', colorize: 'up-good' },
                     { key: 'positionChange', label: 'Pozisyon', type: 'delta', colorize: 'up-good' },
                   ]}
@@ -661,9 +669,9 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             right={(
               <>
                 <SubHeading>Tıklama düşen <SourceTag source={GSC} /></SubHeading>
-                <DataTable
+                <Table
                   columns={[
-                    { key: 'path', label: 'Sayfa', type: 'text' },
+                    { key: 'path', label: 'Sayfa', type: 'url' },
                     { key: 'change', label: 'Fark', type: 'delta', colorize: 'up-good' },
                     { key: 'positionChange', label: 'Pozisyon', type: 'delta', colorize: 'up-good' },
                   ]}
@@ -712,7 +720,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(ga?.devices) && (
           <>
             <DevicePodium devices={ga.devices} />
-            <DataTable
+            <Table
               columns={[
                 { key: 'name', label: 'Cihaz', type: 'text' },
                 { key: 'activeUsers', label: 'Kullanıcı (Users)', type: 'int' },
@@ -726,7 +734,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(gsc?.devices) && (
           <>
             <SubHeading>Google arama — cihaz</SubHeading>
-            <DataTable
+            <Table
               columns={[
                 { key: 'label', label: 'Cihaz', type: 'text' },
                 { key: 'clicks', label: 'Tıklama', type: 'int' },
@@ -744,8 +752,56 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
     skip(21, 'Cihaz Dağılımı', 'Cihaz verisi yok');
   }
 
-  // ------------------------------------------------------------------ 22 + 23 (birleşik ülke)
+  // ------------------------------------------------------------------ 22 + 23 (birleşik ülke + tek tablo)
   if (hasRows(ga?.countries) || hasRows(gsc?.countries)) {
+    const gscByCode = new Map();
+    const gscByName = new Map();
+    (gsc?.countries || []).forEach((row) => {
+      const alpha2 = toAlpha2(row.countryCode);
+      if (alpha2) gscByCode.set(alpha2, row);
+      if (row.countryName) gscByName.set(String(row.countryName).toLocaleLowerCase('tr-TR'), row);
+    });
+
+    const mergedCountries = [];
+    const seen = new Set();
+    (ga?.countries || []).forEach((row) => {
+      const code = row.countryCode ? String(row.countryCode).toUpperCase() : null;
+      const gscRow = (code && gscByCode.get(code))
+        || gscByName.get(String(row.country || '').toLocaleLowerCase('tr-TR'))
+        || null;
+      if (code) seen.add(code);
+      if (row.country) seen.add(`n:${String(row.country).toLocaleLowerCase('tr-TR')}`);
+      mergedCountries.push({
+        country: row.country,
+        activeUsers: row.activeUsers,
+        sessions: row.sessions,
+        views: row.views,
+        engagementRate: row.engagementRate,
+        percentage: row.percentage,
+        clicks: gscRow?.clicks ?? null,
+        impressions: gscRow?.impressions ?? null,
+        ctr: gscRow?.ctr ?? null,
+        position: gscRow?.position ?? null,
+      });
+    });
+    (gsc?.countries || []).forEach((row) => {
+      const code = toAlpha2(row.countryCode);
+      const nameKey = `n:${String(row.countryName || '').toLocaleLowerCase('tr-TR')}`;
+      if ((code && seen.has(code)) || seen.has(nameKey)) return;
+      mergedCountries.push({
+        country: row.countryName,
+        activeUsers: null,
+        sessions: null,
+        views: null,
+        engagementRate: null,
+        percentage: null,
+        clicks: row.clicks,
+        impressions: row.impressions,
+        ctr: row.ctr,
+        position: row.position,
+      });
+    });
+
     add(
       <ReportSection
         key="s22"
@@ -754,37 +810,21 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         sources={[hasRows(ga?.countries) && GA4, hasRows(gsc?.countries) && GSC].filter(Boolean)}
       >
         {hasRows(ga?.countries) && <CountryWorldPanel countries={ga.countries} />}
-        {hasRows(ga?.countries) && (
-          <>
-            <SubHeading>Site trafiği — ülke</SubHeading>
-            <DataTable
-              columns={[
-                { key: 'country', label: 'Ülke', type: 'text' },
-                { key: 'activeUsers', label: 'Kullanıcı', type: 'int' },
-                { key: 'sessions', label: 'Oturum', type: 'int' },
-                { key: 'views', label: 'Görüntüleme', type: 'int' },
-                { key: 'engagementRate', label: 'Etkileşim', type: 'pct' },
-                { key: 'percentage', label: 'Pay', type: 'pct' },
-              ]}
-              rows={ga.countries}
-            />
-          </>
-        )}
-        {hasRows(gsc?.countries) && (
-          <>
-            <SubHeading>Google arama — ülke</SubHeading>
-            <DataTable
-              columns={[
-                { key: 'countryName', label: 'Ülke', type: 'text' },
-                { key: 'clicks', label: 'Tıklama', type: 'int' },
-                { key: 'impressions', label: 'Gösterim', type: 'int' },
-                { key: 'ctr', label: 'CTR (tıklama oranı)', type: 'pct' },
-                { key: 'position', label: 'Pozisyon', type: 'float' },
-              ]}
-              rows={gsc.countries}
-            />
-          </>
-        )}
+        <Table
+          columns={[
+            { key: 'country', label: 'Ülke', type: 'text', width: '10rem' },
+            { key: 'activeUsers', label: 'Kullanıcı', type: 'int' },
+            { key: 'sessions', label: 'Oturum', type: 'int' },
+            { key: 'views', label: 'Görüntüleme', type: 'int' },
+            { key: 'engagementRate', label: 'Etkileşim', type: 'pct' },
+            { key: 'percentage', label: 'Pay', type: 'pct' },
+            { key: 'clicks', label: 'Tıklama', type: 'int' },
+            { key: 'impressions', label: 'Gösterim', type: 'int' },
+            { key: 'ctr', label: 'CTR', type: 'pct' },
+            { key: 'position', label: 'Pozisyon', type: 'float' },
+          ]}
+          rows={mergedCountries}
+        />
       </ReportSection>,
     );
   } else {
@@ -796,7 +836,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
     add(
       <ReportSection key="s24" no={24} title="Şehir Dağılımı" sources={[GA4]}>
         <CityTurkeyPanel cities={extras.cities} />
-        <DataTable
+        <Table
           columns={[
             { key: 'city', label: 'Şehir', type: 'text' },
             { key: 'country', label: 'Ülke', type: 'text' },
@@ -896,7 +936,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(extras.keyEvents) && (
           <>
             <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.4rem' }}>Anahtar olaylar</h3>
-            <DataTable
+            <Table
               columns={[
                 { key: 'event', label: 'Olay', type: 'text' },
                 { key: 'count', label: 'Sayı', type: 'int' },
@@ -908,7 +948,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(extras.events) && (
           <>
             <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.4rem' }}>Tüm olaylar</h3>
-            <DataTable
+            <Table
               columns={[
                 { key: 'event', label: 'Olay', type: 'text' },
                 { key: 'count', label: 'Sayı', type: 'int' },
@@ -945,7 +985,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         {hasRows(extras.products) && (
           <>
             <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.4rem' }}>En çok satan ürünler</h3>
-            <DataTable
+            <Table
               columns={[
                 { key: 'name', label: 'Ürün', type: 'text' },
                 { key: 'quantity', label: 'Adet', type: 'int' },
@@ -965,7 +1005,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
   if (hasRows(extras?.siteSearch)) {
     add(
       <ReportSection key="s30" no={30} title="İç Arama Verileri" sources={[GA4]}>
-        <DataTable
+        <Table
           columns={[
             { key: 'term', label: 'Arama terimi', type: 'text' },
             { key: 'count', label: 'Arama sayısı', type: 'int' },

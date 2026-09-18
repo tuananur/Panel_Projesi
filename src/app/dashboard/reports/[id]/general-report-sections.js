@@ -54,11 +54,12 @@ export const GENERAL_REPORT_SECTIONS = [
 
 export const ALL_SECTION_NOS = GENERAL_REPORT_SECTIONS.map((section) => section.no);
 
-export const STORAGE_KEY = 'general-report-visible-sections';
+export const STORAGE_KEY = 'general-report-visible-sections-v2';
 export const CHARTS_ONLY_KEY = 'general-report-charts-only';
 
+/** Kart 10 (takip edilen kelimeler) default kapalı. */
 export function defaultVisibleSet() {
-  return new Set(ALL_SECTION_NOS);
+  return new Set(ALL_SECTION_NOS.filter((no) => no !== 10));
 }
 
 /** localStorage'dan okur; bozuk/eksik kayıtta tüm bölümler açık döner. */

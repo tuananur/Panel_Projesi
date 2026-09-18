@@ -284,9 +284,9 @@ export function BrowserSplit({ rows = [], limit = 10 }) {
   );
 }
 
-/** Ülke dünya haritası — GA oturum / kullanıcı yoğunluğu. */
+/** Ülke dünya haritası — tam genişlik, ilk 10 etiket, hover mavi. */
 export function CountryWorldPanel({ countries = [] }) {
-  const mapData = useMemo(() => {
+  const sorted = useMemo(() => {
     return (countries || [])
       .map((row) => {
         const raw = row.countryCode || '';
@@ -294,29 +294,128 @@ export function CountryWorldPanel({ countries = [] }) {
         if (!alpha2 || alpha2.length !== 2) return null;
         const value = Number(row.sessions || row.activeUsers || row.clicks || 0) || 0;
         if (value <= 0) return null;
-        return { country: alpha2.toLowerCase(), value };
+        return {
+          country: alpha2.toLowerCase(),
+          value,
+          name: row.country || row.countryName || alpha2,
+        };
       })
-      .filter(Boolean);
+      .filter(Boolean)
+      .sort((a, b) => b.value - a.value);
   }, [countries]);
+
+  const mapData = useMemo(
+    () => sorted.map(({ country, value }) => ({ country, value })),
+    [sorted],
+  );
+
+  const top10 = sorted.slice(0, 10);
+  const max = Math.max(...sorted.map((row) => row.value), 1);
+
+  // textLabelFunction SVG piksel uzayında (transform dışında) — oranlar yaklaşık.
+  const CENTROID = {
+    tr: [0.58, 0.40], de: [0.50, 0.32], us: [0.20, 0.40], gb: [0.46, 0.30], fr: [0.48, 0.35],
+    nl: [0.49, 0.31], it: [0.52, 0.38], es: [0.46, 0.40], ru: [0.68, 0.28], az: [0.62, 0.38],
+    sa: [0.60, 0.48], ae: [0.62, 0.46], iq: [0.60, 0.42], ir: [0.63, 0.42], eg: [0.56, 0.46],
+    cn: [0.78, 0.42], in: [0.70, 0.48], br: [0.30, 0.62], ca: [0.20, 0.28], au: [0.82, 0.70],
+    jp: [0.86, 0.40], kr: [0.84, 0.40], pl: [0.53, 0.30], se: [0.52, 0.22], be: [0.48, 0.32],
+    at: [0.52, 0.34], ch: [0.50, 0.35], gr: [0.54, 0.40], pt: [0.44, 0.40], ua: [0.56, 0.32],
+    ro: [0.55, 0.35], bg: [0.55, 0.38], ge: [0.62, 0.36], kz: [0.68, 0.34],
+  };
 
   if (mapData.length === 0) return null;
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', margin: '0.5rem 0 1rem', overflow: 'hidden' }}>
-      <WorldMap
-        color="#4285F4"
-        valueSuffix=" oturum"
-        size="xl"
-        data={mapData}
-        backgroundColor="transparent"
-        borderColor="#cbd5e1"
-        richInteraction
-      />
+    <div style={{ width: '100%', margin: '0.35rem 0 1rem', overflow: 'hidden' }}>
+      <style>{`
+        .report-worldmap-wrap .worldmap__wrapper { width: 100% !important; }
+        .report-worldmap-wrap .worldmap__figure-container { width: 100% !important; }
+        .report-worldmap-wrap svg { width: 100% !important; max-width: 100%; height: auto !important; }
+        .report-worldmap-wrap path.worldmap__region--hover {
+          fill: #3b82f6 !important;
+          stroke: #1d4ed8 !important;
+          stroke-width: 1.5px;
+          stroke-opacity: 1 !important;
+        }
+      `}</style>
+      <div className="report-worldmap-wrap" style={{ width: '100%' }}>
+        <WorldMap
+          color="#4285F4"
+          valueSuffix=" oturum"
+          size="responsive"
+          data={mapData}
+          backgroundColor="transparent"
+          borderColor="#cbd5e1"
+          richInteraction
+          tooltipBgColor="#0f172a"
+          tooltipTextColor="#fff"
+          styleFunction={({ countryValue, minValue, maxValue }) => {
+            if (countryValue === undefined) {
+              return { fill: '#eef2f7', stroke: '#cbd5e1', strokeWidth: 0.5, cursor: 'pointer' };
+            }
+            const span = (maxValue - minValue) || 1;
+            const intensity = 0.25 + ((Number(countryValue) - minValue) / span) * 0.75;
+            return {
+              fill: `rgba(66, 133, 244, ${intensity})`,
+              stroke: '#94a3b8',
+              strokeWidth: 0.6,
+              cursor: 'pointer',
+            };
+          }}
+          tooltipTextFunction={({ countryName, countryValue }) => (
+            countryValue === undefined
+              ? countryName
+              : `${countryName}: ${nf.format(Number(countryValue) || 0)} oturum`
+          )}
+          textLabelFunction={(width) => {
+            const height = width * 0.75;
+            return top10.flatMap((row, index) => {
+              const point = CENTROID[row.country];
+              if (!point) return [];
+              const x = point[0] * width;
+              const y = point[1] * height;
+              return [
+                {
+                  label: `${row.name}${'\u200b'.repeat(index + 1)}`,
+                  x,
+                  y: y - 7,
+                  style: {
+                    fontSize: Math.max(9, Math.min(12, width / 90)),
+                    fontWeight: 800,
+                    fill: '#0f172a',
+                    textAnchor: 'middle',
+                    paintOrder: 'stroke',
+                    stroke: 'rgba(255,255,255,0.92)',
+                    strokeWidth: 3,
+                  },
+                },
+                {
+                  label: `${nf.format(row.value)}${'\u200b'.repeat(index + 20)}`,
+                  x,
+                  y: y + 8,
+                  style: {
+                    fontSize: Math.max(8, Math.min(11, width / 100)),
+                    fontWeight: 700,
+                    fill: '#1d4ed8',
+                    textAnchor: 'middle',
+                    paintOrder: 'stroke',
+                    stroke: 'rgba(255,255,255,0.92)',
+                    strokeWidth: 3,
+                  },
+                },
+              ];
+            });
+          }}
+        />
+      </div>
+      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
+        İlk 10 ülke haritada etiketli · diğerleri üzerine gelince görünür · en yüksek {nf.format(max)} oturum
+      </div>
     </div>
   );
 }
 
-/** Türkiye haritası — şehir adları harita üzerinde; üstteki top-5 chip yok. */
+/** Türkiye haritası — şehir adları harita üzerinde; tooltip mouse yanında. */
 export function CityTurkeyPanel({ cities = [] }) {
   const sorted = useMemo(
     () => [...cities].sort((a, b) => (b.sessions || b.activeUsers || 0) - (a.sessions || a.activeUsers || 0)),
@@ -328,11 +427,8 @@ export function CityTurkeyPanel({ cities = [] }) {
     return map;
   }, [sorted]);
   const max = Math.max(...sorted.map((row) => row.sessions || row.activeUsers || 0), 1);
-  const [hover, setHover] = useState(null);
-  const labeledCities = useMemo(() => {
-    // Yoğun şehirlerde etiket; çok kalabalık olmasın diye ilk 18 + değeri olanlar.
-    return sorted.slice(0, 18);
-  }, [sorted]);
+  const [tip, setTip] = useState(null);
+  const labeledCities = useMemo(() => sorted.slice(0, 18), [sorted]);
   const labeledSet = useMemo(
     () => new Set(labeledCities.map((row) => normalizeTr(row.city))),
     [labeledCities],
@@ -367,14 +463,33 @@ export function CityTurkeyPanel({ cities = [] }) {
           </div>
         ))}
       </div>
-      <div style={{ position: 'relative' }}>
+      <div
+        style={{ position: 'relative', overflow: 'hidden' }}
+        onMouseMove={(event) => {
+          if (!tip) return;
+          const rect = event.currentTarget.getBoundingClientRect();
+          const localX = event.clientX - rect.left + 12;
+          const localY = event.clientY - rect.top + 12;
+          setTip((prev) => prev ? {
+            ...prev,
+            x: Math.min(localX, Math.max(8, rect.width - 160)),
+            y: Math.min(localY, Math.max(8, rect.height - 40)),
+          } : prev);
+        }}
+        onMouseLeave={() => setTip(null)}
+      >
         <TurkeyMap
           hoverable
-          showTooltip
+          showTooltip={false}
           customStyle={{ idleColor: '#e8eef7', hoverColor: '#60a5fa' }}
           onHover={(city) => {
             const row = byName.get(normalizeTr(city.name));
-            setHover({ name: city.name, value: row ? (row.sessions || row.activeUsers || 0) : null });
+            setTip((prev) => ({
+              x: prev?.x ?? 0,
+              y: prev?.y ?? 0,
+              name: city.name,
+              value: row ? (row.sessions || row.activeUsers || 0) : null,
+            }));
           }}
           cityWrapper={(cityComponent, city) => {
             const row = byName.get(normalizeTr(city.name));
@@ -412,16 +527,27 @@ export function CityTurkeyPanel({ cities = [] }) {
             );
           }}
         />
-        {hover && (
+        {tip?.name && (
           <div
             style={{
-              marginTop: '0.5rem',
-              fontSize: '0.8rem',
-              color: 'var(--text-secondary)',
+              position: 'absolute',
+              left: tip.x,
+              top: tip.y,
+              zIndex: 20,
+              pointerEvents: 'none',
+              background: '#0f172a',
+              color: '#fff',
+              padding: '0.35rem 0.55rem',
+              borderRadius: 6,
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              boxShadow: '0 6px 18px rgba(0,0,0,0.25)',
+              maxWidth: '90%',
             }}
           >
-            <strong style={{ color: 'var(--text-primary)' }}>{hover.name}</strong>
-            {hover.value !== null ? ` · ${nf.format(hover.value)} oturum` : ' · bu dönemde ölçüm yok'}
+            {tip.name}
+            {tip.value !== null ? ` · ${nf.format(tip.value)} oturum` : ''}
           </div>
         )}
       </div>

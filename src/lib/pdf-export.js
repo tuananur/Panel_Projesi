@@ -94,13 +94,16 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
   const html2canvas = (await import('html2canvas')).default;
   const { jsPDF } = await import('jspdf');
 
+  const prevOverflow = el.style.overflow;
   const prevWidth = el.style.width;
   const prevMaxWidth = el.style.maxWidth;
-  el.style.width = `${el.scrollWidth}px`;
-  el.style.maxWidth = `${el.scrollWidth}px`;
-
-  const w = el.scrollWidth;
+  // scrollWidth tooltip/taşma ile şişerse PDF boş/devasa beyaz sayfa olur — görünür genişliği kullan.
+  el.style.overflow = 'hidden';
+  const w = Math.max(el.clientWidth || 0, Math.min(el.scrollWidth || 0, 1600)) || el.offsetWidth || 1200;
   const h = el.scrollHeight;
+  el.style.width = `${w}px`;
+  el.style.maxWidth = `${w}px`;
+
   const scale = Math.min(2, Math.max(1, 8192 / Math.max(w, h)));
 
   // Bölüm başlangıçları CSS pikseli olarak, kökün üstüne göre ölçülür.
@@ -119,23 +122,38 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
       width: w,
       height: h,
       scrollX: 0,
-      scrollY: 0,
+      scrollY: -window.scrollY,
       windowWidth: w,
       windowHeight: h,
       onclone: (doc, clonedEl) => {
         doc.querySelectorAll('[data-pdf-hide]').forEach((n) => n.remove());
-        doc.querySelectorAll('.tooltip-content').forEach((n) => n.remove());
+        doc.querySelectorAll('.tooltip-content, [id*="tooltip"], [id*="Tooltip"]').forEach((n) => n.remove());
         doc.querySelectorAll('[data-pdf-expand]').forEach((n) => {
           n.style.overflow = 'visible';
           n.style.maxWidth = 'none';
         });
+        clonedEl.style.overflow = 'hidden';
+        clonedEl.style.width = `${w}px`;
+        clonedEl.style.maxWidth = `${w}px`;
+        clonedEl.style.background = PDF_BG;
+        clonedEl.style.color = '#0f172a';
+        // Klonlanan DOM'da gizli (display:none) bölümler zaten yok sayılır; renkleri zorla aydınlık yap.
         forceLightThemeForPdf(clonedEl);
+        clonedEl.querySelectorAll('*').forEach((node) => {
+          if (!(node instanceof doc.defaultView.HTMLElement)) return;
+          const style = doc.defaultView.getComputedStyle(node);
+          // html2canvas oklch/lab renkleri boş çizebiliyor — computed RGB'ye sabitle.
+          if (style.color) node.style.color = style.color;
+          if (style.backgroundColor && style.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+            node.style.backgroundColor = style.backgroundColor;
+          }
+        });
         onClone?.(doc, clonedEl);
       },
     });
 
     // CSS pikselinden canvas pikseline gerçek oran (html2canvas ölçeği yuvarlayabilir).
-    const pxRatio = canvas.height / h;
+    const pxRatio = canvas.height / Math.max(h, 1);
     const pages = computePageBreaks(canvas.height, sectionOffsets.map((offset) => offset * pxRatio));
 
     const pdf = new jsPDF({
@@ -168,5 +186,6 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
   } finally {
     el.style.width = prevWidth;
     el.style.maxWidth = prevMaxWidth;
+    el.style.overflow = prevOverflow;
   }
 }
