@@ -15,11 +15,36 @@ const SAFE_PAGE_PX = MAX_PAGE_PX - 200;
 // bunun altında tutulur.
 const MAX_CAPTURE_PX = 16000;
 
-// Dosya boyutu: retina scale + yüksek JPEG kalitesi 30MB+ üretiyordu.
-// ~5MB hedefi için dar yakalama + scale 1 + orta JPEG.
-const PDF_WIDTH_CAP = 1000;
-const PDF_SCALE = 1;
-const JPEG_QUALITY = 0.68;
+// Yakalama: ekran layout'u bozulmasın (link/grafik kesilmesin) — önceki keskinlik.
+const CAPTURE_WIDTH_CAP = 1600;
+const CAPTURE_SCALE = 2;
+
+// Dosya boyutu: layout'u daraltmak yerine bitmap'i PDF'e gömmeden önce küçült.
+// 17 Eyl çalışan rapor ~1080px genişlikteydi; ~5MB için JPEG orta kalite.
+const EMBED_MAX_WIDTH = 1100;
+const JPEG_QUALITY = 0.7;
+
+/** Yüksek çözünürlüklü canvas'ı PDF gömme boyutuna indirir (layout değişmez). */
+function compressCanvasForPdf(source, maxWidth = EMBED_MAX_WIDTH, quality = JPEG_QUALITY) {
+  const ratio = source.width > maxWidth ? maxWidth / source.width : 1;
+  const width = Math.max(1, Math.round(source.width * ratio));
+  const height = Math.max(1, Math.round(source.height * ratio));
+
+  const out = document.createElement('canvas');
+  out.width = width;
+  out.height = height;
+  const ctx = out.getContext('2d');
+  ctx.fillStyle = PDF_BG;
+  ctx.fillRect(0, 0, width, height);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(source, 0, 0, width, height);
+
+  const dataUrl = out.toDataURL('image/jpeg', quality);
+  out.width = 0;
+  out.height = 0;
+  return { dataUrl, width, height };
+}
 
 /**
  * Kesme noktalarını hesaplar: her dilim mümkün olan en fazla tam bölümü alır,
@@ -133,15 +158,14 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
   const prevOverflow = el.style.overflow;
   const prevWidth = el.style.width;
   const prevMaxWidth = el.style.maxWidth;
-  // scrollWidth tooltip/taşma ile şişerse ölçüm bozulur — görünür genişliği kullan, PDF için üst sınır.
+  // scrollWidth tooltip/taşma ile şişerse ölçüm bozulur — görünür genişliği kullan.
   el.style.overflow = 'hidden';
-  const rawW = Math.max(el.clientWidth || 0, Math.min(el.scrollWidth || 0, 1600)) || el.offsetWidth || 1200;
-  const w = Math.min(rawW, PDF_WIDTH_CAP);
+  const w = Math.max(el.clientWidth || 0, Math.min(el.scrollWidth || 0, CAPTURE_WIDTH_CAP)) || el.offsetWidth || 1200;
   el.style.width = `${w}px`;
   el.style.maxWidth = `${w}px`;
 
   const h = el.scrollHeight;
-  const scale = Math.min(PDF_SCALE, MAX_CAPTURE_PX / Math.max(w, 1));
+  const scale = Math.min(CAPTURE_SCALE, MAX_CAPTURE_PX / Math.max(w, 1));
   const maxCssChunk = Math.max(1, Math.floor(MAX_CAPTURE_PX / scale));
 
   const rootTop = el.getBoundingClientRect().top;
@@ -177,18 +201,13 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
       throw new Error('PDF için çizilecek içerik bulunamadı');
     }
 
-    const pdf = new jsPDF({
-      unit: 'px',
-      format: [canvases[0].width, canvases[0].height],
-      hotfixes: ['px_scaling'],
-      compress: true,
-    });
-
+    let pdf = null;
     let pageCount = 0;
-    canvases.forEach((canvas, index) => {
+
+    canvases.forEach((canvas) => {
       // Tek dilim PDF sayfa limitini aşarsa (ölçek/yuvarlama), alt dilimlere böl.
       const pageSlices = computePageBreaks(canvas.height, [], SAFE_PAGE_PX);
-      pageSlices.forEach((slice, sliceIndex) => {
+      pageSlices.forEach((slice) => {
         const piece = document.createElement('canvas');
         piece.width = canvas.width;
         piece.height = slice.height;
@@ -197,10 +216,21 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
         ctx.fillRect(0, 0, piece.width, piece.height);
         ctx.drawImage(canvas, 0, slice.start, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
 
-        if (pageCount > 0) pdf.addPage([piece.width, piece.height]);
-        pdf.addImage(piece.toDataURL('image/jpeg', JPEG_QUALITY), 'JPEG', 0, 0, piece.width, piece.height, undefined, 'FAST');
+        const { dataUrl, width, height } = compressCanvasForPdf(piece);
         piece.width = 0;
         piece.height = 0;
+
+        if (!pdf) {
+          pdf = new jsPDF({
+            unit: 'px',
+            format: [width, height],
+            hotfixes: ['px_scaling'],
+            compress: true,
+          });
+        } else {
+          pdf.addPage([width, height]);
+        }
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, width, height, undefined, 'FAST');
         pageCount += 1;
       });
     });
