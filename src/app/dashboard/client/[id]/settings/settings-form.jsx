@@ -528,10 +528,12 @@ export default function SettingsForm({ client, role }) {
                 name="searchConsoleSiteUrl"
                 className="input-field"
                 defaultValue={client.searchConsoleSiteUrl || ''}
-                placeholder="Örn: https://terapiyle.com/ veya sc-domain:terapiyle.com"
+                placeholder="Örn: sc-domain:bogohdesign.com veya https://www.bilengiyim.com/"
               />
               <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                Boş bırakılırsa müşteri web sitesinden otomatik eşleştirilir. Keyword sıralama tablosu Analytics sekmesinde görünür.
+                GSC&apos;de &quot;Alan adı mülkü&quot; ise <code style={{ fontSize: '0.65rem' }}>sc-domain:site.com</code> yaz.
+                URL öneki ise sondaki / ile birebir kopyala (örn. <code style={{ fontSize: '0.65rem' }}>https://www.site.com/</code>).
+                Boş bırakılırsa website alanından otomatik eşleşir.
               </p>
             </div>
 

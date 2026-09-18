@@ -39,31 +39,63 @@ export async function listSearchConsoleSites(accessToken) {
   return data.siteEntry || [];
 }
 
-export async function resolveSearchConsoleSiteUrl(accessToken, client) {
-  const explicit = client?.searchConsoleSiteUrl?.trim();
-  if (explicit) return explicit;
-
-  const host = normalizeWebsiteHost(client?.website);
-  if (!host) return null;
-
-  const sites = await listSearchConsoleSites(accessToken);
-  const candidates = [
+function buildGscCandidates(host) {
+  if (!host) return [];
+  return [
     `sc-domain:${host}`,
     `https://${host}/`,
     `https://www.${host}/`,
     `http://${host}/`,
+    `http://www.${host}/`,
   ];
+}
 
+function matchSiteInList(sites, candidates, host = '') {
   for (const candidate of candidates) {
     const found = sites.find((s) => s.siteUrl === candidate);
     if (found) return found.siteUrl;
   }
-
+  if (!host) return null;
   const fuzzy = sites.find((s) => {
     const u = (s.siteUrl || '').toLowerCase();
     return u.includes(host);
   });
   return fuzzy?.siteUrl || null;
+}
+
+/**
+ * GSC mülk URL'sini çözer.
+ * - Alan boşsa: müşteri website host'undan sc-domain / https / http adaylarını
+ *   hesabın gerçek mülk listesiyle eşleştirir (Beyin Atölyesi gibi).
+ * - Alan doluysa: yazılan değeri olduğu gibi kullanmaz; önce listedeki birebir
+ *   eşleşmeye, yoksa host'tan üretilen adaylara bakar. Böylece
+ *   "http://bogohdesign.com" yazılsa bile "Alan adı mülkü" olan
+ *   sc-domain:bogohdesign.com seçilir.
+ */
+export async function resolveSearchConsoleSiteUrl(accessToken, client) {
+  const explicit = client?.searchConsoleSiteUrl?.trim() || '';
+  const hostFromWebsite = normalizeWebsiteHost(client?.website);
+  const hostFromExplicit = explicit
+    ? (explicit.toLowerCase().startsWith('sc-domain:')
+      ? explicit.slice('sc-domain:'.length).replace(/^www\./i, '').toLowerCase()
+      : normalizeWebsiteHost(explicit))
+    : '';
+  const host = hostFromExplicit || hostFromWebsite;
+  if (!explicit && !host) return null;
+
+  const sites = await listSearchConsoleSites(accessToken);
+
+  // Elle yazılan değer listedeyse (doğru format) direkt kullan.
+  if (explicit) {
+    const exact = sites.find((s) => s.siteUrl === explicit);
+    if (exact) return exact.siteUrl;
+  }
+
+  const matched = matchSiteInList(sites, buildGscCandidates(host), host);
+  if (matched) return matched;
+
+  // Liste boş/erişilemezse eski davranışa düş: explicit varsa onu dene.
+  return explicit || null;
 }
 
 /**
