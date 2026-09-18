@@ -288,10 +288,10 @@ export function BrowserSplit({ rows = [], limit = 10 }) {
   );
 }
 
-/** Ülke dünya haritası — container genişliğinde; etiketler path bbox merkezinde. */
+/** Ülke dünya haritası — Türkiye paneli gibi sol liste + sağ harita (≈25/75). */
 export function CountryWorldPanel({ countries = [] }) {
   const wrapRef = useRef(null);
-  const [mapWidth, setMapWidth] = useState(960);
+  const [mapWidth, setMapWidth] = useState(720);
   const [labels, setLabels] = useState([]);
 
   const sorted = useMemo(() => {
@@ -308,6 +308,8 @@ export function CountryWorldPanel({ countries = [] }) {
           value,
           name: row.country || row.countryName || alpha2,
           enName: WORLD_NAME_BY_CODE[code] || alpha2.toUpperCase(),
+          sessions: Number(row.sessions) || 0,
+          activeUsers: Number(row.activeUsers) || 0,
         };
       })
       .filter(Boolean)
@@ -320,14 +322,14 @@ export function CountryWorldPanel({ countries = [] }) {
   );
 
   const top10 = useMemo(() => sorted.slice(0, 10), [sorted]);
-  const max = Math.max(...sorted.map((row) => row.value), 1);
+  const listRows = useMemo(() => sorted.slice(0, 12), [sorted]);
 
   useEffect(() => {
     const node = wrapRef.current;
     if (!node || typeof ResizeObserver === 'undefined') return undefined;
     const apply = () => {
       const width = Math.floor(node.getBoundingClientRect().width);
-      if (width > 0) setMapWidth(Math.max(640, width));
+      if (width > 0) setMapWidth(Math.max(480, width));
     };
     apply();
     const ro = new ResizeObserver(apply);
@@ -381,7 +383,16 @@ export function CountryWorldPanel({ countries = [] }) {
   if (mapData.length === 0) return null;
 
   return (
-    <div style={{ width: '100%', margin: '0.35rem 0 1rem' }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(150px, 0.26fr) minmax(0, 0.74fr)',
+        gap: '1rem',
+        alignItems: 'start',
+        margin: '0.35rem 0 1rem',
+      }}
+      className="report-country-split"
+    >
       <style>{`
         .report-worldmap-wrap .worldmap__wrapper { width: 100% !important; max-width: 100% !important; }
         .report-worldmap-wrap .worldmap__figure-container {
@@ -403,8 +414,38 @@ export function CountryWorldPanel({ countries = [] }) {
           stroke-width: 1.5px;
           stroke-opacity: 1 !important;
         }
+        @media (max-width: 900px) {
+          .report-country-split { grid-template-columns: 1fr !important; }
+        }
       `}</style>
-      <div ref={wrapRef} className="report-worldmap-wrap" style={{ width: '100%', position: 'relative', overflow: 'hidden' }}>
+
+      <div>
+        {listRows.map((row, index) => (
+          <div
+            key={`${row.country}-${index}`}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: '0.5rem',
+              padding: '0.4rem 0.3rem',
+              borderBottom: '1px solid var(--border-color)',
+              background: index % 2 ? 'rgba(15,23,42,0.03)' : 'transparent',
+              fontSize: '0.78rem',
+            }}
+          >
+            <span style={{ fontWeight: index < 5 ? 700 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {index + 1}. {row.name}
+            </span>
+            <strong style={{ flexShrink: 0 }}>{nf.format(row.value)}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div
+        ref={wrapRef}
+        className="report-worldmap-wrap"
+        style={{ width: '100%', position: 'relative', overflow: 'hidden' }}
+      >
         <WorldMap
           color="#4285F4"
           valueSuffix=" oturum"
@@ -450,7 +491,7 @@ export function CountryWorldPanel({ countries = [] }) {
           >
             <div
               style={{
-                fontSize: mapWidth > 900 ? '0.72rem' : '0.62rem',
+                fontSize: mapWidth > 700 ? '0.7rem' : '0.6rem',
                 fontWeight: 800,
                 color: '#0f172a',
                 textShadow: '0 0 4px #fff, 0 0 4px #fff, 0 0 6px #fff',
@@ -461,7 +502,7 @@ export function CountryWorldPanel({ countries = [] }) {
             </div>
             <div
               style={{
-                fontSize: mapWidth > 900 ? '0.68rem' : '0.58rem',
+                fontSize: mapWidth > 700 ? '0.65rem' : '0.55rem',
                 fontWeight: 700,
                 color: '#1d4ed8',
                 textShadow: '0 0 4px #fff, 0 0 4px #fff',
@@ -472,9 +513,6 @@ export function CountryWorldPanel({ countries = [] }) {
             </div>
           </div>
         ))}
-      </div>
-      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
-        İlk 10 ülke haritada etiketli · diğerleri üzerine gelince görünür · en yüksek {nf.format(max)} oturum
       </div>
     </div>
   );
