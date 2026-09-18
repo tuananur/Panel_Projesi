@@ -34,14 +34,22 @@ function compareValues(a, b, type) {
   return String(a).localeCompare(String(b), 'tr', { sensitivity: 'base', numeric: true });
 }
 
+function columnWidth(column, isNumeric) {
+  if (column.width) return column.width;
+  if (isNumeric) return '7.5rem';
+  if (column.type === 'url' || column.type === 'link') return '14rem';
+  return '11rem';
+}
+
 /**
  * Sayfalı + sıralanabilir tablo. Sort tüm satırlar üzerinde; pageSize ile dilimlenir.
+ * Sütun genişlikleri sabit — sıralamada header yatay kaymaz; uzun metin ellipsis.
  */
 export function DataTable({
   columns,
   rows,
   emptyNote = null,
-  defaultPageSize = 50,
+  defaultPageSize = 100,
   pageSizeOptions = PAGE_SIZE_OPTIONS,
 }) {
   const allRows = rows || [];
@@ -89,16 +97,23 @@ export function DataTable({
   return (
     <div data-report-table style={{ marginTop: '0.35rem' }}>
       <div data-pdf-expand className="custom-scrollbar" style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+        <table style={{ width: '100%', minWidth: `${columns.length * 7.5}rem`, borderCollapse: 'collapse', fontSize: '0.82rem', tableLayout: 'fixed' }}>
+          <colgroup>
+            {columns.map((column) => {
+              const isNumeric = column.type && column.type !== 'text' && column.type !== 'date' && column.type !== 'url' && column.type !== 'link' && !column.badge;
+              return <col key={column.key} style={{ width: columnWidth(column, isNumeric) }} />;
+            })}
+          </colgroup>
           <thead>
             <tr>
               {columns.map((column) => {
-                const isNumeric = column.type && column.type !== 'text' && column.type !== 'date' && !column.badge;
+                const isNumeric = column.type && column.type !== 'text' && column.type !== 'date' && column.type !== 'url' && column.type !== 'link' && !column.badge;
                 const active = sort.key === column.key;
                 return (
                   <th
                     key={column.key}
                     onClick={() => toggleSort(column.key)}
+                    title={column.label}
                     style={{
                       textAlign: isNumeric ? 'right' : 'left',
                       padding: '0.45rem 0.5rem',
@@ -108,14 +123,16 @@ export function DataTable({
                       fontSize: '0.74rem',
                       textTransform: 'uppercase',
                       letterSpacing: '0.02em',
-                      whiteSpace: 'nowrap',
                       cursor: 'pointer',
                       userSelect: 'none',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', justifyContent: isNumeric ? 'flex-end' : 'flex-start' }}>
-                      {column.label}
-                      {active ? (sort.dir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />) : <ArrowUpDown size={12} style={{ opacity: 0.35 }} />}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', maxWidth: '100%', justifyContent: isNumeric ? 'flex-end' : 'flex-start' }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{column.label}</span>
+                      {active ? (sort.dir === 'asc' ? <ArrowUp size={12} style={{ flexShrink: 0 }} /> : <ArrowDown size={12} style={{ flexShrink: 0 }} />) : <ArrowUpDown size={12} style={{ opacity: 0.35, flexShrink: 0 }} />}
                     </span>
                   </th>
                 );
@@ -129,18 +146,19 @@ export function DataTable({
                 <tr key={safePage * pageSize + index} style={{ background: zebra ? 'rgba(15, 23, 42, 0.035)' : 'transparent' }}>
                   {columns.map((column) => {
                     const raw = row[column.key];
-                    const isNumeric = column.type && column.type !== 'text' && column.type !== 'date' && !column.badge;
+                    const isNumeric = column.type && column.type !== 'text' && column.type !== 'date' && column.type !== 'url' && column.type !== 'link' && !column.badge;
                     const color = column.colorize ? cellColor(raw, column.colorize) : undefined;
                     return (
                       <td
                         key={column.key}
+                        title={raw !== null && raw !== undefined ? String(raw) : undefined}
                         style={{
                           textAlign: isNumeric ? 'right' : 'left',
                           padding: '0.45rem 0.5rem',
                           borderBottom: '1px solid var(--border-color)',
-                          whiteSpace: isNumeric ? 'nowrap' : 'normal',
-                          maxWidth: column.width || (isNumeric ? undefined : '560px'),
-                          overflowWrap: 'anywhere',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
                           fontWeight: color ? 700 : undefined,
                           color,
                         }}
@@ -197,30 +215,45 @@ export function DataTable({
             </select>
           </label>
 
-          <button type="button" disabled={safePage <= 0} onClick={() => setPage((p) => Math.max(0, p - 1))} style={pagerBtn} aria-label="Önceki sayfa">
-            <ChevronLeft size={16} />
+          <button
+            type="button"
+            disabled={safePage <= 0}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.2rem',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '6px',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-secondary)',
+              opacity: safePage <= 0 ? 0.4 : 1,
+              cursor: safePage <= 0 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            <ChevronLeft size={14} /> Önceki
           </button>
-          <span style={{ fontWeight: 600, color: 'var(--text-primary)', minWidth: '4.5rem', textAlign: 'center' }}>
-            {safePage + 1} / {pageCount}
-          </span>
-          <button type="button" disabled={safePage >= pageCount - 1} onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} style={pagerBtn} aria-label="Sonraki sayfa">
-            <ChevronRight size={16} />
+          <span>{safePage + 1} / {pageCount}</span>
+          <button
+            type="button"
+            disabled={safePage >= pageCount - 1}
+            onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.2rem',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '6px',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-secondary)',
+              opacity: safePage >= pageCount - 1 ? 0.4 : 1,
+              cursor: safePage >= pageCount - 1 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            Sonraki <ChevronRight size={14} />
           </button>
         </div>
       </div>
     </div>
   );
 }
-
-const pagerBtn = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '30px',
-  height: '30px',
-  borderRadius: '6px',
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-secondary)',
-  color: 'var(--text-primary)',
-  cursor: 'pointer',
-};

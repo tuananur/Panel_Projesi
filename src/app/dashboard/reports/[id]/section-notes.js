@@ -147,19 +147,14 @@ Yaş aralığı / cinsiyet = tahmini demografik kırılım`,
 
 Isı haritası / şerit: koyu veya yüksek değer = daha yoğun trafik saati`,
 
-  28: `Bu kart, site trafiği’teki dönüşüm / key event (önemli olay) sayılarını listeler.
+  28: `Bu kart, sitedeki dönüşüm ve önemli olay sayılarını listeler.
 
-Key event = iş için kritik olay (form, satın alma, lead vb.)
-Event adı İngilizce gelse bile Türkçe karşılığıyla gösterilir (ör. begin_checkout → ödemeye başlama)`,
+Önemli olay = form gönderimi, satın alma, lead gibi iş için kritik aksiyonlar
+Olay adları Türkçe karşılıklarıyla gösterilir`,
 
-  29: `Bu kart, e-ticaret hunisi ve gelir sinyallerini özetler (site trafiği e-ticaret etkinlikleri).
+  29: `Bu kart, e-ticaret hunisi ve gelir özetini gösterir.
 
-view_item_list = ürün listesi görüntüleme
-view_item = ürün görüntüleme
-add_to_cart = sepete ekleme
-begin_checkout = ödemeye başlama
-purchase = satın alma
-Gelir = purchase ile ilişkili ciro`,
+Ürün listesi / ürün görüntüleme / sepete ekleme / ödemeye başlama / satın alma adımları ve ilişkili ciro`,
 
   30: `Bu kart, sitedeki dahili arama kutusunda kullanıcıların ne aradığını gösterir.
 
@@ -203,15 +198,11 @@ Kaybedilen = artık link vermeyen domain`,
 
 Aşırı marka dışı / aşırı keyword anchor oranı spam riski işaret edebilir`,
 
-  38: `Bu kart, rakibe link verip size vermeyen siteleri (backlink fırsatları) listeler.
-
-Outreach (ulaşım) için aday domain havuzudur`,
-
-  39: `Bu kart, teknik SEO tarama sağlığını özetler (SEO aracı audit).
+  39: `Bu kart, teknik SEO tarama sağlığını özetler.
 
 Site sağlık puanı = 0–100 teknik skor
 Başarılı / yönlendirilen / kırık / engellenen sayfalar = tarama sınıfları
-Toplam sorun = tespit edilen teknik issue adedi`,
+Toplam sorun = tespit edilen teknik sorun adedi`,
 
   40: `Bu kart, teknik SEO sorunlarını etki ve zorluğa göre listeler.
 

@@ -152,6 +152,21 @@ export function ReportSection({ no, title, sources = [], note, children, compact
   );
 }
 
+function looksLikeUrl(value) {
+  const text = String(value || '').trim();
+  if (!text) return false;
+  if (/^https?:\/\//i.test(text)) return true;
+  if (text.startsWith('/') && text.length > 1) return true;
+  return /^[\w.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(text);
+}
+
+function hrefFor(value) {
+  const text = String(value).trim();
+  if (/^https?:\/\//i.test(text)) return text;
+  if (text.startsWith('/')) return text;
+  return `https://${text}`;
+}
+
 export function formatCell(value, type) {
   if (value === null || value === undefined || value === '') return EMPTY_VALUE;
   switch (type) {
@@ -171,8 +186,26 @@ export function formatCell(value, type) {
       return value instanceof Date ? value.toLocaleDateString('tr-TR') : String(value);
     case 'code':
       return trLabel(String(value));
-    default:
-      return trLabel(String(value));
+    case 'url':
+    case 'link': {
+      const text = String(value);
+      return (
+        <a href={hrefFor(text)} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+          {trLabel(text)}
+        </a>
+      );
+    }
+    default: {
+      const text = String(value);
+      if (looksLikeUrl(text)) {
+        return (
+          <a href={hrefFor(text)} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+            {trLabel(text)}
+          </a>
+        );
+      }
+      return trLabel(text);
+    }
   }
 }
 
@@ -183,15 +216,15 @@ export function formatCell(value, type) {
 export function MetricGrid({ items, compact = false }) {
   const filled = (items || []).filter(Boolean);
   if (filled.length === 0) return null;
+  // 10+ kartta min genişliği büyüt: satırda ~5–6 kart, alt satırda kalanlar da aynı boyutta kalır.
+  const minCol = compact ? 160 : filled.length >= 10 ? 220 : 200;
 
   return (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: compact
-          ? 'repeat(auto-fill, minmax(150px, 1fr))'
-          : 'repeat(auto-fill, minmax(180px, 1fr))',
-        gap: '0.65rem',
+        gridTemplateColumns: `repeat(auto-fill, minmax(${minCol}px, 1fr))`,
+        gap: compact ? '0.75rem' : '0.85rem',
       }}
     >
       {filled.map((item) => {
@@ -201,20 +234,21 @@ export function MetricGrid({ items, compact = false }) {
             key={`${item.source}-${item.label}`}
             style={{
               border: '1px solid var(--border-color)',
-              borderRadius: '10px',
-              padding: compact ? '0.6rem 0.7rem' : '0.7rem 0.8rem',
+              borderRadius: '12px',
+              padding: compact ? '0.75rem 0.85rem' : '0.95rem 1.05rem',
               background: 'var(--bg-secondary)',
+              minHeight: compact ? undefined : '5.5rem',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.35rem' }}>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{item.label}</span>
+              <span style={{ fontSize: compact ? '0.72rem' : '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{item.label}</span>
               {item.source && <SourceTag source={item.source} />}
             </div>
             <div
               style={{
-                fontSize: compact ? '1.05rem' : '1.2rem',
+                fontSize: compact ? '1.1rem' : '1.45rem',
                 fontWeight: 800,
-                marginTop: '0.3rem',
+                marginTop: '0.4rem',
                 color: empty ? 'var(--text-secondary)' : undefined,
                 opacity: empty ? 0.6 : 1,
                 letterSpacing: '-0.02em',

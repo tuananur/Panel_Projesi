@@ -33,7 +33,6 @@ export function buildSeoSections(ubersuggest) {
       [35, 'Backlink Overview'],
       [36, 'Yeni Link Veren / Linki Kesilen Siteler'],
       [37, 'Anchor Text Analizi'],
-      [38, 'Backlink Fırsatları'],
       [39, 'Teknik SEO Sağlığı'],
       [40, 'Teknik SEO Sorunları'],
       [41, 'Sorunlu URL Listesi'],
@@ -238,33 +237,7 @@ export function buildSeoSections(ubersuggest) {
     skip(37, 'Anchor Text Analizi', 'Ubersuggest anchor verisi yok');
   }
 
-  // ------------------------------------------------------------------ 38
-  if (hasRows(snapshot.backlinkOpportunities)) {
-    add(
-      <ReportSection
-        key="s38"
-        no={38}
-        title="Geri Bağlantı Fırsatları"
-        sources={[UBER]}
-
-      >
-        <DataTable
-          columns={[
-            { key: 'referringDomain', label: 'Domain', type: 'text' },
-            { key: 'competitorDomain', label: 'Rakip', type: 'text' },
-            { key: 'linksToCompetitor', label: 'Rakibe link', type: 'int' },
-            { key: 'linksToUs', label: 'Bize link', type: 'int' },
-            { key: 'opportunityStatus', label: 'Durum', type: 'text' },
-          ]}
-          rows={snapshot.backlinkOpportunities}
-
-
-        />
-      </ReportSection>,
-    );
-  } else {
-    skip(38, 'Backlink Fırsatları', 'Ubersuggest backlink fırsatı yok');
-  }
+  // ------------------------------------------------------------------ 38 — kaldırıldı (geri bağlantı fırsatları müşteri raporunda yok)
 
   // ------------------------------------------------------------------ 39
   if (snapshot.siteHealthScore !== null || snapshot.crawledPagesCount !== null) {
@@ -276,33 +249,47 @@ export function buildSeoSections(ubersuggest) {
         sources={[UBER]}
         note={snapshot.auditLastCrawledAt ? `Son tarama: ${new Date(snapshot.auditLastCrawledAt).toLocaleDateString('tr-TR')}` : undefined}
       >
-        <GaugeChart
-          value={snapshot.siteHealthScore}
-          label="Site Health"
-          legend={[
-            { label: 'Başarılı', value: snapshot.successfulPagesCount, color: '#34A853' },
-            { label: 'Yönlendirilen', value: snapshot.redirectedPagesCount, color: '#FBBC05' },
-            { label: 'Kırık', value: snapshot.brokenPagesCount, color: '#EA4335' },
-            { label: 'Engellenen', value: snapshot.blockedPagesCount, color: '#4285F4' },
-            { label: 'Toplam sorun', value: snapshot.totalIssuesCount, color: '#94a3b8' },
-          ].filter((item) => item.value !== null && item.value !== undefined)}
-        />
-        <MetricGrid
-          compact
-          items={[
-            {
-              label: 'Site sağlık puanı',
-              source: UBER,
-              value: num(snapshot.siteHealthScore),
-              hint: snapshot.previousSiteHealthScore !== null ? `Önceki: ${nf.format(snapshot.previousSiteHealthScore)}` : null,
-            },
-            { label: 'Taranan sayfa', source: UBER, value: num(snapshot.crawledPagesCount) },
-          ]}
-        />
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(280px, 0.9fr) minmax(0, 1.1fr)',
+            gap: '1.5rem',
+            alignItems: 'center',
+            marginTop: '0.5rem',
+          }}
+          className="report-split-layout"
+        >
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <GaugeChart
+              value={snapshot.siteHealthScore}
+              label="Site sağlığı"
+              size={220}
+              legend={null}
+            />
+          </div>
+          <div>
+            <MetricGrid
+              items={[
+                {
+                  label: 'Site sağlık puanı',
+                  source: UBER,
+                  value: num(snapshot.siteHealthScore),
+                  hint: snapshot.previousSiteHealthScore !== null ? `Önceki: ${nf.format(snapshot.previousSiteHealthScore)}` : null,
+                },
+                { label: 'Taranan sayfa', source: UBER, value: num(snapshot.crawledPagesCount) },
+                { label: 'Başarılı', source: UBER, value: num(snapshot.successfulPagesCount) },
+                { label: 'Yönlendirilen', source: UBER, value: num(snapshot.redirectedPagesCount) },
+                { label: 'Kırık', source: UBER, value: num(snapshot.brokenPagesCount) },
+                { label: 'Engellenen', source: UBER, value: num(snapshot.blockedPagesCount) },
+                { label: 'Toplam sorun', source: UBER, value: num(snapshot.totalIssuesCount) },
+              ]}
+            />
+          </div>
+        </div>
       </ReportSection>,
     );
   } else {
-    skip(39, 'Teknik SEO Sağlığı', 'Ubersuggest site audit özeti yok');
+    skip(39, 'Teknik SEO Sağlığı', 'Site audit özeti yok');
   }
 
   // ------------------------------------------------------------------ 40

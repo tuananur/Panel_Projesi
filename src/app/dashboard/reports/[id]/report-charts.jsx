@@ -52,7 +52,7 @@ function ChartTooltip({ hover, series, valueSuffix = '' }) {
   );
 }
 
-/** Çok serili çizgi grafik — hover'da nokta değerleri. */
+/** Çok serili çizgi grafik — yuvarlak noktalar + seri renkli değer şeridi (çakışmasız). */
 export function LineChart({ data, series, height = 240, valueSuffix = '', showRange = true }) {
   const rows = (data || []).filter(Boolean);
   const [hover, setHover] = useState(null);
@@ -66,6 +66,7 @@ export function LineChart({ data, series, height = 240, valueSuffix = '', showRa
   const x = (index) => (rows.length === 1 ? 0 : (index / (rows.length - 1)) * width);
   const y = (value) => height - 24 - ((Number(value) || 0) - min) / span * (height - 44);
   const labelStep = Math.ceil(rows.length / 8);
+  const valueStep = rows.length > 40 ? 2 : 1;
 
   const onMove = (event) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -89,60 +90,96 @@ export function LineChart({ data, series, height = 240, valueSuffix = '', showRa
       </div>
       <div style={{ position: 'relative' }} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         <ChartTooltip hover={hover} series={series} valueSuffix={valueSuffix} />
+        {/* Çizgiler stretch edilebilir; noktalar HTML ile yuvarlak kalır (SVG stretch düz çizgi yapıyordu). */}
         <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: `${height}px`, overflow: 'visible', display: 'block' }}>
           {[0, 0.5, 1].map((ratio) => (
             <line key={ratio} x1="0" x2={width} y1={y(min + span * ratio)} y2={y(min + span * ratio)} stroke="var(--border-color)" strokeWidth="0.3" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
           ))}
           {series.map((s, seriesIndex) => (
-            <path key={s.key} d={seriesPath(rows, s.key, x, y)} fill="none" stroke={s.color || PALETTE[seriesIndex % PALETTE.length]} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
+            <path key={s.key} d={seriesPath(rows, s.key, x, y)} fill="none" stroke={s.color || PALETTE[seriesIndex % PALETTE.length]} strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
           ))}
-          {series.map((s, seriesIndex) => rows.map((row, index) => (
-            <circle
-              key={`pt-${s.key}-${index}`}
-              cx={x(index)}
-              cy={y(row[s.key])}
-              r="1.1"
-              fill={s.color || PALETTE[seriesIndex % PALETTE.length]}
-            />
-          )))}
           {hover && (
             <line x1={x(hover.index)} x2={x(hover.index)} y1={12} y2={height - 20} stroke="var(--text-secondary)" strokeWidth="0.4" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
           )}
         </svg>
-        {/* Günlük değer etiketleri — PDF'de de okunur (hover'a bağlı değil). */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-          {rows.map((row, index) => {
-            const primary = series[0];
-            const value = Number(row[primary.key]) || 0;
-            const topPct = (y(value) / height) * 100;
+          {series.map((s, seriesIndex) => rows.map((row, index) => {
+            const color = s.color || PALETTE[seriesIndex % PALETTE.length];
             const leftPct = (x(index) / width) * 100;
-            const step = rows.length > 45 ? 2 : 1;
-            if (index % step !== 0 && index !== rows.length - 1) return null;
+            const topPct = (y(Number(row[s.key]) || 0) / height) * 100;
             return (
               <span
-                key={`lbl-${index}`}
+                key={`dot-${s.key}-${index}`}
                 style={{
                   position: 'absolute',
                   left: `${leftPct}%`,
-                  top: `${Math.max(0, topPct - 4)}%`,
-                  transform: 'translate(-50%, -100%)',
-                  fontSize: rows.length > 31 ? '0.55rem' : '0.62rem',
-                  fontWeight: 700,
-                  color: 'var(--text-primary)',
-                  whiteSpace: 'nowrap',
-                  textShadow: '0 0 3px var(--bg-secondary)',
+                  top: `${topPct}%`,
+                  width: 7,
+                  height: 7,
+                  marginLeft: -3.5,
+                  marginTop: -3.5,
+                  borderRadius: '50%',
+                  background: color,
+                  border: '1.5px solid #fff',
+                  boxShadow: '0 0 0 1px rgba(0,0,0,0.08)',
                 }}
-              >
-                {fmt(value)}{valueSuffix}
-              </span>
+              />
             );
-          })}
+          }))}
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
         {rows.filter((_, index) => index % labelStep === 0 || index === rows.length - 1).map((row, index) => (
           <span key={`${row.label}-${index}`}>{row.label}</span>
         ))}
+      </div>
+      {/* Her serinin değeri ayrı satırda — çizgi üstünde çakışmaz. */}
+      <div
+        data-pdf-expand
+        className="custom-scrollbar"
+        style={{
+          overflowX: 'auto',
+          marginTop: '0.55rem',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+        }}
+      >
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.68rem', minWidth: `${Math.max(480, rows.length * 52)}px` }}>
+          <thead>
+            <tr>
+              <th style={{ textAlign: 'left', padding: '0.35rem 0.45rem', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', position: 'sticky', left: 0, background: 'var(--bg-secondary)', zIndex: 1 }}>Metrik</th>
+              {rows.map((row, index) => (
+                index % valueStep === 0 || index === rows.length - 1 ? (
+                  <th key={`h-${index}`} style={{ textAlign: 'center', padding: '0.35rem 0.25rem', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    {row.label || row.date}
+                  </th>
+                ) : null
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {series.map((s, seriesIndex) => {
+              const color = s.color || PALETTE[seriesIndex % PALETTE.length];
+              return (
+                <tr key={s.key}>
+                  <td style={{ padding: '0.3rem 0.45rem', whiteSpace: 'nowrap', position: 'sticky', left: 0, background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: 2, background: color }} />
+                      {s.label}
+                    </span>
+                  </td>
+                  {rows.map((row, index) => (
+                    index % valueStep === 0 || index === rows.length - 1 ? (
+                      <td key={`v-${s.key}-${index}`} style={{ textAlign: 'center', padding: '0.3rem 0.25rem', fontWeight: 700, color, borderBottom: '1px solid var(--border-color)', whiteSpace: 'nowrap' }}>
+                        {fmt(Number(row[s.key]) || 0)}{valueSuffix}
+                      </td>
+                    ) : null
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
       {showRange && (
         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
@@ -153,8 +190,8 @@ export function LineChart({ data, series, height = 240, valueSuffix = '', showRa
   );
 }
 
-/** Tek serili alan (area) grafik — hover destekli. */
-export function AreaChart({ data, valueKey = 'value', labelKey = 'label', color = '#34A853', height = 160 }) {
+/** Tek serili alan (area) grafik — değerler her zaman görünür. */
+export function AreaChart({ data, valueKey = 'value', labelKey = 'label', color = '#34A853', height = 180 }) {
   const rows = (data || []).filter(Boolean);
   const [hover, setHover] = useState(null);
   if (rows.length < 2) return null;
@@ -163,10 +200,11 @@ export function AreaChart({ data, valueKey = 'value', labelKey = 'label', color 
   const values = rows.map((row) => Number(row[valueKey]) || 0);
   const max = Math.max(...values) || 1;
   const x = (index) => (index / (rows.length - 1)) * width;
-  const y = (value) => height - 20 - (value / max) * (height - 36);
+  const y = (value) => height - 28 - (value / max) * (height - 48);
   const line = rows.map((row, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(Number(row[valueKey]) || 0)}`).join(' ');
   const area = `${line} L ${width} ${height - 20} L 0 ${height - 20} Z`;
   const labelStep = Math.ceil(rows.length / 6);
+  const valueStep = rows.length > 28 ? 2 : 1;
   const series = [{ key: valueKey, label: 'Değer', color }];
 
   const onMove = (event) => {
@@ -183,14 +221,53 @@ export function AreaChart({ data, valueKey = 'value', labelKey = 'label', color 
         <ChartTooltip hover={hover} series={series} />
         <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" style={{ width: '100%', height: `${height}px`, display: 'block' }}>
           <path d={area} fill={color} opacity="0.18" />
-          <path d={line} fill="none" stroke={color} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
+          <path d={line} fill="none" stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
           {hover && (
-            <>
-              <line x1={x(hover.index)} x2={x(hover.index)} y1={8} y2={height - 20} stroke="var(--text-secondary)" strokeWidth="0.4" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
-              <circle cx={x(hover.index)} cy={y(hover.values[valueKey])} r="1.5" fill={color} />
-            </>
+            <line x1={x(hover.index)} x2={x(hover.index)} y1={8} y2={height - 20} stroke="var(--text-secondary)" strokeWidth="0.4" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
           )}
         </svg>
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          {rows.map((row, index) => {
+            const value = Number(row[valueKey]) || 0;
+            const leftPct = (x(index) / width) * 100;
+            const topPct = (y(value) / height) * 100;
+            return (
+              <span key={`dot-${index}`}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    left: `${leftPct}%`,
+                    top: `${topPct}%`,
+                    width: 7,
+                    height: 7,
+                    marginLeft: -3.5,
+                    marginTop: -3.5,
+                    borderRadius: '50%',
+                    background: color,
+                    border: '1.5px solid #fff',
+                  }}
+                />
+                {(index % valueStep === 0 || index === rows.length - 1) && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: `${leftPct}%`,
+                      top: `${Math.max(2, topPct - 6)}%`,
+                      transform: 'translate(-50%, -100%)',
+                      fontSize: rows.length > 24 ? '0.58rem' : '0.68rem',
+                      fontWeight: 700,
+                      color,
+                      whiteSpace: 'nowrap',
+                      textShadow: '0 0 4px #fff, 0 0 4px #fff',
+                    }}
+                  >
+                    {fmt(value)}
+                  </span>
+                )}
+              </span>
+            );
+          })}
+        </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
         {rows.filter((_, index) => index % labelStep === 0 || index === rows.length - 1).map((row, index) => (

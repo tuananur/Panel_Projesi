@@ -75,6 +75,7 @@ export async function fetchGeneralReportGa4(client, { since, until, prevSince, p
     cities,
     dayOfWeek,
     hours,
+    dayHour,
     events,
     keyEvents,
     ecommerce,
@@ -143,6 +144,12 @@ export async function fetchGeneralReportGa4(client, { since, until, prevSince, p
       dateRanges,
       dimensions: [{ name: 'hour' }],
       metrics: [{ name: 'activeUsers' }, { name: 'sessions' }],
+    }),
+    optional({
+      dateRanges,
+      dimensions: [{ name: 'dayOfWeek' }, { name: 'hour' }],
+      metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
+      limit: 200,
     }),
     optional({
       dateRanges,
@@ -273,6 +280,15 @@ export async function fetchGeneralReportGa4(client, { since, until, prevSince, p
           hour: Number(row.dims[0]),
           activeUsers: row.metrics[0],
           sessions: row.metrics[1],
+        }))
+      : null,
+
+    dayHour: dayHour
+      ? mapRows(dayHour).map((row) => ({
+          day: Number(row.dims[0]),
+          hour: Number(row.dims[1]),
+          sessions: row.metrics[0],
+          activeUsers: row.metrics[1],
         }))
       : null,
 

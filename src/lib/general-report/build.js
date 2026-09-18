@@ -285,7 +285,8 @@ function buildPageMovements(ga, extras, gsc) {
 function buildTimeAnalysis(extras) {
   const days = extras?.dayOfWeek;
   const hours = extras?.hours;
-  if (!days && !hours) return null;
+  const dayHour = extras?.dayHour;
+  if (!days && !hours && !dayHour) return null;
 
   return {
     days: days
@@ -293,6 +294,14 @@ function buildTimeAnalysis(extras) {
       : null,
     hours: hours
       ? [...hours].sort((a, b) => a.hour - b.hour).map((row) => ({ ...row, label: `${String(row.hour).padStart(2, '0')}:00` }))
+      : null,
+    cells: dayHour
+      ? [...dayHour].map((row) => ({
+          day: Number(row.day),
+          hour: Number(row.hour),
+          sessions: Number(row.sessions) || 0,
+          activeUsers: Number(row.activeUsers) || 0,
+        }))
       : null,
     busiestDay: days && days.length > 0 ? [...days].sort((a, b) => b.sessions - a.sessions)[0] : null,
     busiestHour: hours && hours.length > 0 ? [...hours].sort((a, b) => b.sessions - a.sessions)[0] : null,
