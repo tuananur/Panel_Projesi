@@ -1,15 +1,19 @@
 'use client';
 
-import { cloneElement, useMemo, useState } from 'react';
+import { cloneElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Monitor, Smartphone, Tablet } from 'lucide-react';
 import TurkeyMap from 'turkey-map-react';
-import WorldMap from 'react-svg-worldmap';
+import WorldMap, { regions as WORLD_REGIONS } from 'react-svg-worldmap';
 import * as SimpleIcons from 'simple-icons';
 import { DonutChart, BarList, PALETTE } from './report-charts';
 import { trLabel } from './report-labels';
 import { alpha3ToAlpha2 } from '@/lib/country-codes';
 
 const nf = new Intl.NumberFormat('tr-TR');
+
+const WORLD_NAME_BY_CODE = Object.fromEntries(
+  (WORLD_REGIONS || []).map((row) => [String(row.code).toLowerCase(), row.name]),
+);
 
 /** SVG path yaklaşık merkez noktası — şehir adı etiketi için. */
 function pathCentroid(path) {
@@ -284,8 +288,12 @@ export function BrowserSplit({ rows = [], limit = 10 }) {
   );
 }
 
-/** Ülke dünya haritası — tam genişlik, ilk 10 etiket, hover mavi. */
+/** Ülke dünya haritası — container genişliğinde; etiketler path bbox merkezinde. */
 export function CountryWorldPanel({ countries = [] }) {
+  const wrapRef = useRef(null);
+  const [mapWidth, setMapWidth] = useState(960);
+  const [labels, setLabels] = useState([]);
+
   const sorted = useMemo(() => {
     return (countries || [])
       .map((row) => {
@@ -294,10 +302,12 @@ export function CountryWorldPanel({ countries = [] }) {
         if (!alpha2 || alpha2.length !== 2) return null;
         const value = Number(row.sessions || row.activeUsers || row.clicks || 0) || 0;
         if (value <= 0) return null;
+        const code = alpha2.toLowerCase();
         return {
-          country: alpha2.toLowerCase(),
+          country: code,
           value,
           name: row.country || row.countryName || alpha2,
+          enName: WORLD_NAME_BY_CODE[code] || alpha2.toUpperCase(),
         };
       })
       .filter(Boolean)
@@ -309,28 +319,84 @@ export function CountryWorldPanel({ countries = [] }) {
     [sorted],
   );
 
-  const top10 = sorted.slice(0, 10);
+  const top10 = useMemo(() => sorted.slice(0, 10), [sorted]);
   const max = Math.max(...sorted.map((row) => row.value), 1);
 
-  // textLabelFunction SVG piksel uzayında (transform dışında) — oranlar yaklaşık.
-  const CENTROID = {
-    tr: [0.58, 0.40], de: [0.50, 0.32], us: [0.20, 0.40], gb: [0.46, 0.30], fr: [0.48, 0.35],
-    nl: [0.49, 0.31], it: [0.52, 0.38], es: [0.46, 0.40], ru: [0.68, 0.28], az: [0.62, 0.38],
-    sa: [0.60, 0.48], ae: [0.62, 0.46], iq: [0.60, 0.42], ir: [0.63, 0.42], eg: [0.56, 0.46],
-    cn: [0.78, 0.42], in: [0.70, 0.48], br: [0.30, 0.62], ca: [0.20, 0.28], au: [0.82, 0.70],
-    jp: [0.86, 0.40], kr: [0.84, 0.40], pl: [0.53, 0.30], se: [0.52, 0.22], be: [0.48, 0.32],
-    at: [0.52, 0.34], ch: [0.50, 0.35], gr: [0.54, 0.40], pt: [0.44, 0.40], ua: [0.56, 0.32],
-    ro: [0.55, 0.35], bg: [0.55, 0.38], ge: [0.62, 0.36], kz: [0.68, 0.34],
-  };
+  useEffect(() => {
+    const node = wrapRef.current;
+    if (!node || typeof ResizeObserver === 'undefined') return undefined;
+    const apply = () => {
+      const width = Math.floor(node.getBoundingClientRect().width);
+      if (width > 0) setMapWidth(Math.max(640, width));
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(node);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const node = wrapRef.current;
+    if (!node || top10.length === 0) {
+      setLabels([]);
+      return undefined;
+    }
+
+    const place = () => {
+      const svg = node.querySelector('svg');
+      if (!svg) return;
+      const wrapRect = node.getBoundingClientRect();
+      const paths = [...svg.querySelectorAll('path')];
+      const next = [];
+
+      top10.forEach((row) => {
+        const path = paths.find((el) => {
+          const title = el.querySelector('title')?.textContent || '';
+          const hay = title.toLowerCase();
+          const en = row.enName.toLowerCase();
+          return hay === en || hay.startsWith(`${en}:`) || hay.startsWith(`${en} `) || hay.includes(en);
+        });
+        if (!path) return;
+        const box = path.getBoundingClientRect();
+        if (box.width < 2 && box.height < 2) return;
+        next.push({
+          key: row.country,
+          name: row.name,
+          value: row.value,
+          left: box.left - wrapRect.left + box.width / 2,
+          top: box.top - wrapRect.top + box.height / 2,
+        });
+      });
+      setLabels(next);
+    };
+
+    const timer = window.setTimeout(place, 80);
+    window.addEventListener('resize', place);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('resize', place);
+    };
+  }, [top10, mapWidth, mapData]);
 
   if (mapData.length === 0) return null;
 
   return (
-    <div style={{ width: '100%', margin: '0.35rem 0 1rem', overflow: 'hidden' }}>
+    <div style={{ width: '100%', margin: '0.35rem 0 1rem' }}>
       <style>{`
-        .report-worldmap-wrap .worldmap__wrapper { width: 100% !important; }
-        .report-worldmap-wrap .worldmap__figure-container { width: 100% !important; }
-        .report-worldmap-wrap svg { width: 100% !important; max-width: 100%; height: auto !important; }
+        .report-worldmap-wrap .worldmap__wrapper { width: 100% !important; max-width: 100% !important; }
+        .report-worldmap-wrap .worldmap__figure-container {
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          display: flex !important;
+          justify-content: center !important;
+        }
+        .report-worldmap-wrap svg {
+          width: 100% !important;
+          max-width: 100% !important;
+          height: auto !important;
+          display: block !important;
+        }
         .report-worldmap-wrap path.worldmap__region--hover {
           fill: #3b82f6 !important;
           stroke: #1d4ed8 !important;
@@ -338,11 +404,11 @@ export function CountryWorldPanel({ countries = [] }) {
           stroke-opacity: 1 !important;
         }
       `}</style>
-      <div className="report-worldmap-wrap" style={{ width: '100%' }}>
+      <div ref={wrapRef} className="report-worldmap-wrap" style={{ width: '100%', position: 'relative', overflow: 'hidden' }}>
         <WorldMap
           color="#4285F4"
           valueSuffix=" oturum"
-          size="responsive"
+          size={mapWidth}
           data={mapData}
           backgroundColor="transparent"
           borderColor="#cbd5e1"
@@ -354,7 +420,7 @@ export function CountryWorldPanel({ countries = [] }) {
               return { fill: '#eef2f7', stroke: '#cbd5e1', strokeWidth: 0.5, cursor: 'pointer' };
             }
             const span = (maxValue - minValue) || 1;
-            const intensity = 0.25 + ((Number(countryValue) - minValue) / span) * 0.75;
+            const intensity = 0.22 + ((Number(countryValue) - minValue) / span) * 0.78;
             return {
               fill: `rgba(66, 133, 244, ${intensity})`,
               stroke: '#94a3b8',
@@ -367,46 +433,45 @@ export function CountryWorldPanel({ countries = [] }) {
               ? countryName
               : `${countryName}: ${nf.format(Number(countryValue) || 0)} oturum`
           )}
-          textLabelFunction={(width) => {
-            const height = width * 0.75;
-            return top10.flatMap((row, index) => {
-              const point = CENTROID[row.country];
-              if (!point) return [];
-              const x = point[0] * width;
-              const y = point[1] * height;
-              return [
-                {
-                  label: `${row.name}${'\u200b'.repeat(index + 1)}`,
-                  x,
-                  y: y - 7,
-                  style: {
-                    fontSize: Math.max(9, Math.min(12, width / 90)),
-                    fontWeight: 800,
-                    fill: '#0f172a',
-                    textAnchor: 'middle',
-                    paintOrder: 'stroke',
-                    stroke: 'rgba(255,255,255,0.92)',
-                    strokeWidth: 3,
-                  },
-                },
-                {
-                  label: `${nf.format(row.value)}${'\u200b'.repeat(index + 20)}`,
-                  x,
-                  y: y + 8,
-                  style: {
-                    fontSize: Math.max(8, Math.min(11, width / 100)),
-                    fontWeight: 700,
-                    fill: '#1d4ed8',
-                    textAnchor: 'middle',
-                    paintOrder: 'stroke',
-                    stroke: 'rgba(255,255,255,0.92)',
-                    strokeWidth: 3,
-                  },
-                },
-              ];
-            });
-          }}
         />
+        {labels.map((item) => (
+          <div
+            key={item.key}
+            style={{
+              position: 'absolute',
+              left: item.left,
+              top: item.top,
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+              textAlign: 'center',
+              lineHeight: 1.15,
+              zIndex: 2,
+            }}
+          >
+            <div
+              style={{
+                fontSize: mapWidth > 900 ? '0.72rem' : '0.62rem',
+                fontWeight: 800,
+                color: '#0f172a',
+                textShadow: '0 0 4px #fff, 0 0 4px #fff, 0 0 6px #fff',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {item.name}
+            </div>
+            <div
+              style={{
+                fontSize: mapWidth > 900 ? '0.68rem' : '0.58rem',
+                fontWeight: 700,
+                color: '#1d4ed8',
+                textShadow: '0 0 4px #fff, 0 0 4px #fff',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {nf.format(item.value)}
+            </div>
+          </div>
+        ))}
       </div>
       <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
         İlk 10 ülke haritada etiketli · diğerleri üzerine gelince görünür · en yüksek {nf.format(max)} oturum
@@ -557,7 +622,7 @@ export function CityTurkeyPanel({ cities = [] }) {
 
 const DAY_LABELS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
-/** Gün × saat kesişim ısı tablosu (yeşil yoğunluk). */
+/** Gün × saat kesişim ısı tablosu — daha yüksek hücreler, metin hep siyah. */
 export function DayHourHeatmap({ days = [], hours = [], cells = null }) {
   const matrix = useMemo(() => {
     const grid = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => 0));
@@ -571,7 +636,6 @@ export function DayHourHeatmap({ days = [], hours = [], cells = null }) {
       });
       return grid;
     }
-    // Kesişim yoksa gün ve saat toplamlarından yaklaşık matris üret (görsel boş kalmasın).
     const dayVals = Array.from({ length: 7 }, (_, day) => {
       const found = days.find((row) => Number(row.day) === day);
       return Number(found?.sessions) || 0;
@@ -594,12 +658,12 @@ export function DayHourHeatmap({ days = [], hours = [], cells = null }) {
 
   return (
     <div style={{ marginTop: '0.5rem', overflowX: 'auto' }} data-pdf-expand className="custom-scrollbar">
-      <table style={{ width: '100%', minWidth: 720, borderCollapse: 'collapse', fontSize: '0.62rem' }}>
+      <table style={{ width: '100%', minWidth: 860, borderCollapse: 'collapse', fontSize: '0.78rem' }}>
         <thead>
           <tr>
-            <th style={{ textAlign: 'left', padding: '0.35rem', color: 'var(--text-secondary)', position: 'sticky', left: 0, background: 'var(--bg-secondary)' }}>Gün \\ Saat</th>
+            <th style={{ textAlign: 'left', padding: '0.55rem 0.45rem', color: '#0f172a', position: 'sticky', left: 0, background: '#f8fafc', fontWeight: 700 }}>Gün \\ Saat</th>
             {Array.from({ length: 24 }, (_, hour) => (
-              <th key={hour} style={{ textAlign: 'center', padding: '0.25rem 0.1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              <th key={hour} style={{ textAlign: 'center', padding: '0.45rem 0.15rem', color: '#0f172a', fontWeight: 700 }}>
                 {String(hour).padStart(2, '0')}
               </th>
             ))}
@@ -608,20 +672,23 @@ export function DayHourHeatmap({ days = [], hours = [], cells = null }) {
         <tbody>
           {DAY_LABELS.map((label, day) => (
             <tr key={label}>
-              <td style={{ padding: '0.3rem 0.4rem', fontWeight: 700, position: 'sticky', left: 0, background: 'var(--bg-secondary)', whiteSpace: 'nowrap' }}>{label}</td>
+              <td style={{ padding: '0.55rem 0.5rem', fontWeight: 800, color: '#0f172a', position: 'sticky', left: 0, background: '#f8fafc', whiteSpace: 'nowrap' }}>{label}</td>
               {matrix[day].map((value, hour) => {
                 const intensity = value / max;
+                // Yoğunluk yeşilde kalsın ama metin her zaman siyah okunabilsin.
+                const bg = `rgba(52, 168, 83, ${0.08 + intensity * 0.42})`;
                 return (
                   <td
                     key={`${day}-${hour}`}
                     title={`${label} ${String(hour).padStart(2, '0')}:00 — ${nf.format(value)}`}
                     style={{
                       textAlign: 'center',
-                      padding: '0.28rem 0.08rem',
-                      background: `rgba(52, 168, 83, ${0.06 + intensity * 0.9})`,
-                      color: intensity > 0.55 ? '#fff' : 'var(--text-primary)',
-                      fontWeight: value > 0 ? 700 : 400,
-                      border: '1px solid rgba(255,255,255,0.35)',
+                      padding: '0.55rem 0.12rem',
+                      minHeight: '2.4rem',
+                      background: bg,
+                      color: '#0f172a',
+                      fontWeight: value > 0 ? 700 : 500,
+                      border: '1px solid rgba(255,255,255,0.55)',
                     }}
                   >
                     {value > 0 ? nf.format(value) : '·'}
@@ -632,6 +699,64 @@ export function DayHourHeatmap({ days = [], hours = [], cells = null }) {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+/** Yaş + cinsiyet: sol barlar / sağ pie’lar aynı satırda hizalı. */
+export function AgeGenderPanel({ ageRows = [], genderRows = [] }) {
+  const hasAge = ageRows.length > 0;
+  const hasGender = genderRows.length > 0;
+  if (!hasAge && !hasGender) return null;
+
+  const ageTotal = ageRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0);
+  const genderTotal = genderRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '0.35rem' }}>
+      {hasAge && (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1.1fr) minmax(260px, 0.9fr)',
+            gap: '1.25rem',
+            alignItems: 'center',
+          }}
+          className="report-split-layout"
+        >
+          <div>
+            <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.25rem' }}>Yaş aralığı</h3>
+            <BarList rows={ageRows} secondary={null} limit={10} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <DonutChart rows={ageRows} size={240} centerLabel="Kullanıcı" centerValue={ageTotal} />
+          </div>
+        </div>
+      )}
+      {hasGender && (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1.1fr) minmax(260px, 0.9fr)',
+            gap: '1.25rem',
+            alignItems: 'center',
+          }}
+          className="report-split-layout"
+        >
+          <div>
+            <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.25rem' }}>Cinsiyet</h3>
+            <BarList rows={genderRows} secondary={null} limit={6} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <DonutChart rows={genderRows} size={240} centerLabel="Kullanıcı" centerValue={genderTotal} />
+          </div>
+        </div>
+      )}
+      <style>{`
+        @media (max-width: 900px) {
+          .report-split-layout { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }

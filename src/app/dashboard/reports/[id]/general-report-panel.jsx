@@ -11,7 +11,7 @@ import { num, pct, EMPTY_VALUE } from '../report-ui';
 import { ReportSection, MetricGrid, SourceTag, StatCallout, SubHeading } from './general-report-ui';
 import { DataTable } from './report-data-table';
 import { LineChart, AreaChart, BarList, DonutChart, ChangeCards, HeatStrip, RankProgressBars, TwoCol } from './report-charts';
-import { SplitBarDonut, DevicePodium, VisitorSplit, BrowserSplit, CityTurkeyPanel, DayHourHeatmap, CountryWorldPanel } from './report-visuals';
+import { SplitBarDonut, DevicePodium, VisitorSplit, BrowserSplit, CityTurkeyPanel, DayHourHeatmap, CountryWorldPanel, AgeGenderPanel } from './report-visuals';
 import { buildSeoSections } from './general-report-seo';
 import { buildInsightSections } from './general-report-insights';
 import { alpha3ToAlpha2 } from '@/lib/country-codes';
@@ -871,32 +871,10 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         title="Yaş / Cinsiyet"
         sources={[GA4]}
       >
-        {hasRows(extras.ageBrackets) && (
-          <>
-            <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.25rem' }}>Yaş aralığı</h3>
-            <SplitBarDonut
-              barRows={extras.ageBrackets.map((row) => ({ label: row.bracket, value: row.activeUsers }))}
-              donutRows={extras.ageBrackets.map((row) => ({ label: row.bracket, value: row.activeUsers }))}
-              barSecondary={null}
-              donutCenterLabel="Kullanıcı"
-              donutCenterValue={extras.ageBrackets.reduce((sum, row) => sum + (Number(row.activeUsers) || 0), 0)}
-              barLimit={10}
-            />
-          </>
-        )}
-        {hasRows(extras.genders) && (
-          <>
-            <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.25rem' }}>Cinsiyet</h3>
-            <SplitBarDonut
-              barRows={extras.genders.map((row) => ({ label: GENDER_LABELS[row.gender] || row.gender, value: row.activeUsers }))}
-              donutRows={extras.genders.map((row) => ({ label: GENDER_LABELS[row.gender] || row.gender, value: row.activeUsers }))}
-              barSecondary={null}
-              donutCenterLabel="Kullanıcı"
-              donutCenterValue={extras.genders.reduce((sum, row) => sum + (Number(row.activeUsers) || 0), 0)}
-              barLimit={6}
-            />
-          </>
-        )}
+        <AgeGenderPanel
+          ageRows={(extras.ageBrackets || []).map((row) => ({ label: row.bracket, value: row.activeUsers }))}
+          genderRows={(extras.genders || []).map((row) => ({ label: GENDER_LABELS[row.gender] || row.gender, value: row.activeUsers }))}
+        />
       </ReportSection>,
     );
   } else {
