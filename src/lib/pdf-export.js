@@ -15,6 +15,12 @@ const SAFE_PAGE_PX = MAX_PAGE_PX - 200;
 // bunun altında tutulur.
 const MAX_CAPTURE_PX = 16000;
 
+// Dosya boyutu: retina scale + yüksek JPEG kalitesi 30MB+ üretiyordu.
+// ~5MB hedefi için dar yakalama + scale 1 + orta JPEG.
+const PDF_WIDTH_CAP = 1000;
+const PDF_SCALE = 1;
+const JPEG_QUALITY = 0.68;
+
 /**
  * Kesme noktalarını hesaplar: her dilim mümkün olan en fazla tam bölümü alır,
  * böylece bir kartın ortasından geçilmez. Tek bir bölüm sınırdan uzunsa
@@ -127,14 +133,15 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
   const prevOverflow = el.style.overflow;
   const prevWidth = el.style.width;
   const prevMaxWidth = el.style.maxWidth;
-  // scrollWidth tooltip/taşma ile şişerse ölçüm bozulur — görünür genişliği kullan.
+  // scrollWidth tooltip/taşma ile şişerse ölçüm bozulur — görünür genişliği kullan, PDF için üst sınır.
   el.style.overflow = 'hidden';
-  const w = Math.max(el.clientWidth || 0, Math.min(el.scrollWidth || 0, 1600)) || el.offsetWidth || 1200;
+  const rawW = Math.max(el.clientWidth || 0, Math.min(el.scrollWidth || 0, 1600)) || el.offsetWidth || 1200;
+  const w = Math.min(rawW, PDF_WIDTH_CAP);
   el.style.width = `${w}px`;
   el.style.maxWidth = `${w}px`;
 
   const h = el.scrollHeight;
-  const scale = Math.min(2, MAX_CAPTURE_PX / Math.max(w, 1));
+  const scale = Math.min(PDF_SCALE, MAX_CAPTURE_PX / Math.max(w, 1));
   const maxCssChunk = Math.max(1, Math.floor(MAX_CAPTURE_PX / scale));
 
   const rootTop = el.getBoundingClientRect().top;
@@ -191,7 +198,7 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
         ctx.drawImage(canvas, 0, slice.start, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
 
         if (pageCount > 0) pdf.addPage([piece.width, piece.height]);
-        pdf.addImage(piece.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, piece.width, piece.height, undefined, 'FAST');
+        pdf.addImage(piece.toDataURL('image/jpeg', JPEG_QUALITY), 'JPEG', 0, 0, piece.width, piece.height, undefined, 'FAST');
         piece.width = 0;
         piece.height = 0;
         pageCount += 1;
