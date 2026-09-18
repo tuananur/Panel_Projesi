@@ -252,6 +252,23 @@ export default async function ClientReportPage({ params, searchParams }) {
 
   const tabs = [
     {
+      id: 'general',
+      label: 'Genel Rapor',
+      hasData: gaOk || gscOk || ubersuggestOk,
+      content: (
+        <GeneralReportControls>
+          <GeneralReportPanel
+            ga={ga}
+            gsc={gscOk ? gsc : null}
+            extras={extras}
+            ubersuggest={ubersuggest}
+            report={generalReport}
+            periodLabel={`${periodLabel} (${since} → ${until})`}
+          />
+        </GeneralReportControls>
+      ),
+    },
+    {
       id: 'analytics',
       label: 'Analytics',
       hasData: gaOk,
@@ -268,23 +285,6 @@ export default async function ClientReportPage({ params, searchParams }) {
       label: 'Ubersuggest',
       hasData: ubersuggestOk,
       content: <UbersuggestPanel report={ubersuggest} />,
-    },
-    {
-      id: 'general',
-      label: 'Genel Rapor',
-      hasData: gaOk || gscOk || ubersuggestOk,
-      content: (
-        <GeneralReportControls>
-          <GeneralReportPanel
-            ga={ga}
-            gsc={gscOk ? gsc : null}
-            extras={extras}
-            ubersuggest={ubersuggest}
-            report={generalReport}
-            periodLabel={`${periodLabel} (${since} → ${until})`}
-          />
-        </GeneralReportControls>
-      ),
     },
   ];
 
@@ -308,13 +308,13 @@ export default async function ClientReportPage({ params, searchParams }) {
       <div id="report-pdf-root">
         <h1 className="heading-1" style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{client.companyName}</h1>
 
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+        <div data-pdf-hide style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
           <StatusBadge label="Analytics" connected={gaOk} />
           <StatusBadge label="Search Console" connected={gscOk} />
           <StatusBadge label="Ubersuggest" connected={ubersuggestOk} />
         </div>
 
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <div data-pdf-hide style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
           {ANALYTICS_DATE_PRESETS.map((item) => (
             <Link
               key={item.id}
@@ -337,7 +337,7 @@ export default async function ClientReportPage({ params, searchParams }) {
 
         <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '1.5rem' }}>
           Dönem: {periodLabel} ({since} → {until}, {dayCount} gün) · Tüm ülkeler ve tüm cihazlar ·
-          Tarih aralığı yalnızca Analytics ve Search Console için geçerlidir; Ubersuggest snapshot bazlı çalışır.
+          Tarih aralığı site trafiği ve Google arama verileri için geçerlidir; SEO aracı verisi anlık görüntü (snapshot) bazlıdır.
         </p>
 
         <ReportTabs tabs={tabs} />

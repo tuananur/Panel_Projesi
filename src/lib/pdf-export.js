@@ -1,7 +1,7 @@
 // Ekrandaki bir elemanı uzun PDF sayfası olarak kaydeder (A4'e bölmez).
 // Yalnızca tarayıcıda çalışır; html2canvas ve jspdf tıklama anında dinamik yüklenir.
 
-export const PDF_BG = '#0f172a';
+export const PDF_BG = '#ffffff';
 
 // PDF spesifikasyonu bir sayfayı en fazla 14400 user unit (200 inç) yapabilir; jsPDF de
 // bunu aşan formatı sessizce 14400'e kırpar ve taşan içerik sayfa dışında kalır.
@@ -66,6 +66,30 @@ export function computePageBreaks(totalPx, breakPx = []) {
  * limiti nedeniyle bölüm sınırlarından birden fazla uzun sayfaya bölünür; yazı
  * boyutu her sayfada birebir korunur.
  */
+/** PDF klonunda tema değişkenlerini zorla aydınlık yapar (ekran teması ne olursa olsun). */
+function forceLightThemeForPdf(root) {
+  if (!root) return;
+  const light = {
+    '--bg-primary': '#ffffff',
+    '--bg-secondary': '#ffffff',
+    '--bg-tertiary': '#f8fafc',
+    '--text-primary': '#0f172a',
+    '--text-secondary': '#475569',
+    '--border-color': '#e2e8f0',
+    '--scrollbar-track': '#f1f5f9',
+    '--scrollbar-thumb': '#94a3b8',
+    '--scrollbar-thumb-hover': '#64748b',
+  };
+  Object.entries(light).forEach(([key, value]) => root.style.setProperty(key, value));
+  root.style.background = '#ffffff';
+  root.style.color = '#0f172a';
+  root.querySelectorAll('.card, [class*="card"]').forEach((node) => {
+    node.style.background = '#ffffff';
+    node.style.color = '#0f172a';
+    node.style.borderColor = '#e2e8f0';
+  });
+}
+
 export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelector = '[data-pdf-break]' } = {}) {
   const html2canvas = (await import('html2canvas')).default;
   const { jsPDF } = await import('jspdf');
@@ -105,6 +129,7 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
           n.style.overflow = 'visible';
           n.style.maxWidth = 'none';
         });
+        forceLightThemeForPdf(clonedEl);
         onClone?.(doc, clonedEl);
       },
     });

@@ -31,7 +31,7 @@ export function buildSeoSections(ubersuggest) {
       [33, 'Rakip Analizi'],
       [34, 'Keyword Gap'],
       [35, 'Backlink Overview'],
-      [36, 'Yeni / Kaybedilen Referans Domainler'],
+      [36, 'Yeni Link Veren / Linki Kesilen Siteler'],
       [37, 'Anchor Text Analizi'],
       [38, 'Backlink Fırsatları'],
       [39, 'Teknik SEO Sağlığı'],
@@ -89,7 +89,8 @@ export function buildSeoSections(ubersuggest) {
             { key: 'thirdTierKeywords', label: '11-50', type: 'int' },
             { key: 'fourthTierKeywords', label: '51+', type: 'int' },
           ]}
-          rows={[...snapshot.domainHistory].reverse()}
+          rows={[...snapshot.domainHistory].reverse()}
+
         />
       </ReportSection>,
     );
@@ -111,7 +112,8 @@ export function buildSeoSections(ubersuggest) {
             { key: 'competitorBacklinks', label: 'Geri bağlantı (Backlink)', type: 'int' },
             { key: 'competitorDomainAuthority', label: 'DA (alan otoritesi)', type: 'int' },
           ]}
-          rows={snapshot.competitors}
+          rows={snapshot.competitors}
+
         />
       </ReportSection>,
     );
@@ -127,7 +129,8 @@ export function buildSeoSections(ubersuggest) {
         key="s34"
         no={34}
         title="Kelime Boşluğu (Keyword Gap)"
-        sources={[UBER]}
+        sources={[UBER]}
+
       >
         <BarList
           rows={gapRows.map((row) => ({ label: row.competitorDomain, value: row.keywordGapCount, common: row.commonKeywordCount }))}
@@ -162,7 +165,9 @@ export function buildSeoSections(ubersuggest) {
               { key: 'sourceDomainRank', label: 'DR (alan puanı)', type: 'int' },
               { key: 'followStatus', label: 'Durum', type: 'text' },
             ]}
-            rows={snapshot.backlinks}
+            rows={snapshot.backlinks}
+
+
           />
         )}
       </ReportSection>,
@@ -176,7 +181,7 @@ export function buildSeoSections(ubersuggest) {
   const lostDomains = (snapshot.linkingDomains || []).filter((row) => row.status === 'lost');
   if (newDomains.length > 0 || lostDomains.length > 0) {
     add(
-      <ReportSection key="s36" no={36} title="Yeni / Kaybedilen Referans Domainler" sources={[UBER]}>
+      <ReportSection key="s36" no={36} title="Yeni Link Veren / Linki Kesilen Siteler" sources={[UBER]}>
         <TwoCol
           left={(
             <>
@@ -186,7 +191,8 @@ export function buildSeoSections(ubersuggest) {
                   { key: 'referringDomain', label: 'Domain', type: 'text' },
                   { key: 'detectedDate', label: 'Tespit', type: 'date' },
                 ]}
-                rows={newDomains}
+                rows={newDomains}
+
                 emptyNote="Yeni domain yok"
               />
             </>
@@ -199,7 +205,8 @@ export function buildSeoSections(ubersuggest) {
                   { key: 'referringDomain', label: 'Domain', type: 'text' },
                   { key: 'detectedDate', label: 'Tespit', type: 'date' },
                 ]}
-                rows={lostDomains}
+                rows={lostDomains}
+
                 emptyNote="Kaybedilen domain yok"
               />
             </>
@@ -208,7 +215,7 @@ export function buildSeoSections(ubersuggest) {
       </ReportSection>,
     );
   } else {
-    skip(36, 'Yeni / Kaybedilen Referans Domainler', 'Ubersuggest referans domain hareketi yok');
+    skip(36, 'Yeni Link Veren / Linki Kesilen Siteler', 'Ubersuggest referans domain hareketi yok');
   }
 
   // ------------------------------------------------------------------ 37
@@ -221,7 +228,9 @@ export function buildSeoSections(ubersuggest) {
             { key: 'externalRootDomains', label: 'Domain', type: 'int' },
             { key: 'externalPages', label: 'Sayfa', type: 'int' },
           ]}
-          rows={snapshot.anchorTexts}
+          rows={snapshot.anchorTexts}
+
+
         />
       </ReportSection>,
     );
@@ -236,7 +245,8 @@ export function buildSeoSections(ubersuggest) {
         key="s38"
         no={38}
         title="Geri Bağlantı Fırsatları"
-        sources={[UBER]}
+        sources={[UBER]}
+
       >
         <DataTable
           columns={[
@@ -246,7 +256,9 @@ export function buildSeoSections(ubersuggest) {
             { key: 'linksToUs', label: 'Bize link', type: 'int' },
             { key: 'opportunityStatus', label: 'Durum', type: 'text' },
           ]}
-          rows={snapshot.backlinkOpportunities}
+          rows={snapshot.backlinkOpportunities}
+
+
         />
       </ReportSection>,
     );
@@ -306,7 +318,9 @@ export function buildSeoSections(ubersuggest) {
             { key: 'seoImpact', label: 'Etki', badge: true },
             { key: 'difficulty', label: 'Zorluk', type: 'text' },
           ]}
-          rows={snapshot.auditIssues}
+          rows={snapshot.auditIssues}
+
+
         />
       </ReportSection>,
     );
@@ -332,7 +346,8 @@ export function buildSeoSections(ubersuggest) {
         key="s41"
         no={41}
         title="Sorunlu URL Listesi"
-        sources={[UBER]}
+        sources={[UBER]}
+
       >
         <DataTable
           columns={[
@@ -344,7 +359,8 @@ export function buildSeoSections(ubersuggest) {
             { key: 'difficulty', label: 'Zorluk', type: 'text' },
             { key: 'recommendation', label: 'Öneri', type: 'text' },
           ]}
-          rows={affectedUrls}
+          rows={affectedUrls}
+
         />
       </ReportSection>,
     );
@@ -407,7 +423,9 @@ export function buildSeoSections(ubersuggest) {
               { key: 'impact', label: 'Etki', badge: true },
               { key: 'effort', label: 'Efor', type: 'text' },
             ]}
-            rows={snapshot.opportunities}
+            rows={snapshot.opportunities}
+
+
           />
         )}
       </ReportSection>,
@@ -471,7 +489,8 @@ export function buildSeoSections(ubersuggest) {
             { key: 'averageRank', label: 'Ort. sıra', type: 'float' },
             { key: 'sentimentLabel', label: 'Duygu', type: 'text' },
           ]}
-          rows={snapshot.aiProviders}
+          rows={snapshot.aiProviders}
+
         />
       </ReportSection>,
     );
@@ -493,7 +512,8 @@ export function buildSeoSections(ubersuggest) {
             { key: 'sentimentPositivePercentage', label: 'Pozitif', type: 'pct' },
             { key: 'sentimentNegativePercentage', label: 'Negatif', type: 'pct' },
           ]}
-          rows={snapshot.aiCompetitors}
+          rows={snapshot.aiCompetitors}
+
         />
       </ReportSection>,
     );

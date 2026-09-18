@@ -6,17 +6,17 @@ export const SECTION_NOTES = {
 Kullanıcı (Users) = siteye giren yaklaşık benzersiz kişi sayısı
 Oturum (Sessions) = site ziyaretlerinin toplam sayısı
 Sayfa görüntüleme (Pageviews) = açılan sayfaların toplamı
-Organik tıklama = Google arama sonuçlarından siteye gelen gerçek tıklamalar (Search Console)
+Organik tıklama = Google arama sonuçlarından siteye gelen gerçek tıklamalar (Google arama)
 Gösterim (Impressions) = sorgunuzun Google’da kaç kez göründüğü
 CTR (Click-Through Rate / tıklama oranı) = tıklama ÷ gösterim
 Ort. pozisyon = Google’da ortalama sıralama (düşük daha iyi)
-Organik keyword / tahmini trafik / DA / backlink / site sağlığı = Ubersuggest araç tahminleri (gerçek ziyaretçi sayısı değildir)`,
+Organik keyword / tahmini trafik / DA / backlink / site sağlığı = SEO aracı araç tahminleri (gerçek ziyaretçi sayısı değildir)`,
 
   2: `Bu kart, seçilen dönemi aynı uzunluktaki önceki dönemle karşılaştırır. Yeşil iyileşme, kırmızı gerilemedir.
 
 Aktif kullanıcı = benzersiz ziyaretçi değişimi
 Oturum = ziyaret sayısı değişimi
-Organik tıklama / gösterim / CTR / pozisyon = Search Console metriklerinin dönemler arası farkı`,
+Organik tıklama / gösterim / CTR / pozisyon = Google arama metriklerinin dönemler arası farkı`,
 
   3: `Bu kart, dönemde gün gün trafik hareketini gösterir. Çizgilere mouse ile geldiğinizde o günün değerleri çıkar.
 
@@ -25,19 +25,19 @@ Oturum = o gündeki ziyaret sayısı
 Sayfa görüntüleme = o günde açılan sayfa adedi
 Hemen çıkma oranı (Bounce Rate) = tek sayfa bakıp çıkan oturumların oranı (yüksek genelde kötü)`,
 
-  4: `Bu kart, trafiğin hangi kanallardan geldiğini gösterir. Kanal grubu GA4 sınıflandırmasıdır; kaynak adı ise ham referrer’dır.
+  4: `Bu kart, trafiğin hangi kanallardan geldiğini gösterir. Kanal grubu site trafiği sınıflandırmasıdır; kaynak adı ise ham referrer’dır.
 
 Oturum = o kanaldan gelen ziyaret sayısı
 Kullanıcı = o kanaldan gelen benzersiz kişi
 Örnek: Organik arama = Google/Bing gibi arama motorlarından gelen trafik`,
 
-  5: `Bu kart yalnızca GA4’teki “Organik arama” kanalını özetler. Search Console tıklamalarıyla aynı sayı değildir; farklı ölçüm yöntemleridir.
+  5: `Bu kart yalnızca site trafiği’teki “Organik arama” kanalını özetler. Google arama tıklamalarıyla aynı sayı değildir; farklı ölçüm yöntemleridir.
 
 Organik kullanıcı / oturum = arama motorundan gelen trafik
 Organik oturum/kullanıcı payı = tüm trafiğin yüzde kaçı organik
 Etkileşim oranı (Engagement Rate) = anlamlı etkileşim gösteren oturumların oranı`,
 
-  6: `Bu kart, Google arama sonuçlarındaki gerçek performansı özetler (Search Console).
+  6: `Bu kart, Google arama sonuçlarındaki gerçek performansı özetler (Google arama).
 
 Tıklama = sonuçlardan siteye gelen tıklama
 Gösterim = sonucunuzun kaç kez listelendiği
@@ -45,7 +45,7 @@ CTR (tıklama oranı) = tıklama ÷ gösterim
 Ortalama pozisyon = ortalama sıralama (1 = en üst)
 Toplam sorgu = ölçülen farklı arama ifadesi sayısı`,
 
-  7: `Bu kart, Search Console metriklerinin gün gün kırılımını gösterir. Hover ile günlük değerleri görebilirsiniz.
+  7: `Bu kart, Google arama metriklerinin gün gün kırılımını gösterir. Hover ile günlük değerleri görebilirsiniz.
 
 Tıklama / gösterim / CTR / pozisyon = her gün için aynı tanımlar (bkz. bölüm 6)`,
 
@@ -57,7 +57,7 @@ Pozisyon = ortalama sıralama; Önceki = önceki dönem pozisyonu
 Değişim = pozisyon farkı (pozitif = yukarı çıkış, daha iyi)
 Sıralanan URL = Google’ın o sorgu için gösterdiği sayfa`,
 
-  9: `Bu kart, Ubersuggest’in ölçtüğü anahtar kelime performansını gösterir. Pozisyon GSC ortalamasından farklı olabilir.
+  9: `Bu kart, SEO aracı’in ölçtüğü anahtar kelime performansını gösterir. Pozisyon Google arama ortalamasından farklı olabilir.
 
 Keyword (anahtar kelime) = takip/ölçülen arama ifadesi
 Pozisyon = araç ölçümü sıralama
@@ -65,9 +65,9 @@ Hacim (Search Volume) = aylık tahmini arama sayısı
 SD (SEO Difficulty / SEO zorluğu) = sıralama zorluk skoru
 CPC (Cost Per Click / tıklama maliyeti) = reklamda ortalama tıklama ücreti
 Niyet = bilgisel / ticari / yönlendirme / satın alma
-Tahmini trafik = araç tahminidir, gerçek GA4 trafiği değildir`,
+Tahmini trafik = araç tahminidir, gerçek site trafiği trafiği değildir`,
 
-  10: `Bu kart, Ubersuggest rank tracker ile takip edilen kelimelerin güncel durumunu gösterir.
+  10: `Bu kart, SEO aracı rank tracker ile takip edilen kelimelerin güncel durumunu gösterir.
 
 Takip edilen kelime = düzenli ölçülen anahtar kelime
 Yeni / eski pozisyon = son iki ölçüm
@@ -81,7 +81,7 @@ Değişim = pozisyon farkı; pozitif değer daha iyi sıralama demektir`,
 
 Değişim = pozisyon farkı; negatif değer sıralama kaybı demektir`,
 
-  13: `Bu kart, sıralanmaya yakın veya fırsat potansiyeli taşıyan kelimeleri listeler (Ubersuggest / GSC birleşik sinyal).
+  13: `Bu kart, sıralanmaya yakın veya fırsat potansiyeli taşıyan kelimeleri listeler (SEO aracı / Google arama birleşik sinyal).
 
 Fırsat = hacmi olan ama henüz güçlü sıralanmayan veya iyileştirilebilir kelimeler`,
 
@@ -92,13 +92,13 @@ CTR (tıklama oranı) düşükse başlık/meta açıklama iyileştirmesi genelde
   15: `Bu kart, organik aramadan gelen kullanıcıların ilk indiği sayfaları (landing page) gösterir.
 
 Landing page = oturumun başladığı URL
-Kullanıcı / oturum / görüntüleme = o iniş sayfasındaki GA4 metrikleri`,
+Kullanıcı / oturum / görüntüleme = o iniş sayfasındaki site trafiği metrikleri`,
 
-  16: `Bu kart, Ubersuggest’e göre en çok organik trafik tahmini üreten sayfaları listeler.
+  16: `Bu kart, SEO aracı’e göre en çok organik trafik tahmini üreten sayfaları listeler.
 
-Tahmini trafik = araç modeli; gerçek ziyaret sayısı GA4’te doğrulanmalıdır`,
+Tahmini trafik = araç modeli; gerçek ziyaret sayısı site trafiği’te doğrulanmalıdır`,
 
-  17: `Bu kart, dönemde en çok ziyaret edilen sayfaları GA4 verisiyle gösterir.
+  17: `Bu kart, dönemde en çok ziyaret edilen sayfaları site trafiği verisiyle gösterir.
 
 Yol (path) = sayfa adresi
 Görüntüleme / kullanıcı / ortalama süre = o sayfanın popülerliği ve etkileşimi`,
@@ -114,7 +114,7 @@ Yeni kullanıcı = ilk ziyaret
 Geri dönen = tekrar ziyaret edenler
 Retention sinyali için kritik dengedir`,
 
-  20: `Bu kart, kullanıcıların ne kadar süre sonra geri döndüğüne dair cohort / retention özetidir (GA4).
+  20: `Bu kart, kullanıcıların ne kadar süre sonra geri döndüğüne dair cohort / retention özetidir (site trafiği).
 
 Cohort = aynı dönemde kazanılan kullanıcı grubu
 Retention = grubun sonraki günlerde geri gelme oranı`,
@@ -123,15 +123,15 @@ Retention = grubun sonraki günlerde geri gelme oranı`,
 
 Oturum ve kullanıcı payı cihaz deneyimini ve mobil önceliği değerlendirmek için kullanılır`,
 
-  22: `Bu kart, GA4’e göre site trafiğinin ülke dağılımını gösterir.
+  22: `Bu kart, site trafiği’e göre site trafiğinin ülke dağılımını gösterir.
 
 Ülke = ziyaretçinin coğrafyası; pay = toplam aktif kullanıcıya oran`,
 
-  23: `Bu kart, Search Console’daki ülke bazlı Google arama performansını gösterir.
+  23: `Bu kart, Google arama’daki ülke bazlı Google arama performansını gösterir.
 
 Tıklama / gösterim / CTR / pozisyon = o ülkedeki Google sonuç performansı`,
 
-  24: `Bu kart, GA4 şehir kırılımını gösterir (mümkün olan ölçümde).
+  24: `Bu kart, site trafiği şehir kırılımını gösterir (mümkün olan ölçümde).
 
 Şehir = ziyaretçi konumu; oturum / kullanıcı = o şehirden gelen trafik`,
 
@@ -139,7 +139,7 @@ Tıklama / gösterim / CTR / pozisyon = o ülkedeki Google sonuç performansı`,
 
 Tarayıcı uyumluluğu ve teknik hata önceliği için kullanılır`,
 
-  26: `Bu kart, GA4 demografik (yaş / cinsiyet) sinyallerini gösterir. Veri, Google sinyalleri açık hesaplarda gelir; her sitede olmayabilir.
+  26: `Bu kart, site trafiği demografik (yaş / cinsiyet) sinyallerini gösterir. Veri, Google sinyalleri açık hesaplarda gelir; her sitede olmayabilir.
 
 Yaş aralığı / cinsiyet = tahmini demografik kırılım`,
 
@@ -147,12 +147,12 @@ Yaş aralığı / cinsiyet = tahmini demografik kırılım`,
 
 Isı haritası / şerit: koyu veya yüksek değer = daha yoğun trafik saati`,
 
-  28: `Bu kart, GA4’teki dönüşüm / key event (önemli olay) sayılarını listeler.
+  28: `Bu kart, site trafiği’teki dönüşüm / key event (önemli olay) sayılarını listeler.
 
 Key event = iş için kritik olay (form, satın alma, lead vb.)
 Event adı İngilizce gelse bile Türkçe karşılığıyla gösterilir (ör. begin_checkout → ödemeye başlama)`,
 
-  29: `Bu kart, e-ticaret hunisi ve gelir sinyallerini özetler (GA4 e-ticaret etkinlikleri).
+  29: `Bu kart, e-ticaret hunisi ve gelir sinyallerini özetler (site trafiği e-ticaret etkinlikleri).
 
 view_item_list = ürün listesi görüntüleme
 view_item = ürün görüntüleme
@@ -165,7 +165,7 @@ Gelir = purchase ile ilişkili ciro`,
 
 İç arama terimi = ziyaretçinin sitede yazdığı kelime; içerik boşluğu sinyali olabilir`,
 
-  31: `Bu kart, domain’in Ubersuggest genel SEO özetidir (araç tahmini).
+  31: `Bu kart, domain’in SEO aracı genel SEO özetidir (araç tahmini).
 
 Organik keyword = sıralandığı tahmin edilen kelime sayısı
 Tahmini organik trafik = araç modeli
@@ -207,7 +207,7 @@ Aşırı marka dışı / aşırı keyword anchor oranı spam riski işaret edebi
 
 Outreach (ulaşım) için aday domain havuzudur`,
 
-  39: `Bu kart, teknik SEO tarama sağlığını özetler (Ubersuggest audit).
+  39: `Bu kart, teknik SEO tarama sağlığını özetler (SEO aracı audit).
 
 Site sağlık puanı = 0–100 teknik skor
 Başarılı / yönlendirilen / kırık / engellenen sayfalar = tarama sınıfları
@@ -234,7 +234,7 @@ FCP (First Contentful Paint) = ilk içerik boyaması
 TTFB (Time to First Byte) = ilk bayt süresi
 CWV = bu metriklerin genel durumu`,
 
-  43: `Bu kart, Ubersuggest SEO fırsatlarını türüne göre gösterir.
+  43: `Bu kart, SEO aracı SEO fırsatlarını türüne göre gösterir.
 
 KEYWORD_OPPORTUNITY gibi tür kodları Türkçe’ye çevrilir (anahtar kelime fırsatı vb.)
 Hacim / pozisyon / zorluk = fırsatın büyüklüğü ve uygulanabilirliği`,

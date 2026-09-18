@@ -12,13 +12,14 @@ export default function ReportTabs({ tabs }) {
     <>
       <div
         role="tablist"
-        style={{
+          style={{
           display: 'flex',
           gap: '0.25rem',
           marginBottom: '1.5rem',
           borderBottom: '1px solid var(--border-color)',
           flexWrap: 'wrap',
         }}
+        data-pdf-hide
       >
         {available.map((tab) => {
           const isActive = tab.id === active?.id;

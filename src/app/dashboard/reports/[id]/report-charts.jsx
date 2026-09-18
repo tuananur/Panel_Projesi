@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { trLabel } from './report-labels';
+import { SourceTag } from './general-report-ui';
 
 export const PALETTE = ['#4285F4', '#34A853', '#FBBC05', '#EA4335', '#A142F4', '#00ACC1', '#FF7043', '#9E9D24'];
 
@@ -52,7 +53,7 @@ function ChartTooltip({ hover, series, valueSuffix = '' }) {
 }
 
 /** Çok serili çizgi grafik — hover'da nokta değerleri. */
-export function LineChart({ data, series, height = 190, valueSuffix = '', showRange = true }) {
+export function LineChart({ data, series, height = 240, valueSuffix = '', showRange = true }) {
   const rows = (data || []).filter(Boolean);
   const [hover, setHover] = useState(null);
   if (rows.length < 2 || !series?.length) return null;
@@ -95,13 +96,48 @@ export function LineChart({ data, series, height = 190, valueSuffix = '', showRa
           {series.map((s, seriesIndex) => (
             <path key={s.key} d={seriesPath(rows, s.key, x, y)} fill="none" stroke={s.color || PALETTE[seriesIndex % PALETTE.length]} strokeWidth="1.8" vectorEffect="non-scaling-stroke" />
           ))}
+          {series.map((s, seriesIndex) => rows.map((row, index) => (
+            <circle
+              key={`pt-${s.key}-${index}`}
+              cx={x(index)}
+              cy={y(row[s.key])}
+              r="1.1"
+              fill={s.color || PALETTE[seriesIndex % PALETTE.length]}
+            />
+          )))}
           {hover && (
             <line x1={x(hover.index)} x2={x(hover.index)} y1={12} y2={height - 20} stroke="var(--text-secondary)" strokeWidth="0.4" strokeDasharray="1 1" vectorEffect="non-scaling-stroke" />
           )}
-          {hover && series.map((s, seriesIndex) => (
-            <circle key={`dot-${s.key}`} cx={x(hover.index)} cy={y(hover.values[s.key])} r="1.6" fill={s.color || PALETTE[seriesIndex % PALETTE.length]} />
-          ))}
         </svg>
+        {/* Günlük değer etiketleri — PDF'de de okunur (hover'a bağlı değil). */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          {rows.map((row, index) => {
+            const primary = series[0];
+            const value = Number(row[primary.key]) || 0;
+            const topPct = (y(value) / height) * 100;
+            const leftPct = (x(index) / width) * 100;
+            const step = rows.length > 45 ? 2 : 1;
+            if (index % step !== 0 && index !== rows.length - 1) return null;
+            return (
+              <span
+                key={`lbl-${index}`}
+                style={{
+                  position: 'absolute',
+                  left: `${leftPct}%`,
+                  top: `${Math.max(0, topPct - 4)}%`,
+                  transform: 'translate(-50%, -100%)',
+                  fontSize: rows.length > 31 ? '0.55rem' : '0.62rem',
+                  fontWeight: 700,
+                  color: 'var(--text-primary)',
+                  whiteSpace: 'nowrap',
+                  textShadow: '0 0 3px var(--bg-secondary)',
+                }}
+              >
+                {fmt(value)}{valueSuffix}
+              </span>
+            );
+          })}
+        </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
         {rows.filter((_, index) => index % labelStep === 0 || index === rows.length - 1).map((row, index) => (
@@ -254,7 +290,7 @@ export function RankProgressBars({ items }) {
 }
 
 /** Donut; centerLabel/centerValue ile ortada toplam gösterilebilir. */
-export function DonutChart({ rows, valueKey = 'value', labelKey = 'label', size = 160, centerLabel = null, centerValue = null }) {
+export function DonutChart({ rows, valueKey = 'value', labelKey = 'label', size = 220, centerLabel = null, centerValue = null }) {
   const items = (rows || []).filter((row) => (Number(row[valueKey]) || 0) > 0);
   if (items.length === 0) return null;
 
@@ -370,8 +406,8 @@ export function ChangeCards({ rows }) {
         const color = improved === null ? 'var(--text-secondary)' : improved ? '#34A853' : '#EA4335';
         return (
           <div key={`${row.source}-${row.label}`} style={{ border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.75rem 0.85rem' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{row.source}</div>
-            <div style={{ fontSize: '0.82rem', marginTop: '0.15rem' }}>{row.label}</div>
+            <div style={{ marginTop: '0.1rem' }}><SourceTag source={row.source} /></div>
+            <div style={{ fontSize: '0.82rem', marginTop: '0.25rem' }}>{row.label}</div>
             <div style={{ fontSize: '1.25rem', fontWeight: 700, marginTop: '0.35rem' }}>{formatValue(row.current, row.unit)}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Önceki: {formatValue(row.previous, row.unit)}</div>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color, marginTop: '0.25rem' }}>

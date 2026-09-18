@@ -11,6 +11,7 @@ import { num, pct, EMPTY_VALUE } from '../report-ui';
 import { ReportSection, MetricGrid, SourceTag, StatCallout, SubHeading } from './general-report-ui';
 import { DataTable } from './report-data-table';
 import { LineChart, AreaChart, BarList, DonutChart, ChangeCards, HeatStrip, RankProgressBars, TwoCol } from './report-charts';
+import { SplitBarDonut, DevicePodium, VisitorSplit, BrowserBars, CityTurkeyPanel, DayHourHeatmap } from './report-visuals';
 import { buildSeoSections } from './general-report-seo';
 import { buildInsightSections } from './general-report-insights';
 
@@ -126,6 +127,10 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
 
   // ------------------------------------------------------------------ 4
   if (hasRows(ga?.channels) || hasRows(extras?.channelGroups)) {
+    const channelBars = hasRows(extras?.channelGroups)
+      ? extras.channelGroups.map((row) => ({ label: row.channel, value: row.sessions, users: row.activeUsers }))
+      : ga.channels.map((row) => ({ label: row.name, value: row.sessions, users: row.activeUsers }));
+    const donutSource = hasRows(ga?.channels) ? ga.channels : extras.channelGroups.map((row) => ({ name: row.channel, sessions: row.sessions }));
     add(
       <ReportSection
         key="s4"
@@ -133,30 +138,17 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         title="Trafik Kaynakları"
         sources={[GA4]}
       >
-        {hasRows(extras?.channelGroups) && (
-          <>
-            <SubHeading>Kanal grubu</SubHeading>
-            <BarList
-              rows={extras.channelGroups.map((row) => ({ label: row.channel, value: row.sessions, users: row.activeUsers }))}
-              secondary="users"
-              limit={12}
-            />
-          </>
-        )}
-        {hasRows(ga?.channels) && (
-          <>
-            <SubHeading>Kaynak (referrer)</SubHeading>
-            <DonutChart
-              rows={ga.channels.slice(0, 7).map((row) => ({ label: row.name, value: row.sessions }))}
-              centerLabel="Oturum"
-              centerValue={ga.channels.slice(0, 7).reduce((acc, row) => acc + (row.sessions || 0), 0)}
-            />
-          </>
-        )}
+        <SplitBarDonut
+          barRows={channelBars}
+          barLimit={12}
+          donutRows={donutSource.slice(0, 8).map((row) => ({ label: row.name || row.label, value: row.sessions }))}
+          donutCenterLabel="Oturum"
+          donutCenterValue={donutSource.slice(0, 8).reduce((acc, row) => acc + (row.sessions || 0), 0)}
+        />
       </ReportSection>,
     );
   } else {
-    skip(4, 'Trafik Kaynakları', 'GA4 kaynak verisi yok');
+    skip(4, 'Trafik Kaynakları', 'Kaynak verisi yok');
   }
 
   // ------------------------------------------------------------------ 5
@@ -193,7 +185,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
   // ------------------------------------------------------------------ 6
   if (gscOk) {
     add(
-      <ReportSection key="s6" no={6} title="Search Console Genel Performans" sources={[GSC]}>
+      <ReportSection key="s6" no={6} title="Google Arama Genel Performans" sources={[GSC]}>
         <MetricGrid
           compact
           items={[
@@ -207,14 +199,14 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       </ReportSection>,
     );
   } else {
-    skip(6, 'Search Console Genel Performans', 'Search Console verisi yok');
+    skip(6, 'Google Arama Genel Performans', 'Search Console verisi yok');
   }
 
   // ------------------------------------------------------------------ 7
   if (hasRows(gsc?.daily)) {
     const daily = gsc.daily.map((row) => ({ ...row, label: row.date?.slice(5) }));
     add(
-      <ReportSection key="s7" no={7} title="Search Console Günlük Performans" sources={[GSC]}>
+      <ReportSection key="s7" no={7} title="Google Arama Günlük Performans" sources={[GSC]}>
         <LineChart
           data={daily}
           series={[
@@ -233,7 +225,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       </ReportSection>,
     );
   } else {
-    skip(7, 'Search Console Günlük Performans', 'GSC günlük verisi yok');
+    skip(7, 'Google Arama Günlük Performans', 'GSC günlük verisi yok');
   }
 
   // ------------------------------------------------------------------ 8
@@ -293,7 +285,8 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             { key: 'estimatedTraffic', label: 'Tahmini trafik', type: 'float' },
             { key: 'rankingUrl', label: 'Sıralanan URL', type: 'text' },
           ]}
-          rows={snapshot.keywords}
+          rows={snapshot.keywords}
+
         />
       </ReportSection>,
     );
@@ -302,7 +295,15 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
   }
 
   // ------------------------------------------------------------------ 10
-  if (snapshot && (snapshot.trackedKeywordsCount !== null || hasRows(snapshot.rankTracking))) {
+  if (
+    snapshot
+    && (
+      (Number(snapshot.trackedKeywordsCount) > 0)
+      || hasRows(snapshot.rankTracking)
+      || hasRows(snapshot.averagePositions)
+      || snapshot.top3New !== null
+    )
+  ) {
     add(
       <ReportSection
         key="s10"
@@ -385,7 +386,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       <ReportSection
         key="s11"
         no={11}
-        title="En Çok Yükselen Anahtar Kelimeler"
+        title="Sıralaması Yükselen Kelimeler"
         sources={[risingSource]}
         note={risingSource === UBER ? 'Kaynak: Ubersuggest rank tracker.' : 'Kaynak: Search Console pozisyon değişimi.'}
       >
@@ -403,7 +404,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       <ReportSection
         key="s12"
         no={12}
-        title="En Çok Düşen Anahtar Kelimeler"
+        title="Sıralaması Düşen Kelimeler"
         sources={[fallingSource]}
         note={fallingSource === UBER ? 'Kaynak: Ubersuggest rank tracker.' : 'Kaynak: Search Console pozisyon değişimi.'}
       >
@@ -469,7 +470,8 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
                 { key: 'impact', label: 'Etki', type: 'text' },
                 { key: 'effort', label: 'Efor', type: 'text' },
               ]}
-              rows={opportunities.uberOpportunities}
+              rows={opportunities.uberOpportunities}
+
             />
           </>
         )}
@@ -513,7 +515,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       <ReportSection
         key="s15"
         no={15}
-        title="Organik İniş Sayfaları"
+        title="Organik Aramadan İlk Girilen Sayfalar"
         sources={hasRows(landing.merged) ? [GA4, GSC] : [GSC]}
         note={
           hasRows(landing.merged)
@@ -559,7 +561,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       <ReportSection
         key="s16"
         no={16}
-        title="En İyi SEO Sayfaları"
+        title="En Çok Organik Trafik Getiren Sayfalar"
         sources={[UBER]}
       >
         <DataTable
@@ -570,7 +572,8 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
             { key: 'backlinks', label: 'Geri bağlantı (Backlink)', type: 'int' },
             { key: 'referringDomains', label: 'Ref. domain', type: 'int' },
           ]}
-          rows={snapshot.topPages}
+          rows={snapshot.topPages}
+
         />
       </ReportSection>,
     );
@@ -581,7 +584,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
   // ------------------------------------------------------------------ 17
   if (hasRows(ga?.pages)) {
     add(
-      <ReportSection key="s17" no={17} title="En Çok Ziyaret Edilen Sayfalar" sources={[GA4]}>
+      <ReportSection key="s17" no={17} title="Sitede En Çok Açılan Sayfalar" sources={[GA4]}>
         <DataTable
           columns={[
             { key: 'title', label: 'Sayfa başlığı', type: 'text' },
@@ -595,7 +598,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       </ReportSection>,
     );
   } else {
-    skip(17, 'En Çok Ziyaret Edilen Sayfalar', 'GA4 sayfa verisi yok');
+    skip(17, 'Sitede En Çok Açılan Sayfalar', 'GA4 sayfa verisi yok');
   }
 
   // ------------------------------------------------------------------ 18
@@ -605,7 +608,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       <ReportSection
         key="s18"
         no={18}
-        title="Kazanan / Kaybeden Sayfalar"
+        title="Trafiği Artan / Azalan Sayfalar"
         sources={[moves.views && GA4, moves.clicks && GSC].filter(Boolean)}
       >
         {moves.views && (
@@ -673,7 +676,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       </ReportSection>,
     );
   } else {
-    skip(18, 'Kazanan / Kaybeden Sayfalar', 'Önceki dönem sayfa verisi alınamadı');
+    skip(18, 'Trafiği Artan / Azalan Sayfalar', 'Önceki dönem sayfa verisi alınamadı');
   }
 
   // ------------------------------------------------------------------ 19
@@ -686,23 +689,16 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
     const returning = rows.find((row) => row.type === 'returning');
     const returningRate = total > 0 && returning ? (returning.activeUsers / total) * 100 : null;
     add(
-      <ReportSection key="s19" no={19} title="Yeni vs Geri Dönen Kullanıcılar" sources={[GA4]}>
-        <DonutChart
-          rows={rows.map((row) => ({ label: row.label, value: row.activeUsers }))}
-          centerLabel="Kullanıcı"
-          centerValue={total}
-        />
-        {returningRate !== null && (
-          <StatCallout label="Geri dönüş oranı" value={pct(returningRate)} tone="neutral" />
-        )}
+      <ReportSection key="s19" no={19} title="İlk Kez Gelen / Tekrar Gelen Kullanıcılar" sources={[GA4]}>
+        <VisitorSplit rows={rows} total={total} returningRate={returningRate} />
       </ReportSection>,
     );
   } else {
-    skip(19, 'Yeni vs Geri Dönen Kullanıcılar', 'GA4 newVsReturning verisi yok');
+    skip(19, 'İlk Kez Gelen / Tekrar Gelen Kullanıcılar', 'Yeni/geri dönen kullanıcı verisi yok');
   }
 
   // 20 — cohort/retention için GA4 cohortSpec sorgusu bu panelde çalıştırılmıyor.
-  skip(20, 'Retention / Cohort', 'GA4 cohort sorgusu bu raporda çalıştırılmıyor, veri toplanmıyor');
+  skip(20, 'Tekrar Gelme / Cohort', 'GA4 cohort sorgusu bu raporda çalıştırılmıyor, veri toplanmıyor');
 
   // ------------------------------------------------------------------ 21
   if (hasRows(ga?.devices) || hasRows(gsc?.devices)) {
@@ -715,12 +711,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       >
         {hasRows(ga?.devices) && (
           <>
-            <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.25rem' }}>Site kullanımı <SourceTag source={GA4} /></h3>
-            <DonutChart
-              rows={ga.devices.map((row) => ({ label: row.name, value: row.activeUsers }))}
-              centerLabel="Kullanıcı"
-              centerValue={ga.devices.reduce((acc, row) => acc + (row.activeUsers || 0), 0)}
-            />
+            <DevicePodium devices={ga.devices} />
             <DataTable
               columns={[
                 { key: 'name', label: 'Cihaz', type: 'text' },
@@ -734,7 +725,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
         )}
         {hasRows(gsc?.devices) && (
           <>
-            <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.4rem' }}>Arama performansı <SourceTag source={GSC} /></h3>
+            <SubHeading>Google arama — cihaz</SubHeading>
             <DataTable
               columns={[
                 { key: 'label', label: 'Cihaz', type: 'text' },
@@ -780,7 +771,7 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       <ReportSection
         key="s23"
         no={23}
-        title="Search Console Ülke Performansı"
+        title="Google Arama Ülke Performansı"
         sources={[GSC]}
       >
         <DataTable
@@ -796,17 +787,14 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       </ReportSection>,
     );
   } else {
-    skip(23, 'Search Console Ülke Performansı', 'GSC ülke verisi yok');
+    skip(23, 'Google Arama Ülke Performansı', 'GSC ülke verisi yok');
   }
 
   // ------------------------------------------------------------------ 24
   if (hasRows(extras?.cities)) {
     add(
       <ReportSection key="s24" no={24} title="Şehir Dağılımı" sources={[GA4]}>
-        <BarList
-          rows={extras.cities.slice(0, 12).map((row) => ({ label: `${row.city}${row.country ? ` (${row.country})` : ''}`, value: row.sessions, users: row.activeUsers }))}
-          secondary="users"
-        />
+        <CityTurkeyPanel cities={extras.cities} />
         <DataTable
           columns={[
             { key: 'city', label: 'Şehir', type: 'text' },
@@ -819,18 +807,18 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
       </ReportSection>,
     );
   } else {
-    skip(24, 'Şehir Dağılımı', 'GA4 şehir verisi alınamadı');
+    skip(24, 'Şehir Dağılımı', 'Şehir verisi alınamadı');
   }
 
   // ------------------------------------------------------------------ 25
   if (hasRows(ga?.browsers)) {
     add(
       <ReportSection key="s25" no={25} title="Tarayıcı Dağılımı" sources={[GA4]}>
-        <BarList rows={ga.browsers.map((row) => ({ label: row.name, value: row.sessions, users: row.activeUsers }))} secondary="users" limit={10} />
+        <BrowserBars rows={ga.browsers.map((row) => ({ label: row.name, value: row.sessions, users: row.activeUsers }))} limit={10} />
       </ReportSection>,
     );
   } else {
-    skip(25, 'Tarayıcı Dağılımı', 'GA4 tarayıcı verisi yok');
+    skip(25, 'Tarayıcı Dağılımı', 'Tarayıcı verisi yok');
   }
 
   // ------------------------------------------------------------------ 26
@@ -874,18 +862,9 @@ export default function GeneralReportPanel({ ga, gsc, extras, ubersuggest, repor
           timeAnalysis.busiestHour ? `en yoğun saat: ${String(timeAnalysis.busiestHour.hour).padStart(2, '0')}:00` : null,
         ].filter(Boolean).join(' · ') || undefined}
       >
-        {hasRows(timeAnalysis.days) && (
-          <>
-            <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.25rem' }}>Haftanın günleri (oturum)</h3>
-            <HeatStrip rows={timeAnalysis.days} />
-          </>
-        )}
-        {hasRows(timeAnalysis.hours) && (
-          <>
-            <h3 style={{ fontSize: '0.85rem', margin: '1.25rem 0 0.25rem' }}>Saatler (oturum)</h3>
-            <HeatStrip rows={timeAnalysis.hours} />
-          </>
-        )}
+        {hasRows(timeAnalysis.days) || hasRows(timeAnalysis.hours) ? (
+          <DayHourHeatmap days={timeAnalysis.days || []} hours={timeAnalysis.hours || []} />
+        ) : null}
       </ReportSection>,
     );
   } else {

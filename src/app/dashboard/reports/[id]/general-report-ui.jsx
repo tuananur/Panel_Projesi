@@ -27,20 +27,19 @@ export function SourceTag({ source }) {
   const theme = SOURCE_COLORS[source] || SOURCE_COLORS.Beyin;
   return (
     <span
+      title={source}
+      aria-label={source}
       style={{
         display: 'inline-block',
-        padding: '0.15rem 0.5rem',
-        borderRadius: '999px',
-        fontSize: '0.68rem',
-        fontWeight: 700,
-        background: theme.bg,
+        width: '10px',
+        height: '10px',
+        borderRadius: '50%',
+        background: theme.text,
         border: `1px solid ${theme.border}`,
-        color: theme.text,
-        whiteSpace: 'nowrap',
+        boxShadow: `0 0 0 3px ${theme.bg}`,
+        flexShrink: 0,
       }}
-    >
-      {source}
-    </span>
+    />
   );
 }
 
@@ -91,41 +90,63 @@ export function TrendText({ changePct, lowerIsBetter = false, absolute = null })
   );
 }
 
+function NoteBlock({ text }) {
+  if (!text) return null;
+  const lines = String(text).split('\n');
+  return (
+    <div
+      className="text-muted"
+      style={{
+        fontSize: '0.8rem',
+        marginBottom: '0.95rem',
+        lineHeight: 1.6,
+        maxWidth: '1100px',
+      }}
+    >
+      {lines.map((line, index) => {
+        const trimmed = line.trimEnd();
+        if (!trimmed) return <div key={index} style={{ height: '0.45rem' }} />;
+        const eq = trimmed.indexOf(' = ');
+        if (eq > 0) {
+          const term = trimmed.slice(0, eq).trim();
+          const desc = trimmed.slice(eq + 3).trim();
+          return (
+            <div key={index}>
+              <strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{term}</strong>
+              <span style={{ fontWeight: 400 }}>{` = ${desc}`}</span>
+            </div>
+          );
+        }
+        return (
+          <div key={index} style={{ fontWeight: 400 }}>{trimmed}</div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ReportSection({ no, title, sources = [], note, children, compact = false }) {
   const catalog = SECTION_NOTES[no];
   const resolvedNote = [note, catalog].filter(Boolean).join('\n\n') || null;
   return (
     <div className="card" data-pdf-break data-section-no={no} style={{ marginBottom: compact ? '1rem' : '1.25rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: resolvedNote ? '0.3rem' : '0.85rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', marginBottom: resolvedNote ? '0.35rem' : '0.95rem' }}>
         <span
           style={{
-            fontSize: '0.72rem',
+            fontSize: '0.75rem',
             fontWeight: 700,
             color: 'var(--text-secondary)',
             border: '1px solid var(--border-color)',
             borderRadius: '6px',
-            padding: '0.1rem 0.4rem',
+            padding: '0.12rem 0.45rem',
           }}
         >
           {no}
         </span>
-        <h2 className="heading-2" style={{ fontSize: '1.05rem', margin: 0, flex: 1, minWidth: '200px' }}>{title}</h2>
+        <h2 className="heading-2" style={{ fontSize: '1.28rem', margin: 0, flex: 1, minWidth: '200px', letterSpacing: '-0.01em' }}>{title}</h2>
         {sources.map((source) => <SourceTag key={source} source={source} />)}
       </div>
-      {resolvedNote && (
-        <p
-          className="text-muted"
-          style={{
-            fontSize: '0.78rem',
-            marginBottom: '0.85rem',
-            whiteSpace: 'pre-line',
-            lineHeight: 1.55,
-            maxWidth: '1100px',
-          }}
-        >
-          {resolvedNote}
-        </p>
-      )}
+      <NoteBlock text={resolvedNote} />
       {children}
     </div>
   );
