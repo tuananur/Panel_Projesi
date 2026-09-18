@@ -10,16 +10,23 @@ const MAX_PAGE_PX = 19200;
 // Yuvarlama farklarında kırpmaya düşmemek için küçük bir pay bırakılır.
 const SAFE_PAGE_PX = MAX_PAGE_PX - 200;
 
+// Tarayıcı canvas kenar limiti genelde 32767–65535. Tek seferde tüm raporu çizmek
+// bu limiti aşınca html2canvas boş (beyaz/koyu) canvas döndürür. Dilim yüksekliği
+// bunun altında tutulur.
+const MAX_CAPTURE_PX = 16000;
+
 /**
- * Kesme noktalarını hesaplar: her sayfa mümkün olan en fazla tam bölümü alır,
- * böylece bir kartın ortasından geçilmez. Tek bir bölüm sayfa sınırından uzunsa
+ * Kesme noktalarını hesaplar: her dilim mümkün olan en fazla tam bölümü alır,
+ * böylece bir kartın ortasından geçilmez. Tek bir bölüm sınırdan uzunsa
  * (nadiren) o bölüm sınırda kesilir.
  *
- * @param totalPx   canvas yüksekliği (canvas pikseli)
- * @param breakPx   bölüm başlangıçlarının canvas pikseli cinsinden konumları (artan)
+ * @param totalPx   toplam yükseklik (canvas veya CSS pikseli)
+ * @param breakPx   bölüm başlangıçları (artan)
+ * @param limitPx   dilim üst sınırı (varsayılan: PDF sayfa limiti)
  */
-export function computePageBreaks(totalPx, breakPx = []) {
-  if (totalPx <= SAFE_PAGE_PX) return [{ start: 0, height: totalPx }];
+export function computePageBreaks(totalPx, breakPx = [], limitPx = SAFE_PAGE_PX) {
+  if (totalPx <= 0) return [];
+  if (totalPx <= limitPx) return [{ start: 0, height: totalPx }];
 
   const candidates = breakPx
     .map((value) => Math.round(value))
@@ -31,13 +38,12 @@ export function computePageBreaks(totalPx, breakPx = []) {
 
   while (start < totalPx) {
     const remaining = totalPx - start;
-    if (remaining <= SAFE_PAGE_PX) {
+    if (remaining <= limitPx) {
       pages.push({ start, height: remaining });
       break;
     }
 
-    const limit = start + SAFE_PAGE_PX;
-    // Sınırı geçmeyen en son bölüm başlangıcı; bulunamazsa ham sınırdan kes.
+    const limit = start + limitPx;
     let end = 0;
     for (const candidate of candidates) {
       if (candidate > start && candidate <= limit) end = candidate;
@@ -52,20 +58,6 @@ export function computePageBreaks(totalPx, breakPx = []) {
   return pages;
 }
 
-/**
- * @param el              PDF'e dönüştürülecek kök eleman
- * @param fileName        indirilecek dosya adı
- * @param onClone         klon DOM üzerinde son rötuşlar
- * @param sectionSelector sayfa kesmelerinin hizalanacağı bölüm elemanları
- *
- * Klon üzerinde otomatik uygulananlar:
- *   [data-pdf-hide]   → tamamen kaldırılır (butonlar, filtre çubukları gibi)
- *   [data-pdf-expand] → yatay kaydırma açılır, tablolar kırpılmaz
- *
- * Not: içerik tek sayfaya sığıyorsa tek uzun sayfa üretilir. Sığmıyorsa PDF sayfa
- * limiti nedeniyle bölüm sınırlarından birden fazla uzun sayfaya bölünür; yazı
- * boyutu her sayfada birebir korunur.
- */
 /** PDF klonunda tema değişkenlerini zorla aydınlık yapar (ekran teması ne olursa olsun). */
 function forceLightThemeForPdf(root) {
   if (!root) return;
@@ -90,6 +82,44 @@ function forceLightThemeForPdf(root) {
   });
 }
 
+function prepareClone(doc, clonedEl, w, onClone) {
+  doc.querySelectorAll('[data-pdf-hide]').forEach((n) => n.remove());
+  doc.querySelectorAll('.tooltip-content, [id*="tooltip"], [id*="Tooltip"]').forEach((n) => n.remove());
+  doc.querySelectorAll('[data-pdf-expand]').forEach((n) => {
+    n.style.overflow = 'visible';
+    n.style.maxWidth = 'none';
+  });
+  clonedEl.style.overflow = 'hidden';
+  clonedEl.style.width = `${w}px`;
+  clonedEl.style.maxWidth = `${w}px`;
+  clonedEl.style.background = PDF_BG;
+  clonedEl.style.color = '#0f172a';
+  forceLightThemeForPdf(clonedEl);
+  clonedEl.querySelectorAll('*').forEach((node) => {
+    if (!(node instanceof doc.defaultView.HTMLElement)) return;
+    const style = doc.defaultView.getComputedStyle(node);
+    // html2canvas oklch/lab renkleri boş çizebiliyor — computed RGB'ye sabitle.
+    if (style.color) node.style.color = style.color;
+    if (style.backgroundColor && style.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+      node.style.backgroundColor = style.backgroundColor;
+    }
+  });
+  onClone?.(doc, clonedEl);
+}
+
+/**
+ * @param el              PDF'e dönüştürülecek kök eleman
+ * @param fileName        indirilecek dosya adı
+ * @param onClone         klon DOM üzerinde son rötuşlar
+ * @param sectionSelector sayfa kesmelerinin hizalanacağı bölüm elemanları
+ *
+ * Klon üzerinde otomatik uygulananlar:
+ *   [data-pdf-hide]   → tamamen kaldırılır (butonlar, filtre çubukları gibi)
+ *   [data-pdf-expand] → yatay kaydırma açılır, tablolar kırpılmaz
+ *
+ * Uzun raporlar tarayıcı canvas limitini aşmasın diye bölüm sınırlarından
+ * dilim dilim html2canvas ile alınır; her dilim ayrı uzun PDF sayfası olur.
+ */
 export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelector = '[data-pdf-break]' } = {}) {
   const html2canvas = (await import('html2canvas')).default;
   const { jsPDF } = await import('jspdf');
@@ -97,92 +127,79 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
   const prevOverflow = el.style.overflow;
   const prevWidth = el.style.width;
   const prevMaxWidth = el.style.maxWidth;
-  // scrollWidth tooltip/taşma ile şişerse PDF boş/devasa beyaz sayfa olur — görünür genişliği kullan.
+  // scrollWidth tooltip/taşma ile şişerse ölçüm bozulur — görünür genişliği kullan.
   el.style.overflow = 'hidden';
   const w = Math.max(el.clientWidth || 0, Math.min(el.scrollWidth || 0, 1600)) || el.offsetWidth || 1200;
-  const h = el.scrollHeight;
   el.style.width = `${w}px`;
   el.style.maxWidth = `${w}px`;
 
-  const scale = Math.min(2, Math.max(1, 8192 / Math.max(w, h)));
+  const h = el.scrollHeight;
+  const scale = Math.min(2, MAX_CAPTURE_PX / Math.max(w, 1));
+  const maxCssChunk = Math.max(1, Math.floor(MAX_CAPTURE_PX / scale));
 
-  // Bölüm başlangıçları CSS pikseli olarak, kökün üstüne göre ölçülür.
   const rootTop = el.getBoundingClientRect().top;
   const sectionOffsets = sectionSelector
     ? [...el.querySelectorAll(sectionSelector)].map((node) => node.getBoundingClientRect().top - rootTop)
     : [];
 
-  try {
-    const canvas = await html2canvas(el, {
-      scale,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: PDF_BG,
-      logging: false,
-      width: w,
-      height: h,
-      scrollX: 0,
-      scrollY: -window.scrollY,
-      windowWidth: w,
-      windowHeight: h,
-      onclone: (doc, clonedEl) => {
-        doc.querySelectorAll('[data-pdf-hide]').forEach((n) => n.remove());
-        doc.querySelectorAll('.tooltip-content, [id*="tooltip"], [id*="Tooltip"]').forEach((n) => n.remove());
-        doc.querySelectorAll('[data-pdf-expand]').forEach((n) => {
-          n.style.overflow = 'visible';
-          n.style.maxWidth = 'none';
-        });
-        clonedEl.style.overflow = 'hidden';
-        clonedEl.style.width = `${w}px`;
-        clonedEl.style.maxWidth = `${w}px`;
-        clonedEl.style.background = PDF_BG;
-        clonedEl.style.color = '#0f172a';
-        // Klonlanan DOM'da gizli (display:none) bölümler zaten yok sayılır; renkleri zorla aydınlık yap.
-        forceLightThemeForPdf(clonedEl);
-        clonedEl.querySelectorAll('*').forEach((node) => {
-          if (!(node instanceof doc.defaultView.HTMLElement)) return;
-          const style = doc.defaultView.getComputedStyle(node);
-          // html2canvas oklch/lab renkleri boş çizebiliyor — computed RGB'ye sabitle.
-          if (style.color) node.style.color = style.color;
-          if (style.backgroundColor && style.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-            node.style.backgroundColor = style.backgroundColor;
-          }
-        });
-        onClone?.(doc, clonedEl);
-      },
-    });
+  const chunks = computePageBreaks(h, sectionOffsets, maxCssChunk);
 
-    // CSS pikselinden canvas pikseline gerçek oran (html2canvas ölçeği yuvarlayabilir).
-    const pxRatio = canvas.height / Math.max(h, 1);
-    const pages = computePageBreaks(canvas.height, sectionOffsets.map((offset) => offset * pxRatio));
+  try {
+    const canvases = [];
+    for (const chunk of chunks) {
+      const canvas = await html2canvas(el, {
+        scale,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: PDF_BG,
+        logging: false,
+        x: 0,
+        y: chunk.start,
+        width: w,
+        height: chunk.height,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        windowWidth: w,
+        windowHeight: Math.max(h, chunk.height),
+        onclone: (doc, clonedEl) => prepareClone(doc, clonedEl, w, onClone),
+      });
+      canvases.push(canvas);
+    }
+
+    if (canvases.length === 0) {
+      throw new Error('PDF için çizilecek içerik bulunamadı');
+    }
 
     const pdf = new jsPDF({
       unit: 'px',
-      format: [canvas.width, pages[0].height],
+      format: [canvases[0].width, canvases[0].height],
       hotfixes: ['px_scaling'],
       compress: true,
     });
 
-    const slice = document.createElement('canvas');
-    const ctx = slice.getContext('2d');
+    let pageCount = 0;
+    canvases.forEach((canvas, index) => {
+      // Tek dilim PDF sayfa limitini aşarsa (ölçek/yuvarlama), alt dilimlere böl.
+      const pageSlices = computePageBreaks(canvas.height, [], SAFE_PAGE_PX);
+      pageSlices.forEach((slice, sliceIndex) => {
+        const piece = document.createElement('canvas');
+        piece.width = canvas.width;
+        piece.height = slice.height;
+        const ctx = piece.getContext('2d');
+        ctx.fillStyle = PDF_BG;
+        ctx.fillRect(0, 0, piece.width, piece.height);
+        ctx.drawImage(canvas, 0, slice.start, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
 
-    pages.forEach((page, index) => {
-      slice.width = canvas.width;
-      slice.height = page.height;
-      ctx.fillStyle = PDF_BG;
-      ctx.fillRect(0, 0, slice.width, slice.height);
-      ctx.drawImage(canvas, 0, page.start, canvas.width, page.height, 0, 0, canvas.width, page.height);
-
-      if (index > 0) pdf.addPage([canvas.width, page.height]);
-      pdf.addImage(slice.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, canvas.width, page.height, undefined, 'FAST');
+        if (pageCount > 0) pdf.addPage([piece.width, piece.height]);
+        pdf.addImage(piece.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, piece.width, piece.height, undefined, 'FAST');
+        piece.width = 0;
+        piece.height = 0;
+        pageCount += 1;
+      });
     });
 
-    // Dilim canvası serbest bırakılır: uzun raporlarda yüzlerce MB tutabilir.
-    slice.width = 0;
-    slice.height = 0;
-
     pdf.save(fileName);
-    return { pageCount: pages.length };
+    return { pageCount };
   } finally {
     el.style.width = prevWidth;
     el.style.maxWidth = prevMaxWidth;

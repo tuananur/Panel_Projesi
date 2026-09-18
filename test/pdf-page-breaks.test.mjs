@@ -55,4 +55,18 @@ test('sınır dışı işaretler yok sayılır', () => {
   assert.equal(pages[1].start, 9000, 'geçerli tek bölüm sınırı kullanılmalı');
 });
 
+test('özel limit ile yakalama dilimleri canvas güvenli sınırında kalır', () => {
+  const captureLimit = 8000;
+  const breaks = Array.from({ length: 40 }, (_, i) => i * 1200);
+  const chunks = computePageBreaks(48000, breaks, captureLimit);
+  assert.ok(chunks.length >= 6);
+  assert.ok(chunks.every((chunk) => chunk.height <= captureLimit));
+  assert.equal(totalOf(chunks), 48000);
+  assert.ok(contiguous(chunks));
+});
+
+test('boş içerik boş dilim listesi döner', () => {
+  assert.deepEqual(computePageBreaks(0, [100]), []);
+});
+
 console.log(`\n${passed} test geçti.`);
