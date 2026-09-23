@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare, Bell, Megaphone, UtensilsCrossed, UsersRound, FileBarChart2 } from 'lucide-react';
+import { LayoutDashboard, Users, UserCircle, LogOut, ChevronLeft, ChevronRight, Brain, Settings, ClipboardList, X, StickyNote, Wallet, Lock, Mail, CheckSquare, Bell, Megaphone, UtensilsCrossed, UsersRound, FileBarChart2, PenSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getLatestLogIdAction, getLatestNoteIdAction, getUnreadMailCountAction, getWorkItemBadgeCountAction, getNotificationUnreadCountAction } from '@/app/actions';
 import { can } from '@/lib/permissions';
@@ -34,6 +34,7 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
   const canSendNotifications = can(permissions, role, 'page.send_notifications');
   const canNotifications = can(permissions, role, 'page.notifications');
   const canReports = can(permissions, role, 'page.reports');
+  const canOtoBlog = can(permissions, role, 'page.oto_blog');
   const [hasNewLogs, setHasNewLogs] = useState(false);
   const [hasNewNotes, setHasNewNotes] = useState(false);
   const [unreadMailCount, setUnreadMailCount] = useState(0);
@@ -113,6 +114,12 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
 
   const navItems = [
     { href: '/dashboard', label: 'Gösterge Paneli', icon: <LayoutDashboard size={20} /> },
+    ...(canReports ? [
+      { href: '/dashboard/reports', label: 'Raporlar', icon: <FileBarChart2 size={20} /> },
+    ] : []),
+    ...(canOtoBlog ? [
+      { href: '/dashboard/oto-blog', label: 'Oto Blog', icon: <PenSquare size={20} /> },
+    ] : []),
     ...(canClients ? [
       { href: '/dashboard/clients', label: 'Müşteriler', icon: <Users size={20} /> },
     ] : []),
@@ -148,9 +155,6 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
     ] : []),
     ...(canSendNotifications ? [
       { href: '/dashboard/send-notification', label: 'Bildirim Gönder', icon: <Megaphone size={20} /> },
-    ] : []),
-    ...(canReports ? [
-      { href: '/dashboard/reports', label: 'Raporlar', icon: <FileBarChart2 size={20} /> },
     ] : []),
     { href: '/dashboard/settings', label: 'Ayarlar', icon: <Settings size={20} /> },
   ];
@@ -252,7 +256,9 @@ export default function Sidebar({ role, permissions, isMobileOpen, onClose, mail
 
       <nav className="sidebar-nav" style={{ marginTop: '1rem' }}>
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = item.href === '/dashboard'
+            ? pathname === '/dashboard'
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link 
               key={item.href} 

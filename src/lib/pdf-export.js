@@ -14,37 +14,9 @@ const SAFE_PAGE_PX = MAX_PAGE_PX - 200;
 // bu limiti aşınca html2canvas boş (beyaz/koyu) canvas döndürür. Dilim yüksekliği
 // bunun altında tutulur.
 const MAX_CAPTURE_PX = 16000;
-
-// Yakalama: ekran layout'u bozulmasın (link/grafik kesilmesin) — önceki keskinlik.
 const CAPTURE_WIDTH_CAP = 1600;
 const CAPTURE_SCALE = 2;
-
-// Dosya boyutu: layout'u daraltmak yerine bitmap'i PDF'e gömmeden önce küçült.
-// 17 Eyl çalışan rapor ~1080px genişlikteydi; ~5MB için JPEG orta kalite.
-const EMBED_MAX_WIDTH = 1100;
-const JPEG_QUALITY = 0.7;
-
-/** Yüksek çözünürlüklü canvas'ı PDF gömme boyutuna indirir (layout değişmez). */
-function compressCanvasForPdf(source, maxWidth = EMBED_MAX_WIDTH, quality = JPEG_QUALITY) {
-  const ratio = source.width > maxWidth ? maxWidth / source.width : 1;
-  const width = Math.max(1, Math.round(source.width * ratio));
-  const height = Math.max(1, Math.round(source.height * ratio));
-
-  const out = document.createElement('canvas');
-  out.width = width;
-  out.height = height;
-  const ctx = out.getContext('2d');
-  ctx.fillStyle = PDF_BG;
-  ctx.fillRect(0, 0, width, height);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(source, 0, 0, width, height);
-
-  const dataUrl = out.toDataURL('image/jpeg', quality);
-  out.width = 0;
-  out.height = 0;
-  return { dataUrl, width, height };
-}
+const JPEG_QUALITY = 0.92;
 
 /**
  * Kesme noktalarını hesaplar: her dilim mümkün olan en fazla tam bölümü alır,
@@ -216,7 +188,9 @@ export async function saveElementAsLongPdf(el, fileName, { onClone, sectionSelec
         ctx.fillRect(0, 0, piece.width, piece.height);
         ctx.drawImage(canvas, 0, slice.start, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
 
-        const { dataUrl, width, height } = compressCanvasForPdf(piece);
+        const width = piece.width;
+        const height = piece.height;
+        const dataUrl = piece.toDataURL('image/jpeg', JPEG_QUALITY);
         piece.width = 0;
         piece.height = 0;
 

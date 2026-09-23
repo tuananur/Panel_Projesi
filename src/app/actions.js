@@ -1814,6 +1814,66 @@ export async function saveGoogleAnalyticsGlobalSettingsAction(formData) {
   }
 }
 
+const GEMINI_SETTING_KEY = 'gemini_ai_config';
+const WEBSITE_TYPES = ['OTHER', 'BEYIN_ATOLYESI', 'IDEASOFT'];
+
+export async function getGeminiSettingsAction() {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== 'ADMIN') return { error: 'Yetkisiz erişim.' };
+    const setting = await prisma.setting.findUnique({ where: { key: GEMINI_SETTING_KEY } });
+    return { success: true, config: setting ? JSON.parse(setting.value) : {} };
+  } catch (error) {
+    return { error: 'AI ayarları alınamadı.' };
+  }
+}
+
+export async function saveGeminiSettingsAction(formData) {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== 'ADMIN') return { error: 'Yetkisiz erişim.' };
+
+    const config = {
+      apiKey: String(formData.get('apiKey') || '').trim(),
+    };
+
+    await prisma.setting.upsert({
+      where: { key: GEMINI_SETTING_KEY },
+      update: { value: JSON.stringify(config) },
+      create: { key: GEMINI_SETTING_KEY, value: JSON.stringify(config) },
+    });
+
+    await logActivity('UPDATE', 'SETTINGS', 'Gemini AI API ayarları güncellendi.');
+    return { success: true };
+  } catch (error) {
+    return { error: 'Ayarlar kaydedilemedi.' };
+  }
+}
+
+export async function updateClientWebsiteTypeAction(clientId, websiteType) {
+  try {
+    const session = await getSession();
+    const permissions = await getRolePermissions(session);
+    if (!session || !can(permissions, session.role, 'page.oto_blog')) {
+      return { error: 'Yetkisiz erişim.' };
+    }
+    const id = parseInt(clientId, 10);
+    if (!id || !WEBSITE_TYPES.includes(websiteType)) {
+      return { error: 'Geçersiz istek.' };
+    }
+
+    const client = await prisma.client.update({
+      where: { id },
+      data: { websiteType },
+      select: { companyName: true },
+    });
+    await logActivity('UPDATE', 'CLIENT', `${client.companyName} site altyapısı güncellendi.`, id);
+    return { success: true, websiteType };
+  } catch (error) {
+    return { error: 'Altyapı güncellenemedi.' };
+  }
+}
+
 // Mail Actions
 export async function getMailSettingsAction() {
   try {
