@@ -9,7 +9,9 @@ import {
   generateOtoBlogImageAction,
   generateOtoBlogImagePromptAction,
   generateOtoBlogOutlineAction,
-  publishOtoBlogAction,
+  finalizeOtoBlogPublishAction,
+  prepareOtoBlogPublishAction,
+  publishOtoBlogLanguageAction,
   refineOtoBlogSystemPromptAction,
   saveOtoBlogAiSettingsAction,
   saveOtoBlogDraftAction,
@@ -34,7 +36,8 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
   const [error, setError] = useState(null);
   const [info, setInfo] = useState(null);
   const [languages, setLanguages] = useState([]);
-  const [publishResults, setPublishResults] = useState(null);
+  const [publishQueue, setPublishQueue] = useState([]);
+  const [publishGroupId, setPublishGroupId] = useState('');
   const [imageUrl, setImageUrl] = useState(initialImageUrl || (initialDraft.imageToken ? `/api/oto-blog/image/${initialDraft.imageToken}` : ''));
 
   const itemsText = useMemo(() => (draft.items || []).join('\n'), [draft.items]);
@@ -102,21 +105,53 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
     setStep(4);
   }
 
+  function patchQueue(id, patch) {
+    setPublishQueue((current) => current.map((item) => (Number(item.id) === Number(id) ? { ...item, ...patch } : item)));
+  }
+
   async function goPublish() {
-    setBusy('publish'); setError(null); setInfo(null); setPublishResults(null);
-    const result = await publishOtoBlogAction(client.id, draft, ai);
-    setBusy('');
-    if (result.error) return setError(result.error);
-    setPublishResults(result.results || []);
-    if (!result.allOk) {
+    setBusy('publish'); setError(null); setInfo(null);
+    const prepared = await prepareOtoBlogPublishAction(client.id, draft, publishGroupId);
+    if (!prepared.success) {
+      setBusy('');
+      return setError(prepared.error);
+    }
+
+    setPublishGroupId(prepared.groupId);
+    const queue = prepared.languages.map((lang) => {
+      const previous = publishQueue.find((item) => Number(item.id) === Number(lang.id));
+      return {
+        ...lang,
+        status: previous?.status === 'ok' ? 'ok' : 'wait',
+        detail: previous?.status === 'ok' ? previous.detail : 'Bekliyor',
+      };
+    });
+    setPublishQueue(queue);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+
+    let failed = false;
+    for (const lang of queue) {
+      if (lang.status === 'ok') continue;
+      patchQueue(lang.id, { status: 'sending', detail: `${lang.name} gönderiliyor` });
+      const result = await publishOtoBlogLanguageAction(client.id, draft, ai, lang, prepared.groupId);
+      if (result.ok) {
+        patchQueue(lang.id, { status: 'ok', detail: `Gönderildi (${result.status})` });
+      } else {
+        failed = true;
+        patchQueue(lang.id, { status: 'error', detail: result.error || `Hata ${result.status || ''}`.trim() });
+      }
+    }
+
+    if (failed) {
+      setBusy('');
       setInfo('Bazı diller hata verdi. Görsel duruyor, tekrar dene.');
       return;
     }
-    if (result.draft) setDraft(result.draft);
-    else {
-      const usedExtra = draft.sourceKeyword || draft.topic;
-      setDraft({ ...draft, published: true, step: 7, usedKeywords: rememberUsedKeywords(draft.usedKeywords, usedExtra) });
-    }
+
+    const finished = await finalizeOtoBlogPublishAction(client.id, draft);
+    setBusy('');
+    if (!finished.success) return setError(finished.error);
+    setDraft(finished.draft);
     setStep(7);
     setInfo(null);
   }
@@ -137,7 +172,8 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
       usedKeywords: rememberUsedKeywords(draft.usedKeywords, draft.sourceKeyword),
     };
     setDraft(next);
-    setPublishResults(null);
+    setPublishQueue([]);
+    setPublishGroupId('');
     setImageUrl('');
     setError(null);
     setInfo(null);
@@ -388,15 +424,33 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
               Diller: {languages.filter((lang) => isTurkishLanguage(lang) || draft.selectedLangIds.includes(Number(lang.id))).map((lang) => lang.name).join(', ')}
             </p>
             <button type="button" className="btn btn-primary" disabled={busy || draft.published} onClick={goPublish}>
-              {draft.published ? 'Gönderildi' : busy === 'publish' ? 'Gönderiliyor…' : 'Siteye gönder'}
+              {draft.published ? 'Gönderildi' : busy === 'publish' ? 'Gönderiliyor…' : publishQueue.some((item) => item.status === 'error') ? 'Tekrar dene' : 'Siteye gönder'}
             </button>
-            {publishResults && (
-              <div style={{ fontSize: '0.8rem' }}>
-                {publishResults.map((item) => (
-                  <p key={item.language.id} style={{ color: item.ok ? '#10b981' : '#ef4444', fontWeight: 700 }}>
-                    {item.language.name}: {item.ok ? `OK (${item.status})` : `Hata ${item.status}`}
-                  </p>
-                ))}
+            {publishQueue.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                {publishQueue.map((item) => {
+                  const color = item.status === 'ok' ? '#10b981' : item.status === 'error' ? '#ef4444' : item.status === 'sending' ? 'var(--accent-primary)' : 'var(--text-secondary)';
+                  return (
+                    <div
+                      key={item.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: '0.75rem',
+                        alignItems: 'center',
+                        padding: '0.65rem 0.8rem',
+                        borderRadius: 8,
+                        border: `1px solid ${item.status === 'sending' ? 'rgba(59,130,246,0.35)' : 'var(--border-color)'}`,
+                        background: item.status === 'ok' ? 'rgba(16,185,129,0.08)' : item.status === 'error' ? 'rgba(239,68,68,0.08)' : item.status === 'sending' ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.03)',
+                      }}
+                    >
+                      <strong style={{ fontSize: '0.85rem' }}>{item.name} <span className="text-muted" style={{ fontWeight: 600 }}>({item.code})</span></strong>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 800, color, whiteSpace: 'nowrap' }}>
+                        {item.status === 'sending' ? `${item.name} gönderiliyor…` : item.detail}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

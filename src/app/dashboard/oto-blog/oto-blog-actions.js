@@ -304,7 +304,44 @@ export async function saveOtoBlogDraftAction(clientId, draft) {
   }
 }
 
-export async function publishOtoBlogAction(clientId, draftInput, aiSettings) {
+function selectedPublishLanguages(languages, draft) {
+  const unique = [];
+  for (const lang of languages || []) {
+    const selected = isTurkishLanguage(lang) || draft.selectedLangIds.includes(Number(lang.id));
+    if (!selected) continue;
+    if (!unique.some((item) => Number(item.id) === Number(lang.id))) unique.push(lang);
+  }
+  unique.sort((a, b) => Number(isTurkishLanguage(b)) - Number(isTurkishLanguage(a)));
+  return unique;
+}
+
+function publicLanguage(lang) {
+  return { id: Number(lang.id), code: lang.code, name: lang.name };
+}
+
+export async function prepareOtoBlogPublishAction(clientId, draftInput, groupId) {
+  try {
+    await requireAccess();
+    const client = await loadClient(clientId);
+    const config = parseOtoBlogConfig(client.otoBlogConfig, client.website);
+    if (!config.postUrl || !config.headerValue) return { error: 'Ayarlar’da POST URL ve key kaydet.' };
+
+    const draft = parseOtoBlogDraft(JSON.stringify(draftInput));
+    if (!draft.title || !draft.content) return { error: 'Başlık ve içerik eksik.' };
+    if (!draft.imageToken) return { error: 'Önce görsel oluştur.' };
+
+    const languagesResult = await fetchOtoBlogLanguagesAction(clientId);
+    const languages = selectedPublishLanguages(languagesResult.languages, draft);
+    if (!languages.some(isTurkishLanguage)) return { error: 'Türkçe zorunlu.' };
+
+    const nextGroupId = String(groupId || '').trim() || `oto-${client.id}-${Date.now()}`;
+    return { success: true, groupId: nextGroupId, languages: languages.map(publicLanguage) };
+  } catch (error) {
+    return { error: error.message || 'Gönderim hazırlanamadı.' };
+  }
+}
+
+export async function publishOtoBlogLanguageAction(clientId, draftInput, aiSettings, language, groupId) {
   try {
     await requireAccess();
     const client = await loadClient(clientId);
@@ -314,103 +351,87 @@ export async function publishOtoBlogAction(clientId, draftInput, aiSettings) {
     if (!config.postUrl || !config.headerValue) return { error: 'Ayarlar’da POST URL ve key kaydet.' };
 
     const draft = parseOtoBlogDraft(JSON.stringify(draftInput));
-    if (!draft.title || !draft.content) return { error: 'Başlık ve içerik eksik.' };
-    if (!draft.imageToken) return { error: 'Önce görsel oluştur.' };
-
-    const languagesResult = await fetchOtoBlogLanguagesAction(clientId);
-    const languages = languagesResult.languages || [];
-    const unique = [];
-    for (const lang of languages) {
-      const selected = isTurkishLanguage(lang) || draft.selectedLangIds.includes(Number(lang.id));
-      if (!selected) continue;
-      if (!unique.some((item) => Number(item.id) === Number(lang.id))) unique.push(lang);
-    }
-    if (!unique.some(isTurkishLanguage)) return { error: 'Türkçe zorunlu.' };
+    const lang = publicLanguage(language);
+    if (!lang.id || !groupId) return { error: 'Dil veya grup eksik.' };
 
     const origin = await publicAppUrl();
     const imageUrl = imagePublicUrl(draft.imageToken, origin);
-    const groupId = `oto-${client.id}-${Date.now()}`;
-    const results = [];
+    let payload = {
+      title: draft.title,
+      content: draft.content,
+      image: imageUrl,
+      image_alt: draft.title,
+      language_id: lang.id,
+      translation_group_id: groupId,
+      meta_title: draft.metaTitle || draft.title,
+      meta_description: draft.metaDescription || '',
+      short_desc: draft.shortDesc || '',
+    };
 
-    for (const lang of unique) {
-      let payload = {
-        title: draft.title,
-        content: draft.content,
-        image: imageUrl,
-        image_alt: draft.title,
-        language_id: Number(lang.id),
-        translation_group_id: groupId,
-        meta_title: draft.metaTitle || draft.title,
-        meta_description: draft.metaDescription || '',
-        short_desc: draft.shortDesc || '',
+    if (!isTurkishLanguage(lang)) {
+      const text = await geminiGenerateText({
+        apiKey,
+        model: settings.textModel,
+        systemPrompt: settings.textSystemPrompt,
+        json: true,
+        userPrompt: `Aşağıdaki Türkçe blogu ${lang.name} (${lang.code}) diline çevir. Anlamı koru, AI kokusu ekleme. Sadece JSON döndür: {"title":"...","content":"...","meta_title":"...","meta_description":"...","short_desc":"...","image_alt":"..."}\n\nKaynak:\n${JSON.stringify({
+          title: draft.title,
+          content: draft.content,
+          meta_title: draft.metaTitle,
+          meta_description: draft.metaDescription,
+          short_desc: draft.shortDesc,
+          image_alt: draft.title,
+        })}`,
+      });
+      const translated = parseModelJson(text);
+      payload = {
+        ...payload,
+        title: translated.title || payload.title,
+        content: translated.content || payload.content,
+        meta_title: translated.meta_title || payload.meta_title,
+        meta_description: translated.meta_description || payload.meta_description,
+        short_desc: translated.short_desc || payload.short_desc,
+        image_alt: translated.image_alt || payload.image_alt,
       };
-
-      if (!isTurkishLanguage(lang)) {
-        const text = await geminiGenerateText({
-          apiKey,
-          model: settings.textModel,
-          systemPrompt: settings.textSystemPrompt,
-          json: true,
-          userPrompt: `Aşağıdaki Türkçe blogu ${lang.name} (${lang.code}) diline çevir. Anlamı koru, AI kokusu ekleme. Sadece JSON döndür: {"title":"...","content":"...","meta_title":"...","meta_description":"...","short_desc":"...","image_alt":"..."}\n\nKaynak:\n${JSON.stringify({
-            title: draft.title,
-            content: draft.content,
-            meta_title: draft.metaTitle,
-            meta_description: draft.metaDescription,
-            short_desc: draft.shortDesc,
-            image_alt: draft.title,
-          })}`,
-        });
-        const translated = parseModelJson(text);
-        payload = {
-          ...payload,
-          title: translated.title || payload.title,
-          content: translated.content || payload.content,
-          meta_title: translated.meta_title || payload.meta_title,
-          meta_description: translated.meta_description || payload.meta_description,
-          short_desc: translated.short_desc || payload.short_desc,
-          image_alt: translated.image_alt || payload.image_alt,
-        };
-      }
-
-      const headersMap = { Accept: 'application/json', 'Content-Type': 'application/json' };
-      headersMap[config.headerName] = config.headerValue;
-      const response = await fetch(config.postUrl, {
-        method: 'POST',
-        headers: headersMap,
-        body: JSON.stringify(payload),
-        cache: 'no-store',
-      });
-      const data = await response.text();
-      let parsed = data;
-      try { parsed = data ? JSON.parse(data) : null; } catch { /* raw */ }
-      results.push({
-        language: lang,
-        ok: response.ok,
-        status: response.status,
-        data: parsed,
-        payload,
-      });
     }
 
-    const allOk = results.every((item) => item.ok);
-    if (allOk && draft.imageToken) {
+    const headersMap = { Accept: 'application/json', 'Content-Type': 'application/json' };
+    headersMap[config.headerName] = config.headerValue;
+    const response = await fetch(config.postUrl, {
+      method: 'POST',
+      headers: headersMap,
+      body: JSON.stringify(payload),
+      cache: 'no-store',
+    });
+    return {
+      success: response.ok,
+      language: lang,
+      ok: response.ok,
+      status: response.status,
+    };
+  } catch (error) {
+    return { error: error.message || 'Dil gönderilemedi.', language, ok: false };
+  }
+}
+
+export async function finalizeOtoBlogPublishAction(clientId, draftInput) {
+  try {
+    await requireAccess();
+    const client = await loadClient(clientId);
+    const draft = parseOtoBlogDraft(JSON.stringify(draftInput));
+    if (draft.imageToken) {
       await prisma.otoBlogTempImage.deleteMany({ where: { token: draft.imageToken } });
     }
-
-    if (allOk) {
-      const usedExtra = draft.sourceKeyword || (isRawKeywordTopic(draft.topic) ? draft.topic : '');
-      const nextDraft = {
-        ...draft,
-        published: true,
-        step: 7,
-        usedKeywords: rememberUsedKeywords(draft.usedKeywords, usedExtra),
-      };
-      await saveDraft(client.id, nextDraft);
-      return { success: true, results, allOk, draft: nextDraft };
-    }
-
-    return { success: allOk, results, allOk };
+    const usedExtra = draft.sourceKeyword || (isRawKeywordTopic(draft.topic) ? draft.topic : '');
+    const nextDraft = {
+      ...draft,
+      published: true,
+      step: 7,
+      usedKeywords: rememberUsedKeywords(draft.usedKeywords, usedExtra),
+    };
+    await saveDraft(client.id, nextDraft);
+    return { success: true, draft: nextDraft };
   } catch (error) {
-    return { error: error.message || 'Yayın başarısız.' };
+    return { error: error.message || 'Gönderim tamamlanamadı.' };
   }
 }
