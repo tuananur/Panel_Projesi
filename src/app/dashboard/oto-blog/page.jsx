@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
@@ -30,9 +31,14 @@ export default async function OtoBlogPage() {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Oto Blog</h1>
-        <p className="text-muted">Müşteri sitelerinin altyapısını buradan seç. Üretim ekranı sonra gelecek.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <div>
+          <h1 className="heading-1" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Oto Blog</h1>
+          <p className="text-muted">Manuel üretim veya siteden gelen tam oto işleri.</p>
+        </div>
+        <Link href="/dashboard/oto-blog/logs" className="btn btn-primary" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          Tam Oto Logs
+        </Link>
       </div>
       <OtoBlogClients clients={clients} />
     </div>

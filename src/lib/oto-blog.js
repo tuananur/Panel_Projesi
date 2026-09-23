@@ -29,6 +29,7 @@ export function defaultOtoBlogConfig(website) {
     languagesUrl: origin ? `${origin}/api/languages` : '',
     headerName: 'X-POST-KEY',
     headerValue: '',
+    inboundKey: '',
     bodyJson: JSON.stringify(DEFAULT_POST_BODY, null, 2),
   };
 }

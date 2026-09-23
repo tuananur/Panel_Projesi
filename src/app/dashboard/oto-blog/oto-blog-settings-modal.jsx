@@ -158,6 +158,42 @@ export default function OtoBlogSettingsModal({ client, onClose, onSaved }) {
             </button>
           </div>
           <ResultBox result={getResult} />
+
+          <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+            <div className="input-label" style={{ marginBottom: '0.55rem' }}>Site → Dashboard (tam oto)</div>
+            <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.75rem' }}>
+              Sitedeki kutu bu endpoint’e POST atar. Header adı sabit: X-OTO-BLOG-KEY
+            </p>
+            <div className="input-group">
+              <label className="input-label">Endpoint</label>
+              <input className="input-field" readOnly value={typeof window !== 'undefined' ? `${window.location.origin}/api/oto-blog/auto` : '/api/oto-blog/auto'} />
+            </div>
+            <div className="input-group">
+              <label className="input-label">X-OTO-BLOG-KEY</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input className="input-field" value={config.inboundKey || ''} onChange={(e) => patch({ inboundKey: e.target.value })} autoComplete="off" />
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ whiteSpace: 'nowrap', fontSize: '0.75rem' }}
+                  onClick={() => {
+                    const bytes = new Uint8Array(24);
+                    crypto.getRandomValues(bytes);
+                    patch({ inboundKey: Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('') });
+                  }}
+                >
+                  Üret
+                </button>
+              </div>
+            </div>
+            <pre style={{ margin: 0, padding: '0.75rem', borderRadius: 8, border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.03)', fontSize: '0.72rem', whiteSpace: 'pre-wrap' }}>
+{`POST /api/oto-blog/auto
+${'X-OTO-BLOG-KEY'}: ${config.inboundKey || '<key>'}
+Content-Type: application/json
+
+{ "topic": "Kaygı ile baş etmek için günlük rutinler" }`}
+            </pre>
+          </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem' }}>

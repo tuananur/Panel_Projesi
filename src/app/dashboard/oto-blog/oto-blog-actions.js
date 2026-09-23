@@ -435,6 +435,47 @@ export async function publishOtoBlogLanguageAction(clientId, draftInput, languag
   }
 }
 
+export async function getOtoBlogAutoJobsAction() {
+  try {
+    await requireAccess();
+    const jobs = await prisma.otoBlogAutoJob.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 80,
+      select: {
+        id: true,
+        topic: true,
+        refinedTopic: true,
+        title: true,
+        status: true,
+        statusText: true,
+        logsJson: true,
+        error: true,
+        createdAt: true,
+        updatedAt: true,
+        client: { select: { id: true, companyName: true, website: true } },
+      },
+    });
+    return {
+      success: true,
+      jobs: jobs.map((job) => ({
+        ...job,
+        createdAt: job.createdAt.toISOString(),
+        updatedAt: job.updatedAt.toISOString(),
+        logs: (() => {
+          try {
+            const parsed = JSON.parse(job.logsJson || '[]');
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        })(),
+      })),
+    };
+  } catch (error) {
+    return { error: error.message || 'Loglar alınamadı.' };
+  }
+}
+
 export async function finalizeOtoBlogPublishAction(clientId, draftInput) {
   try {
     await requireAccess();

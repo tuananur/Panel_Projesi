@@ -1894,6 +1894,7 @@ function sanitizeOtoBlogConfig(raw) {
     languagesUrl,
     headerName,
     headerValue,
+    inboundKey: String(raw.inboundKey || '').trim(),
     bodyJson: String(raw.bodyJson || ''),
   };
 }
@@ -1937,9 +1938,16 @@ export async function saveOtoBlogConfigAction(clientId, rawConfig) {
     if (!id) return { error: 'Geçersiz müşteri.' };
 
     const config = sanitizeOtoBlogConfig(rawConfig);
+    if (!config.inboundKey) {
+      const { randomBytes } = await import('crypto');
+      config.inboundKey = randomBytes(24).toString('hex');
+    }
     const client = await prisma.client.update({
       where: { id },
-      data: { otoBlogConfig: JSON.stringify(config) },
+      data: {
+        otoBlogConfig: JSON.stringify(config),
+        otoBlogInboundKey: config.inboundKey,
+      },
       select: { companyName: true, website: true },
     });
     await logActivity('UPDATE', 'CLIENT', `${client.companyName} oto blog API ayarları kaydedildi.`, id);

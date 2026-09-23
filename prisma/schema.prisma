@@ -52,7 +52,9 @@ model Client {
   otoBlogConfig     String? @db.Text
   otoBlogAiSettings String? @db.Text
   otoBlogDraft      String? @db.Text
+  otoBlogInboundKey String? @unique
   otoBlogTempImages OtoBlogTempImage[]
+  otoBlogAutoJobs   OtoBlogAutoJob[]
 
   tasks                   Task[]
   logs                    ActivityLog[]
@@ -324,6 +326,28 @@ model MealOrder {
   updatedAt   DateTime @updatedAt
 
   @@index([date])
+}
+
+model OtoBlogAutoJob {
+  id            Int      @id @default(autoincrement())
+  clientId      Int
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  continueToken String   @unique
+  topic         String   @db.Text
+  refinedTopic  String?  @db.Text
+  title         String?
+  status        String   @default("queued")
+  statusText    String   @default("Sırada")
+  phase         String   @default("queued")
+  payloadJson   String?  @db.Text
+  logsJson      String   @default("[]") @db.Text
+  error         String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([clientId, createdAt])
+  @@index([status])
+  @@map("oto_blog_auto_jobs")
 }
 
 model OtoBlogTempImage {
