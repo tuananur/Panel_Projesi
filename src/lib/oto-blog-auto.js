@@ -62,9 +62,32 @@ export async function continueAutoJob(jobId, token, budgetMs = 50000) {
   let result = { ok: true, done: false, phase: null };
   while (Date.now() - started < budgetMs) {
     result = await processAutoJobStep(jobId, token);
-    if (!result.ok || result.done) return result;
+    if (result.blocked) return result;
+    if (!result.ok || result.done) break;
+  }
+  if (result.done) {
+    const job = await prisma.otoBlogAutoJob.findUnique({ where: { id: Number(jobId) }, select: { clientId: true } });
+    if (job) await kickClientQueue(job.clientId);
   }
   return result;
+}
+
+export async function kickClientQueue(clientId) {
+  const running = await prisma.otoBlogAutoJob.findFirst({
+    where: { clientId, status: 'running' },
+    select: { id: true },
+  });
+  if (running) return { started: false };
+
+  const next = await prisma.otoBlogAutoJob.findFirst({
+    where: { clientId, status: 'queued' },
+    orderBy: { id: 'asc' },
+  });
+  if (!next) return { started: false };
+
+  const origin = await resolveAppUrl();
+  await enqueueAutoJobRun(origin, next.id, next.continueToken);
+  return { started: true, jobId: next.id };
 }
 
 async function getGeminiKey() {
@@ -131,18 +154,21 @@ async function failJob(job, error) {
   }, `Hata: ${message}`);
 }
 
-export async function createAutoJob(client, topic) {
+export async function createAutoJob(client, topic, { waiting = false } = {}) {
   const token = randomBytes(24).toString('hex');
+  const now = new Date().toISOString();
+  const logs = [{ at: now, text: `Konu alındı: ${topic}` }];
+  if (waiting) logs.push({ at: now, text: 'Sıraya alındı, önceki iş bitince başlayacak' });
   return prisma.otoBlogAutoJob.create({
     data: {
       clientId: client.id,
       continueToken: token,
       topic,
       status: 'queued',
-      statusText: 'Sırada',
+      statusText: waiting ? 'Sırada bekliyor' : 'Sırada',
       phase: 'queued',
       payloadJson: JSON.stringify({ topic }),
-      logsJson: JSON.stringify([{ at: new Date().toISOString(), text: `Konu alındı: ${topic}` }]),
+      logsJson: JSON.stringify(logs),
     },
   });
 }
@@ -154,6 +180,13 @@ export async function processAutoJobStep(jobId, token) {
   });
   if (!job || job.continueToken !== token) return { ok: false, error: 'Job bulunamadı.' };
   if (job.phase === 'done' || job.phase === 'error') return { ok: true, done: true, phase: job.phase };
+  if (job.status === 'queued') {
+    const running = await prisma.otoBlogAutoJob.findFirst({
+      where: { clientId: job.clientId, status: 'running', NOT: { id: job.id } },
+      select: { id: true },
+    });
+    if (running) return { ok: true, done: false, blocked: true, phase: 'queued' };
+  }
 
   try {
     const next = await runPhase(job);

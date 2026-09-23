@@ -2,12 +2,10 @@ import { after, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import {
   INBOUND_HEADER,
-  continueAutoJob,
   createAutoJob,
-  enqueueAutoJobRun,
   findClientByAutoKey,
+  kickClientQueue,
   readAutoAuthKey,
-  resolveAppUrl,
 } from '@/lib/oto-blog-auto';
 import { parseOtoBlogConfig } from '@/lib/oto-blog';
 
@@ -41,21 +39,12 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, error: 'Müşteri oto blog POST ayarı eksik.' }, { status: 503 });
   }
 
-  const active = await prisma.otoBlogAutoJob.findFirst({
-    where: { clientId: client.id, status: { in: ['queued', 'running'] } },
+  const running = await prisma.otoBlogAutoJob.findFirst({
+    where: { clientId: client.id, status: 'running' },
+    select: { id: true },
   });
-  if (active) {
-    return NextResponse.json({ ok: false, error: 'Bu site için zaten bir blog oluşturuluyor.' }, { status: 409 });
-  }
-
-  const job = await createAutoJob(client, topic);
-  const origin = await resolveAppUrl();
-  after(async () => {
-    const result = await continueAutoJob(job.id, job.continueToken, 50000);
-    if (result.ok && !result.done) {
-      await enqueueAutoJobRun(origin, job.id, job.continueToken);
-    }
-  });
+  await createAutoJob(client, topic, { waiting: Boolean(running) });
+  after(() => kickClientQueue(client.id));
 
   return NextResponse.json({
     ok: true,
