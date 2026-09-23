@@ -22,10 +22,11 @@ const STEPS = [
   { id: 4, label: 'Fotoğraf' },
   { id: 5, label: 'Diller' },
   { id: 6, label: 'Gönder' },
+  { id: 7, label: 'Taslak' },
 ];
 
 export default function OtoBlogWizard({ client, initialDraft, initialAi, initialImageUrl }) {
-  const [step, setStep] = useState(initialDraft.step || 1);
+  const [step, setStep] = useState(initialDraft.published ? 7 : (initialDraft.step || 1));
   const [draft, setDraft] = useState(() => ({ ...emptyOtoBlogDraft(), ...initialDraft }));
   const [ai, setAi] = useState(initialAi);
   const [busy, setBusy] = useState('');
@@ -99,7 +100,15 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
     setBusy('');
     if (result.error) return setError(result.error);
     setPublishResults(result.results || []);
-    setInfo(result.allOk ? 'Tüm dillere gönderildi. Geçici görsel silindi.' : 'Bazı diller hata verdi. Görsel duruyor, tekrar dene.');
+    if (!result.allOk) {
+      setInfo('Bazı diller hata verdi. Görsel duruyor, tekrar dene.');
+      return;
+    }
+    const nextDraft = { ...draft, published: true, step: 7 };
+    setDraft(nextDraft);
+    await persist(nextDraft);
+    setStep(7);
+    setInfo(null);
   }
 
   async function saveAi() {
@@ -147,7 +156,10 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
               key={item.id}
               type="button"
               className="btn"
-              onClick={() => setStep(item.id)}
+              onClick={() => {
+                if (draft.published && item.id !== 7) return;
+                setStep(item.id);
+              }}
               style={{
                 fontSize: '0.75rem',
                 fontWeight: active ? 800 : 600,
@@ -277,8 +289,8 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
             <p className="text-muted" style={{ fontSize: '0.8rem' }}>
               Diller: {languages.filter((lang) => isTurkishLanguage(lang) || draft.selectedLangIds.includes(Number(lang.id))).map((lang) => lang.name).join(', ')}
             </p>
-            <button type="button" className="btn btn-primary" disabled={busy} onClick={goPublish}>
-              {busy === 'publish' ? 'Gönderiliyor…' : 'Siteye gönder'}
+            <button type="button" className="btn btn-primary" disabled={busy || draft.published} onClick={goPublish}>
+              {draft.published ? 'Gönderildi' : busy === 'publish' ? 'Gönderiliyor…' : 'Siteye gönder'}
             </button>
             {publishResults && (
               <div style={{ fontSize: '0.8rem' }}>
@@ -289,6 +301,32 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {step === 7 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <h2 className="heading-2" style={{ fontSize: '1.25rem', marginBottom: '0.4rem' }}>Bloglarınız taslak olarak panelinizde</h2>
+              <p className="text-muted" style={{ fontSize: '0.85rem' }}>
+                Seçilen diller siteye taslak olarak düştü. Panellerinden kontrol edip yayınlayabilirsiniz.
+              </p>
+            </div>
+            {imageUrl && (
+              <img src={imageUrl} alt="" style={{ maxWidth: 480, width: '100%', borderRadius: '10px', border: '1px solid var(--border-color)' }} />
+            )}
+            <div>
+              <div className="text-muted" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.25rem' }}>Başlık</div>
+              <strong style={{ fontSize: '1.15rem' }}>{draft.title}</strong>
+            </div>
+            {draft.shortDesc && <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{draft.shortDesc}</p>}
+            <div>
+              <div className="text-muted" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.4rem' }}>İçerik</div>
+              <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: '0.85rem' }} dangerouslySetInnerHTML={{ __html: draft.content }} />
+            </div>
+            <Link href="/dashboard/oto-blog" className="btn btn-primary" style={{ alignSelf: 'flex-start', textDecoration: 'none' }}>
+              Oto Blog’a dön
+            </Link>
           </div>
         )}
       </div>

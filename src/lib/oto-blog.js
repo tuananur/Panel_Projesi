@@ -127,6 +127,7 @@ export function emptyOtoBlogDraft() {
     imageToken: '',
     selectedLangIds: [1],
     translations: [],
+    published: false,
   };
 }
 
