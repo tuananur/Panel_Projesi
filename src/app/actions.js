@@ -8,6 +8,7 @@ import { ASSIGNABLE_ROLE_OPTIONS, can, getRoleAssignableRoles, getRolePermission
 import { SPECIAL_DAYS } from '@/lib/holidays';
 import { ALLOWED_NOTIFICATION_SOUNDS, DEFAULT_APPEARANCE, sanitizeAppearance } from '@/lib/appearance';
 import { isFutureReminderTime, processDueNoteReminders } from '@/lib/note-reminders';
+import { assertPublicHttpUrl, parseOtoBlogConfig, parsePostBody } from '@/lib/oto-blog';
 async function fetchWithTimeout(resource, options = {}) {
   const { timeout = 8000 } = options;
   const controller = new AbortController();
@@ -1871,6 +1872,127 @@ export async function updateClientWebsiteTypeAction(clientId, websiteType) {
     return { success: true, websiteType };
   } catch (error) {
     return { error: 'Altyapı güncellenemedi.' };
+  }
+}
+
+function withHttp(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  return raw.startsWith('http://') || raw.startsWith('https://') ? raw : `https://${raw}`;
+}
+
+function sanitizeOtoBlogConfig(raw) {
+  const headerName = String(raw.headerName || 'X-POST-KEY').trim() || 'X-POST-KEY';
+  const headerValue = String(raw.headerValue || '').trim();
+  const siteOrigin = raw.siteOrigin ? assertPublicHttpUrl(withHttp(raw.siteOrigin)).replace(/\/$/, '') : '';
+  const postUrl = raw.postUrl ? assertPublicHttpUrl(withHttp(raw.postUrl)) : '';
+  const languagesUrl = raw.languagesUrl ? assertPublicHttpUrl(withHttp(raw.languagesUrl)) : '';
+  parsePostBody(raw.bodyJson || '{}');
+  return {
+    siteOrigin,
+    postUrl,
+    languagesUrl,
+    headerName,
+    headerValue,
+    bodyJson: String(raw.bodyJson || ''),
+  };
+}
+
+async function requireOtoBlogAccess() {
+  const session = await getSession();
+  const permissions = await getRolePermissions(session);
+  if (!session || !can(permissions, session.role, 'page.oto_blog')) {
+    return { error: 'Yetkisiz erişim.' };
+  }
+  return { session };
+}
+
+async function requestOtoBlogApi({ url, method, headerName, headerValue, body }) {
+  const headers = { Accept: 'application/json' };
+  if (headerName && headerValue) headers[headerName] = headerValue;
+  if (method === 'POST') headers['Content-Type'] = 'application/json';
+
+  const response = await fetchWithTimeout(url, {
+    method,
+    headers,
+    body: method === 'POST' ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
+    timeout: 15000,
+  });
+  const text = await response.text();
+  let data = text;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
+  return { ok: response.ok, status: response.status, data };
+}
+
+export async function saveOtoBlogConfigAction(clientId, rawConfig) {
+  try {
+    const access = await requireOtoBlogAccess();
+    if (access.error) return access;
+    const id = parseInt(clientId, 10);
+    if (!id) return { error: 'Geçersiz müşteri.' };
+
+    const config = sanitizeOtoBlogConfig(rawConfig);
+    const client = await prisma.client.update({
+      where: { id },
+      data: { otoBlogConfig: JSON.stringify(config) },
+      select: { companyName: true, website: true },
+    });
+    await logActivity('UPDATE', 'CLIENT', `${client.companyName} oto blog API ayarları kaydedildi.`, id);
+    return { success: true, config: parseOtoBlogConfig(JSON.stringify(config), client.website) };
+  } catch (error) {
+    return { error: error.message || 'Ayarlar kaydedilemedi.' };
+  }
+}
+
+export async function testOtoBlogPostAction(clientId, rawConfig) {
+  try {
+    const access = await requireOtoBlogAccess();
+    if (access.error) return access;
+    const id = parseInt(clientId, 10);
+    if (!id) return { error: 'Geçersiz müşteri.' };
+
+    const config = sanitizeOtoBlogConfig(rawConfig);
+    if (!config.postUrl) return { error: 'POST URL boş.' };
+    if (!config.headerValue) return { error: 'Header değeri boş.' };
+    const body = parsePostBody(config.bodyJson);
+    const result = await requestOtoBlogApi({
+      url: config.postUrl,
+      method: 'POST',
+      headerName: config.headerName,
+      headerValue: config.headerValue,
+      body,
+    });
+    await logActivity('UPDATE', 'CLIENT', `Oto blog POST test: ${result.status}`, id);
+    return { success: true, ...result };
+  } catch (error) {
+    return { error: error.message || 'POST testi başarısız.' };
+  }
+}
+
+export async function testOtoBlogLanguagesAction(clientId, rawConfig) {
+  try {
+    const access = await requireOtoBlogAccess();
+    if (access.error) return access;
+    const id = parseInt(clientId, 10);
+    if (!id) return { error: 'Geçersiz müşteri.' };
+
+    const config = sanitizeOtoBlogConfig(rawConfig);
+    if (!config.languagesUrl) return { error: 'GET URL boş.' };
+    const result = await requestOtoBlogApi({
+      url: config.languagesUrl,
+      method: 'GET',
+      headerName: config.headerName,
+      headerValue: config.headerValue,
+    });
+    await logActivity('UPDATE', 'CLIENT', `Oto blog GET languages test: ${result.status}`, id);
+    return { success: true, ...result };
+  } catch (error) {
+    return { error: error.message || 'GET testi başarısız.' };
   }
 }
 

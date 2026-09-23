@@ -24,6 +24,7 @@ export default async function OtoBlogPage() {
       companyName: true,
       website: true,
       websiteType: true,
+      otoBlogConfig: true,
     },
   });
 

@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { updateClientWebsiteTypeAction } from '@/app/actions';
+import { parseOtoBlogConfig } from '@/lib/oto-blog';
+import OtoBlogSettingsModal from './oto-blog-settings-modal';
 
 const WEBSITE_TYPES = [
   { value: 'BEYIN_ATOLYESI', label: 'Beyin Atölyesi' },
@@ -14,6 +16,7 @@ export default function OtoBlogClients({ clients }) {
   const [search, setSearch] = useState('');
   const [savingId, setSavingId] = useState(null);
   const [error, setError] = useState(null);
+  const [settingsClient, setSettingsClient] = useState(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -38,6 +41,13 @@ export default function OtoBlogClients({ clients }) {
     setSavingId(null);
   }
 
+  function openSettings(client) {
+    setSettingsClient({
+      ...client,
+      config: parseOtoBlogConfig(client.otoBlogConfig, client.website),
+    });
+  }
+
   return (
     <div className="card">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -60,33 +70,54 @@ export default function OtoBlogClients({ clients }) {
             <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               <th style={{ padding: '0.7rem 0.6rem', borderBottom: '1px solid var(--border-color)' }}>Müşteri</th>
               <th style={{ padding: '0.7rem 0.6rem', borderBottom: '1px solid var(--border-color)' }}>Site</th>
-              <th style={{ padding: '0.7rem 0.6rem', borderBottom: '1px solid var(--border-color)', width: '220px' }}>Site altyapısı</th>
+              <th style={{ padding: '0.7rem 0.6rem', borderBottom: '1px solid var(--border-color)', width: '320px' }}>Site altyapısı</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((client) => (
-              <tr key={client.id}>
-                <td style={{ padding: '0.75rem 0.6rem', borderBottom: '1px solid var(--border-color)', fontWeight: 700 }}>
-                  {client.companyName}
-                </td>
-                <td style={{ padding: '0.75rem 0.6rem', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                  {client.website || '—'}
-                </td>
-                <td style={{ padding: '0.75rem 0.6rem', borderBottom: '1px solid var(--border-color)' }}>
-                  <select
-                    className="input-field"
-                    value={client.websiteType || 'OTHER'}
-                    disabled={savingId === client.id}
-                    onChange={(e) => handleTypeChange(client.id, e.target.value)}
-                    style={{ fontSize: '0.82rem' }}
-                  >
-                    {WEBSITE_TYPES.map((type) => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            ))}
+            {filtered.map((client) => {
+              const isBa = (client.websiteType || 'OTHER') === 'BEYIN_ATOLYESI';
+              return (
+                <tr key={client.id}>
+                  <td style={{ padding: '0.75rem 0.6rem', borderBottom: '1px solid var(--border-color)', fontWeight: 700 }}>
+                    {client.companyName}
+                  </td>
+                  <td style={{ padding: '0.75rem 0.6rem', borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                    {client.website || '—'}
+                  </td>
+                  <td style={{ padding: '0.75rem 0.6rem', borderBottom: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <select
+                        className="input-field"
+                        value={client.websiteType || 'OTHER'}
+                        disabled={savingId === client.id}
+                        onChange={(e) => handleTypeChange(client.id, e.target.value)}
+                        style={{ fontSize: '0.82rem', flex: 1 }}
+                      >
+                        {WEBSITE_TYPES.map((type) => (
+                          <option key={type.value} value={type.value}>{type.label}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="btn"
+                        disabled={!isBa}
+                        onClick={() => openSettings(client)}
+                        title={isBa ? 'API ayarları' : 'Önce Beyin Atölyesi seç'}
+                        style={{
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          whiteSpace: 'nowrap',
+                          opacity: isBa ? 1 : 0.45,
+                          cursor: isBa ? 'pointer' : 'not-allowed',
+                        }}
+                      >
+                        Ayarlar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={3} style={{ padding: '1.5rem 0.6rem', color: 'var(--text-secondary)' }}>
@@ -97,6 +128,18 @@ export default function OtoBlogClients({ clients }) {
           </tbody>
         </table>
       </div>
+
+      {settingsClient && (
+        <OtoBlogSettingsModal
+          client={settingsClient}
+          onClose={() => setSettingsClient(null)}
+          onSaved={(config) => {
+            setRows((current) => current.map((row) => (
+              row.id === settingsClient.id ? { ...row, otoBlogConfig: JSON.stringify(config) } : row
+            )));
+          }}
+        />
+      )}
     </div>
   );
 }

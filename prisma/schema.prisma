@@ -49,6 +49,7 @@ model Client {
   // Website Integration
   websiteType String? @default("OTHER") // "BEYIN_ATOLYESI", "IDEASOFT", "OTHER"
   blogApiUrl  String? @db.Text
+  otoBlogConfig String? @db.Text
 
   tasks                   Task[]
   logs                    ActivityLog[]
