@@ -1,3 +1,5 @@
+export const APP_ORIGIN = 'https://panel-projesi.vercel.app';
+
 export const DEFAULT_POST_BODY = {
   title: 'Örnek Blog Yazısı',
   content: '<p>Bu örnek blog içeriğidir.</p>',

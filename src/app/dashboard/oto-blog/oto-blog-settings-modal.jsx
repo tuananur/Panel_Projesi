@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { saveOtoBlogConfigAction, testOtoBlogLanguagesAction, testOtoBlogPostAction } from '@/app/actions';
-import { defaultOtoBlogConfig } from '@/lib/oto-blog';
+import { APP_ORIGIN, defaultOtoBlogConfig } from '@/lib/oto-blog';
 
 function ResultBox({ result }) {
   if (!result) return null;
@@ -166,7 +166,7 @@ export default function OtoBlogSettingsModal({ client, onClose, onSaved }) {
             </p>
             <div className="input-group">
               <label className="input-label">Endpoint</label>
-              <input className="input-field" readOnly value={typeof window !== 'undefined' ? `${window.location.origin}/api/oto-blog/auto` : '/api/oto-blog/auto'} />
+              <input className="input-field" readOnly value={`${APP_ORIGIN}/api/oto-blog/auto`} />
             </div>
             <div className="input-group">
               <label className="input-label">X-OTO-BLOG-KEY</label>
@@ -187,8 +187,8 @@ export default function OtoBlogSettingsModal({ client, onClose, onSaved }) {
               </div>
             </div>
             <pre style={{ margin: 0, padding: '0.75rem', borderRadius: 8, border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.03)', fontSize: '0.72rem', whiteSpace: 'pre-wrap' }}>
-{`POST /api/oto-blog/auto
-${'X-OTO-BLOG-KEY'}: ${config.inboundKey || '<key>'}
+{`POST ${APP_ORIGIN}/api/oto-blog/auto
+X-OTO-BLOG-KEY: ${config.inboundKey || '<key>'}
 Content-Type: application/json
 
 { "topic": "Kaygı ile baş etmek için günlük rutinler" }`}

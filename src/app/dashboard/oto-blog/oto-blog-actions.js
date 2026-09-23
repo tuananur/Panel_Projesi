@@ -1,7 +1,6 @@
 'use server';
 
 import { randomBytes } from 'crypto';
-import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { can, getRolePermissions } from '@/lib/permissions';
@@ -13,6 +12,7 @@ import {
   normalizeLanguages,
   parseOtoBlogAiSettings,
   parseOtoBlogConfig,
+  APP_ORIGIN,
   parseOtoBlogDraft,
   rememberUsedKeywords,
 } from '@/lib/oto-blog';
@@ -58,14 +58,7 @@ async function saveDraft(clientId, draft) {
 }
 
 async function publicAppUrl() {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  const headerStore = await headers();
-  const host = headerStore.get('x-forwarded-host') || headerStore.get('host');
-  const proto = headerStore.get('x-forwarded-proto') || 'https';
-  if (!host) throw new Error('Uygulama adresi bulunamadı.');
-  return `${proto}://${host}`;
+  return APP_ORIGIN;
 }
 
 function imagePublicUrl(token, origin) {

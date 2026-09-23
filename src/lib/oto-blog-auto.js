@@ -1,8 +1,8 @@
 import { randomBytes } from 'crypto';
-import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { geminiGenerateImage, geminiGenerateText, parseModelJson } from '@/lib/gemini';
 import {
+  APP_ORIGIN,
   isTurkishLanguage,
   normalizeLanguages,
   parseOtoBlogAiSettings,
@@ -18,14 +18,7 @@ export function generateOtoBlogInboundKey() {
 }
 
 export async function resolveAppUrl() {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  const headerStore = await headers();
-  const host = headerStore.get('x-forwarded-host') || headerStore.get('host');
-  const proto = headerStore.get('x-forwarded-proto') || 'https';
-  if (!host) throw new Error('Uygulama adresi bulunamadı.');
-  return `${proto}://${host}`;
+  return APP_ORIGIN;
 }
 
 export async function enqueueAutoJobRun(origin, jobId, token) {
