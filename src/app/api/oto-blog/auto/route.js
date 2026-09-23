@@ -2,6 +2,7 @@ import { after, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import {
   INBOUND_HEADER,
+  continueAutoJob,
   createAutoJob,
   enqueueAutoJobRun,
   findClientByAutoKey,
@@ -11,7 +12,7 @@ import {
 import { parseOtoBlogConfig } from '@/lib/oto-blog';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function POST(request) {
   const key = readAutoAuthKey(request);
@@ -49,7 +50,12 @@ export async function POST(request) {
 
   const job = await createAutoJob(client, topic);
   const origin = await resolveAppUrl();
-  after(() => enqueueAutoJobRun(origin, job.id, job.continueToken));
+  after(async () => {
+    const result = await continueAutoJob(job.id, job.continueToken, 50000);
+    if (result.ok && !result.done) {
+      await enqueueAutoJobRun(origin, job.id, job.continueToken);
+    }
+  });
 
   return NextResponse.json({
     ok: true,

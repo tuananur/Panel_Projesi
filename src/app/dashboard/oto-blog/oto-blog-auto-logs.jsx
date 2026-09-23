@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getOtoBlogAutoJobsAction } from './oto-blog-actions';
+import { getOtoBlogAutoJobsAction, resumeOtoBlogAutoJobAction } from './oto-blog-actions';
 
 function statusColor(status) {
   if (status === 'done') return '#10b981';
@@ -21,6 +21,7 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
   const [jobs, setJobs] = useState(initialJobs || []);
   const [error, setError] = useState(initialError);
   const [openId, setOpenId] = useState(null);
+  const [busyId, setBusyId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +35,7 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
         setError(result.error);
       }
     }
+    tick();
     const id = setInterval(tick, 3000);
     return () => {
       cancelled = true;
@@ -50,6 +52,7 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
         {jobs.map((job) => {
           const color = statusColor(job.status);
           const open = openId === job.id;
+          const stuck = job.status !== 'done' && job.status !== 'error' && Date.now() - new Date(job.updatedAt).getTime() > 90000;
           return (
             <div key={job.id} style={{ border: '1px solid var(--border-color)', borderRadius: 10, overflow: 'hidden' }}>
               <button
@@ -76,10 +79,33 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
                 )}
                 <div style={{ marginTop: '0.45rem', fontSize: '0.78rem', fontWeight: 800, color }}>
                   {job.statusText}{job.title ? ` · ${job.title}` : ''}
+                  {stuck ? ' · kilitlendi' : ''}
                 </div>
               </button>
               {open && (
                 <div style={{ padding: '0 1rem 0.9rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
+                    <span className="text-muted" style={{ fontSize: '0.72rem' }}>
+                      adım: {job.phase || '—'} · son güncelleme: {formatWhen(job.updatedAt)}
+                    </span>
+                    {job.status !== 'done' && (
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        disabled={busyId === job.id}
+                        onClick={async (event) => {
+                          event.stopPropagation();
+                          setBusyId(job.id);
+                          const result = await resumeOtoBlogAutoJobAction(job.id);
+                          if (result.error) setError(result.error);
+                          setBusyId(null);
+                        }}
+                        style={{ fontSize: '0.72rem', padding: '0.35rem 0.7rem' }}
+                      >
+                        {busyId === job.id ? 'Başlatılıyor…' : 'Devam ettir'}
+                      </button>
+                    )}
+                  </div>
                   {job.error && <p style={{ color: '#ef4444', fontSize: '0.78rem', fontWeight: 700, margin: 0 }}>{job.error}</p>}
                   {(job.logs || []).map((line, index) => (
                     <div key={`${job.id}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', fontSize: '0.75rem' }}>

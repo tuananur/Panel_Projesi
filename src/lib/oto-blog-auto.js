@@ -42,12 +42,29 @@ export async function resolveAppUrl() {
 }
 
 export async function enqueueAutoJobRun(origin, jobId, token) {
-  await fetch(`${origin}/api/oto-blog/auto/run`, {
+  const response = await fetch(`${origin}/api/oto-blog/auto/run`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', [RUN_HEADER]: token },
     body: JSON.stringify({ jobId }),
     cache: 'no-store',
   });
+  if (!response.ok) {
+    const current = await prisma.otoBlogAutoJob.findUnique({ where: { id: Number(jobId) } });
+    if (current) {
+      await writeJob(current, {}, `Devam isteği başarısız (${response.status})`);
+    }
+  }
+  return response;
+}
+
+export async function continueAutoJob(jobId, token, budgetMs = 50000) {
+  const started = Date.now();
+  let result = { ok: true, done: false, phase: null };
+  while (Date.now() - started < budgetMs) {
+    result = await processAutoJobStep(jobId, token);
+    if (!result.ok || result.done) return result;
+  }
+  return result;
 }
 
 async function getGeminiKey() {
@@ -91,7 +108,8 @@ function draftFields(payload) {
 }
 
 async function writeJob(job, patch, logText) {
-  const logs = parseLogs(job.logsJson);
+  const current = await prisma.otoBlogAutoJob.findUnique({ where: { id: job.id }, select: { logsJson: true } });
+  const logs = parseLogs(current?.logsJson);
   if (logText) logs.push({ at: new Date().toISOString(), text: logText });
   const next = await prisma.otoBlogAutoJob.update({
     where: { id: job.id },
@@ -245,6 +263,7 @@ async function makeContent(job, payload, ai) {
 }
 
 async function makeImagePrompt(job, payload, ai) {
+  await writeJob(job, { statusText: 'Görsel prompt yazılıyor' }, 'Görsel prompt yazılıyor');
   const apiKey = await getGeminiKey();
   const text = await geminiGenerateText({
     apiKey,
@@ -263,6 +282,7 @@ async function makeImagePrompt(job, payload, ai) {
 }
 
 async function makeImage(job, payload, ai) {
+  await writeJob(job, { statusText: 'Fotoğraf üretiliyor' }, 'Fotoğraf üretiliyor');
   const apiKey = await getGeminiKey();
   const image = await geminiGenerateImage({
     apiKey,

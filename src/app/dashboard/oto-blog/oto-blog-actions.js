@@ -441,6 +441,7 @@ export async function getOtoBlogAutoJobsAction() {
         title: true,
         status: true,
         statusText: true,
+        phase: true,
         logsJson: true,
         error: true,
         createdAt: true,
@@ -466,6 +467,36 @@ export async function getOtoBlogAutoJobsAction() {
     };
   } catch (error) {
     return { error: error.message || 'Loglar alınamadı.' };
+  }
+}
+
+export async function resumeOtoBlogAutoJobAction(jobId) {
+  try {
+    await requireAccess();
+    const id = parseInt(jobId, 10);
+    const job = await prisma.otoBlogAutoJob.findUnique({ where: { id } });
+    if (!job) return { error: 'İş bulunamadı.' };
+    if (job.status === 'done') return { error: 'Bu iş zaten bitti.' };
+
+    if (job.status === 'error') {
+      const rollbackPhase = job.phase === 'error' ? 'image_prompt' : job.phase;
+      await prisma.otoBlogAutoJob.update({
+        where: { id },
+        data: {
+          status: 'running',
+          phase: rollbackPhase === 'error' ? 'queued' : rollbackPhase,
+          error: null,
+          statusText: 'Devam ettiriliyor',
+        },
+      });
+    }
+
+    const { enqueueAutoJobRun, resolveAppUrl } = await import('@/lib/oto-blog-auto');
+    const origin = await resolveAppUrl();
+    await enqueueAutoJobRun(origin, job.id, job.continueToken);
+    return { success: true };
+  } catch (error) {
+    return { error: error.message || 'Devam ettirilemedi.' };
   }
 }
 
