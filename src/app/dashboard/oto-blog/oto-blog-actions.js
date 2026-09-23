@@ -70,6 +70,32 @@ function imagePublicUrl(token, origin) {
   return `${origin}/api/oto-blog/image/${token}`;
 }
 
+export async function refineOtoBlogSystemPromptAction(clientId, kind, prompt, aiSettings) {
+  try {
+    await requireAccess();
+    const client = await loadClient(clientId);
+    const apiKey = await getGeminiKey();
+    const settings = mergeAiSettings(client.otoBlogAiSettings, aiSettings);
+    const draft = String(prompt || '').trim();
+    if (!draft) return { error: 'Önce bir system prompt yaz.' };
+
+    const target = kind === 'image' ? 'görsel üretimi' : 'blog yazımı';
+    const text = await geminiGenerateText({
+      apiKey,
+      model: settings.textModel,
+      systemPrompt: '',
+      json: true,
+      userPrompt: `Kullanıcının ${target} için yazdığı system prompt taslağını net, uygulanabilir ve profesyonel hale getir. Anlamı bozma, yasakları ve marka sesini koru. Sadece JSON döndür: {"prompt":"..."}\n\nTaslak:\n${draft}`,
+    });
+    const parsed = parseModelJson(text);
+    const refined = String(parsed.prompt || '').trim();
+    if (!refined) throw new Error('Düzeltilmiş prompt boş geldi.');
+    return { success: true, prompt: refined };
+  } catch (error) {
+    return { error: error.message || 'Prompt düzeltilemedi.' };
+  }
+}
+
 export async function saveOtoBlogAiSettingsAction(clientId, raw) {
   try {
     await requireAccess();

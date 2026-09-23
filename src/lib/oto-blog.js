@@ -69,14 +69,17 @@ export function parsePostBody(bodyJson) {
 }
 
 export const TEXT_MODELS = [
+  { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
+  { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash-Lite' },
   { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-  { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
 ];
 
 export const IMAGE_MODELS = [
-  { id: 'gemini-2.5-flash-image', label: 'Gemini 2.5 Flash Image' },
-  { id: 'gemini-2.0-flash-preview-image-generation', label: 'Gemini 2.0 Flash Image' },
+  { id: 'gemini-3.1-flash-image', label: 'Gemini 3.1 Flash Image' },
+  { id: 'gemini-3.1-flash-lite-image', label: 'Gemini 3.1 Flash-Lite Image' },
+  { id: 'gemini-3-pro-image', label: 'Gemini 3 Pro Image' },
+  { id: 'gemini-2.5-flash-image', label: 'Gemini 2.5 Flash Image (eski)' },
 ];
 
 export const FALLBACK_LANGUAGES = [
@@ -101,7 +104,10 @@ export function parseOtoBlogAiSettings(raw) {
   if (!raw) return defaults;
   try {
     const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    return { ...defaults, ...parsed };
+    const next = { ...defaults, ...parsed };
+    if (!TEXT_MODELS.some((model) => model.id === next.textModel)) next.textModel = defaults.textModel;
+    if (!IMAGE_MODELS.some((model) => model.id === next.imageModel)) next.imageModel = defaults.imageModel;
+    return next;
   } catch {
     return defaults;
   }
@@ -137,38 +143,58 @@ export function parseOtoBlogDraft(raw) {
   }
 }
 
+export const LANGUAGE_LABELS = {
+  tr: 'Türkçe',
+  en: 'English',
+  fr: 'Français',
+  ru: 'Русский',
+  de: 'Deutsch',
+};
+
 export function isTurkishLanguage(lang) {
   if (!lang) return false;
   return Number(lang.id) === 1 || String(lang.code || '').toLowerCase() === 'tr';
 }
 
-export function normalizeLanguages(payload) {
-  const raw = Array.isArray(payload)
-    ? payload
-    : payload?.data || payload?.languages || payload?.items || null;
+function languageName(code) {
+  const key = String(code || '').toLowerCase();
+  return LANGUAGE_LABELS[key] || key.toUpperCase();
+}
 
-  let list = [];
-  if (Array.isArray(raw)) {
-    list = raw.map((item, index) => {
+function mapIdCodeRecord(record) {
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return [];
+  return Object.entries(record)
+    .filter(([key, value]) => /^\d+$/.test(String(key)) && value != null && typeof value !== 'object')
+    .map(([key, value]) => {
+      const code = String(value).toLowerCase();
+      return { id: Number(key), code, name: languageName(code) };
+    });
+}
+
+export function normalizeLanguages(payload) {
+  if (!payload) return FALLBACK_LANGUAGES;
+
+  if (Array.isArray(payload)) {
+    const list = payload.map((item, index) => {
       if (typeof item === 'string') {
-        return { id: index + 1, code: item, name: item };
+        const code = item.toLowerCase();
+        return { id: index + 1, code, name: languageName(code) };
       }
       const id = Number(item.id ?? item.language_id ?? item.languageId ?? index + 1);
       const code = String(item.code || item.locale || item.slug || item.short_name || item.name || id).toLowerCase();
-      const name = String(item.name || item.title || item.label || item.code || id);
-      return { id, code, name };
+      return { id, code, name: item.name || item.title || item.label || languageName(code) };
     });
-  } else if (payload && typeof payload === 'object') {
-    list = Object.entries(payload)
-      .filter(([, value]) => value != null && typeof value !== 'object')
-      .map(([key, value]) => ({
-        id: Number(key) || Number(value) || 0,
-        code: String(Number(key) ? value : key).toLowerCase(),
-        name: String(value),
-      }));
+    return list.length ? list : FALLBACK_LANGUAGES;
   }
 
-  if (!list.length) return FALLBACK_LANGUAGES;
-  const hasTr = list.some(isTurkishLanguage);
-  return hasTr ? list : [...FALLBACK_LANGUAGES.slice(0, 1), ...list];
+  if (typeof payload === 'object') {
+    const nested = payload.data || payload.languages || payload.items;
+    const fromNestedMap = mapIdCodeRecord(nested);
+    if (fromNestedMap.length) return fromNestedMap;
+    if (Array.isArray(nested) && nested.length) return normalizeLanguages(nested);
+    const fromRootMap = mapIdCodeRecord(payload);
+    if (fromRootMap.length) return fromRootMap;
+  }
+
+  return FALLBACK_LANGUAGES;
 }

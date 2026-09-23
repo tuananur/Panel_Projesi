@@ -9,6 +9,7 @@ import {
   generateOtoBlogImagePromptAction,
   generateOtoBlogOutlineAction,
   publishOtoBlogAction,
+  refineOtoBlogSystemPromptAction,
   saveOtoBlogAiSettingsAction,
   saveOtoBlogDraftAction,
 } from './oto-blog-actions';
@@ -108,6 +109,16 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
     if (!result.success) return setError(result.error);
     setAi(result.settings);
     setInfo('Müşteri AI ayarları kaydedildi.');
+  }
+
+  async function refinePrompt(kind) {
+    const current = kind === 'image' ? ai.imageSystemPrompt : ai.textSystemPrompt;
+    setBusy(`refine-${kind}`); setError(null); setInfo(null);
+    const result = await refineOtoBlogSystemPromptAction(client.id, kind, current, ai);
+    setBusy('');
+    if (!result.success) return setError(result.error);
+    setAi((c) => (kind === 'image' ? { ...c, imageSystemPrompt: result.prompt } : { ...c, textSystemPrompt: result.prompt }));
+    setInfo('System prompt düzeltildi. Kaydetmeyi unutma.');
   }
 
   function toggleLang(id, locked) {
@@ -300,11 +311,21 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
           </div>
         </div>
         <div className="input-group" style={{ marginBottom: '0.85rem' }}>
-          <label className="input-label">Yazı system prompt</label>
+          <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            Yazı system prompt
+            <button type="button" className="btn" disabled={!ai.textSystemPrompt.trim() || busy} onClick={() => refinePrompt('text')} style={{ fontSize: '0.72rem', padding: '0.25rem 0.6rem' }}>
+              {busy === 'refine-text' ? 'Düzeltiliyor…' : 'Düzelt'}
+            </button>
+          </label>
           <textarea className="input-field" rows={5} value={ai.textSystemPrompt} onChange={(e) => setAi((c) => ({ ...c, textSystemPrompt: e.target.value }))} placeholder="Marka sesi, yasaklar, HTML kuralları…" />
         </div>
         <div className="input-group" style={{ marginBottom: '1rem' }}>
-          <label className="input-label">Görsel system prompt</label>
+          <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            Görsel system prompt
+            <button type="button" className="btn" disabled={!ai.imageSystemPrompt.trim() || busy} onClick={() => refinePrompt('image')} style={{ fontSize: '0.72rem', padding: '0.25rem 0.6rem' }}>
+              {busy === 'refine-image' ? 'Düzeltiliyor…' : 'Düzelt'}
+            </button>
+          </label>
           <textarea className="input-field" rows={4} value={ai.imageSystemPrompt} onChange={(e) => setAi((c) => ({ ...c, imageSystemPrompt: e.target.value }))} placeholder="Stil, yazısız görsel, renk paleti…" />
         </div>
         <button type="button" className="btn btn-primary" disabled={busy === 'ai'} onClick={saveAi} style={{ background: '#8b5cf6' }}>
