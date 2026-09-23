@@ -12,6 +12,7 @@ import {
   finalizeOtoBlogPublishAction,
   prepareOtoBlogPublishAction,
   publishOtoBlogLanguageAction,
+  translateOtoBlogLanguageAction,
   refineOtoBlogSystemPromptAction,
   saveOtoBlogAiSettingsAction,
   saveOtoBlogDraftAction,
@@ -28,6 +29,12 @@ const STEPS = [
   { id: 7, label: 'Taslak' },
 ];
 
+function formatMs(ms) {
+  if (ms == null) return '';
+  if (ms < 1000) return `${ms} ms`;
+  return `${(ms / 1000).toFixed(1)} sn`;
+}
+
 export default function OtoBlogWizard({ client, initialDraft, initialAi, initialImageUrl, keywordSuggestions = [] }) {
   const [step, setStep] = useState(initialDraft.published ? 7 : (initialDraft.step || 1));
   const [draft, setDraft] = useState(() => ({ ...emptyOtoBlogDraft(), ...initialDraft }));
@@ -38,6 +45,7 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
   const [languages, setLanguages] = useState([]);
   const [publishQueue, setPublishQueue] = useState([]);
   const [publishGroupId, setPublishGroupId] = useState('');
+  const [publishTotalMs, setPublishTotalMs] = useState(null);
   const [imageUrl, setImageUrl] = useState(initialImageUrl || (initialDraft.imageToken ? `/api/oto-blog/image/${initialDraft.imageToken}` : ''));
 
   const itemsText = useMemo(() => (draft.items || []).join('\n'), [draft.items]);
@@ -110,7 +118,7 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
   }
 
   async function goPublish() {
-    setBusy('publish'); setError(null); setInfo(null);
+    setBusy('publish'); setError(null); setInfo(null); setPublishTotalMs(null);
     const prepared = await prepareOtoBlogPublishAction(client.id, draft, publishGroupId);
     if (!prepared.success) {
       setBusy('');
@@ -120,27 +128,56 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
     setPublishGroupId(prepared.groupId);
     const queue = prepared.languages.map((lang) => {
       const previous = publishQueue.find((item) => Number(item.id) === Number(lang.id));
+      const done = previous?.status === 'ok';
       return {
         ...lang,
-        status: previous?.status === 'ok' ? 'ok' : 'wait',
-        detail: previous?.status === 'ok' ? previous.detail : 'Bekliyor',
+        status: done ? 'ok' : 'wait',
+        fields: previous?.fields || null,
+        translateMs: previous?.translateMs ?? null,
+        sendMs: done ? previous.sendMs : null,
+        statusCode: done ? previous.statusCode : null,
+        error: null,
       };
     });
     setPublishQueue(queue);
     await new Promise((resolve) => setTimeout(resolve, 40));
 
     let failed = false;
+    const runStarted = Date.now();
     for (const lang of queue) {
       if (lang.status === 'ok') continue;
-      patchQueue(lang.id, { status: 'sending', detail: `${lang.name} gönderiliyor` });
-      const result = await publishOtoBlogLanguageAction(client.id, draft, ai, lang, prepared.groupId);
+      const skipTranslate = isTurkishLanguage(lang);
+      let fields = lang.fields;
+
+      if (!skipTranslate && !fields) {
+        patchQueue(lang.id, { status: 'translating' });
+        await new Promise((resolve) => setTimeout(resolve, 40));
+        const translateStarted = Date.now();
+        const translated = await translateOtoBlogLanguageAction(client.id, draft, ai, lang);
+        const translateMs = Date.now() - translateStarted;
+        if (!translated.success) {
+          failed = true;
+          patchQueue(lang.id, { status: 'error', translateMs, error: translated.error || 'Çeviri hatası' });
+          continue;
+        }
+        fields = translated.fields;
+        patchQueue(lang.id, { fields, translateMs, status: 'sending' });
+      } else {
+        patchQueue(lang.id, { status: 'sending', translateMs: skipTranslate ? null : lang.translateMs });
+      }
+      await new Promise((resolve) => setTimeout(resolve, 40));
+
+      const sendStarted = Date.now();
+      const result = await publishOtoBlogLanguageAction(client.id, draft, lang, prepared.groupId, fields);
+      const sendMs = Date.now() - sendStarted;
       if (result.ok) {
-        patchQueue(lang.id, { status: 'ok', detail: `Gönderildi (${result.status})` });
+        patchQueue(lang.id, { status: 'ok', sendMs, statusCode: result.status, error: null });
       } else {
         failed = true;
-        patchQueue(lang.id, { status: 'error', detail: result.error || `Hata ${result.status || ''}`.trim() });
+        patchQueue(lang.id, { status: 'error', sendMs, error: result.error || `Hata ${result.status || ''}`.trim() });
       }
     }
+    setPublishTotalMs(Date.now() - runStarted);
 
     if (failed) {
       setBusy('');
@@ -174,6 +211,7 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
     setDraft(next);
     setPublishQueue([]);
     setPublishGroupId('');
+    setPublishTotalMs(null);
     setImageUrl('');
     setError(null);
     setInfo(null);
@@ -427,30 +465,59 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
               {draft.published ? 'Gönderildi' : busy === 'publish' ? 'Gönderiliyor…' : publishQueue.some((item) => item.status === 'error') ? 'Tekrar dene' : 'Siteye gönder'}
             </button>
             {publishQueue.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
                 {publishQueue.map((item) => {
-                  const color = item.status === 'ok' ? '#10b981' : item.status === 'error' ? '#ef4444' : item.status === 'sending' ? 'var(--accent-primary)' : 'var(--text-secondary)';
+                  const active = item.status === 'translating' || item.status === 'sending';
+                  const needsTranslate = !isTurkishLanguage(item);
+                  const translateLabel = item.status === 'translating'
+                    ? 'Çevriliyor…'
+                    : item.translateMs != null
+                      ? formatMs(item.translateMs)
+                      : item.status === 'error' && !item.sendMs
+                        ? (item.error || 'Hata')
+                        : 'Bekliyor';
+                  const sendLabel = item.status === 'sending'
+                    ? 'Gönderiliyor…'
+                    : item.status === 'ok'
+                      ? `Gönderildi (${item.statusCode}) · ${formatMs(item.sendMs)}`
+                      : item.sendMs != null
+                        ? `${item.error || 'Hata'} · ${formatMs(item.sendMs)}`
+                        : item.status === 'error' && item.translateMs != null
+                          ? 'Bekliyor'
+                          : item.status === 'error'
+                            ? (item.error || 'Hata')
+                            : 'Bekliyor';
                   return (
                     <div
                       key={item.id}
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        gap: '0.75rem',
-                        alignItems: 'center',
-                        padding: '0.65rem 0.8rem',
+                        padding: '0.7rem 0.85rem',
                         borderRadius: 8,
-                        border: `1px solid ${item.status === 'sending' ? 'rgba(59,130,246,0.35)' : 'var(--border-color)'}`,
-                        background: item.status === 'ok' ? 'rgba(16,185,129,0.08)' : item.status === 'error' ? 'rgba(239,68,68,0.08)' : item.status === 'sending' ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${active ? 'rgba(59,130,246,0.35)' : 'var(--border-color)'}`,
+                        background: item.status === 'ok' ? 'rgba(16,185,129,0.08)' : item.status === 'error' ? 'rgba(239,68,68,0.08)' : active ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.03)',
                       }}
                     >
                       <strong style={{ fontSize: '0.85rem' }}>{item.name} <span className="text-muted" style={{ fontWeight: 600 }}>({item.code})</span></strong>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 800, color, whiteSpace: 'nowrap' }}>
-                        {item.status === 'sending' ? `${item.name} gönderiliyor…` : item.detail}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '0.4rem', fontSize: '0.76rem', fontWeight: 700 }}>
+                        {needsTranslate && (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', color: item.status === 'translating' ? 'var(--accent-primary)' : item.translateMs != null ? '#10b981' : 'var(--text-secondary)' }}>
+                            <span>Çeviri</span>
+                            <span>{translateLabel}</span>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', color: item.status === 'sending' ? 'var(--accent-primary)' : item.status === 'ok' ? '#10b981' : item.status === 'error' && item.sendMs != null ? '#ef4444' : 'var(--text-secondary)' }}>
+                          <span>Gönderim</span>
+                          <span>{sendLabel}</span>
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
+                {publishTotalMs != null && (
+                  <p className="text-muted" style={{ fontSize: '0.75rem', fontWeight: 700, margin: '0.15rem 0 0' }}>
+                    Toplam: {formatMs(publishTotalMs)}
+                  </p>
+                )}
               </div>
             )}
           </div>

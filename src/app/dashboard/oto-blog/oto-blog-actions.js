@@ -341,59 +341,79 @@ export async function prepareOtoBlogPublishAction(clientId, draftInput, groupId)
   }
 }
 
-export async function publishOtoBlogLanguageAction(clientId, draftInput, aiSettings, language, groupId) {
+function draftLanguageFields(draft) {
+  return {
+    title: draft.title,
+    content: draft.content,
+    meta_title: draft.metaTitle || draft.title,
+    meta_description: draft.metaDescription || '',
+    short_desc: draft.shortDesc || '',
+    image_alt: draft.title,
+  };
+}
+
+export async function translateOtoBlogLanguageAction(clientId, draftInput, aiSettings, language) {
+  const started = Date.now();
   try {
     await requireAccess();
     const client = await loadClient(clientId);
+    const draft = parseOtoBlogDraft(JSON.stringify(draftInput));
+    const lang = publicLanguage(language);
+    if (!lang.id) return { error: 'Dil eksik.', language: lang, ok: false };
+
+    if (isTurkishLanguage(lang)) {
+      return { success: true, language: lang, fields: draftLanguageFields(draft), ms: Date.now() - started };
+    }
+
     const apiKey = await getGeminiKey();
     const settings = mergeAiSettings(client.otoBlogAiSettings, aiSettings);
+    const text = await geminiGenerateText({
+      apiKey,
+      model: settings.textModel,
+      systemPrompt: settings.textSystemPrompt,
+      json: true,
+      userPrompt: `Aşağıdaki Türkçe blogu ${lang.name} (${lang.code}) diline çevir. Anlamı koru, AI kokusu ekleme. Sadece JSON döndür: {"title":"...","content":"...","meta_title":"...","meta_description":"...","short_desc":"...","image_alt":"..."}\n\nKaynak:\n${JSON.stringify(draftLanguageFields(draft))}`,
+    });
+    const translated = parseModelJson(text);
+    const base = draftLanguageFields(draft);
+    return {
+      success: true,
+      language: lang,
+      fields: {
+        title: translated.title || base.title,
+        content: translated.content || base.content,
+        meta_title: translated.meta_title || base.meta_title,
+        meta_description: translated.meta_description || base.meta_description,
+        short_desc: translated.short_desc || base.short_desc,
+        image_alt: translated.image_alt || base.image_alt,
+      },
+      ms: Date.now() - started,
+    };
+  } catch (error) {
+    return { error: error.message || 'Çeviri başarısız.', language, ok: false, ms: Date.now() - started };
+  }
+}
+
+export async function publishOtoBlogLanguageAction(clientId, draftInput, language, groupId, fields) {
+  const started = Date.now();
+  try {
+    await requireAccess();
+    const client = await loadClient(clientId);
     const config = parseOtoBlogConfig(client.otoBlogConfig, client.website);
-    if (!config.postUrl || !config.headerValue) return { error: 'Ayarlar’da POST URL ve key kaydet.' };
+    if (!config.postUrl || !config.headerValue) return { error: 'Ayarlar’da POST URL ve key kaydet.', ok: false };
 
     const draft = parseOtoBlogDraft(JSON.stringify(draftInput));
     const lang = publicLanguage(language);
-    if (!lang.id || !groupId) return { error: 'Dil veya grup eksik.' };
+    if (!lang.id || !groupId) return { error: 'Dil veya grup eksik.', ok: false };
 
     const origin = await publicAppUrl();
-    const imageUrl = imagePublicUrl(draft.imageToken, origin);
-    let payload = {
-      title: draft.title,
-      content: draft.content,
-      image: imageUrl,
-      image_alt: draft.title,
+    const payload = {
+      ...draftLanguageFields(draft),
+      ...(fields || {}),
+      image: imagePublicUrl(draft.imageToken, origin),
       language_id: lang.id,
       translation_group_id: groupId,
-      meta_title: draft.metaTitle || draft.title,
-      meta_description: draft.metaDescription || '',
-      short_desc: draft.shortDesc || '',
     };
-
-    if (!isTurkishLanguage(lang)) {
-      const text = await geminiGenerateText({
-        apiKey,
-        model: settings.textModel,
-        systemPrompt: settings.textSystemPrompt,
-        json: true,
-        userPrompt: `Aşağıdaki Türkçe blogu ${lang.name} (${lang.code}) diline çevir. Anlamı koru, AI kokusu ekleme. Sadece JSON döndür: {"title":"...","content":"...","meta_title":"...","meta_description":"...","short_desc":"...","image_alt":"..."}\n\nKaynak:\n${JSON.stringify({
-          title: draft.title,
-          content: draft.content,
-          meta_title: draft.metaTitle,
-          meta_description: draft.metaDescription,
-          short_desc: draft.shortDesc,
-          image_alt: draft.title,
-        })}`,
-      });
-      const translated = parseModelJson(text);
-      payload = {
-        ...payload,
-        title: translated.title || payload.title,
-        content: translated.content || payload.content,
-        meta_title: translated.meta_title || payload.meta_title,
-        meta_description: translated.meta_description || payload.meta_description,
-        short_desc: translated.short_desc || payload.short_desc,
-        image_alt: translated.image_alt || payload.image_alt,
-      };
-    }
 
     const headersMap = { Accept: 'application/json', 'Content-Type': 'application/json' };
     headersMap[config.headerName] = config.headerValue;
@@ -408,9 +428,10 @@ export async function publishOtoBlogLanguageAction(clientId, draftInput, aiSetti
       language: lang,
       ok: response.ok,
       status: response.status,
+      ms: Date.now() - started,
     };
   } catch (error) {
-    return { error: error.message || 'Dil gönderilemedi.', language, ok: false };
+    return { error: error.message || 'Dil gönderilemedi.', language, ok: false, ms: Date.now() - started };
   }
 }
 
