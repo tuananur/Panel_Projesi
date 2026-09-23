@@ -162,7 +162,7 @@ export default function OtoBlogSettingsModal({ client, onClose, onSaved }) {
           <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
             <div className="input-label" style={{ marginBottom: '0.55rem' }}>Site → Dashboard (tam oto)</div>
             <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '0.75rem' }}>
-              Sitedeki kutu bu endpoint’e POST atar. Header adı sabit: X-OTO-BLOG-KEY
+              Sitedeki kutu bu endpoint’e POST atar. Ayarlardaki Header değeri (site key) de geçer. Ayrı key şart değil.
             </p>
             <div className="input-group">
               <label className="input-label">Endpoint</label>

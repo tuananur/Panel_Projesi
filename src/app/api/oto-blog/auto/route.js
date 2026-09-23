@@ -4,6 +4,8 @@ import {
   INBOUND_HEADER,
   createAutoJob,
   enqueueAutoJobRun,
+  findClientByAutoKey,
+  readAutoAuthKey,
   resolveAppUrl,
 } from '@/lib/oto-blog-auto';
 import { parseOtoBlogConfig } from '@/lib/oto-blog';
@@ -12,9 +14,9 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function POST(request) {
-  const key = String(request.headers.get(INBOUND_HEADER) || '').trim();
+  const key = readAutoAuthKey(request);
   if (!key) {
-    return NextResponse.json({ ok: false, error: `${INBOUND_HEADER} gerekli.` }, { status: 401 });
+    return NextResponse.json({ ok: false, error: `${INBOUND_HEADER} veya X-POST-KEY gerekli.` }, { status: 401 });
   }
 
   let body = {};
@@ -28,8 +30,8 @@ export async function POST(request) {
   if (!topic) return NextResponse.json({ ok: false, error: 'topic boş.' }, { status: 400 });
   if (topic.length > 2000) return NextResponse.json({ ok: false, error: 'topic çok uzun.' }, { status: 400 });
 
-  const client = await prisma.client.findUnique({ where: { otoBlogInboundKey: key } });
-  if (!client || client.websiteType !== 'BEYIN_ATOLYESI') {
+  const client = await findClientByAutoKey(key);
+  if (!client) {
     return NextResponse.json({ ok: false, error: 'Geçersiz anahtar.' }, { status: 401 });
   }
 

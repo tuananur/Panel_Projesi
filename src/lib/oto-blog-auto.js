@@ -17,6 +17,26 @@ export function generateOtoBlogInboundKey() {
   return randomBytes(24).toString('hex');
 }
 
+export function readAutoAuthKey(request) {
+  const inbound = String(request.headers.get(INBOUND_HEADER) || '').trim();
+  if (inbound) return inbound;
+  return String(request.headers.get('x-post-key') || '').trim();
+}
+
+export async function findClientByAutoKey(key) {
+  const clean = String(key || '').trim();
+  if (!clean) return null;
+
+  const byColumn = await prisma.client.findUnique({ where: { otoBlogInboundKey: clean } });
+  if (byColumn && byColumn.websiteType === 'BEYIN_ATOLYESI') return byColumn;
+
+  const clients = await prisma.client.findMany({ where: { websiteType: 'BEYIN_ATOLYESI' } });
+  return clients.find((client) => {
+    const config = parseOtoBlogConfig(client.otoBlogConfig, client.website);
+    return config.inboundKey === clean || config.headerValue === clean;
+  }) || null;
+}
+
 export async function resolveAppUrl() {
   return APP_ORIGIN;
 }

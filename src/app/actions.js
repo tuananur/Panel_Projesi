@@ -1894,7 +1894,7 @@ function sanitizeOtoBlogConfig(raw) {
     languagesUrl,
     headerName,
     headerValue,
-    inboundKey: String(raw.inboundKey || '').trim(),
+    inboundKey: String(raw.inboundKey || raw.headerValue || '').trim(),
     bodyJson: String(raw.bodyJson || ''),
   };
 }
