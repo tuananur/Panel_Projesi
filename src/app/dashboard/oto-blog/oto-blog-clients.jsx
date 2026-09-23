@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { updateClientWebsiteTypeAction } from '@/app/actions';
 import { parseOtoBlogConfig } from '@/lib/oto-blog';
 import OtoBlogSettingsModal from './oto-blog-settings-modal';
@@ -70,7 +71,7 @@ export default function OtoBlogClients({ clients }) {
             <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               <th style={{ padding: '0.7rem 0.6rem', borderBottom: '1px solid var(--border-color)' }}>Müşteri</th>
               <th style={{ padding: '0.7rem 0.6rem', borderBottom: '1px solid var(--border-color)' }}>Site</th>
-              <th style={{ padding: '0.7rem 0.6rem', borderBottom: '1px solid var(--border-color)', width: '320px' }}>Site altyapısı</th>
+              <th style={{ padding: '0.7rem 0.6rem', borderBottom: '1px solid var(--border-color)', width: '420px' }}>Site altyapısı</th>
             </tr>
           </thead>
           <tbody>
@@ -113,6 +114,15 @@ export default function OtoBlogClients({ clients }) {
                       >
                         Ayarlar
                       </button>
+                      {isBa ? (
+                        <Link href={`/dashboard/oto-blog/${client.id}`} className="btn btn-primary" style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                          Blog oluştur
+                        </Link>
+                      ) : (
+                        <button type="button" className="btn btn-primary" disabled style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', opacity: 0.45 }}>
+                          Blog oluştur
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
