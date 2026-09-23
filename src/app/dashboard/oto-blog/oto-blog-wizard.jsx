@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
+  expandOtoBlogTopicFromKeywordAction,
   fetchOtoBlogLanguagesAction,
   generateOtoBlogContentAction,
   generateOtoBlogImageAction,
@@ -13,7 +14,7 @@ import {
   saveOtoBlogAiSettingsAction,
   saveOtoBlogDraftAction,
 } from './oto-blog-actions';
-import { IMAGE_MODELS, TEXT_MODELS, emptyOtoBlogDraft, isTurkishLanguage } from '@/lib/oto-blog';
+import { IMAGE_MODELS, TEXT_MODELS, emptyOtoBlogDraft, isTurkishLanguage, keywordWasUsed, rememberUsedKeywords } from '@/lib/oto-blog';
 
 const STEPS = [
   { id: 1, label: 'Konu' },
@@ -25,7 +26,7 @@ const STEPS = [
   { id: 7, label: 'Taslak' },
 ];
 
-export default function OtoBlogWizard({ client, initialDraft, initialAi, initialImageUrl }) {
+export default function OtoBlogWizard({ client, initialDraft, initialAi, initialImageUrl, keywordSuggestions = [] }) {
   const [step, setStep] = useState(initialDraft.published ? 7 : (initialDraft.step || 1));
   const [draft, setDraft] = useState(() => ({ ...emptyOtoBlogDraft(), ...initialDraft }));
   const [ai, setAi] = useState(initialAi);
@@ -37,6 +38,13 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
   const [imageUrl, setImageUrl] = useState(initialImageUrl || (initialDraft.imageToken ? `/api/oto-blog/image/${initialDraft.imageToken}` : ''));
 
   const itemsText = useMemo(() => (draft.items || []).join('\n'), [draft.items]);
+  const suggestions = useMemo(
+    () => (keywordSuggestions || []).map((item) => ({
+      ...item,
+      used: item.used || keywordWasUsed(item.keyword, draft.usedKeywords),
+    })),
+    [keywordSuggestions, draft.usedKeywords],
+  );
 
   function patchDraft(partial) {
     setDraft((current) => ({ ...current, ...partial }));
@@ -104,11 +112,37 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
       setInfo('Bazı diller hata verdi. Görsel duruyor, tekrar dene.');
       return;
     }
-    const nextDraft = { ...draft, published: true, step: 7 };
-    setDraft(nextDraft);
-    await persist(nextDraft);
+    if (result.draft) setDraft(result.draft);
+    else {
+      const usedExtra = draft.sourceKeyword || draft.topic;
+      setDraft({ ...draft, published: true, step: 7, usedKeywords: rememberUsedKeywords(draft.usedKeywords, usedExtra) });
+    }
     setStep(7);
     setInfo(null);
+  }
+
+  async function pickKeyword(item) {
+    setBusy(`kw:${item.keyword}`);
+    setError(null);
+    setInfo(item.used ? 'Bu kelimeden daha önce blog yazılmış.' : null);
+    const result = await expandOtoBlogTopicFromKeywordAction(client.id, item.keyword, ai);
+    setBusy('');
+    if (!result.success) return setError(result.error);
+    patchDraft({ topic: result.topic, sourceKeyword: item.keyword });
+  }
+
+  async function startNewBlog() {
+    const next = {
+      ...emptyOtoBlogDraft(),
+      usedKeywords: rememberUsedKeywords(draft.usedKeywords, draft.sourceKeyword),
+    };
+    setDraft(next);
+    setPublishResults(null);
+    setImageUrl('');
+    setError(null);
+    setInfo(null);
+    setStep(1);
+    await persist(next);
   }
 
   async function saveAi() {
@@ -179,13 +213,77 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         {step === 1 && (
           <div>
-            <label className="input-label">Blog konusu</label>
-            <textarea className="input-field" rows={4} value={draft.topic} onChange={(e) => patchDraft({ topic: e.target.value })} placeholder="Örn: Kaygı ile baş etmek için günlük rutinler" />
-            <div style={{ marginTop: '1rem' }}>
-              <button type="button" className="btn btn-primary" disabled={!draft.topic.trim() || busy} onClick={goGenerateOutline}>
-                {busy === 'outline' ? 'Üretiliyor…' : 'Devam et'}
-              </button>
+            <div className="input-group" style={{ marginBottom: '1rem' }}>
+              <label className="input-label" htmlFor="oto-blog-topic">Blog konusu</label>
+              <textarea
+                id="oto-blog-topic"
+                className="input-field"
+                rows={5}
+                value={draft.topic}
+                onChange={(e) => patchDraft({ topic: e.target.value, sourceKeyword: draft.sourceKeyword })}
+                placeholder="Örn: Kaygı ile baş etmek için günlük rutinler"
+                style={{ minHeight: '8.5rem' }}
+              />
             </div>
+
+            <div style={{ marginBottom: '1.15rem' }}>
+              <div className="input-label" style={{ marginBottom: '0.55rem' }}>Ubersuggest önerileri</div>
+              {suggestions.length ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {suggestions.map((item) => {
+                    const loading = busy === `kw:${item.keyword}`;
+                    const selected = draft.sourceKeyword === item.keyword;
+                    return (
+                      <button
+                        key={item.keyword}
+                        type="button"
+                        disabled={!!busy}
+                        onClick={() => pickKeyword(item)}
+                        title={item.volume ? `Hacim: ${item.volume}` : item.keyword}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          maxWidth: '100%',
+                          padding: '0.45rem 0.75rem',
+                          borderRadius: '999px',
+                          border: selected ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                          background: item.used ? 'rgba(16, 185, 129, 0.08)' : selected ? 'rgba(59, 130, 246, 0.12)' : 'rgba(255,255,255,0.03)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          cursor: busy ? 'wait' : 'pointer',
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{loading ? 'Konu yazılıyor…' : item.keyword}</span>
+                        {item.used && (
+                          <span style={{
+                            flexShrink: 0,
+                            fontSize: '0.62rem',
+                            fontWeight: 800,
+                            letterSpacing: '0.02em',
+                            color: '#10b981',
+                            background: 'rgba(16, 185, 129, 0.12)',
+                            border: '1px solid rgba(16, 185, 129, 0.28)',
+                            borderRadius: '999px',
+                            padding: '0.12rem 0.4rem',
+                          }}>
+                            Blog yazıldı
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-muted" style={{ fontSize: '0.78rem', margin: 0 }}>Bu müşteri için kayıtlı Ubersuggest kelime önerisi yok.</p>
+              )}
+            </div>
+
+            <button type="button" className="btn btn-primary" disabled={!draft.topic.trim() || busy} onClick={goGenerateOutline}>
+              {busy === 'outline' ? 'Üretiliyor…' : 'Devam et'}
+            </button>
           </div>
         )}
 
@@ -324,9 +422,12 @@ export default function OtoBlogWizard({ client, initialDraft, initialAi, initial
               <div className="text-muted" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.4rem' }}>İçerik</div>
               <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: '0.85rem' }} dangerouslySetInnerHTML={{ __html: draft.content }} />
             </div>
-            <Link href="/dashboard/oto-blog" className="btn btn-primary" style={{ alignSelf: 'flex-start', textDecoration: 'none' }}>
-              Oto Blog’a dön
-            </Link>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button type="button" className="btn" onClick={startNewBlog}>Yeni blog oluştur</button>
+              <Link href="/dashboard/oto-blog" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                Oto Blog’a dön
+              </Link>
+            </div>
           </div>
         )}
       </div>

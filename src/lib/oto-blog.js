@@ -128,6 +128,8 @@ export function emptyOtoBlogDraft() {
     selectedLangIds: [1],
     translations: [],
     published: false,
+    sourceKeyword: '',
+    usedKeywords: [],
   };
 }
 
@@ -138,10 +140,63 @@ export function parseOtoBlogDraft(raw) {
     const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
     const selected = Array.isArray(parsed.selectedLangIds) ? parsed.selectedLangIds.map(Number) : [1];
     if (!selected.includes(1)) selected.unshift(1);
-    return { ...defaults, ...parsed, selectedLangIds: [...new Set(selected)] };
+    const usedKeywords = uniqueKeywords(parsed.usedKeywords);
+    return {
+      ...defaults,
+      ...parsed,
+      selectedLangIds: [...new Set(selected)],
+      sourceKeyword: String(parsed.sourceKeyword || '').trim(),
+      usedKeywords,
+    };
   } catch {
     return defaults;
   }
+}
+
+export function normalizeKeyword(value) {
+  return String(value || '')
+    .toLocaleLowerCase('tr-TR')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function uniqueKeywords(values) {
+  const seen = new Set();
+  const list = [];
+  for (const value of Array.isArray(values) ? values : []) {
+    const raw = String(value || '').trim();
+    const key = normalizeKeyword(raw);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    list.push(raw);
+  }
+  return list;
+}
+
+export function rememberUsedKeywords(current, extra) {
+  return uniqueKeywords([...(current || []), extra]);
+}
+
+export function isRawKeywordTopic(text) {
+  const clean = String(text || '').trim();
+  if (!clean) return false;
+  const words = clean.split(/\s+/);
+  if (words.length <= 5) return true;
+  if (/[.?!]/.test(clean)) return false;
+  return words.length <= 8 && clean === clean.toLocaleLowerCase('tr-TR');
+}
+
+export function keywordWasUsed(keyword, usedKeywords, blogTexts = []) {
+  const needle = normalizeKeyword(keyword);
+  if (needle.length < 3) return false;
+  if ((usedKeywords || []).some((item) => normalizeKeyword(item) === needle)) return true;
+  return (blogTexts || []).some((text) => {
+    const hay = normalizeKeyword(text);
+    if (!hay) return false;
+    if (hay === needle) return true;
+    return needle.length >= 6 && hay.includes(needle);
+  });
 }
 
 export const LANGUAGE_LABELS = {

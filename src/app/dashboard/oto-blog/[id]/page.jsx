@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { can, getRolePermissions } from '@/lib/permissions';
 import { parseOtoBlogAiSettings, parseOtoBlogDraft } from '@/lib/oto-blog';
+import { loadOtoBlogKeywordSuggestions } from '@/lib/oto-blog-suggestions';
 import OtoBlogWizard from '../oto-blog-wizard';
 
 export const metadata = {
@@ -36,6 +37,7 @@ export default async function OtoBlogCreatePage({ params }) {
 
   const draft = parseOtoBlogDraft(client.otoBlogDraft);
   const imageUrl = draft.imageToken ? `/api/oto-blog/image/${draft.imageToken}` : '';
+  const keywordSuggestions = await loadOtoBlogKeywordSuggestions(client.id, draft.usedKeywords);
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: 880 }}>
@@ -44,6 +46,7 @@ export default async function OtoBlogCreatePage({ params }) {
         initialDraft={draft}
         initialAi={parseOtoBlogAiSettings(client.otoBlogAiSettings)}
         initialImageUrl={imageUrl}
+        keywordSuggestions={keywordSuggestions}
       />
     </div>
   );

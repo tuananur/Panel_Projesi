@@ -350,12 +350,20 @@ input, button, select, textarea {
 }
 
 .input-field {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background-color: var(--input-bg, rgba(15, 23, 42, 0.5));
   color: var(--text-primary);
   transition: var(--transition-normal);
+}
+
+textarea.input-field {
+  min-height: 7.5rem;
+  resize: vertical;
+  line-height: 1.55;
 }
 
 .input-field:focus {

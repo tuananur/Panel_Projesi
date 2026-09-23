@@ -8,11 +8,13 @@ import { can, getRolePermissions } from '@/lib/permissions';
 import { geminiGenerateImage, geminiGenerateText, parseModelJson } from '@/lib/gemini';
 import {
   defaultOtoBlogAiSettings,
+  isRawKeywordTopic,
   isTurkishLanguage,
   normalizeLanguages,
   parseOtoBlogAiSettings,
   parseOtoBlogConfig,
   parseOtoBlogDraft,
+  rememberUsedKeywords,
 } from '@/lib/oto-blog';
 
 const GEMINI_SETTING_KEY = 'gemini_ai_config';
@@ -108,6 +110,35 @@ export async function saveOtoBlogAiSettingsAction(clientId, raw) {
     return { success: true, settings: config };
   } catch (error) {
     return { error: error.message || 'AI ayarları kaydedilemedi.' };
+  }
+}
+
+export async function expandOtoBlogTopicFromKeywordAction(clientId, keyword, aiSettings) {
+  try {
+    await requireAccess();
+    const client = await loadClient(clientId);
+    const cleanKeyword = String(keyword || '').trim();
+    if (!cleanKeyword) return { error: 'Kelime boş.' };
+
+    if (!isRawKeywordTopic(cleanKeyword)) {
+      return { success: true, topic: cleanKeyword, expanded: false };
+    }
+
+    const apiKey = await getGeminiKey();
+    const settings = mergeAiSettings(client.otoBlogAiSettings, aiSettings);
+    const text = await geminiGenerateText({
+      apiKey,
+      model: settings.textModel,
+      systemPrompt: settings.textSystemPrompt,
+      json: true,
+      userPrompt: `Müşteri: ${client.companyName}\nSite: ${client.website || '-'}\nAnahtar kelime: ${cleanKeyword}\n\nBu bir arama kelimesi, blog konusu olarak ham kalır. Kelimeyi koruyarak 1 cümlelik net bir BLOG KONUSU yaz. Başlık yazma, tırnak kullanma. Sadece JSON döndür: {"topic":"..."}`,
+    });
+    const parsed = parseModelJson(text);
+    const topic = String(parsed.topic || '').trim();
+    if (!topic) throw new Error('Konu boş geldi.');
+    return { success: true, topic, expanded: true };
+  } catch (error) {
+    return { error: error.message || 'Konu üretilemedi.' };
   }
 }
 
@@ -364,6 +395,18 @@ export async function publishOtoBlogAction(clientId, draftInput, aiSettings) {
     const allOk = results.every((item) => item.ok);
     if (allOk && draft.imageToken) {
       await prisma.otoBlogTempImage.deleteMany({ where: { token: draft.imageToken } });
+    }
+
+    if (allOk) {
+      const usedExtra = draft.sourceKeyword || (isRawKeywordTopic(draft.topic) ? draft.topic : '');
+      const nextDraft = {
+        ...draft,
+        published: true,
+        step: 7,
+        usedKeywords: rememberUsedKeywords(draft.usedKeywords, usedExtra),
+      };
+      await saveDraft(client.id, nextDraft);
+      return { success: true, results, allOk, draft: nextDraft };
     }
 
     return { success: allOk, results, allOk };
