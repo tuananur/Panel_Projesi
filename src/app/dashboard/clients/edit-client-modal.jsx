@@ -116,7 +116,7 @@ export default function EditClientModal({ client }) {
 
               {websiteType === 'BEYIN_ATOLYESI' && (
                 <div className="input-group animate-fade-in">
-                  <label htmlFor="blogApiUrl" className="input-label">Blog API URL</label>
+                  <label htmlFor="blogApiUrl" className="input-label">Blog API URL (isteğe bağlı)</label>
                   <input 
                     type="url" 
                     id="blogApiUrl" 
@@ -124,10 +124,9 @@ export default function EditClientModal({ client }) {
                     className="input-field" 
                     defaultValue={client.blogApiUrl || ''}
                     placeholder="https://..."
-                    required={websiteType === 'BEYIN_ATOLYESI'}
                   />
                   <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.4rem' }}>
-                    * Bu adresten bloglar otomatik olarak çekilecektir.
+                    Boş bırakılabilir. Doldurulursa bloglar bu adresten otomatik çekilir.
                   </p>
                 </div>
               )}
