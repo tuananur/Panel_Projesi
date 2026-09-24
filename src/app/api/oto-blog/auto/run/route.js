@@ -1,10 +1,5 @@
 import { after, NextResponse } from 'next/server';
-import {
-  RUN_HEADER,
-  continueAutoJob,
-  enqueueAutoJobRun,
-  resolveAppUrl,
-} from '@/lib/oto-blog-auto';
+import { RUN_HEADER, claimNextQueued, continueAutoJob } from '@/lib/oto-blog-auto';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -20,11 +15,23 @@ export async function POST(request) {
   const jobId = Number(body.jobId);
   if (!token || !jobId) return NextResponse.json({ ok: false }, { status: 400 });
 
-  const origin = await resolveAppUrl();
   after(async () => {
-    const result = await continueAutoJob(jobId, token, 50000);
-    if (result.ok && !result.done) {
-      await enqueueAutoJobRun(origin, jobId, token);
+    const deadline = Date.now() + 270000;
+    let currentId = jobId;
+    let currentToken = token;
+    let clientId = null;
+
+    while (Date.now() < deadline - 8000) {
+      const slice = Math.min(50000, deadline - Date.now() - 8000);
+      const result = await continueAutoJob(currentId, currentToken, slice);
+      clientId = result.clientId || clientId;
+      if (result.blocked || !result.ok) return;
+      if (!result.done) continue;
+      if (!clientId) return;
+      const next = await claimNextQueued(clientId);
+      if (!next) return;
+      currentId = next.id;
+      currentToken = next.continueToken;
     }
   });
 

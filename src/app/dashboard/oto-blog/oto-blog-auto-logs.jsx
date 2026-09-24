@@ -59,7 +59,7 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
           const open = openId === job.id;
           const stuck = job.status === 'running' && Date.now() - new Date(job.updatedAt).getTime() > STUCK_MS;
           const badge = jobBadge(job, stuck);
-          const canResume = stuck || job.status === 'error';
+          const canResume = stuck || job.status === 'error' || (job.status === 'running' && job.phase === 'queued');
           const canCancel = job.status !== 'done' && job.status !== 'cancelled';
           return (
             <div key={job.id} style={{ border: '1px solid var(--border-color)', borderRadius: 10, overflow: 'hidden' }}>

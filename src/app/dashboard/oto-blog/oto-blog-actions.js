@@ -500,7 +500,7 @@ export async function resumeOtoBlogAutoJobAction(jobId) {
     if (job.status === 'queued') return { error: 'İş sırada bekliyor, otomatik başlayacak.' };
 
     const { enqueueAutoJobRun, isJobStuck, resolveAppUrl } = await import('@/lib/oto-blog-auto');
-    if (job.status === 'running' && !isJobStuck(job)) {
+    if (job.status === 'running' && !isJobStuck(job) && job.phase !== 'queued') {
       return { error: 'İş şu an çalışıyor.' };
     }
 

@@ -48,35 +48,66 @@ export async function resolveAppUrl() {
   return APP_ORIGIN;
 }
 
+async function logRunFail(jobId, detail) {
+  const current = await prisma.otoBlogAutoJob.findUnique({ where: { id: Number(jobId) } });
+  if (current) await writeJob(current, {}, `Devam isteği başarısız (${detail})`);
+}
+
 export async function enqueueAutoJobRun(origin, jobId, token) {
-  const response = await fetch(`${origin}/api/oto-blog/auto/run`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', [RUN_HEADER]: token },
-    body: JSON.stringify({ jobId }),
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    const current = await prisma.otoBlogAutoJob.findUnique({ where: { id: Number(jobId) } });
-    if (current) {
-      await writeJob(current, {}, `Devam isteği başarısız (${response.status})`);
+  try {
+    const response = await fetch(`${origin}/api/oto-blog/auto/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', [RUN_HEADER]: token },
+      body: JSON.stringify({ jobId }),
+      cache: 'no-store',
+    });
+    if (response.ok) return response;
+    await logRunFail(jobId, response.status);
+    if (response.status === 508) {
+      await continueAutoJob(jobId, token, 50000);
     }
+    return response;
+  } catch (error) {
+    await logRunFail(jobId, error.message || 'ağ');
+    await continueAutoJob(jobId, token, 50000);
+    return null;
   }
-  return response;
 }
 
 export async function continueAutoJob(jobId, token, budgetMs = 50000) {
   const started = Date.now();
-  let result = { ok: true, done: false, phase: null };
+  let result = { ok: true, done: false, phase: null, clientId: null };
   while (Date.now() - started < budgetMs) {
     result = await processAutoJobStep(jobId, token);
     if (result.blocked) return result;
     if (!result.ok || result.done) break;
   }
-  if (result.done) {
+  if (!result.clientId) {
     const job = await prisma.otoBlogAutoJob.findUnique({ where: { id: Number(jobId) }, select: { clientId: true } });
-    if (job) await kickClientQueue(job.clientId);
+    result.clientId = job?.clientId || null;
   }
   return result;
+}
+
+export async function claimNextQueued(clientId) {
+  const next = await prisma.otoBlogAutoJob.findFirst({
+    where: { clientId, status: 'queued' },
+    orderBy: { id: 'asc' },
+  });
+  if (!next) return null;
+  const claimed = await prisma.otoBlogAutoJob.updateMany({
+    where: { id: next.id, status: 'queued' },
+    data: { status: 'running', statusText: 'Başlıyor' },
+  });
+  if (claimed.count === 0) return null;
+  await writeJob(next, {}, 'Kuyruk sırası geldi, başlıyor');
+  return prisma.otoBlogAutoJob.findUnique({ where: { id: next.id } });
+}
+
+function isUnstartedRunning(job, now = Date.now()) {
+  if (!job || job.status !== 'running' || job.phase !== 'queued') return false;
+  const updated = new Date(job.updatedAt).getTime();
+  return Number.isFinite(updated) && now - updated > 15000;
 }
 
 export async function kickClientQueue(clientId) {
@@ -85,7 +116,12 @@ export async function kickClientQueue(clientId) {
     orderBy: { id: 'asc' },
   });
 
-  if (running && !isJobStuck(running)) return { started: false };
+  if (running && !isJobStuck(running)) {
+    if (!isUnstartedRunning(running)) return { started: false };
+    await writeJob(running, {}, 'Başlatma tekrar deneniyor');
+    await enqueueAutoJobRun(await resolveAppUrl(), running.id, running.continueToken);
+    return { started: true, jobId: running.id, recovered: true };
+  }
 
   if (running && isJobStuck(running)) {
     const released = await prisma.otoBlogAutoJob.updateMany({
@@ -104,21 +140,9 @@ export async function kickClientQueue(clientId) {
     }
   }
 
-  const next = await prisma.otoBlogAutoJob.findFirst({
-    where: { clientId, status: 'queued' },
-    orderBy: { id: 'asc' },
-  });
+  const next = await claimNextQueued(clientId);
   if (!next) return { started: false };
-
-  const claimed = await prisma.otoBlogAutoJob.updateMany({
-    where: { id: next.id, status: 'queued' },
-    data: { status: 'running', statusText: 'Başlıyor' },
-  });
-  if (claimed.count === 0) return { started: false };
-
-  await writeJob(next, {}, 'Kuyruk sırası geldi, başlıyor');
-  const origin = await resolveAppUrl();
-  await enqueueAutoJobRun(origin, next.id, next.continueToken);
+  await enqueueAutoJobRun(await resolveAppUrl(), next.id, next.continueToken);
   return { started: true, jobId: next.id };
 }
 
@@ -235,15 +259,15 @@ export async function processAutoJobStep(jobId, token) {
     where: { id: Number(jobId) },
     include: { client: true },
   });
-  if (!job || job.continueToken !== token) return { ok: false, error: 'Job bulunamadı.' };
+  if (!job || job.continueToken !== token) return { ok: false, error: 'Job bulunamadı.', clientId: job?.clientId || null };
   if (job.status === 'done' || job.status === 'error' || job.status === 'cancelled') {
-    return { ok: true, done: true, phase: job.phase };
+    return { ok: true, done: true, phase: job.phase, clientId: job.clientId };
   }
   if (job.status === 'queued') {
     const running = await prisma.otoBlogAutoJob.findFirst({
       where: { clientId: job.clientId, status: 'running', NOT: { id: job.id } },
     });
-    if (running && !isJobStuck(running)) return { ok: true, done: false, blocked: true, phase: 'queued' };
+    if (running && !isJobStuck(running)) return { ok: true, done: false, blocked: true, phase: 'queued', clientId: job.clientId };
     if (running && isJobStuck(running)) {
       await writeJob(running, {
         status: 'error',
@@ -256,10 +280,10 @@ export async function processAutoJobStep(jobId, token) {
 
   try {
     const next = await runPhase(job);
-    return { ok: true, done: next.phase === 'done' || next.phase === 'error', phase: next.phase };
+    return { ok: true, done: next.phase === 'done' || next.phase === 'error', phase: next.phase, clientId: job.clientId };
   } catch (error) {
     await failJob(job, error);
-    return { ok: false, done: true, phase: 'error', error: error.message };
+    return { ok: false, done: true, phase: 'error', error: error.message, clientId: job.clientId };
   }
 }
 
