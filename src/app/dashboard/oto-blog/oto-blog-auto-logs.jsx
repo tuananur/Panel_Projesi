@@ -5,11 +5,14 @@ import { cancelOtoBlogAutoJobAction, getOtoBlogAutoJobsAction, resumeOtoBlogAuto
 
 const STUCK_MS = 2 * 60 * 1000;
 
-function statusColor(status) {
-  if (status === 'done') return '#10b981';
-  if (status === 'error') return '#ef4444';
-  if (status === 'cancelled') return '#94a3b8';
-  return '#3b82f6';
+function jobBadge(job, stuck) {
+  if (stuck) return { text: 'Kilitlendi', color: '#f59e0b' };
+  if (job.status === 'done') return { text: 'Tamamlandı', color: '#10b981' };
+  if (job.status === 'error') return { text: 'Hata', color: '#ef4444' };
+  if (job.status === 'cancelled') return { text: 'İptal', color: '#94a3b8' };
+  if (job.status === 'queued') return { text: 'Sırada bekliyor', color: '#64748b' };
+  if (job.status === 'running') return { text: 'Şu an yapılıyor', color: '#3b82f6' };
+  return { text: job.status, color: '#3b82f6' };
 }
 
 function formatWhen(value) {
@@ -53,9 +56,11 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
         {jobs.map((job) => {
-          const color = statusColor(job.status);
           const open = openId === job.id;
           const stuck = job.status === 'running' && Date.now() - new Date(job.updatedAt).getTime() > STUCK_MS;
+          const badge = jobBadge(job, stuck);
+          const canResume = stuck || job.status === 'error';
+          const canCancel = job.status !== 'done' && job.status !== 'cancelled';
           return (
             <div key={job.id} style={{ border: '1px solid var(--border-color)', borderRadius: 10, overflow: 'hidden' }}>
               <button
@@ -80,34 +85,51 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
                 {job.refinedTopic && job.refinedTopic !== job.topic && (
                   <div className="text-muted" style={{ fontSize: '0.78rem', marginTop: '0.2rem' }}>AI konu: {job.refinedTopic}</div>
                 )}
-                <div style={{ marginTop: '0.45rem', fontSize: '0.78rem', fontWeight: 800, color }}>
-                  {job.statusText}{job.title ? ` · ${job.title}` : ''}
-                  {stuck ? ' · kilitlendi' : ''}
+                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.02em',
+                    color: badge.color,
+                    background: `${badge.color}1a`,
+                    border: `1px solid ${badge.color}55`,
+                    borderRadius: 999,
+                    padding: '0.18rem 0.55rem',
+                  }}>
+                    {badge.text}
+                  </span>
                 </div>
+                {job.statusText && (
+                  <div style={{ marginTop: '0.35rem', fontSize: '0.82rem', fontWeight: 700 }}>
+                    {job.statusText}{job.title ? ` · ${job.title}` : ''}
+                  </div>
+                )}
               </button>
               {open && (
                 <div style={{ padding: '0 1rem 0.9rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
                     <span className="text-muted" style={{ fontSize: '0.72rem' }}>
-                      adım: {job.phase || '—'} · son güncelleme: {formatWhen(job.updatedAt)}
+                      son güncelleme: {formatWhen(job.updatedAt)}
                     </span>
-                    {job.status !== 'done' && job.status !== 'cancelled' && (
+                    {canCancel && (
                       <div style={{ display: 'flex', gap: '0.4rem' }}>
-                        <button
-                          type="button"
-                          className="btn btn-primary"
-                          disabled={busyId === job.id}
-                          onClick={async (event) => {
-                            event.stopPropagation();
-                            setBusyId(job.id);
-                            const result = await resumeOtoBlogAutoJobAction(job.id);
-                            if (result.error) setError(result.error);
-                            setBusyId(null);
-                          }}
-                          style={{ fontSize: '0.72rem', padding: '0.35rem 0.7rem' }}
-                        >
-                          {busyId === job.id ? '…' : 'Devam ettir'}
-                        </button>
+                        {canResume && (
+                          <button
+                            type="button"
+                            className="btn btn-primary"
+                            disabled={busyId === job.id}
+                            onClick={async (event) => {
+                              event.stopPropagation();
+                              setBusyId(job.id);
+                              const result = await resumeOtoBlogAutoJobAction(job.id);
+                              if (result.error) setError(result.error);
+                              setBusyId(null);
+                            }}
+                            style={{ fontSize: '0.72rem', padding: '0.35rem 0.7rem' }}
+                          >
+                            {busyId === job.id ? '…' : 'Devam ettir'}
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="btn"

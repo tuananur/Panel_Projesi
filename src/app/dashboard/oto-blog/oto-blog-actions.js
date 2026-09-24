@@ -496,6 +496,13 @@ export async function resumeOtoBlogAutoJobAction(jobId) {
     const job = await prisma.otoBlogAutoJob.findUnique({ where: { id } });
     if (!job) return { error: 'İş bulunamadı.' };
     if (job.status === 'done') return { error: 'Bu iş zaten bitti.' };
+    if (job.status === 'cancelled') return { error: 'Bu iş iptal edildi.' };
+    if (job.status === 'queued') return { error: 'İş sırada bekliyor, otomatik başlayacak.' };
+
+    const { enqueueAutoJobRun, isJobStuck, resolveAppUrl } = await import('@/lib/oto-blog-auto');
+    if (job.status === 'running' && !isJobStuck(job)) {
+      return { error: 'İş şu an çalışıyor.' };
+    }
 
     if (job.status === 'error') {
       const rollbackPhase = job.phase === 'error' ? 'image_prompt' : job.phase;
@@ -510,7 +517,6 @@ export async function resumeOtoBlogAutoJobAction(jobId) {
       });
     }
 
-    const { enqueueAutoJobRun, resolveAppUrl } = await import('@/lib/oto-blog-auto');
     const origin = await resolveAppUrl();
     await enqueueAutoJobRun(origin, job.id, job.continueToken);
     return { success: true };
