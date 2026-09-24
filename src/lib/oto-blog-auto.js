@@ -11,7 +11,14 @@ import {
 
 export const INBOUND_HEADER = 'X-OTO-BLOG-KEY';
 export const RUN_HEADER = 'X-OTO-RUN-KEY';
+export const STUCK_MS = 2 * 60 * 1000;
 const GEMINI_SETTING_KEY = 'gemini_ai_config';
+
+export function isJobStuck(job, now = Date.now()) {
+  if (!job || job.status !== 'running') return false;
+  const updated = new Date(job.updatedAt).getTime();
+  return Number.isFinite(updated) && now - updated > STUCK_MS;
+}
 
 export function generateOtoBlogInboundKey() {
   return randomBytes(24).toString('hex');
@@ -75,9 +82,27 @@ export async function continueAutoJob(jobId, token, budgetMs = 50000) {
 export async function kickClientQueue(clientId) {
   const running = await prisma.otoBlogAutoJob.findFirst({
     where: { clientId, status: 'running' },
-    select: { id: true },
+    orderBy: { id: 'asc' },
   });
-  if (running) return { started: false };
+
+  if (running && !isJobStuck(running)) return { started: false };
+
+  if (running && isJobStuck(running)) {
+    const released = await prisma.otoBlogAutoJob.updateMany({
+      where: { id: running.id, status: 'running', updatedAt: { lt: new Date(Date.now() - STUCK_MS) } },
+      data: {
+        status: 'error',
+        phase: 'error',
+        statusText: 'Kilitlendi',
+        error: 'İş kilitlendi, sıradaki başlıyor.',
+      },
+    });
+    if (released.count > 0) {
+      await writeJob(running, {}, 'Kilitlendi, sıradaki işe geçildi');
+    } else {
+      return { started: false };
+    }
+  }
 
   const next = await prisma.otoBlogAutoJob.findFirst({
     where: { clientId, status: 'queued' },
@@ -85,9 +110,32 @@ export async function kickClientQueue(clientId) {
   });
   if (!next) return { started: false };
 
+  const claimed = await prisma.otoBlogAutoJob.updateMany({
+    where: { id: next.id, status: 'queued' },
+    data: { status: 'running', statusText: 'Başlıyor' },
+  });
+  if (claimed.count === 0) return { started: false };
+
+  await writeJob(next, {}, 'Kuyruk sırası geldi, başlıyor');
   const origin = await resolveAppUrl();
   await enqueueAutoJobRun(origin, next.id, next.continueToken);
   return { started: true, jobId: next.id };
+}
+
+export async function cancelAutoJob(jobId) {
+  const job = await prisma.otoBlogAutoJob.findUnique({ where: { id: Number(jobId) } });
+  if (!job) return { ok: false, error: 'İş bulunamadı.' };
+  if (job.status === 'done') return { ok: false, error: 'Biten iş iptal edilemez.' };
+  if (job.status === 'cancelled') return { ok: true, job };
+
+  await writeJob(job, {
+    status: 'cancelled',
+    phase: 'cancelled',
+    statusText: 'İptal edildi',
+    error: null,
+  }, 'İptal edildi');
+  await kickClientQueue(job.clientId);
+  return { ok: true };
 }
 
 async function getGeminiKey() {
@@ -131,7 +179,16 @@ function draftFields(payload) {
 }
 
 async function writeJob(job, patch, logText) {
-  const current = await prisma.otoBlogAutoJob.findUnique({ where: { id: job.id }, select: { logsJson: true } });
+  const current = await prisma.otoBlogAutoJob.findUnique({ where: { id: job.id }, select: { logsJson: true, status: true } });
+  if (
+    current
+    && (current.status === 'cancelled' || current.status === 'error')
+    && patch.status
+    && patch.status !== 'cancelled'
+    && patch.status !== 'error'
+  ) {
+    return current;
+  }
   const logs = parseLogs(current?.logsJson);
   if (logText) logs.push({ at: new Date().toISOString(), text: logText });
   const next = await prisma.otoBlogAutoJob.update({
@@ -179,13 +236,22 @@ export async function processAutoJobStep(jobId, token) {
     include: { client: true },
   });
   if (!job || job.continueToken !== token) return { ok: false, error: 'Job bulunamadı.' };
-  if (job.phase === 'done' || job.phase === 'error') return { ok: true, done: true, phase: job.phase };
+  if (job.status === 'done' || job.status === 'error' || job.status === 'cancelled') {
+    return { ok: true, done: true, phase: job.phase };
+  }
   if (job.status === 'queued') {
     const running = await prisma.otoBlogAutoJob.findFirst({
       where: { clientId: job.clientId, status: 'running', NOT: { id: job.id } },
-      select: { id: true },
     });
-    if (running) return { ok: true, done: false, blocked: true, phase: 'queued' };
+    if (running && !isJobStuck(running)) return { ok: true, done: false, blocked: true, phase: 'queued' };
+    if (running && isJobStuck(running)) {
+      await writeJob(running, {
+        status: 'error',
+        phase: 'error',
+        statusText: 'Kilitlendi',
+        error: 'İş kilitlendi, sıradaki başlıyor.',
+      }, 'Kilitlendi, sıradaki işe geçildi');
+    }
   }
 
   try {

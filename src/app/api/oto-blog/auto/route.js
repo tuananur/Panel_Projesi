@@ -4,6 +4,7 @@ import {
   INBOUND_HEADER,
   createAutoJob,
   findClientByAutoKey,
+  isJobStuck,
   kickClientQueue,
   readAutoAuthKey,
 } from '@/lib/oto-blog-auto';
@@ -41,9 +42,9 @@ export async function POST(request) {
 
   const running = await prisma.otoBlogAutoJob.findFirst({
     where: { clientId: client.id, status: 'running' },
-    select: { id: true },
   });
-  await createAutoJob(client, topic, { waiting: Boolean(running) });
+  const waiting = Boolean(running && !isJobStuck(running));
+  await createAutoJob(client, topic, { waiting });
   after(() => kickClientQueue(client.id));
 
   return NextResponse.json({

@@ -431,6 +431,13 @@ export async function publishOtoBlogLanguageAction(clientId, draftInput, languag
 export async function getOtoBlogAutoJobsAction() {
   try {
     await requireAccess();
+    const { kickClientQueue } = await import('@/lib/oto-blog-auto');
+    const pending = await prisma.otoBlogAutoJob.findMany({
+      where: { status: { in: ['queued', 'running'] } },
+      select: { clientId: true },
+    });
+    await Promise.all([...new Set(pending.map((row) => row.clientId))].map((clientId) => kickClientQueue(clientId)));
+
     const jobs = await prisma.otoBlogAutoJob.findMany({
       orderBy: { createdAt: 'desc' },
       take: 80,
@@ -467,6 +474,18 @@ export async function getOtoBlogAutoJobsAction() {
     };
   } catch (error) {
     return { error: error.message || 'Loglar alınamadı.' };
+  }
+}
+
+export async function cancelOtoBlogAutoJobAction(jobId) {
+  try {
+    await requireAccess();
+    const { cancelAutoJob } = await import('@/lib/oto-blog-auto');
+    const result = await cancelAutoJob(jobId);
+    if (!result.ok) return { error: result.error };
+    return { success: true };
+  } catch (error) {
+    return { error: error.message || 'İptal edilemedi.' };
   }
 }
 

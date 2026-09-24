@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getOtoBlogAutoJobsAction, resumeOtoBlogAutoJobAction } from './oto-blog-actions';
+import { cancelOtoBlogAutoJobAction, getOtoBlogAutoJobsAction, resumeOtoBlogAutoJobAction } from './oto-blog-actions';
+
+const STUCK_MS = 2 * 60 * 1000;
 
 function statusColor(status) {
   if (status === 'done') return '#10b981';
   if (status === 'error') return '#ef4444';
+  if (status === 'cancelled') return '#94a3b8';
   return '#3b82f6';
 }
 
@@ -52,7 +55,7 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
         {jobs.map((job) => {
           const color = statusColor(job.status);
           const open = openId === job.id;
-          const stuck = job.status !== 'done' && job.status !== 'error' && Date.now() - new Date(job.updatedAt).getTime() > 90000;
+          const stuck = job.status === 'running' && Date.now() - new Date(job.updatedAt).getTime() > STUCK_MS;
           return (
             <div key={job.id} style={{ border: '1px solid var(--border-color)', borderRadius: 10, overflow: 'hidden' }}>
               <button
@@ -88,22 +91,39 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
                     <span className="text-muted" style={{ fontSize: '0.72rem' }}>
                       adım: {job.phase || '—'} · son güncelleme: {formatWhen(job.updatedAt)}
                     </span>
-                    {job.status !== 'done' && (
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        disabled={busyId === job.id}
-                        onClick={async (event) => {
-                          event.stopPropagation();
-                          setBusyId(job.id);
-                          const result = await resumeOtoBlogAutoJobAction(job.id);
-                          if (result.error) setError(result.error);
-                          setBusyId(null);
-                        }}
-                        style={{ fontSize: '0.72rem', padding: '0.35rem 0.7rem' }}
-                      >
-                        {busyId === job.id ? 'Başlatılıyor…' : 'Devam ettir'}
-                      </button>
+                    {job.status !== 'done' && job.status !== 'cancelled' && (
+                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          disabled={busyId === job.id}
+                          onClick={async (event) => {
+                            event.stopPropagation();
+                            setBusyId(job.id);
+                            const result = await resumeOtoBlogAutoJobAction(job.id);
+                            if (result.error) setError(result.error);
+                            setBusyId(null);
+                          }}
+                          style={{ fontSize: '0.72rem', padding: '0.35rem 0.7rem' }}
+                        >
+                          {busyId === job.id ? '…' : 'Devam ettir'}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn"
+                          disabled={busyId === job.id}
+                          onClick={async (event) => {
+                            event.stopPropagation();
+                            setBusyId(job.id);
+                            const result = await cancelOtoBlogAutoJobAction(job.id);
+                            if (result.error) setError(result.error);
+                            setBusyId(null);
+                          }}
+                          style={{ fontSize: '0.72rem', padding: '0.35rem 0.7rem', color: '#ef4444', borderColor: 'rgba(239,68,68,0.35)' }}
+                        >
+                          İptal
+                        </button>
+                      </div>
                     )}
                   </div>
                   {job.error && <p style={{ color: '#ef4444', fontSize: '0.78rem', fontWeight: 700, margin: 0 }}>{job.error}</p>}
