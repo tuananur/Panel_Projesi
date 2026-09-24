@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { cancelOtoBlogAutoJobAction, getOtoBlogAutoJobsAction, resumeOtoBlogAutoJobAction } from './oto-blog-actions';
 
-const STUCK_MS = 2 * 60 * 1000;
+const LEASE_MS = 90 * 1000;
 
-function jobBadge(job, stuck) {
-  if (stuck) return { text: 'Kilitlendi', color: '#f59e0b' };
+function jobBadge(job, orphan) {
   if (job.status === 'done') return { text: 'Tamamlandı', color: '#10b981' };
+  if (orphan) return { text: 'Devam ettirilecek', color: '#f59e0b' };
   if (job.status === 'error') return { text: 'Hata', color: '#ef4444' };
   if (job.status === 'cancelled') return { text: 'İptal', color: '#94a3b8' };
   if (job.status === 'queued') return { text: 'Sırada bekliyor', color: '#64748b' };
@@ -57,9 +57,9 @@ export default function OtoBlogAutoLogs({ initialJobs, initialError }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
         {jobs.map((job) => {
           const open = openId === job.id;
-          const stuck = job.status === 'running' && Date.now() - new Date(job.updatedAt).getTime() > STUCK_MS;
-          const badge = jobBadge(job, stuck);
-          const canResume = stuck || job.status === 'error' || (job.status === 'running' && job.phase === 'queued');
+          const orphan = job.status === 'running' && Date.now() - new Date(job.updatedAt).getTime() > LEASE_MS;
+          const badge = jobBadge(job, orphan);
+          const canResume = orphan || job.status === 'error';
           const canCancel = job.status !== 'done' && job.status !== 'cancelled';
           return (
             <div key={job.id} style={{ border: '1px solid var(--border-color)', borderRadius: 10, overflow: 'hidden' }}>

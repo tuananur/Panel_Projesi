@@ -11,13 +11,39 @@ import {
 
 export const INBOUND_HEADER = 'X-OTO-BLOG-KEY';
 export const RUN_HEADER = 'X-OTO-RUN-KEY';
-export const STUCK_MS = 2 * 60 * 1000;
+export const LEASE_MS = 90 * 1000;
+export const MAX_JOB_MS = 15 * 60 * 1000;
+export const MAX_PHASE_RESUMES = 3;
 const GEMINI_SETTING_KEY = 'gemini_ai_config';
 
-export function isJobStuck(job, now = Date.now()) {
+function getRunMeta(payload) {
+  const raw = payload?._run && typeof payload._run === 'object' ? payload._run : {};
+  return {
+    leaseUntil: Number(raw.leaseUntil) || 0,
+    startedAt: Number(raw.startedAt) || 0,
+    resumeAttempts: Number(raw.resumeAttempts) || 0,
+    lastPhase: raw.lastPhase || null,
+    failedPhase: raw.failedPhase || null,
+  };
+}
+
+function setRunMeta(payload, patch) {
+  return { ...payload, _run: { ...getRunMeta(payload), ...patch } };
+}
+
+function isLeaseActive(job, now = Date.now()) {
   if (!job || job.status !== 'running') return false;
-  const updated = new Date(job.updatedAt).getTime();
-  return Number.isFinite(updated) && now - updated > STUCK_MS;
+  return getRunMeta(parsePayload(job.payloadJson)).leaseUntil > now;
+}
+
+function isJobExpired(job, now = Date.now()) {
+  if (!job || job.status !== 'running') return false;
+  const started = getRunMeta(parsePayload(job.payloadJson)).startedAt || new Date(job.createdAt).getTime();
+  return Number.isFinite(started) && now - started > MAX_JOB_MS;
+}
+
+export function isJobStuck(job, now = Date.now()) {
+  return Boolean(job && job.status === 'running' && !isLeaseActive(job, now));
 }
 
 export function generateOtoBlogInboundKey() {
@@ -100,14 +126,48 @@ export async function claimNextQueued(clientId) {
     data: { status: 'running', statusText: 'Başlıyor' },
   });
   if (claimed.count === 0) return null;
-  await writeJob(next, {}, 'Kuyruk sırası geldi, başlıyor');
+  const payload = parsePayload(next.payloadJson);
+  await writeJob(next, {
+    payloadJson: JSON.stringify(setRunMeta(payload, {
+      startedAt: Date.now(),
+      leaseUntil: Date.now() + LEASE_MS,
+      lastPhase: next.phase,
+      resumeAttempts: 0,
+    })),
+  }, 'Kuyruk sırası geldi, başlıyor');
   return prisma.otoBlogAutoJob.findUnique({ where: { id: next.id } });
 }
 
-function isUnstartedRunning(job, now = Date.now()) {
-  if (!job || job.status !== 'running' || job.phase !== 'queued') return false;
-  const updated = new Date(job.updatedAt).getTime();
-  return Number.isFinite(updated) && now - updated > 15000;
+async function failRunningJob(job, message) {
+  const payload = parsePayload(job.payloadJson);
+  await writeJob(job, {
+    status: 'error',
+    phase: 'error',
+    statusText: 'Hata',
+    error: message,
+    payloadJson: JSON.stringify(setRunMeta(payload, { failedPhase: job.phase === 'error' ? getRunMeta(payload).failedPhase : job.phase, leaseUntil: 0 })),
+  }, `Hata: ${message}`);
+}
+
+async function resumeOrphanJob(job) {
+  const payload = parsePayload(job.payloadJson);
+  const meta = getRunMeta(payload);
+  const samePhase = (meta.lastPhase || job.phase) === job.phase;
+  const attempts = samePhase ? meta.resumeAttempts + 1 : 1;
+  if (attempts > MAX_PHASE_RESUMES) {
+    await failRunningJob(job, `Aynı adım (${job.phase}) ${MAX_PHASE_RESUMES} kez takıldı.`);
+    return false;
+  }
+  await writeJob(job, {
+    payloadJson: JSON.stringify(setRunMeta(payload, {
+      resumeAttempts: attempts,
+      lastPhase: job.phase,
+      leaseUntil: Date.now() + LEASE_MS,
+      startedAt: meta.startedAt || Date.now(),
+    })),
+  }, `Yetim iş devam ettiriliyor (${job.phase}, ${attempts}/${MAX_PHASE_RESUMES})`);
+  await enqueueAutoJobRun(await resolveAppUrl(), job.id, job.continueToken);
+  return true;
 }
 
 export async function kickClientQueue(clientId) {
@@ -116,27 +176,14 @@ export async function kickClientQueue(clientId) {
     orderBy: { id: 'asc' },
   });
 
-  if (running && !isJobStuck(running)) {
-    if (!isUnstartedRunning(running)) return { started: false };
-    await writeJob(running, {}, 'Başlatma tekrar deneniyor');
-    await enqueueAutoJobRun(await resolveAppUrl(), running.id, running.continueToken);
-    return { started: true, jobId: running.id, recovered: true };
-  }
-
-  if (running && isJobStuck(running)) {
-    const released = await prisma.otoBlogAutoJob.updateMany({
-      where: { id: running.id, status: 'running', updatedAt: { lt: new Date(Date.now() - STUCK_MS) } },
-      data: {
-        status: 'error',
-        phase: 'error',
-        statusText: 'Kilitlendi',
-        error: 'İş kilitlendi, sıradaki başlıyor.',
-      },
-    });
-    if (released.count > 0) {
-      await writeJob(running, {}, 'Kilitlendi, sıradaki işe geçildi');
-    } else {
+  if (running) {
+    if (isJobExpired(running)) {
+      await failRunningJob(running, 'İş 15 dakikayı aştı.');
+    } else if (isLeaseActive(running)) {
       return { started: false };
+    } else {
+      const resumed = await resumeOrphanJob(running);
+      if (resumed) return { started: true, jobId: running.id, recovered: true };
     }
   }
 
@@ -159,6 +206,49 @@ export async function cancelAutoJob(jobId) {
     error: null,
   }, 'İptal edildi');
   await kickClientQueue(job.clientId);
+  return { ok: true };
+}
+
+export async function resumeAutoJob(jobId) {
+  const job = await prisma.otoBlogAutoJob.findUnique({ where: { id: Number(jobId) } });
+  if (!job) return { ok: false, error: 'İş bulunamadı.' };
+  if (job.status === 'done') return { ok: false, error: 'Bu iş zaten bitti.' };
+  if (job.status === 'cancelled') return { ok: false, error: 'Bu iş iptal edildi.' };
+  if (job.status === 'queued') return { ok: false, error: 'İş sırada bekliyor, otomatik başlayacak.' };
+  if (job.status === 'running' && isLeaseActive(job)) return { ok: false, error: 'İş şu an çalışıyor.' };
+
+  const payload = parsePayload(job.payloadJson);
+  if (job.status === 'error') {
+    const failedPhase = getRunMeta(payload).failedPhase;
+    const rollback = (
+      (failedPhase && failedPhase !== 'error' && failedPhase)
+      || (payload.imageToken && 'languages')
+      || (payload.imagePrompt && 'image')
+      || (payload.content && 'image_prompt')
+      || (payload.title && 'content')
+      || (job.refinedTopic && 'outline')
+      || 'queued'
+    );
+    await writeJob(job, {
+      status: 'running',
+      phase: rollback,
+      error: null,
+      statusText: 'Devam ettiriliyor',
+      payloadJson: JSON.stringify(setRunMeta(payload, {
+        resumeAttempts: 0,
+        failedPhase: null,
+        leaseUntil: Date.now() + LEASE_MS,
+        startedAt: Date.now(),
+      })),
+    }, 'Manuel devam ettirildi', { force: true });
+  } else {
+    await writeJob(job, {
+      payloadJson: JSON.stringify(setRunMeta(payload, { resumeAttempts: 0, leaseUntil: Date.now() + LEASE_MS })),
+    }, 'Manuel devam ettirildi');
+  }
+
+  const current = await prisma.otoBlogAutoJob.findUnique({ where: { id: job.id } });
+  await enqueueAutoJobRun(await resolveAppUrl(), current.id, current.continueToken);
   return { ok: true };
 }
 
@@ -202,10 +292,14 @@ function draftFields(payload) {
   };
 }
 
-async function writeJob(job, patch, logText) {
-  const current = await prisma.otoBlogAutoJob.findUnique({ where: { id: job.id }, select: { logsJson: true, status: true } });
+async function writeJob(job, patch, logText, { force = false } = {}) {
+  const current = await prisma.otoBlogAutoJob.findUnique({
+    where: { id: job.id },
+    select: { logsJson: true, status: true, payloadJson: true, phase: true },
+  });
   if (
-    current
+    !force
+    && current
     && (current.status === 'cancelled' || current.status === 'error')
     && patch.status
     && patch.status !== 'cancelled'
@@ -215,10 +309,28 @@ async function writeJob(job, patch, logText) {
   }
   const logs = parseLogs(current?.logsJson);
   if (logText) logs.push({ at: new Date().toISOString(), text: logText });
+
+  const currentPayload = parsePayload(current?.payloadJson);
+  const incomingPayload = patch.payloadJson ? parsePayload(patch.payloadJson) : currentPayload;
+  const currentMeta = getRunMeta(currentPayload);
+  const incomingMeta = getRunMeta(incomingPayload);
+  const nextPhase = patch.phase || current?.phase;
+  const phaseChanged = Boolean(patch.phase && current && patch.phase !== current.phase);
+  const { payloadJson: _ignored, ...rest } = patch;
+
   const next = await prisma.otoBlogAutoJob.update({
     where: { id: job.id },
     data: {
-      ...patch,
+      ...rest,
+      payloadJson: JSON.stringify(setRunMeta({ ...currentPayload, ...incomingPayload }, {
+        startedAt: incomingMeta.startedAt || currentMeta.startedAt || Date.now(),
+        leaseUntil: patch.status === 'error' || patch.status === 'cancelled' || patch.status === 'done'
+          ? 0
+          : Date.now() + LEASE_MS,
+        lastPhase: nextPhase,
+        resumeAttempts: phaseChanged ? 0 : (incomingMeta.resumeAttempts || currentMeta.resumeAttempts || 0),
+        failedPhase: incomingMeta.failedPhase || currentMeta.failedPhase || null,
+      })),
       logsJson: JSON.stringify(logs.slice(-80)),
     },
   });
@@ -227,12 +339,7 @@ async function writeJob(job, patch, logText) {
 
 async function failJob(job, error) {
   const message = error?.message || String(error || 'Bilinmeyen hata');
-  await writeJob(job, {
-    status: 'error',
-    phase: 'error',
-    statusText: 'Hata',
-    error: message,
-  }, `Hata: ${message}`);
+  await failRunningJob(job, message);
 }
 
 export async function createAutoJob(client, topic, { waiting = false } = {}) {
@@ -267,15 +374,14 @@ export async function processAutoJobStep(jobId, token) {
     const running = await prisma.otoBlogAutoJob.findFirst({
       where: { clientId: job.clientId, status: 'running', NOT: { id: job.id } },
     });
-    if (running && !isJobStuck(running)) return { ok: true, done: false, blocked: true, phase: 'queued', clientId: job.clientId };
-    if (running && isJobStuck(running)) {
-      await writeJob(running, {
-        status: 'error',
-        phase: 'error',
-        statusText: 'Kilitlendi',
-        error: 'İş kilitlendi, sıradaki başlıyor.',
-      }, 'Kilitlendi, sıradaki işe geçildi');
-    }
+    if (running) return { ok: true, done: false, blocked: true, phase: 'queued', clientId: job.clientId };
+  }
+  if (job.status === 'running' && isJobExpired(job)) {
+    await failRunningJob(job, 'İş 15 dakikayı aştı.');
+    return { ok: false, done: true, phase: 'error', clientId: job.clientId };
+  }
+  if (job.status === 'running') {
+    await writeJob(job, {});
   }
 
   try {
@@ -362,13 +468,13 @@ async function makeOutline(job, payload, ai) {
 
 async function makeContent(job, payload, ai) {
   const apiKey = await getGeminiKey();
-  const text = await geminiGenerateText({
+  const text = await withLeaseHeartbeat(job, () => geminiGenerateText({
     apiKey,
     model: ai.textModel,
     systemPrompt: ai.textSystemPrompt,
     json: true,
     userPrompt: `Konu: ${payload.topic}\nBaşlık: ${payload.title}\nMaddeler:\n${(payload.items || []).map((item, i) => `${i + 1}. ${item}`).join('\n')}\n\nBu başlık ve maddelere göre yayınlanacak tam bir blog yazısı yaz. HTML kullan (p, h2, h3, ul, li). AI yazmış gibi durmasın. Sadece JSON döndür: {"content":"<p>...</p>","meta_title":"...","meta_description":"...","short_desc":"..."}`,
-  });
+  }));
   const parsed = parseModelJson(text);
   const content = String(parsed.content || '').trim();
   if (!content) throw new Error('Blog içeriği boş.');
@@ -404,15 +510,26 @@ async function makeImagePrompt(job, payload, ai) {
   }, 'Görsel prompt hazır');
 }
 
+async function withLeaseHeartbeat(job, work) {
+  const timer = setInterval(() => {
+    writeJob(job, {}).catch(() => {});
+  }, 20000);
+  try {
+    return await work();
+  } finally {
+    clearInterval(timer);
+  }
+}
+
 async function makeImage(job, payload, ai) {
   await writeJob(job, { statusText: 'Fotoğraf üretiliyor' }, 'Fotoğraf üretiliyor');
   const apiKey = await getGeminiKey();
-  const image = await geminiGenerateImage({
+  const image = await withLeaseHeartbeat(job, () => geminiGenerateImage({
     apiKey,
     model: ai.imageModel,
     systemPrompt: ai.imageSystemPrompt,
     prompt: payload.imagePrompt,
-  });
+  }));
   const token = randomBytes(24).toString('hex');
   await prisma.otoBlogTempImage.create({
     data: {
@@ -463,13 +580,13 @@ async function translateLang(job, payload, ai) {
     return writeJob(job, { phase: 'send', statusText: `${lang.name} gönderiliyor` });
   }
   const apiKey = await getGeminiKey();
-  const text = await geminiGenerateText({
+  const text = await withLeaseHeartbeat(job, () => geminiGenerateText({
     apiKey,
     model: ai.textModel,
     systemPrompt: ai.textSystemPrompt,
     json: true,
     userPrompt: `Aşağıdaki Türkçe blogu ${lang.name} (${lang.code}) diline çevir. Anlamı koru, AI kokusu ekleme. Sadece JSON döndür: {"title":"...","content":"...","meta_title":"...","meta_description":"...","short_desc":"...","image_alt":"..."}\n\nKaynak:\n${JSON.stringify(draftFields(payload))}`,
-  });
+  }));
   const translated = parseModelJson(text);
   const base = draftFields(payload);
   const fieldsByLang = { ...(payload.fieldsByLang || {}) };
